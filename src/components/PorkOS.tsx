@@ -1,11 +1,12 @@
 "use client";
-/** Racine de PorkOS : démarrage → connexion → session (→ veille patriotique). */
+/** Racine de PorkOS : démarrage → connexion → session (→ veille), dans le moniteur 4:3. */
 import { useCallback, useEffect, useState } from "react";
 import type { ContentPack, UserProfile } from "@/content/types";
 import { makeStr } from "@/os/context";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from "@/os/settings";
 import { Boot } from "./Boot";
 import { Login } from "./Login";
+import { Monitor } from "./Monitor";
 import { Session } from "./Session";
 
 type Phase = { kind: "boot" } | { kind: "login"; impatient: boolean } | { kind: "session"; user: UserProfile; impatient: boolean; sleeping: boolean };
@@ -26,10 +27,10 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
   const sleep = useCallback(() => setPhase((p) => (p.kind === "session" ? { ...p, sleeping: true } : p)), []);
 
   return (
-    <main className="ecran crt" style={{ "--crt": settings.crt / 100 } as React.CSSProperties}>
+    <Monitor crt={settings.crt} marque={str("ecran.marque")} modele={str("ecran.modele")} rotation={str("ecran.rotation")} continuer={str("ecran.continuer")}>
       {phase.kind === "boot" && <Boot pack={pack} onDone={bootDone} />}
       {phase.kind === "login" && (
-        <Login pack={pack} onLogin={(user) => setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false })} />
+        <Login pack={pack} fond={settings.fond} onLogin={(user) => setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false })} />
       )}
       {phase.kind === "session" && (
         <>
@@ -43,6 +44,7 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
           )}
         </>
       )}
-    </main>
+      <div className="balayage" aria-hidden="true" />
+    </Monitor>
   );
 }

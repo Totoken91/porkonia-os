@@ -1,22 +1,10 @@
 "use client";
-/** Bandeau d'information, barre des tâches (« canaux ») et menu « Au programme ». */
+/** Barre des tâches, menu PorkOS (avec sous-menus) et zone de notification. */
 import { useEffect, useRef, useState } from "react";
+import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
 import type { Win } from "@/os/windows";
 import { Icon } from "./Icon";
-
-export function Ticker() {
-  const { pack, str } = useOs();
-  const text = pack.ticker.join("   ■   ");
-  return (
-    <div className="ticker" aria-label="Bandeau d'information">
-      <span className="flash">{str("bandeau.flash")}</span>
-      <div className="rail">
-        <div style={{ animationDuration: `${Math.round(text.length / 7)}s` }}>{text}</div>
-      </div>
-    </div>
-  );
-}
 
 function Clock() {
   const [now, setNow] = useState<Date | null>(null);
@@ -34,9 +22,12 @@ interface Props {
   onTask(w: Win): void;
 }
 
+type Sub = "programmes" | "accessoires" | null;
+
 export function Taskbar({ windows, focusedId, onTask }: Props) {
   const { pack, str, openApp, runAction } = useOs();
   const [open, setOpen] = useState(false);
+  const [sub, setSub] = useState<Sub>(null);
   const menu = useRef<HTMLDivElement>(null);
   const startBtn = useRef<HTMLButtonElement>(null);
 
@@ -54,63 +45,101 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
+  useEffect(() => setSub(null), [open]);
 
-  const listed = pack.apps.filter((a) => a.slot);
+  const go = (fn: () => void) => () => {
+    setOpen(false);
+    fn();
+  };
+  const group = (g: AppManifest["menu"]) => pack.apps.filter((a) => a.menu === g);
+  const config = group("systeme")[0];
+
+  const Flyout = ({ id, apps }: { id: Exclude<Sub, null>; apps: AppManifest[] }) => (
+    <li className="menu-parent" onPointerEnter={() => setSub(id)}>
+      <button aria-expanded={sub === id} onClick={() => setSub(sub === id ? null : id)} data-testid={`menu-${id}`}>
+        <Icon name="dossier" size={24} />
+        <span>{str(`menu.${id}`)}</span>
+        <i className="fleche" />
+      </button>
+      {sub === id && (
+        <ul className="menu-sous">
+          {apps.map((a) => (
+            <li key={a.id}>
+              <button onClick={go(() => openApp(a.id))} title={a.blurb}>
+                <Icon name={a.icon} size={16} />
+                <span>{a.title}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
 
   return (
     <>
       {open && (
-        <div className="programme" ref={menu} data-testid="programme">
-          <header>
-            <small>{str("menu.soustitre")}</small>
-            <b>{str("menu.titre")}</b>
-          </header>
+        <div className="menu-porkos" ref={menu} data-testid="programme">
+          <div className="menu-bandeau">
+            <span>{str("menu.bandeau")}</span>
+          </div>
           <ul>
-            {listed.map((a) => (
-              <li key={a.id}>
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    openApp(a.id);
-                  }}
-                >
-                  <span className="horaire">{a.slot}</span>
-                  <Icon name={a.icon} size={30} />
-                  <span className="nom">
-                    {a.title}
-                    {a.blurb && <span className="blurb">{a.blurb}</span>}
-                  </span>
+            <Flyout id="programmes" apps={group("programmes")} />
+            <Flyout id="accessoires" apps={group("accessoires")} />
+            <li onPointerEnter={() => setSub(null)}>
+              <button onClick={go(() => openApp("fichiers", { path: "Documents officiels" }))}>
+                <Icon name="texte" size={24} />
+                <span>{str("menu.documents")}</span>
+              </button>
+            </li>
+            {config && (
+              <li onPointerEnter={() => setSub(null)}>
+                <button onClick={go(() => openApp(config.id))}>
+                  <Icon name={config.icon} size={24} />
+                  <span>{str("menu.systeme")}</span>
                 </button>
               </li>
-            ))}
+            )}
+            <li className="separateur" />
+            <li onPointerEnter={() => setSub(null)}>
+              <button onClick={go(() => runAction({ type: "lock" }))}>
+                <Icon name="cadenas" size={24} />
+                <span>{str("menu.verrouiller")}</span>
+              </button>
+            </li>
+            <li onPointerEnter={() => setSub(null)}>
+              <button onClick={go(() => runAction({ type: "dialog-ref", id: "arret" }))}>
+                <Icon name="embleme" size={24} />
+                <span>{str("menu.arreter")}</span>
+              </button>
+            </li>
           </ul>
-          <footer>
-            <button className="pk-btn" onClick={() => { setOpen(false); runAction({ type: "lock" }); }}>
-              {str("menu.verrouiller")}
-            </button>
-            <button className="pk-btn" onClick={() => { setOpen(false); runAction({ type: "dialog-ref", id: "arret" }); }}>
-              {str("menu.arreter")}
-            </button>
-          </footer>
         </div>
       )}
       <nav className="taskbar">
-        <button ref={startBtn} className="tb-start" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)} data-testid="start">
-          <img src="/brand/embleme-64.png" alt="" width={26} height={26} />
-          {pack.os.name}
+        <button ref={startBtn} className="tb-start pk-btn" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)} data-testid="start">
+          <img src="/brand/embleme-64.png" alt="" width={18} height={18} />
+          <b>{str("demarrer")}</b>
         </button>
+        <span className="tb-poignee" />
         <div className="tb-tasks">
-          {windows.map((w, i) => (
-            <button key={w.id} className="tb-task" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)} title={w.title}>
-              <span className="num">{String(i + 1).padStart(2, "0")}</span>
-              <span>{w.title}</span>
-            </button>
-          ))}
+          {windows.map((w) => {
+            const m = pack.apps.find((a) => a.id === w.appId);
+            return (
+              <button key={w.id} className="tb-task pk-btn" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)} title={w.title}>
+                {m && <Icon name={m.icon} size={16} />}
+                <span>{w.title}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="tb-tray">
-          <span className="direct">
-            <i />
-            {str("barre.direct")}
+          <span title="Douzi Ambrée : niveau de mousse conforme">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 5h8v9H3z" fill="#e0a526" stroke="#2a2118" />
+              <path d="M11 7h2v4h-2" fill="none" stroke="#2a2118" />
+              <path d="M2.5 5c0-2 2-2.5 3-1.5 1-1.5 3.5-1 3.5.5 1-.5 2.5 0 2 1z" fill="#fff" stroke="#2a2118" strokeWidth=".8" />
+            </svg>
           </span>
           <Clock />
         </div>

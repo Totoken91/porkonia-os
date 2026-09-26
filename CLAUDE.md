@@ -9,7 +9,7 @@ Démo jouable (export statique Next 16) de l'OS officiel de la République de Po
 - Logique pure dans `src/os/` et `src/apps/*/logic|url|timeline.ts`, testée dans `tests/`.
 - Images de Porkopédia : liens vers l'hébergement d'origine, aucune copie. Porkopédia n'est jamais modifiée d'ici.
 - Ne jamais inventer de canon Porkonia présenté comme officiel ; les notices viennent d'une extraction.
-- Direction « Télé d'État » : châssis de fenêtres de l'atelier + affiche rouge/crème/noir, trame, CRT. Pas d'emoji, pas de dégradés violets, pas d'Inter.
+- Direction « PorkOS 98 » : écran 4:3 800×600 dans un moniteur, look carré et d'époque, châssis de fenêtres de l'atelier (parchemin, lie-de-vin, or). Pas une copie de Windows. Pas d'emoji, pas de dégradés violets, pas d'Inter.
 - Aucun secret côté client, aucune API payante, pas de Supabase.
 - Next 16 : lire `node_modules/next/dist/docs/` avant d'utiliser une API.
 

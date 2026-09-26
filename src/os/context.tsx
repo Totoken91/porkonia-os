@@ -49,3 +49,7 @@ export function makeStr(pack: ContentPack) {
     return s;
   };
 }
+
+/** Facteur d'échelle de l'écran 4:3 (les déplacements à la souris sont divisés par ce facteur). */
+export const ScaleContext = createContext(1);
+export const useScale = () => useContext(ScaleContext);

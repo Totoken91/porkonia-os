@@ -1,6 +1,6 @@
 "use client";
 /**
- * Session ouverte : bureau-affiche, fenêtres, barre des tâches et moteur d'événements.
+ * Session ouverte : bureau, fenêtres, barre des tâches et moteur d'événements.
  * Les événements (pop-ups, pubs, mises à jour) viennent des règles du pack via l'ordonnanceur pur.
  */
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
@@ -15,21 +15,13 @@ import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { emptyWinState, winReducer, type Viewport } from "@/os/windows";
 import { Icon } from "./Icon";
 import { AdBox, DialogBox, Toasts, UpdateScreen, type LiveToast } from "./Overlays";
-import { Taskbar, Ticker } from "./Taskbar";
+import { SCREEN } from "./Monitor";
+import { Taskbar } from "./Taskbar";
+import { Wallpaper } from "./Wallpaper";
 import { WindowFrame } from "./WindowFrame";
 
-const BOTTOM = 66; // barre des tâches + bandeau
-
-function useViewport(): Viewport {
-  const [vp, setVp] = useState<Viewport>({ w: 1280, h: 800, bottom: BOTTOM });
-  useEffect(() => {
-    const on = () => setVp({ w: window.innerWidth, h: window.innerHeight, bottom: BOTTOM });
-    on();
-    window.addEventListener("resize", on);
-    return () => window.removeEventListener("resize", on);
-  }, []);
-  return vp;
-}
+const TASKBAR = 28;
+const VP: Viewport = { w: SCREEN.w, h: SCREEN.h, bottom: TASKBAR };
 
 interface Props {
   pack: ContentPack;
@@ -42,7 +34,7 @@ interface Props {
 }
 
 export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep }: Props) {
-  const vp = useViewport();
+  const vp = VP;
   const [wins, dispatch] = useReducer(winReducer, undefined, emptyWinState);
   const [toasts, setToasts] = useState<LiveToast[]>([]);
   const [dialogs, setDialogs] = useState<DialogSpec[]>([]);
@@ -152,35 +144,11 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   );
 
   const closeToast = useCallback((key: number) => setToasts((ts) => ts.filter((t) => t.key !== key)), []);
-  const portrait = pack.wallpaper?.portrait;
 
   return (
     <OsContext.Provider value={api}>
-      <div className="bureau" onPointerDown={(e) => e.target === e.currentTarget && setSelected(null)}>
-        <div className={`affiche${settings.fond === "mire" ? " mire" : settings.fond === "trame" ? " trame-seule" : ""}`} onPointerDown={() => setSelected(null)}>
-          {settings.fond === "mire" ? (
-            <div className="barres">{Array.from({ length: 7 }, (_, i) => <i key={i} />)}</div>
-          ) : (
-            <>
-              <div className="trame" />
-              {portrait && (
-                <div className="portrait">
-                  <img src={portrait} alt="" referrerPolicy="no-referrer" />
-                </div>
-              )}
-              <div className="bande" />
-              <div className="slogan">
-                <small>{str("affiche.surtitre")}</small>
-                {str("affiche.slogan")}
-              </div>
-            </>
-          )}
-          <div className="sceau">
-            <img src="/brand/embleme-64.png" alt="" width={34} height={34} />
-            {str("affiche.sceau")}
-          </div>
-        </div>
-
+      <div className="bureau" onPointerDown={(e) => (e.target as HTMLElement).closest(".desk-icon") || setSelected(null)}>
+        <Wallpaper pack={pack} fond={settings.fond} />
         <div className="desk-icons" role="listbox" aria-label="Bureau">
           {pack.desktop.map((d) => {
             const launch = () => ("app" in d.open ? openApp(d.open.app, d.open.args) : runAction(d.open.action));
@@ -198,7 +166,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
                 onKeyDown={(e) => e.key === "Enter" && launch()}
                 data-testid={`icon-${d.id}`}
               >
-                <Icon name={d.icon} size={44} />
+                <Icon name={d.icon} size={32} />
                 <span>{d.label}</span>
               </button>
             );
@@ -218,7 +186,6 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         </div>
 
         <Toasts toasts={toasts} onClose={closeToast} />
-        <Ticker />
         <Taskbar
           windows={wins.windows}
           focusedId={wins.focusedId}

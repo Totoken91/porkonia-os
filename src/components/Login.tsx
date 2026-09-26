@@ -4,7 +4,9 @@ import { useState } from "react";
 import type { ContentPack, UserProfile } from "@/content/types";
 import { makeStr } from "@/os/context";
 import { makeRng, pick } from "@/os/rng";
+import type { Fond } from "@/os/settings";
 import { Icon } from "./Icon";
+import { Wallpaper } from "./Wallpaper";
 
 export function checkPassword(user: UserProfile, pw: string, pack: ContentPack, rnd: () => number): { ok: boolean; message: string } {
   if (user.guest) return { ok: true, message: pack.login.guestNotice };
@@ -14,7 +16,7 @@ export function checkPassword(user: UserProfile, pw: string, pack: ContentPack, 
   return { ok: true, message: pick(rnd, pack.login.acceptedAny) };
 }
 
-export function Login({ pack, onLogin }: { pack: ContentPack; onLogin(user: UserProfile): void }) {
+export function Login({ pack, fond, onLogin }: { pack: ContentPack; fond: Fond; onLogin(user: UserProfile): void }) {
   const str = makeStr(pack);
   const [userId, setUserId] = useState(pack.users[0]!.id);
   const [pw, setPw] = useState("");
@@ -35,31 +37,31 @@ export function Login({ pack, onLogin }: { pack: ContentPack; onLogin(user: User
 
   return (
     <div className="connexion" data-testid="login">
-      <div className="trame" />
-      <div className="connexion-grille">
-        <div className="connexion-affiche">
-          <small>{pack.os.vendor}</small>
-          <h1>{pack.os.name}</h1>
-          <p>
-            {pack.os.edition} · {pack.os.version}
-          </p>
+      <Wallpaper pack={pack} fond={fond} />
+      <form
+        className="pk-window focused connexion-fenetre"
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit(user);
+        }}
+      >
+        <div className="pk-titlebar">
+          <Icon name="cadenas" size={16} />
+          <h2>{str("login.titre")}</h2>
         </div>
-        <form
-          className="pk-window focused connexion-fenetre"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit(user);
-          }}
-        >
-          <div className="pk-titlebar">
-            <img src="/brand/embleme-64.png" alt="" width={18} height={18} />
-            <h2>{str("login.titre")}</h2>
+        <div className="connexion-bandeau">
+          <img src="/brand/embleme-64.png" alt="" width={48} height={48} />
+          <div>
+            <b>{pack.os.name}</b> <span>{pack.os.edition}</span>
+            <small>{pack.os.vendor}</small>
           </div>
-          <div className="connexion-corps">
-            <p className="invite">{pack.login.prompt}</p>
+        </div>
+        <div className="connexion-corps">
+          <p className="invite">{pack.login.prompt}</p>
+          <div className="connexion-profils">
             {citizens.map((u) => (
               <button type="button" key={u.id} className="user-tile" aria-pressed={u.id === userId} onClick={() => { setUserId(u.id); setMsg(null); }}>
-                <Icon name="carte" size={36} />
+                <Icon name="carte" size={28} />
                 <span>
                   <b>{u.displayName}</b>
                   <br />
@@ -67,29 +69,29 @@ export function Login({ pack, onLogin }: { pack: ContentPack; onLogin(user: User
                 </span>
               </button>
             ))}
-            <label className="champ">
-              {str("login.motdepasse")}
-              <input className="pk-input" type="password" autoFocus value={pw} onChange={(e) => setPw(e.target.value)} data-testid="login-password" autoComplete="off" />
-            </label>
-            {fails > 0 && user.passwordHint && <p className="indice">{user.passwordHint}</p>}
-            {msg && (
-              <p className={msg.ok ? "retour ok" : "retour"} role="status" data-testid="login-message">
-                {msg.text}
-              </p>
-            )}
-            <div className="actions">
-              {guest && (
-                <button type="button" className="pk-btn" onClick={() => submit(guest)}>
-                  {str("login.invite")}
-                </button>
-              )}
-              <button type="submit" className="pk-btn primary" data-testid="login-submit">
-                {str("login.valider")}
-              </button>
-            </div>
           </div>
-        </form>
-      </div>
+          <label className="champ">
+            <span>{str("login.motdepasse")} :</span>
+            <input className="pk-input" type="password" autoFocus value={pw} onChange={(e) => setPw(e.target.value)} data-testid="login-password" autoComplete="off" />
+          </label>
+          {fails > 0 && user.passwordHint && <p className="indice">{user.passwordHint}</p>}
+          {msg && (
+            <p className={msg.ok ? "retour ok" : "retour"} role="status" data-testid="login-message">
+              {msg.text}
+            </p>
+          )}
+          <div className="actions">
+            <button type="submit" className="pk-btn primary" data-testid="login-submit">
+              {str("login.valider")}
+            </button>
+            {guest && (
+              <button type="button" className="pk-btn" onClick={() => submit(guest)}>
+                {str("login.invite")}
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

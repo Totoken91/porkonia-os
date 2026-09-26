@@ -41,8 +41,8 @@ const shot = async (page, name) => SHOTS && page.screenshot({ path: join(SHOTS, 
 const step = (m) => console.log("✓", m);
 
 try {
-  for (const viewport of [{ width: 1366, height: 800 }, { width: 390, height: 780 }]) {
-    const tag = viewport.width < 700 ? "mobile" : "bureau";
+  for (const viewport of [{ width: 1366, height: 800 }, { width: 844, height: 390 }]) {
+    const tag = viewport.height < 500 ? "mobile" : "bureau";
     const ctx = await browser.newContext({ viewport });
     if (process.env.HTTPS_PROXY)
       await ctx.route("https://porkopedia.totoken.chatgpt.site/**", async (route) => {
@@ -54,12 +54,12 @@ try {
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && errors.push(`${tag}: ${m.text()}`));
 
     await page.goto(base);
-    await page.getByTestId("boot-mire").waitFor();
-    await shot(page, `${tag}-01-mire`);
+    await page.getByTestId("boot-bios").waitFor();
     if (tag === "bureau") {
-      await page.getByTestId("boot-bios").waitFor({ timeout: 5000 });
-      await page.waitForTimeout(1500);
-      await shot(page, `${tag}-02-bios`);
+      await page.waitForTimeout(2500);
+      await shot(page, `${tag}-01-bios`);
+      await page.getByTestId("boot-chargement").waitFor({ timeout: 8000 });
+      await shot(page, `${tag}-02-chargement`);
     }
     await page.keyboard.press("Space");
     await page.getByTestId("login").waitFor();
@@ -73,7 +73,10 @@ try {
     await page.getByText("patriotique").waitFor();
     await shot(page, `${tag}-03-connexion`);
     await page.getByTestId("start").waitFor({ timeout: 6000 });
-    await page.waitForTimeout(600);
+    await page.getByTestId("window-bienvenue").waitFor();
+    await page.waitForTimeout(800);
+    await shot(page, `${tag}-04-bienvenue`);
+    await page.locator("[data-testid=window-bienvenue] [data-testid=window-close]").click();
     await shot(page, `${tag}-04-bureau`);
     step(`${tag} : connexion et bureau`);
 
@@ -130,6 +133,7 @@ try {
     // Menu « Au programme » → arrêt → veille patriotique
     await page.getByTestId("start").click();
     await page.getByTestId("programme").waitFor();
+    await page.getByTestId("menu-programmes").hover();
     await shot(page, `${tag}-10-programme`);
     await page.getByRole("button", { name: "Arrêter…" }).click();
     await page.getByRole("button", { name: "Veille patriotique" }).click();

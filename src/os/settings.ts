@@ -1,8 +1,9 @@
 /** Réglages du citoyen (conservés dans le navigateur, jamais ailleurs). */
-export type Fond = "affiche" | "mire" | "trame";
+export type Fond = "bouteille" | "lie" | "fondateur" | "emblemes";
+export const FONDS: Fond[] = ["bouteille", "lie", "fondateur", "emblemes"];
 
 export interface Settings {
-  /** Intensité du signal CRT, 12–100. */
+  /** Rémanence du tube (lignes de balayage), 12–100. */
   crt: number;
   /** Volume de l'hymne, 12–100. */
   hymne: number;
@@ -10,7 +11,7 @@ export interface Settings {
   rappels: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { crt: 60, hymne: 70, fond: "affiche", rappels: true };
+export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true };
 
 const KEY = "porkos.reglages";
 
@@ -41,7 +42,7 @@ export function sanitizeSettings(v: unknown): Settings {
   return {
     crt: clampPct(o.crt, d.crt),
     hymne: clampPct(o.hymne, d.hymne),
-    fond: o.fond === "mire" || o.fond === "trame" || o.fond === "affiche" ? o.fond : d.fond,
+    fond: FONDS.includes(o.fond as Fond) ? (o.fond as Fond) : d.fond,
     rappels: typeof o.rappels === "boolean" ? o.rappels : d.rappels,
   };
 }

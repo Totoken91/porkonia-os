@@ -36,9 +36,10 @@ export function Config() {
   const [tab, setTab] = useState<Tab>("Affichage");
 
   const fonds: { v: Fond | "aucun"; label: string }[] = [
-    { v: "affiche", label: str("config.fond.affiche") },
-    { v: "mire", label: str("config.fond.mire") },
-    { v: "trame", label: str("config.fond.trame") },
+    { v: "bouteille", label: str("config.fond.bouteille") },
+    { v: "lie", label: str("config.fond.lie") },
+    { v: "fondateur", label: str("config.fond.fondateur") },
+    { v: "emblemes", label: str("config.fond.emblemes") },
     { v: "aucun", label: str("config.fond.aucun") },
   ];
 
@@ -78,6 +79,7 @@ export function Config() {
             </fieldset>
             <fieldset className="pk-fieldset">
               <legend>{str("config.fond")}</legend>
+              <div className={`apercu fond-${settings.fond}`} aria-hidden="true" />
               {fonds.map((f) => (
                 <label key={f.v} className="case-a-cocher">
                   <input type="radio" name="fond" disabled={f.v === "aucun"} checked={settings.fond === f.v} onChange={() => f.v !== "aucun" && setSettings({ fond: f.v })} />

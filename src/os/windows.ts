@@ -76,11 +76,19 @@ export function winReducer(s: WinState, a: WinAction): WinState {
         }
       }
       const seq = s.seq + 1;
-      const offset = (s.windows.length % 8) * 28;
+      const offset = (s.windows.length % 6) * 22;
       const small = a.vp.w < 700;
       const rect = small
         ? { x: 0, y: 0, w: a.vp.w, h: a.vp.h - a.vp.bottom }
-        : constrain({ x: Math.round((a.vp.w - a.size.w) / 2) - 120 + offset, y: 40 + offset, w: a.size.w, h: a.size.h }, a.vp);
+        : constrain(
+            {
+              x: Math.max(4, Math.round((a.vp.w - a.size.w) / 2) - 60 + offset),
+              y: Math.max(4, Math.round((a.vp.h - a.vp.bottom - a.size.h) / 2) - 50 + offset),
+              w: a.size.w,
+              h: a.size.h,
+            },
+            a.vp,
+          );
       const win: Win = { id: `w${seq}`, appId: a.appId, title: a.title, args, rect, z: s.nextZ, minimized: false, maximized: small };
       return { windows: [...s.windows, win], focusedId: win.id, nextZ: s.nextZ + 1, seq };
     }

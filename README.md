@@ -1,7 +1,8 @@
 # PorkOS — Édition Citoyenne
 
-Le système d'exploitation officiel de la République de Porkonia, jouable dans le navigateur.
-Démarrage sur mire d'État, connexion, bureau-affiche, fenêtres, « Au programme », flash infos,
+Le système d'exploitation officiel de la République de Porkonia, jouable dans le navigateur,
+façon poste administratif de 1998 : écran 4:3 (800×600) dans son moniteur beige, PorkBIOS,
+écran de chargement, ouverture de session, bureau, fenêtres, menu PorkOS, bulles de notification,
 publicités de la Douzi Ambrée et mises à jour obligatoires.
 
 > Le porc. La bière. Toujours plus.
@@ -29,6 +30,7 @@ npm run build && npm run test:e2e   # parcours complet (bureau + mobile), captur
 
 | Appli | Ce qu'elle fait |
 | --- | --- |
+| Bienvenue dans PorkOS | Écran d'accueil à la connexion : raccourcis et « Le saviez-vous ? ». |
 | PigNet Navigateur | Adresses `porko://…`, Porkopédia hors ligne (12 notices intégrées, index de 470 titres), recherche, internet étranger refusé, erreur 412. |
 | Channel Pork | Canal 1 : diaporamas d'archives, bandeaux, sous-titres, guide des programmes (vidéo réelle possible via `videoSrc`). |
 | Nappe Vide | Démineur du protocole des banquets : zones de nappe vide, assiettes, Petit banquet → Niveau VII. |

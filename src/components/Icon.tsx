@@ -1,5 +1,5 @@
 /**
- * Pictogrammes d'État : aplats trois couleurs (rouge, crème, noir), trait épais, comme sur une affiche.
+ * Pictogrammes d'État 32 px : aplats rouge, crème et noir, trait épais, comme sur un vieux poste administratif.
  * Aucun emoji, aucune image externe.
  */
 import type { DialogSpec, IconKey } from "@/content/types";
@@ -9,7 +9,7 @@ const C = "#efe3c6";
 const N = "#15110d";
 const S = { stroke: N, strokeWidth: 2.4, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
 
-const PATHS: Record<IconKey, React.ReactNode> = {
+const PATHS: Record<Exclude<IconKey, "embleme">, React.ReactNode> = {
   navigateur: (
     <>
       <circle cx="20" cy="20" r="15" fill={C} {...S} />
@@ -101,6 +101,7 @@ const PATHS: Record<IconKey, React.ReactNode> = {
 };
 
 export function Icon({ name, size = 40 }: { name: IconKey; size?: number }) {
+  if (name === "embleme") return <img src="/brand/embleme-64.png" alt="" width={size} height={size} />;
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
       {PATHS[name]}
@@ -108,10 +109,11 @@ export function Icon({ name, size = 40 }: { name: IconKey; size?: number }) {
   );
 }
 
-export function DialogIcon({ kind }: { kind: DialogSpec["icon"] }) {
-  if (kind === "sceau") return <img src="/brand/embleme-64.png" alt="" width={48} height={48} />;
+export function DialogIcon({ kind, small }: { kind: DialogSpec["icon"]; small?: boolean }) {
+  const px = small ? 16 : 36;
+  if (kind === "sceau") return <img src="/brand/embleme-64.png" alt="" width={px + 4} height={px + 4} />;
   return (
-    <svg width={44} height={44} viewBox="0 0 40 40" aria-hidden="true">
+    <svg width={px} height={px} viewBox="0 0 40 40" aria-hidden="true">
       {kind === "info" && (
         <>
           <circle cx="20" cy="20" r="16" fill={N} />

@@ -9,29 +9,29 @@ export interface LiveToast extends Toast {
   key: number;
 }
 
+/** Bulles de notification, au-dessus de la zone de notification. */
 export function Toasts({ toasts, onClose }: { toasts: LiveToast[]; onClose(key: number): void }) {
-  const { str } = useOs();
   return (
-    <div className="flash-infos" aria-live="polite">
+    <div className="bulles" aria-live="polite">
       {toasts.map((t) => (
-        <ToastBox key={t.key} t={t} onClose={onClose} label={str("bandeau.flash")} />
+        <ToastBox key={t.key} t={t} onClose={onClose} />
       ))}
     </div>
   );
 }
 
-function ToastBox({ t, onClose, label }: { t: LiveToast; onClose(key: number): void; label: string }) {
+function ToastBox({ t, onClose }: { t: LiveToast; onClose(key: number): void }) {
   useEffect(() => {
     const id = setTimeout(() => onClose(t.key), 9000);
     return () => clearTimeout(id);
   }, [t.key, onClose]);
   return (
-    <div className="flash" role="status" data-testid="toast">
+    <div className="bulle" role="status" data-testid="toast" onClick={() => onClose(t.key)}>
       <header>
-        <span className="etiquette">{label}</span>
-        <span>{t.title}</span>
-        <button aria-label="Fermer" onClick={() => onClose(t.key)}>
-          <svg width="10" height="10" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
+        <DialogIcon kind="info" small />
+        <b>{t.title}</b>
+        <button className="pk-ctl" aria-label="Fermer" onClick={() => onClose(t.key)}>
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
         </button>
       </header>
       <p>{t.body}</p>
@@ -71,26 +71,29 @@ export function AdBox({ ad, onClose, onCta }: { ad: Ad; onClose(): void; onCta()
     return () => clearTimeout(id);
   }, [left]);
   return (
-    <div className="dialog-layer pub-layer" data-testid="ad">
-      <div className="pub" role="dialog" aria-label={ad.headline}>
-        <header>
-          <span>{ad.sponsor}</span>
-          <button className="pk-btn small" disabled={left > 0} onClick={onClose} data-testid="ad-close">
-            {left > 0 ? str("pub.fermeture", { s: left }) : str("pub.fermer")}
-          </button>
-        </header>
-        {ad.image && (
-          <div className="pub-image">
-            <img src={ad.image} alt="" referrerPolicy="no-referrer" />
+    <div className="dialog-layer" data-testid="ad">
+      <div className="pk-window focused pub" role="dialog" aria-label={ad.headline}>
+        <header className="pk-titlebar">
+          <h2>{str("pub.titre")} — {ad.sponsor}</h2>
+          <div className="pk-controls">
+            <button className="pk-ctl close" aria-label={str("pub.fermer")} disabled={left > 0} onClick={onClose} data-testid="ad-close">
+              <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
+            </button>
           </div>
-        )}
-        <div className="pub-texte">
-          <h2>{ad.headline}</h2>
-          <p>{ad.body}</p>
-          <p className="pub-slogan">{ad.slogan}</p>
-          <button className="pub-cta" onClick={onCta}>
-            {ad.cta}
-          </button>
+        </header>
+        <div className="pub-corps">
+          {ad.image && <img src={ad.image} alt="" referrerPolicy="no-referrer" />}
+          <div className="pub-texte">
+            <h3>{ad.headline}</h3>
+            <p>{ad.body}</p>
+            <p className="pub-slogan">{ad.slogan}</p>
+            <button className="pk-btn primary" onClick={onCta}>
+              {ad.cta}
+            </button>
+          </div>
+        </div>
+        <div className="pk-statusbar">
+          <span style={{ flex: 1 }}>{left > 0 ? str("pub.fermeture", { s: left }) : str("pub.fermer")}</span>
         </div>
       </div>
     </div>
@@ -106,26 +109,40 @@ export function UpdateScreen({ update, onDone }: { update: ForcedUpdate; onDone(
     const id = setTimeout(() => setStep((n) => n + 1), update.steps[step]!.ms);
     return () => clearTimeout(id);
   }, [step, done, update.steps]);
-  const pct = Math.round((Math.min(step, update.steps.length) / update.steps.length) * 12);
+  const blocs = Math.round((Math.min(step, update.steps.length) / update.steps.length) * 24);
   return (
-    <div className="mise-a-jour" data-testid="update">
-      <div className="maj-contenu">
-        <small>{update.version}</small>
-        <h1>{update.title}</h1>
-        <div className="barre-segments">{Array.from({ length: 12 }, (_, i) => <i key={i} className={i < pct ? "on" : undefined} />)}</div>
-        {done ? (
-          <>
+    <div className="dialog-layer mise-a-jour" data-testid="update">
+      <div className="pk-window focused maj" role="dialog" aria-label={update.title}>
+        <header className="pk-titlebar">
+          <h2>{update.title}</h2>
+        </header>
+        <div className="maj-bandeau">
+          <div>
+            <b>{update.version}</b>
+            <span>{str("maj.patientez")}</span>
+          </div>
+          <img src="/brand/embleme-64.png" alt="" width={40} height={40} />
+        </div>
+        <div className="maj-corps">
+          {done ? (
             <p className="maj-outro">{update.outro}</p>
-            <button className="pub-cta" onClick={onDone} autoFocus data-testid="update-done">
-              {str("maj.continuer")}
-            </button>
-          </>
-        ) : (
-          <>
+          ) : (
             <p className="maj-etape">{update.steps[step]!.label}…</p>
-            <p className="maj-note">{str("maj.patientez")}</p>
-          </>
-        )}
+          )}
+          <div className="progression pk-sunken">{Array.from({ length: blocs }, (_, i) => <i key={i} />)}</div>
+          <ol className="maj-liste">
+            {update.steps.map((s, i) => (
+              <li key={i} className={i < step ? "fait" : i === step ? "encours" : undefined}>
+                {s.label}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="dialog-boutons">
+          <button className="pk-btn primary" disabled={!done} onClick={onDone} data-testid="update-done">
+            {str("maj.continuer")}
+          </button>
+        </div>
       </div>
     </div>
   );

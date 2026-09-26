@@ -15,17 +15,17 @@ src/
     fs.ts                 chemins du système de fichiers du pack
     settings.ts           réglages (localStorage, assainis)
     context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis
-  components/             coque : Boot, Login, Session (bureau), WindowFrame, Taskbar, Overlays, Icon
+  components/             coque : Monitor (écran 4:3), Boot, Login, Session (bureau), Wallpaper, WindowFrame, Taskbar, Overlays, Icon
   apps/                   une appli = un composant + sa logique pure ; registry.tsx fait le lien kind → composant
-  app/                    layout (polices), page, globals.css (direction « Télé d'État »)
+  app/                    layout (police du BIOS), page, globals.css (direction « PorkOS 98 »)
 ```
 
 ## Flux
 
-1. `PorkOS` enchaîne les phases : démarrage (mire → PorkBIOS → titre) → connexion → session (→ veille).
+1. `PorkOS` enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle) : PorkBIOS → chargement → connexion → session (→ veille).
 2. `Session` tient les fenêtres (`winReducer`), la file de dialogues, les flash infos, la pub et la mise à jour en cours.
 3. Toutes les secondes, `schedule()` reçoit un `tick` ; ouvrir une appli envoie `app-open` ; une appli peut émettre un `signal` (`nappe:incident`, `tv:zapper`…). Les règles du pack décident de ce qui en découle.
-4. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou un flash, lancer une pub, une mise à jour, la veille ou le verrouillage.
+4. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou une bulle, lancer une pub, une mise à jour, la veille ou le verrouillage.
 
 ## Ajouter…
 
@@ -36,9 +36,10 @@ src/
 
 `tests/pack.test.ts` refuse un pack dont une référence (appli, dialogue, pool, pub, mise à jour, signal) ne mène nulle part.
 
-## Direction visuelle « Télé d'État »
+## Direction visuelle « PorkOS 98 »
 
-Châssis des fenêtres repris de l'atelier (titre lie-de-vin, liseré or, parchemin biseauté) posé sur une affiche
-imprimée trois couleurs (rouge, crème, noir) à trame de points, avec portrait du Fondateur en bichromie. Signal CRT réglable (`--crt`),
-bandeau d'info, barre des tâches en « canaux », menu « Au programme », mire au démarrage. Polices : Big Shoulders (affiche), VT323 (terminal),
-Tahoma dans les fenêtres. Pictogrammes SVG maison, pas d'emoji. `prefers-reduced-motion` respecté.
+Un poste administratif qui aurait pu sortir en 1998, sans copier aucun système existant : écran 4:3 de 800×600 dans un moniteur
+beige (plaque PORKONIA, voyant vert), léger balayage cathodique réglable. Châssis des fenêtres repris de l'atelier : parchemin biseauté,
+titre lie-de-vin liseré d'or, titres à empattements, Tahoma 11 px. Bureau uni (vert bouteille par défaut ; lie-de-vin, portrait du Fondateur
+centré ou mosaïque d'emblèmes), icônes 32 px, barre des tâches en relief, menu PorkOS à bandeau vertical et sous-menus, bulles de notification.
+BIOS en VT323. Pictogrammes SVG maison, pas d'emoji. `prefers-reduced-motion` respecté.

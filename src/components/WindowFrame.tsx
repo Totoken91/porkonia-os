@@ -2,7 +2,7 @@
 /** Fenêtre : châssis de l'atelier, déplaçable par la barre de titre, redimensionnable par le coin. */
 import { useMemo, useRef } from "react";
 import type { AppManifest } from "@/content/types";
-import { WinContext, type WinApi } from "@/os/context";
+import { WinContext, useScale, type WinApi } from "@/os/context";
 import type { Viewport, Win, WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
 
@@ -16,6 +16,7 @@ interface Props {
 }
 
 export function WindowFrame({ win, manifest, focused, vp, dispatch, children }: Props) {
+  const scale = useScale();
   const drag = useRef<{ kind: "move" | "resize"; sx: number; sy: number; ox: number; oy: number } | null>(null);
   const api = useMemo<WinApi>(
     () => ({
@@ -40,8 +41,8 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, children }: 
   const move = (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d) return;
-    const x = d.ox + e.clientX - d.sx;
-    const y = d.oy + e.clientY - d.sy;
+    const x = d.ox + Math.round((e.clientX - d.sx) / scale);
+    const y = d.oy + Math.round((e.clientY - d.sy) / scale);
     dispatch(d.kind === "move" ? { type: "move", id: win.id, x, y, vp } : { type: "resize", id: win.id, w: x, h: y, vp });
   };
   const end = () => (drag.current = null);
@@ -55,7 +56,7 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, children }: 
       data-testid={`window-${win.appId}`}
     >
       <header className="pk-titlebar" onPointerDown={start("move")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onDoubleClick={() => dispatch({ type: "toggleMaximize", id: win.id })}>
-        <Icon name={manifest.icon} size={18} />
+        <Icon name={manifest.icon} size={16} />
         <h2>{win.title}</h2>
         <div className="pk-controls">
           <button className="pk-ctl" aria-label="Réduire" onClick={() => dispatch({ type: "minimize", id: win.id })}>

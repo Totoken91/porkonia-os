@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
+export type AppKind = "bienvenue" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
 
-export type IconKey = "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
+export type IconKey = "embleme" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
 
 export interface AppManifest {
   id: string;
@@ -19,9 +19,9 @@ export interface AppManifest {
   size: { w: number; h: number };
   /** Une seule fenêtre à la fois (réouvrir = remettre au premier plan). */
   single?: boolean;
-  /** Horaire fictif affiché dans le menu « Au programme ». */
-  slot?: string;
-  /** Sous-titre du menu. */
+  /** Rangée dans le menu PorkOS (absente = n'y figure pas). */
+  menu?: "programmes" | "accessoires" | "systeme";
+  /** Info-bulle du menu. */
   blurb?: string;
 }
 
@@ -160,13 +160,16 @@ export interface ContentPack {
   users: UserProfile[];
   apps: AppManifest[];
   desktop: DesktopIcon[];
-  /** Affiche du bureau : portrait tramé (référence d'origine, jamais une copie). */
+  /** Fond d'écran « Portrait du Fondateur » (référence d'origine, jamais une copie). */
   wallpaper?: { portrait?: string };
+  /** Écran de bienvenue ouvert à la connexion. */
+  welcome: { title: string; intro: string; tips: string[]; links: { label: string; action: ActionRef }[] };
   filesystem: FsNode;
   mails: Mail[];
   boot: { bios: string[]; splash: { title: string; slogan: string }; skipHint: string };
   login: { prompt: string; emptyPassword: string; acceptedAny: string[]; patriotic: string; wrongPassword: string; guestNotice: string };
-  ticker: string[];
+  /** Dépêches de l'agence de presse nationale (portail PigNet). */
+  news: string[];
   toastPools: Record<string, Toast[]>;
   dialogs: Record<string, DialogSpec>;
   ads: Ad[];

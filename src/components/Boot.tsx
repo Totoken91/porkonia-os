@@ -1,13 +1,15 @@
 "use client";
-/** Démarrage : mire d'État → PorkBIOS → écran titre. Toute touche ou tout clic passe (et c'est consigné). */
+/** Démarrage : PorkBIOS (texte) → écran de chargement. Toute touche ou tout clic passe (et c'est consigné). */
 import { useEffect, useState } from "react";
 import type { ContentPack } from "@/content/types";
 import { makeStr } from "@/os/context";
 
-type Stage = "mire" | "bios" | "titre";
+type Stage = "bios" | "chargement";
+const MEMOIRE = 640;
 
 export function Boot({ pack, onDone }: { pack: ContentPack; onDone(skipped: boolean): void }) {
-  const [stage, setStage] = useState<Stage>("mire");
+  const [stage, setStage] = useState<Stage>("bios");
+  const [mem, setMem] = useState(0);
   const [lines, setLines] = useState(0);
   const str = makeStr(pack);
 
@@ -26,47 +28,39 @@ export function Boot({ pack, onDone }: { pack: ContentPack; onDone(skipped: bool
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout>;
-    if (stage === "mire") t = setTimeout(() => setStage("bios"), 2200);
-    else if (stage === "bios") {
-      if (lines < pack.boot.bios.length) t = setTimeout(() => setLines((n) => n + 1), lines === 0 ? 300 : 170 + (lines % 3) * 90);
-      else t = setTimeout(() => setStage("titre"), 900);
-    } else t = setTimeout(() => onDone(false), 2600);
+    if (stage === "bios") {
+      if (mem < MEMOIRE) t = setTimeout(() => setMem((m) => Math.min(MEMOIRE, m + 32)), 40);
+      else if (lines < pack.boot.bios.length) t = setTimeout(() => setLines((n) => n + 1), 150 + (lines % 3) * 80);
+      else t = setTimeout(() => setStage("chargement"), 900);
+    } else t = setTimeout(() => onDone(false), 3200);
     return () => clearTimeout(t);
-  }, [stage, lines, pack.boot.bios.length, onDone]);
-
-  if (stage === "mire")
-    return (
-      <div className="ecran-noir mire-etat" data-testid="boot-mire">
-        <div className="barres">{Array.from({ length: 7 }, (_, i) => <i key={i} />)}</div>
-        <div className="cible">
-          <img src="/brand/embleme-256.png" alt="" />
-        </div>
-        <div className="legende">
-          <b>{str("boot.mire")}</b>
-          <span>{str("boot.mire.sous")}</span>
-        </div>
-      </div>
-    );
+  }, [stage, mem, lines, pack.boot.bios.length, onDone]);
 
   if (stage === "bios")
     return (
-      <div className="ecran-noir" data-testid="boot-bios">
-        <pre className="bios">
-          {pack.boot.bios.slice(0, lines).map((l, i) => (
-            <div key={i}>{renderBiosLine(l)}</div>
-          ))}
-          <span className="curseur">_</span>
-        </pre>
+      <div className="ecran-noir bios" data-testid="boot-bios">
+        <img className="bios-logo" src="/brand/embleme-64.png" alt="" width={64} height={64} />
+        <div>{str("boot.memoire", { n: String(mem).padStart(4, " ") })}</div>
+        <div>&nbsp;</div>
+        {pack.boot.bios.slice(0, lines).map((l, i) => (
+          <div key={i}>{renderBiosLine(l)}</div>
+        ))}
+        <span className="curseur">_</span>
         <p className="skip">{pack.boot.skipHint}</p>
       </div>
     );
 
   return (
-    <div className="ecran-noir titre-boot" data-testid="boot-titre">
-      <img src="/brand/embleme-256.png" alt="" />
-      <h1>{pack.boot.splash.title}</h1>
-      <p>{pack.boot.splash.slogan}</p>
-      <div className="barre-segments demarrage">{Array.from({ length: 12 }, (_, i) => <i key={i} style={{ animationDelay: `${i * 0.18}s` }} />)}</div>
+    <div className="chargement" data-testid="boot-chargement">
+      <div className="chargement-centre">
+        <img src="/brand/embleme-256.png" alt="" width={150} height={150} />
+        <div className="chargement-titre">
+          <b>{pack.boot.splash.title}</b>
+          <span>{pack.os.edition}</span>
+        </div>
+        <p>{pack.boot.splash.slogan}</p>
+      </div>
+      <div className="chargement-barre" aria-label={str("boot.chargement")} />
     </div>
   );
 }
