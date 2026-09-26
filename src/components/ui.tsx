@@ -30,10 +30,9 @@ export function Window({
       <header className="pk-titlebar">
         {icon}
         <h1 className="truncate">{title}</h1>
-        {code && <span className="code hidden sm:inline">Formulaire {code}</span>}
+        {code && <span className="code hidden sm:inline">Form. {code}</span>}
         <div className="pk-controls" aria-hidden="true">
-          <span className="pk-ctl">?</span>
-          <span className="pk-ctl">▾</span>
+          <span className="pk-ctl">⟳</span>
         </div>
       </header>
       {menu && <nav className="pk-menubar">{menu}</nav>}

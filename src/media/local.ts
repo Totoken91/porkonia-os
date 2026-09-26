@@ -3,13 +3,13 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 export function mediaRoot(): string {
-  return path.resolve(process.env.PORKONIA_MEDIA_ROOT || path.join(process.cwd(), "medias-locales"));
+  return path.resolve(/*turbopackIgnore: true*/ process.env.PORKONIA_MEDIA_ROOT || path.join(process.cwd(), "medias-locales"));
 }
 
 /** Résout un chemin relatif SOUS la racine des médias (anti-traversée de répertoire). */
 export function resolveLocalMedia(rel: string): string | null {
   const root = mediaRoot();
-  const abs = path.resolve(root, rel);
+  const abs = path.resolve(/*turbopackIgnore: true*/ root, rel);
   if (abs !== root && !abs.startsWith(root + path.sep)) return null;
   return abs;
 }
@@ -25,7 +25,7 @@ export async function statLocal(rel: string) {
   const abs = resolveLocalMedia(rel);
   if (!abs) return null;
   try {
-    const st = await fs.stat(abs);
+    const st = await fs.stat(/*turbopackIgnore: true*/ abs);
     return st.isFile() ? { abs, size: st.size } : null;
   } catch {
     return null;

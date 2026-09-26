@@ -10,7 +10,7 @@ import { NewMediaForm } from "./media-forms";
 
 export const metadata: Metadata = { title: "Archives audiovisuelles" };
 
-type SP = { q?: string; type?: string; lieu?: string; statut?: string; lien?: string; vue?: string; associer?: string; article?: string };
+type SP = { nouveau?: string; q?: string; type?: string; lieu?: string; statut?: string; lien?: string; vue?: string; associer?: string; article?: string };
 
 export default async function MediaPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -77,7 +77,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
       }
       status={[`${rows.length} média(s) affiché(s)`, `${live.filter((m) => m.location === "externe").length} externes`, `${live.filter((m) => m.location === "locale").length} locaux`]}
     >
-      <details className="pk-fieldset mb-2" open={!!(sp.associer || sp.article)}>
+      <details className="pk-fieldset mb-2" open={!!(sp.associer || sp.article || sp.nouveau)}>
         <summary className="cursor-pointer font-bold text-[#7a1016]">Référencer des médias (sans les déplacer)</summary>
         <div className="mt-2">
           <NewMediaForm

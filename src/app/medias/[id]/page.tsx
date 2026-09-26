@@ -67,7 +67,7 @@ export default async function MediaDetail({ params }: { params: Promise<{ id: st
               <tr><td className="pr-2 align-top font-bold">Référence</td><td className="break-all font-mono"><a href={url} target="_blank" rel="noreferrer" className="text-[#1d3f8f] underline">{m.ref}</a></td></tr>
               <tr><td className="pr-2 font-bold">Dimensions</td><td>{m.width ? `${m.width} × ${m.height} px` : "—"}</td></tr>
               <tr><td className="pr-2 font-bold">Format</td><td>{m.format ?? "—"}</td></tr>
-              <tr><td className="pr-2 font-bold">SHA-256</td><td className="break-all font-mono">{m.sha256 ?? "non calculée (voir npm run media:backup)"}</td></tr>
+              <tr><td className="pr-2 font-bold">SHA-256</td><td className="break-all font-mono">{m.sha256 ?? "non calculée"}</td></tr>
               <tr><td className="pr-2 font-bold">Sauvegarde</td><td className="break-all">{m.backupPath ?? "aucune copie de sauvegarde"}</td></tr>
               <tr>
                 <td className="pr-2 font-bold">Vérification</td>

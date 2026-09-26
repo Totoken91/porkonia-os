@@ -1,144 +1,149 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { getDb } from "@/server/page-data";
 import { dashboardStats } from "@/domain/integrity";
-import { Alert, Emblem, Window, fmtDate } from "@/components/ui";
-import { IconDashboard } from "@/components/icons";
+import { Alert, Window, fmtDate } from "@/components/ui";
+import { IconArchive, IconBook, IconCamera, IconDashboard, IconPerson, IconRobot, IconScroll, IconShield, IconStamp } from "@/components/icons";
 import { ActionButton } from "@/components/client";
 import { backupAction } from "./actions";
 import type { Database } from "@/domain/types";
 
+function Tile({ icon, n, label, sub, href }: { icon: ReactNode; n: number | string; label: string; sub: ReactNode; href: string }) {
+  return (
+    <Link href={href} className="stat-tile">
+      {icon}
+      <div className="min-w-0">
+        <div className="l">{label}</div>
+        <div className="n">{n}</div>
+        <div className="s">{sub}</div>
+      </div>
+    </Link>
+  );
+}
+
+function Panel({ title, icon, children, className = "" }: { title: string; icon?: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <section className={`pk-window ${className}`}>
+      <header className="pk-titlebar !text-[14px]">
+        {icon}
+        <h2 className="font-normal">{title}</h2>
+      </header>
+      <div className="p-2">{children}</div>
+    </section>
+  );
+}
+
 export default async function Dashboard() {
   const db = (await getDb()) as Database;
   const s = dashboardStats(db);
-  const tiles: [string, number | string, string][] = [
-    ["Articles", s.articles, "/articles"],
-    ["Brouillons", s.articlesDraft, "/articles?statut=brouillon"],
-    ["Validés (en attente)", s.articlesValidated, "/publication"],
-    ["Publiés", s.articlesPublished, "/articles?statut=publie"],
-    ["Personnages", s.characters, "/personnages"],
-    ["Médias référencés", s.media, "/medias"],
-    ["Entrées de Bible", s.bible, "/bible"],
-    ["Éléments en corbeille", s.trash, "/corbeille"],
-  ];
+  const pub = s.lastPublication;
 
   return (
     <Window
       title="Tableau de bord"
       code="PK-000"
       icon={<IconDashboard size={18} />}
-      menu={
-        <>
-          <Link href="/articles/nouveau">Nouvel article</Link>
-          <Link href="/personnages/nouveau">Nouvelle fiche</Link>
-          <Link href="/medias">Référencer un média</Link>
-          <Link href="/contextes">Préparer un contexte IA</Link>
-        </>
-      }
       status={[
-        `Base locale · ${db.revisions.length} révisions archivées`,
+        `${db.revisions.length} révisions archivées`,
         `Journal : ${db.log.length} opérations`,
-        s.lastBackup ? `Sauvegarde : ${fmtDate(s.lastBackup.at)}` : "Aucune sauvegarde",
+        s.lastBackup ? `Dernière sauvegarde : ${fmtDate(s.lastBackup.at)}` : "Aucune sauvegarde",
       ]}
     >
-      <div className="mb-3 flex items-center gap-3 border-b border-[#8a867c] pb-3">
-        <Emblem size={56} />
-        <div>
-          <div className="text-[16px] font-bold text-[#7a1016]">République de Porkonia — Ministère du Lore</div>
-          <div className="text-[11px] text-[#555]">
-            Poste de travail administratif. Toute modification est archivée, datée et réversible. Merci de ne pas lécher l&apos;écran.
-          </div>
-        </div>
-      </div>
-
       {s.demoItems > 0 && (
         <Alert>
-          <b>Données de démonstration présentes ({s.demoItems} éléments).</b> Elles sont marquées « DÉMO » et ne font pas partie du canon.
-          Aucune donnée réelle de Porkopédia n&apos;a encore été importée.
-        </Alert>
-      )}
-      {s.errors > 0 && (
-        <Alert kind="error">
-          <b>{s.errors} erreur(s) d&apos;intégrité</b> et {s.warnings} avertissement(s). <Link href="/integrite" className="underline">Consulter le contrôle national d&apos;intégrité</Link>.
+          <b>Données de démonstration présentes ({s.demoItems} éléments).</b> Elles sont marquées « DÉMO » et ne font pas partie du canon. Aucune donnée
+          réelle de Porkopédia n&apos;a encore été importée.
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {tiles.map(([label, n, href]) => (
-          <Link key={label} href={href} className="stat-tile block no-underline hover:border-[#316ac5]">
-            <div className="n">{n}</div>
-            <div className="l">{label}</div>
-          </Link>
-        ))}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
+        <Tile icon={<IconPerson size={40} />} n={s.characters} label="Individus enregistrés" sub={`${db.characters.filter((c) => !c.deletedAt && c.status === "canon").length} canoniques`} href="/personnages" />
+        <Tile icon={<IconScroll size={40} />} n={s.articles} label="Articles" sub={`${s.articlesPublished} publiés · ${s.articlesDraft} brouillons`} href="/articles" />
+        <Tile icon={<IconCamera size={40} />} n={s.media} label="Médias référencés" sub={`${db.media.filter((m) => !m.deletedAt && m.canonStatus === "officiel").length} homologués`} href="/medias" />
+        <Tile icon={<IconBook size={40} />} n={s.bible} label="Entrées de Bible" sub="règles et références" href="/bible" />
+        <Tile
+          icon={<IconShield size={40} />}
+          n={s.errors}
+          label="Erreurs d'intégrité"
+          sub={s.errors === 0 ? `aucune erreur · ${s.warnings} avertissement(s)` : `${s.warnings} avertissement(s)`}
+          href="/integrite"
+        />
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <fieldset className="pk-fieldset">
-          <legend>Synchronisation avec Porkopédia</legend>
-          {s.lastPublication ? (
-            <ul className="space-y-1">
-              <li>
-                Dernière publication : <b>n°{s.lastPublication.number}</b> du {fmtDate(s.lastPublication.createdAt)} ({s.lastPublication.articles.length} articles)
-              </li>
-              <li>
-                Vérification sur le site public :{" "}
-                {s.lastPublication.verification === "verifiee" ? (
-                  <span className="badge green">Vérifiée</span>
-                ) : s.lastPublication.verification === "echec" ? (
-                  <span className="badge red">Échec</span>
-                ) : (
-                  <span className="badge amber">Non vérifiée</span>
-                )}
-              </li>
-            </ul>
-          ) : (
-            <p>Aucune publication créée. Porkopédia n&apos;est pas synchronisé automatiquement (voir docs/CHATGPT_SITES_INTEGRATION.md).</p>
-          )}
-          <p className="mt-1">
-            Articles non publiés ou modifiés depuis : <b>{s.pendingForPublication}</b>.{" "}
-            <Link href="/publication" className="text-[#1d3f8f] underline">Préfecture des Publications</Link>
-          </p>
-        </fieldset>
-
-        <fieldset className="pk-fieldset">
-          <legend>Conservation des données</legend>
-          <ul className="space-y-1">
-            <li>Dernière sauvegarde : <b>{s.lastBackup ? fmtDate(s.lastBackup.at) : "jamais"}</b></li>
-            <li>
-              Médias : {s.mediaExternal} externes · {s.media - s.mediaExternal} locaux · <b>{s.mediaBroken}</b> lien(s) mort(s) · {s.mediaUnchecked} non vérifié(s)
-            </li>
-          </ul>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <ActionButton action={backupAction} className="pk-btn primary">
-              Créer une sauvegarde maintenant
-            </ActionButton>
-            <a className="pk-btn" href="/api/export">Télécharger l&apos;export complet (JSON)</a>
-          </div>
-        </fieldset>
-      </div>
-
-      <fieldset className="pk-fieldset">
-        <legend>Dernières opérations</legend>
-        <div className="pk-grid-wrap max-h-72">
-          <table className="pk-grid">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Action</th>
-                <th>Détail</th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.recent.map((l) => (
-                <tr key={l.id}>
-                  <td className="whitespace-nowrap">{fmtDate(l.at)}</td>
-                  <td className="whitespace-nowrap">{l.action}</td>
-                  <td>{l.summary}</td>
+      <div className="mt-2 grid gap-2 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <Panel title="Modifications récentes" icon={<IconArchive size={16} />}>
+          <div className="pk-grid-wrap max-h-72">
+            <table className="pk-grid">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Opération</th>
+                  <th>Détail</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {s.recent.map((l) => (
+                  <tr key={l.id}>
+                    <td className="whitespace-nowrap">{fmtDate(l.at)}</td>
+                    <td className="whitespace-nowrap">{l.action}</td>
+                    <td>{l.summary}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Link href="/journal" className="mt-1 inline-block text-[#1d3f8f] underline">
+            Journal complet des opérations
+          </Link>
+        </Panel>
+
+        <div className="space-y-2">
+          <Panel title="État des publications" icon={<IconStamp size={16} />}>
+            <table className="w-full text-[12px]">
+              <tbody>
+                <tr><td><span className="badge green">Publiés</span></td><td className="text-right font-bold">{s.articlesPublished}</td></tr>
+                <tr><td><span className="badge blue">Validés, en attente</span></td><td className="text-right font-bold">{s.articlesValidated}</td></tr>
+                <tr><td><span className="badge amber">Brouillons</span></td><td className="text-right font-bold">{s.articlesDraft}</td></tr>
+              </tbody>
+            </table>
+            <p className="mt-2">
+              {pub ? (
+                <>
+                  Dernière publication : <b>n°{pub.number}</b> du {fmtDate(pub.createdAt)} ({pub.articles.length} articles) —{" "}
+                  {pub.verification === "verifiee" ? <span className="badge green">Vérifiée</span> : pub.verification === "echec" ? <span className="badge red">Échec</span> : <span className="badge amber">Non vérifiée</span>}
+                </>
+              ) : (
+                <>Aucune publication. Porkopédia n&apos;est pas synchronisé automatiquement.</>
+              )}
+            </p>
+          </Panel>
+          <Panel title="Raccourcis administratifs" icon={<IconRobot size={16} />}>
+            <ul className="grid gap-1 text-[13px] sm:grid-cols-2" style={{ fontFamily: "var(--font-serif)" }}>
+              <li><Link className="hover:underline" href="/articles/nouveau">Rédiger un article</Link></li>
+              <li><Link className="hover:underline" href="/personnages/nouveau">Enregistrer un individu</Link></li>
+              <li><Link className="hover:underline" href="/medias?nouveau=1">Référencer une illustration</Link></li>
+              <li><Link className="hover:underline" href="/contextes">Préparer un contexte IA</Link></li>
+              <li><Link className="hover:underline" href="/integrite">Vérifier l&apos;intégrité</Link></li>
+              <li><Link className="hover:underline" href="/archives">Consulter les archives</Link></li>
+            </ul>
+          </Panel>
+          <Panel title="Conservation des données" icon={<IconArchive size={16} />}>
+            <p>
+              Dernière sauvegarde : <b>{s.lastBackup ? fmtDate(s.lastBackup.at) : "jamais"}</b>
+              <br />
+              Médias : {s.mediaExternal} externes · {s.media - s.mediaExternal} locaux · <b>{s.mediaBroken}</b> lien(s) mort(s) · {s.mediaUnchecked} non vérifié(s)
+              <br />
+              Éléments en corbeille : {s.trash}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <ActionButton action={backupAction} className="pk-btn primary">
+                Sauvegarder maintenant
+              </ActionButton>
+              <a className="pk-btn" href="/api/export">Export complet (JSON)</a>
+            </div>
+          </Panel>
         </div>
-      </fieldset>
+      </div>
     </Window>
   );
 }

@@ -8,7 +8,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ path: string[]
   const st = await statLocal(rel);
   if (!st) return new Response("Média local introuvable", { status: 404 });
   const ext = rel.split(".").pop()?.toLowerCase() ?? "";
-  const data = await fs.readFile(st.abs);
+  const data = await fs.readFile(/*turbopackIgnore: true*/ st.abs);
   return new Response(new Uint8Array(data), {
     headers: {
       "content-type": MIME[ext] ?? "application/octet-stream",
