@@ -1,56 +1,44 @@
-# Architecture
+# Architecture de PorkOS
 
-## Vue d'ensemble
+Export statique Next 16 (App Router, `output: "export"`), React 19, TypeScript strict. Aucun serveur, aucune clé, aucune API payante.
 
 ```
-Navigateur (UI « Édition Administrative 2005 »)
-   │  server actions (écritures) / rendu serveur (lectures)
-   ▼
-src/app/actions.ts ──► src/domain/ops.ts (logique pure, testée)
-   │                         │
-   ▼                         ▼
-src/data/store.ts  ◄── transaction(db => ops.*(db, …))
-   │  JSON atomique : data/porkonia-db.json (+ data/backups/)
-   ▼
-src/export/*  →  /api/export, /api/medias/export, /api/publications/:n, /api/public/v1/*
-src/media/*   →  /api/media/local/* (lecture seule, confinée), vérification de liens
-src/bible/*   →  analyse DOCX (pure) + stockage des originaux et images (/api/bible/*)
-src/import/*  →  lecture des extractions produites par scripts/porkopedia-extract.mjs (Chromium isolé, CLI)
+src/
+  content/
+    types.ts              contrat d'un pack de contenu
+    packs/porkos.ts       le pack « Édition Citoyenne »
+    porkopedia/*.json     notices Porkopédia assainies au build (scripts/build-porkopedia.mts)
+  os/                     cœur PUR (testé) + contextes React
+    windows.ts            réducteur du gestionnaire de fenêtres
+    scheduler.ts          règles d'événements → actions (déterministe)
+    rng.ts                aléatoire rejouable (mulberry32)
+    fs.ts                 chemins du système de fichiers du pack
+    settings.ts           réglages (localStorage, assainis)
+    context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis
+  components/             coque : Boot, Login, Session (bureau), WindowFrame, Taskbar, Overlays, Icon
+  apps/                   une appli = un composant + sa logique pure ; registry.tsx fait le lien kind → composant
+  app/                    layout (polices), page, globals.css (direction « Télé d'État »)
 ```
 
-Séparation demandée : interface (`src/app`, `src/components`) · logique métier (`src/domain`) · accès aux données (`src/data`) · médias (`src/media`) · export/publication (`src/export`, routes `api/`) · contextes IA (`src/domain/context*.ts`).
+## Flux
 
-## Choix techniques
+1. `PorkOS` enchaîne les phases : démarrage (mire → PorkBIOS → titre) → connexion → session (→ veille).
+2. `Session` tient les fenêtres (`winReducer`), la file de dialogues, les flash infos, la pub et la mise à jour en cours.
+3. Toutes les secondes, `schedule()` reçoit un `tick` ; ouvrir une appli envoie `app-open` ; une appli peut émettre un `signal` (`nappe:incident`, `tv:zapper`…). Les règles du pack décident de ce qui en découle.
+4. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou un flash, lancer une pub, une mise à jour, la veille ou le verrouillage.
 
-| Choix | Raison |
-|---|---|
-| Next.js 16 App Router + server actions | Une seule application, rendu serveur, pas d'API interne à maintenir pour l'UI. |
-| TypeScript strict (`noUncheckedIndexedAccess`) | Robustesse du modèle de données. |
-| Tailwind v4 + couche `@layer components` (`pk-*`) | Thème d'époque centralisé dans `globals.css`, utilitaires pour la mise en page. |
-| Stockage V1 : fichier JSON unique | Démarre sans aucun service ; exportable/lisible ; écriture atomique (tmp + fsync + rename) ; mutations sérialisées ; rollback implicite (on travaille sur une copie). Adapté à quelques milliers d'articles. |
-| Logique métier pure (`ops.ts`) | Testable sans base ; réutilisable telle quelle avec PostgreSQL en phase 2. |
-| **Pas de Supabase Storage** | Décision du 26/09/2026 : les médias restent où ils sont (ChatGPT Sites / disque) ; Porkonia OS est un catalogue de références. |
-| react-markdown + remark-gfm | Rendu Markdown sûr (pas de HTML brut exécuté), tableaux GFM. |
+## Ajouter…
 
-## Médias : catalogue, pas hébergement
+- **un fichier, un mail, une pub, un programme, un message** : uniquement dans le pack.
+- **une réaction du système** : une règle dans `rules` (+ un pool de flash infos ou un dialogue).
+- **une appli** : un `kind` dans `types.ts`, un composant dans `src/apps/<kind>/`, une entrée dans `registry.tsx`, un manifeste dans le pack.
+- **un nouvel ordinateur** (spin-off) : un nouveau pack ; `page.tsx` choisit le pack.
 
-- `location: "externe"` : URL absolue (ex. `https://porkopedia.totoken.chatgpt.site/assets/...`), affichée telle quelle.
-- `location: "locale"` : chemin relatif sous `PORKONIA_MEDIA_ROOT` (défaut `./medias-locales`), servi en lecture seule par `/api/media/local/*` (anti-traversée, CSP `sandbox` pour les SVG).
-- Doublons : même référence ou même SHA-256 → refus.
-- Nouvelle version = nouveau média `variantOf` l'original, statut « proposition » ; l'original n'est jamais écrasé.
-- Changer un chemin exige une confirmation explicite et reste dans l'historique.
-- Vérification des liens : HEAD (puis GET 1 octet) côté serveur, résultat journalisé, aucune modification.
-- Sauvegarde facultative : `scripts/media-backup.mjs` (fichiers nommés par empreinte, manifeste), sans toucher la base ni les références.
-- Migration vers un autre hébergeur : facultative, jamais imposée (non implémentée en V1).
+`tests/pack.test.ts` refuse un pack dont une référence (appli, dialogue, pool, pub, mise à jour, signal) ne mène nulle part.
 
-## Accès et sécurité
+## Direction visuelle « Télé d'État »
 
-- V1 : usage local. `src/proxy.ts` impose HTTP Basic si `PORKONIA_ADMIN_PASSWORD` est défini (sauf `/api/public/*`).
-- Aucune clé côté navigateur. `robots: noindex`.
-- API publique : GET seulement, contenu **publié** uniquement, CORS limité à `PORKONIA_PUBLIC_CORS_ORIGIN` (défaut : Porkopédia).
-
-## Limites connues
-
-- Un seul utilisateur, pas de comptes.
-- Stockage fichier : pas d'accès concurrent multi-processus (un seul serveur Next). Base réelle ≈ 9 Mo après import complet.
-- L'extraction de Porkopédia se lance en ligne de commande (choix de sécurité : le serveur n'exécute jamais le code du site).
+Châssis des fenêtres repris de l'atelier (titre lie-de-vin, liseré or, parchemin biseauté) posé sur une affiche
+imprimée trois couleurs (rouge, crème, noir) à trame de points, avec portrait du Fondateur en bichromie. Signal CRT réglable (`--crt`),
+bandeau d'info, barre des tâches en « canaux », menu « Au programme », mire au démarrage. Polices : Big Shoulders (affiche), VT323 (terminal),
+Tahoma dans les fenêtres. Pictogrammes SVG maison, pas d'emoji. `prefers-reduced-motion` respecté.

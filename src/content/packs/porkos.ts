@@ -1,0 +1,427 @@
+/**
+ * Pack « PorkOS — Édition Citoyenne » : l'ordinateur d'un citoyen modèle.
+ * Tout le texte, les fichiers, les mails, les programmes et les événements vivent ici.
+ * Les images renvoient à Porkopédia (hébergement d'origine), rien n'est copié.
+ */
+import type { ContentPack } from "../types";
+
+const P = "https://porkopedia.totoken.chatgpt.site/assets/";
+
+export const porkosPack: ContentPack = {
+  id: "porkos-citoyen",
+  os: { name: "PorkOS", edition: "Édition Citoyenne", version: "12.12", vendor: "Ministère des Systèmes Informatiques de la République de Porkonia" },
+
+  users: [
+    {
+      id: "citoyen",
+      displayName: "Citoyen modèle",
+      caption: "Pork ID PK-0012-4471-B · Niveau de banquet II",
+      password: null,
+      passwordHint: "Indice : un nombre que vous connaissez déjà.",
+      porkId: { numero: "PK-0012-4471-B", niveauBanquet: "II — plat principal, dessert non garanti", profession: "Contribuable enthousiaste", delivrance: "12/12/2012" },
+    },
+    { id: "invite", displayName: "Invité", caption: "Session surveillée · aucune Pork ID", password: null, passwordHint: "", guest: true },
+  ],
+
+  apps: [
+    { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 900, h: 640 }, slot: "06:12", blurb: "Le monde, tel qu'homologué" },
+    { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 820, h: 600 }, single: true, slot: "12:12", blurb: "Canal 1, le seul" },
+    { id: "nappe-vide", kind: "nappe-vide", title: "Nappe Vide", icon: "nappe", size: { w: 420, h: 520 }, single: true, slot: "20:12", blurb: "Jeu de protocole pour toute la famille" },
+    { id: "config", kind: "config", title: "Panneau de configuration", icon: "config", size: { w: 720, h: 540 }, single: true, slot: "23:12", blurb: "Réglez, nous ajusterons" },
+    { id: "fichiers", kind: "fichiers", title: "Mes documents", icon: "dossier", size: { w: 720, h: 500 }, slot: "—", blurb: "Vos papiers, en ordre" },
+    { id: "visionneuse", kind: "visionneuse", title: "Visionneuse", icon: "image", size: { w: 760, h: 580 } },
+    { id: "texte", kind: "texte", title: "Bloc-notes d'État", icon: "texte", size: { w: 620, h: 520 } },
+  ],
+
+  desktop: [
+    { id: "d-nav", label: "PigNet Navigateur", icon: "navigateur", open: { app: "navigateur" } },
+    { id: "d-tv", label: "Channel Pork", icon: "tele", open: { app: "channel-pork" } },
+    { id: "d-nappe", label: "Nappe Vide", icon: "nappe", open: { app: "nappe-vide" } },
+    { id: "d-docs", label: "Mes documents", icon: "dossier", open: { app: "fichiers" } },
+    { id: "d-config", label: "Configuration", icon: "config", open: { app: "config" } },
+    { id: "d-poubelle", label: "Poubelle d'État", icon: "poubelle", open: { action: { type: "dialog-ref", id: "poubelle" } } },
+  ],
+
+  wallpaper: { portrait: `${P}unique-archive-iii-le-fondateur-sofiane-douzi.jpg` },
+
+  filesystem: {
+    type: "dossier",
+    name: "Poste du citoyen",
+    children: [
+      {
+        type: "dossier",
+        name: "Documents officiels",
+        children: [
+          {
+            type: "texte",
+            name: "Lettre de bienvenue.txt",
+            date: "12/12/2012",
+            content:
+              "MINISTÈRE DES SYSTÈMES INFORMATIQUES\nDirection de l'Accueil des Citoyens Numériques\n\nCitoyen,\n\nVous venez d'acquérir PorkOS, Édition Citoyenne. Plus exactement, PorkOS vient de vous acquérir, mais la formulation précédente a été jugée plus rassurante par nos services.\n\nPorkOS est le seul système d'exploitation autorisé sur le territoire de la République. Il est également le meilleur, ce que confirment toutes les études disponibles, toutes réalisées par nous.\n\nVotre poste comprend :\n  – un navigateur donnant accès à PigNet, l'internet national, dont le débit a récemment été porté à « suffisant » ;\n  – Channel Pork, la télévision officielle, avec un choix de chaînes allant de Canal 1 à Canal 1 ;\n  – Nappe Vide, jeu éducatif sur le protocole des banquets ;\n  – un panneau de configuration où tout peut être réglé, puis ajusté.\n\nEn cas de difficulté, n'hésitez pas à contacter l'assistance. Elle vous contactera de toute façon.\n\nLe porc. La bière. Toujours plus.\n\nPour le Ministre, empêché (banquet),\nle Sous-Directeur adjoint de l'Accueil, également empêché (même banquet)",
+          },
+          {
+            type: "texte",
+            name: "Conditions d'utilisation.txt",
+            date: "12/12/2012",
+            content:
+              "CONDITIONS GÉNÉRALES D'UTILISATION DE PORKOS\nVersion 12.12 — non négociable\n\nArticle 1. En allumant ce poste, vous avez accepté les présentes conditions.\nArticle 2. En ne l'allumant pas, également.\nArticle 3. Le citoyen s'engage à utiliser PorkOS dans un esprit de gratitude modérée à forte.\nArticle 4. Toute tentative de désinstallation sera considérée comme une demande de réinstallation.\nArticle 5. Les données personnelles du citoyen sont protégées par la République, qui les garde donc pour elle.\nArticle 6. Le portrait du Fondateur affiché au démarrage ne constitue pas une publicité. Il constitue une évidence.\nArticle 7. Le nombre 12 est réservé. Son usage à des fins privées (anniversaires, douzaines d'œufs, heures de la journée) est toléré.\nArticle 8. En cas de désaccord avec les présentes conditions, le citoyen peut adresser une réclamation au Bureau des Réclamations, qui la transmettra au Bureau des Réclamations.\nArticle 9. Le présent document fait foi, y compris lorsqu'il se contredit.\nArticle 10. Supprimé à la demande de l'article 11.\nArticle 11. Voir article 10.\nArticle 12. Tout va bien.",
+          },
+          { type: "image", name: "Pork ID (scan).png", src: `${P}pork-id.png`, caption: "Scan de Pork ID. La photographie est conforme ; le sourire, toléré." },
+          {
+            type: "texte",
+            name: "Formulaire PK-012 (vierge).txt",
+            content:
+              "FORMULAIRE PK-012 — DEMANDE DE FORMULAIRE\n\nObjet de la demande : obtenir le formulaire permettant de demander le présent formulaire.\n\nNom : ........................\nPrénom : ........................\nNiveau de banquet : ........................\nMotif (12 lignes minimum) :\n..................................................\n\nPièces à joindre : le formulaire PK-012, rempli.\n\nCadre réservé à l'administration :\n[ ] Reçu   [ ] Égaré   [ ] Égaré avec soin",
+          },
+        ],
+      },
+      {
+        type: "dossier",
+        name: "Mes photos",
+        children: [
+          { type: "image", name: "Inauguration du Fondateur.jpg", src: `${P}unique-archive-iii-le-fondateur-sofiane-douzi.jpg`, caption: "Le Grand Maître coupe le ruban. Le sanglier, à droite, n'avait pas été invité. Il est resté pour le dessert.", date: "12/12/2012" },
+          { type: "image", name: "Banquet de quartier.jpg", src: `${P}home-archives/home-banquet.jpg`, caption: "Banquet de quartier. Aucune nappe n'est visible, tout le monde a bien travaillé." },
+          { type: "image", name: "Chope sans fond.jpg", src: `${P}home-archives/home-bottomless-mug.jpg`, caption: "Programme de fidélité de la Chope Sans Fond, 7e tampon sur 12." },
+          { type: "image", name: "Tavernes, soir d'hiver.jpg", src: `${P}article-auto-la-douzi-ambree.jpg`, caption: "Photo prise juste avant de dire quelque chose d'important. Personne ne se souvient de quoi." },
+          { type: "image", name: "Vacances en montagne.jpg", src: `${P}home-archives/home-mountain.jpg`, caption: "Vacances en montagne. Le chalet est conforme ; la montagne, en cours d'homologation." },
+          { type: "image", name: "Commission des Onze Centimètres.jpg", src: `${P}douzi-archives/onze-centimetres.jpg`, caption: "Douzi mesure une bande de nappe vide pendant une audience publique." },
+        ],
+      },
+      { type: "dossier", name: "Téléchargements", locked: "Les téléchargements sont suspendus en attendant la validation du téléchargement précédent (dossier ouvert en 2014, en cours d'instruction).", children: [] },
+      {
+        type: "dossier",
+        name: "Raccourcis",
+        children: [
+          { type: "lien", name: "Porkopédia — Sofiane Douzi", app: "navigateur", args: { url: "porko://porkopedia/douzi" } },
+          { type: "lien", name: "Porkopédia — La Pork ID", app: "navigateur", args: { url: "porko://porkopedia/la-pork-id" } },
+          { type: "lien", name: "Canal 1 en direct", app: "channel-pork" },
+        ],
+      },
+    ],
+  },
+
+  mails: [
+    { id: "m1", folder: "reception", from: "Ministère des Systèmes Informatiques <accueil@msi.gouv.pork>", to: "citoyen@pignet.pork", date: "12/12/2012 12:12", subject: "Bienvenue sur PorkOS", body: "Citoyen, votre poste est activé. Votre mot de passe a été enregistré, et vous a été attribué de nouveau par sécurité.", read: false },
+    { id: "m2", folder: "reception", from: "Brasseries Nationales Réunies <mousse@douzi-ambree.pork>", to: "citoyen@pignet.pork", date: "hier 18:40", subject: "Votre abonnement à la Douzi Ambrée a été renouvelé", body: "Vous ne vous étiez pas abonné. Nous avons corrigé cette erreur.", read: false },
+    { id: "m3", folder: "reception", from: "Bureau des Banquets Inattendus <inattendu@banquets.gouv.pork>", to: "citoyen@pignet.pork", date: "aujourd'hui 09:02", subject: "Banquet inattendu jeudi", body: "Un banquet inattendu aura lieu jeudi à 20 h. Merci de vous montrer surpris.", read: false },
+  ],
+
+  boot: {
+    bios: [
+      "PorkBIOS 12.12 — © Ministère des Systèmes Informatiques de la République de Porkonia",
+      "",
+      "Processeur : Groin Core i12 à 12 MHz ................ LOYAL",
+      "Mémoire vive : 640 Ko ................ suffisant pour tout citoyen honnête",
+      "Test de la mémoire ................ 640 Ko se souviennent de tout",
+      "Périphériques : clavier AZERTY-G, souris, 1 portrait du Fondateur",
+      "Portrait du Fondateur ................ CORRECTEMENT ACCROCHÉ",
+      "Montage du volume /douzi ................ OK",
+      "Pilotes : 11/12 — le douzième est allé chercher le rôti",
+      "Pilotes : 12/12 — rôti livré",
+      "Contrôle de la mousse ................ CONFORME",
+      "",
+      "Démarrage de PorkOS, Édition Citoyenne…",
+    ],
+    splash: { title: "PorkOS", slogan: "Le porc · La bière · Toujours plus" },
+    skipHint: "Appuyez sur une touche pour passer. Votre impatience sera consignée.",
+  },
+
+  login: {
+    prompt: "Identifiez-vous. La République vous reconnaîtra de toute façon.",
+    emptyPassword: "Le silence n'est pas un mot de passe. C'est un aveu.",
+    acceptedAny: [
+      "Mot de passe accepté. Il a été transmis au Bureau des Mots de Passe pour archivage en trois exemplaires.",
+      "Mot de passe accepté. Nous l'avions deviné, mais merci d'avoir fait l'effort.",
+      "Mot de passe accepté. Par souci d'équité, c'est désormais aussi celui de votre voisin.",
+    ],
+    patriotic: "Mot de passe patriotique détecté. Votre niveau de banquet a été examiné avec bienveillance, puis laissé tel quel.",
+    wrongPassword: "Mot de passe incorrect. Il a néanmoins été conservé.",
+    guestNotice: "Session invité : vos clics seront comptés un par un, à la main, par un agent qui n'a rien demandé.",
+  },
+
+  ticker: [
+    "DIRECT — Le Grand Maître a inauguré ce matin une prise USB. Elle fonctionne.",
+    "MÉTÉO — Ciel couvert sur Douzi City, mousse stable sur l'ensemble du territoire.",
+    "RAPPEL — La nappe visible est tolérée jusqu'à onze centimètres. Au-delà, c'est une affaire d'État.",
+    "BOURSE — Le cours du jambon progresse de 12 %. Le jambon n'a fait aucune déclaration.",
+    "PIGNET — Le débit national a été porté à « suffisant ».",
+    "AGENDA — Le Bureau des Banquets Inattendus annonce un banquet inattendu pour jeudi.",
+    "SONDAGE — 112 % des citoyens se déclarent satisfaits de PorkOS. Les 12 % restants ont été recomptés.",
+    "FAITS DIVERS — Un gobelin administratif, qui n'existe pas, réclame une augmentation.",
+    "SPORT — Groinball : match nul entre Douzi City et Douzi City. Les deux équipes revendiquent la victoire.",
+    "CULTURE — DJ Viteau refuse un 13e rappel « par respect pour le nombre sacré ».",
+    "IL EST 12 H 12 QUELQUE PART. PENSEZ-Y.",
+  ],
+
+  toastPools: {
+    bienvenue: [{ title: "Bienvenue dans PorkOS", body: "Votre session est ouverte, enregistrée et légèrement admirée." }],
+    pignet: [{ title: "PigNet", body: "Connexion établie. Vos recherches sont désormais aussi les nôtres." }],
+    rappels: [
+      { title: "Rappel civique", body: "Vous n'avez pas regardé le portrait du Fondateur depuis quatre minutes. Aucune sanction. Pour l'instant." },
+      { title: "Économie d'énergie", body: "PorkOS a réduit la luminosité de tout, sauf du Fondateur." },
+      { title: "Bureau des Mots de Passe", body: "Votre mot de passe a été jugé « correct, sans plus »." },
+      { title: "PigNet", body: "Trois citoyens consultent la même notice que vous. Ne vous retournez pas." },
+      { title: "Hydratation", body: "Pensez à boire. De la bière, de préférence Douzi Ambrée, à température réglementaire." },
+      { title: "Sécurité", body: "Une pensée non homologuée a été interceptée. Elle n'était pas de vous. Probablement." },
+      { title: "Protocole", body: "Votre curseur a survolé une zone vide de l'écran pendant onze secondes. Limite tolérée : douze." },
+      { title: "Gobelins administratifs", body: "Le service des gobelins rappelle qu'il n'existe pas, et qu'il ferme à 17 h." },
+      { title: "Calendrier", body: "Aujourd'hui est un jour. Demain aussi, sauf décret contraire." },
+      { title: "Assistance", body: "L'assistance a résolu un problème que vous n'aviez pas. Aucun remerciement n'est attendu, mais un seul serait apprécié." },
+    ],
+    "nappe-incident": [
+      { title: "Incident protocolaire", body: "Onze centimètres de nappe visible ont été signalés. Le Conseil des Marmites a été convoqué." },
+      { title: "Incident protocolaire", body: "Une zone de nappe vide a été découverte à votre table. Votre voisin a été déplacé, par précaution." },
+    ],
+    "nappe-conforme": [
+      { title: "Banquet conforme", body: "Le Grand Maître en a été informé, puis distrait par autre chose." },
+      { title: "Banquet conforme", body: "Aucune nappe n'est visible. La République vous remercie à voix basse, pour ne pas réveiller le rôti." },
+    ],
+    impatience: [{ title: "Impatience consignée", body: "Vous avez interrompu la séquence de démarrage. Cela a été noté dans votre dossier, à la rubrique « Tempérament »." }],
+    "rappels-off": [{ title: "Rappels civiques désactivés", body: "Vous serez rappelé régulièrement qu'ils sont désactivés." }],
+    zapper: [{ title: "Channel Pork", body: "Aucune autre chaîne n'a été trouvée. Canal 1 a été ajouté à vos favoris, une deuxième fois." }],
+    enregistrer: [
+      { title: "Bloc-notes d'État", body: "Vos modifications ont été enregistrées, relues, puis annulées avec tact." },
+      { title: "Bloc-notes d'État", body: "Les documents officiels ne peuvent être modifiés que par leur auteur, qui ne peut pas non plus." },
+    ],
+    "pub-cta": [
+      { title: "Merci", body: "Votre enthousiasme a été transmis au sponsor. Il vous en remercie par courrier, à vos frais." },
+      { title: "Commande enregistrée", body: "Livraison prévue entre maintenant et le prochain banquet inattendu." },
+    ],
+    actualiser: [{ title: "PigNet", body: "La page était déjà à jour. Elle a été actualisée quand même, par principe." }],
+  },
+
+  dialogs: {
+    poubelle: {
+      title: "Poubelle d'État",
+      icon: "sceau",
+      body: "La Poubelle d'État contient 1 élément : « Opinion personnelle (brouillon) ».\n\nCet élément ne peut être ni restauré ni supprimé. Il est conservé à titre d'exemple.",
+      buttons: [{ label: "Je comprends" }, { label: "Je comprends mieux" }],
+    },
+    "config-bienvenue": {
+      title: "Panneau de configuration",
+      icon: "info",
+      body: "Tout ici peut être configuré.\n\nLes réglages sont ensuite ajustés à ce que vous auriez dû choisir.",
+      buttons: [{ label: "Parfait" }],
+    },
+    arret: {
+      title: "Arrêter PorkOS ?",
+      icon: "attention",
+      body: "PorkOS ne s'arrête pas.\n\nIl peut en revanche se mettre en veille patriotique : l'écran s'éteint, la République reste allumée.",
+      buttons: [{ label: "Veille patriotique", then: { type: "sleep" } }, { label: "Annuler" }],
+    },
+    "fondateur-luminosite": {
+      title: "Réglage non autorisé",
+      icon: "erreur",
+      body: "Erreur 1212 : la luminosité du Fondateur ne peut pas être inférieure à 100 %.\n\nLe curseur a été replacé. Cet incident ne sera pas mentionné, sauf ici.",
+      buttons: [{ label: "Évidemment" }],
+    },
+    "niveau-banquet": {
+      title: "Demande de changement de niveau",
+      icon: "sceau",
+      body: "Votre demande de passage au niveau de banquet III a été enregistrée sous le numéro 4 412.\n\nDélai de traitement estimé : entre deux et trois banquets inattendus.",
+      buttons: [{ label: "Je patienterai" }, { label: "Je patienterai quand même" }],
+    },
+  },
+
+  ads: [
+    { id: "douzi-ambree", sponsor: "Brasseries Nationales Réunies", headline: "Douzi Ambrée", body: "Brassée selon la doctrine des Trois Piliers. Tirée à température d'État. Sa mousse est inspectée à la main, à la règle graduée, par des agents assermentés qui n'ont jamais souri.", slogan: "Douzi Ambrée — la mousse conforme.", image: `${P}article-auto-la-douzi-ambree.jpg`, closeAfter: 5, cta: "J'en reprendrai" },
+    { id: "pork-id", sponsor: "Préfecture des Identités", headline: "Votre Pork ID expire dans trois ans", body: "Anticipez ! Renouvelez-la dès aujourd'hui et profitez d'une file d'attente déjà commencée pour vous.", slogan: "La Pork ID : vous êtes quelqu'un, c'est officiel.", image: `${P}pork-id.png`, closeAfter: 4, cta: "Prendre un ticket (n° 4 412)" },
+    { id: "sauce", sponsor: "Sauces d'État", headline: "La Sauce Douzi", body: "Onze centimètres de nappe blanche vous regardent. Couvrez-les.", slogan: "Sauce Douzi — nappée, jamais vide.", image: `${P}article-auto-la-sauce-douzi.jpg`, closeAfter: 4, cta: "Couvrir la nappe" },
+    { id: "chope", sponsor: "La Chope Sans Fond", headline: "Programme de fidélité", body: "Chaque chope achetée vous rapproche d'une chope.", slogan: "La Chope Sans Fond — le fond, c'est pour les autres.", image: `${P}home-archives/home-bottomless-mug.jpg`, closeAfter: 3, cta: "Tamponner ma carte" },
+    { id: "viteau", sponsor: "Ministère de la Culture et du Déhanché", headline: "DJ Viteau — Grand Zouk de la République", body: "Concert gratuit. Présence recommandée. Déhanché contrôlé à l'entrée.", slogan: "Le zouk, c'est la loi.", image: `${P}dj-viteau-grand-zouk.jpg`, closeAfter: 5, cta: "Réserver une place debout" },
+  ],
+
+  updates: [
+    {
+      id: "maj-loyaute",
+      title: "Mise à jour nationale obligatoire",
+      version: "PorkOS 12.12.1 — correctif de loyauté",
+      steps: [
+        { label: "Téléchargement de trois portraits supplémentaires du Fondateur", ms: 1800 },
+        { label: "Suppression de l'option « Refuser » dans les options", ms: 1300 },
+        { label: "Réindexation de vos souvenirs de vacances", ms: 1500 },
+        { label: "Recalibrage de la mousse (affichage)", ms: 1100 },
+        { label: "Mise à jour 1 sur 12 à 11 sur 12", ms: 1600 },
+        { label: "Mise à jour 12 sur 12 : vérification que les onze précédentes ont été appréciées", ms: 1500 },
+      ],
+      outro: "Mise à jour terminée. Rien n'a changé, mais c'est désormais officiel.\n\nUn redémarrage n'est pas nécessaire : nous tenions simplement à ce que vous patientiez.",
+    },
+    {
+      id: "maj-manuelle",
+      title: "Recherche de mises à jour",
+      version: "PorkOS 12.12.2 — mise à jour de la mise à jour",
+      steps: [
+        { label: "Recherche de mises à jour", ms: 1200 },
+        { label: "Une mise à jour a été trouvée : elle vous cherchait aussi", ms: 1300 },
+        { label: "Installation", ms: 1600 },
+        { label: "Remise de vos réglages à leur valeur recommandée", ms: 1200 },
+      ],
+      outro: "Votre système est à jour. Il le restera jusqu'à la prochaine fois.",
+      resetSettings: true,
+    },
+  ],
+
+  programs: [
+    {
+      id: "journal",
+      title: "Le Journal du Groin",
+      channel: "Canal 1",
+      kind: "journal",
+      slides: [
+        { image: `${P}douzi-archives/fondation-table.jpg`, seconds: 7, chyron: "DOUZI CITY — Séance du Conseil" },
+        { image: `${P}douzi-archives/onze-centimetres.jpg`, seconds: 7, chyron: "AFFAIRE DE LA NAPPE — La commission rend son rapport" },
+        { image: `${P}douzi-archives/nuit-louche-vide.jpg`, seconds: 7, chyron: "LOGISTIQUE — Itinéraires redessinés avant le repas" },
+        { image: `${P}home-archives/home-network.jpg`, seconds: 6, chyron: "PIGNET — Débit porté à « suffisant »" },
+        { image: `${P}editorial-batch-03/grand-banquet-rue.jpg`, seconds: 7, chyron: "MÉTÉO — Mousse stable sur tout le territoire" },
+      ],
+      subtitles: [
+        { at: 0, text: "Bonsoir. Voici les nouvelles, dans l'ordre où le Fondateur les a approuvées." },
+        { at: 3.5, text: "À Douzi City, le Conseil a siégé quatre heures pour fixer la durée des séances. Elle sera de quatre heures." },
+        { at: 7.5, text: "Affaire de la nappe : la commission des Onze Centimètres a rendu son rapport. Il fait onze centimètres." },
+        { at: 14.5, text: "Logistique : les itinéraires de livraison ont été redessinés avant le repas, comme le veut la tradition de la Nuit de la Louche Vide." },
+        { at: 21.5, text: "PigNet : le débit national a été porté à « suffisant ». Les citoyens qui le trouvent insuffisant sont priés de revoir leur définition." },
+        { at: 27.5, text: "Météo : ciel couvert, mousse stable. Risque d'averses de confettis sur les banquets du soir." },
+        { at: 31, text: "C'était le Journal du Groin. Restez sur Canal 1 : de toute façon, c'est le seul." },
+      ],
+    },
+    {
+      id: "pub-ambree",
+      title: "Pause publicitaire — Douzi Ambrée",
+      channel: "Canal 1",
+      kind: "publicite",
+      slides: [
+        { image: `${P}article-auto-la-douzi-ambree.jpg`, seconds: 6, chyron: "PUBLICITÉ" },
+        { image: `${P}home-archives/home-bottomless-mug.jpg`, seconds: 6, chyron: "PUBLICITÉ" },
+        { image: `${P}article-auto-archive-la-biere.jpg`, seconds: 6, caption: "À consommer avec modération, dans la mesure des stocks disponibles." },
+      ],
+      subtitles: [
+        { at: 0, text: "Il y a la bière. Et il y a la bière qui a été vérifiée." },
+        { at: 4, text: "Douzi Ambrée. Brassée selon les Trois Piliers : le porc, la bière, et toujours plus de bière." },
+        { at: 9, text: "Sa mousse est contrôlée à la règle graduée par des inspecteurs assermentés qui n'ont jamais souri." },
+        { at: 13.5, text: "Douzi Ambrée. La mousse conforme." },
+      ],
+    },
+    {
+      id: "pork-id",
+      title: "Ma Pork ID et moi",
+      channel: "Canal 1",
+      kind: "education",
+      slides: [
+        { image: `${P}pork-id.png`, seconds: 7, chyron: "ÉDUCATION CIVIQUE — Leçon n° 12" },
+        { image: `${P}article-pork-id.jpg`, seconds: 7 },
+        { image: `${P}article-bureau-banquets.jpg`, seconds: 7, chyron: "BUREAU DES BANQUETS INATTENDUS" },
+        { image: `${P}niveau-banquet-vii-documentaire.png`, seconds: 8, chyron: "NIVEAU VII — Réservé" },
+      ],
+      subtitles: [
+        { at: 0, text: "Leçon numéro douze : votre Pork ID." },
+        { at: 3, text: "Elle est plastifiée, biométrique et lisible par machine. Elle est aussi héraldique, parce que nous ne sommes pas des sauvages." },
+        { at: 9, text: "Votre niveau de banquet y est inscrit. Il fixe votre place à table, l'ordre du service et le nombre de fois où l'on vous dira « plus tard »." },
+        { at: 16, text: "Le niveau VII donne droit à la septième place. Il oblige aussi à rester jusqu'au dernier plat. Certains ne sont jamais repartis." },
+        { at: 23, text: "En cas de perte de votre Pork ID, présentez-vous au guichet muni de votre Pork ID." },
+      ],
+    },
+    {
+      id: "viteau",
+      title: "DJ Viteau — Le Grand Zouk de la République",
+      channel: "Canal 1",
+      kind: "divertissement",
+      slides: [
+        { image: `${P}dj-viteau-grand-zouk.jpg`, seconds: 6, chyron: "EN DIRECT DU GRAND ZOUK" },
+        { image: `${P}dj-viteau-studio.jpg`, seconds: 6 },
+        { image: `${P}douzi-archives/wilfrite-viteau.jpg`, seconds: 6, chyron: "FÊTE DE VILLAGE — Circulation réglée" },
+        { image: `${P}dj-viteau-grand-zoukeur.jpg`, seconds: 6 },
+      ],
+      subtitles: [
+        { at: 0, text: "(zouk porcin)" },
+        { at: 2.5, text: "Le Grand Zoukeur de la République fait danser les banquets sans interrompre le service." },
+        { at: 8, text: "Record national de rappels : douze. Le treizième a été refusé par respect pour le nombre sacré." },
+        { at: 14, text: "Il est interdit de tester les basses à proximité des caves de fermentation : les fûts s'emballent." },
+        { at: 20, text: "(applaudissements réglementaires)" },
+      ],
+    },
+  ],
+
+  rules: [
+    { id: "bienvenue", trigger: { type: "login", delay: 1800 }, action: { type: "toast-pool", pool: "bienvenue" }, max: 1 },
+    { id: "pignet", trigger: { type: "app-open", app: "navigateur" }, action: { type: "toast-pool", pool: "pignet" }, max: 1 },
+    { id: "config-bienvenue", trigger: { type: "app-open", app: "config" }, action: { type: "dialog-ref", id: "config-bienvenue" }, max: 1 },
+    { id: "rappels", trigger: { type: "interval", startAfter: 40_000, every: 60_000, jitter: 15_000 }, action: { type: "toast-pool", pool: "rappels" }, unlessSetting: "rappels" },
+    { id: "pub", trigger: { type: "interval", startAfter: 30_000, every: 110_000, jitter: 25_000 }, action: { type: "ad" } },
+    { id: "maj-loyaute", trigger: { type: "login", delay: 180_000 }, action: { type: "update", id: "maj-loyaute" }, max: 1 },
+    { id: "nappe-incident", trigger: { type: "signal", name: "nappe:incident" }, action: { type: "toast-pool", pool: "nappe-incident" } },
+    { id: "nappe-conforme", trigger: { type: "signal", name: "nappe:conforme" }, action: { type: "toast-pool", pool: "nappe-conforme" } },
+    { id: "impatience", trigger: { type: "signal", name: "boot:impatience" }, action: { type: "toast-pool", pool: "impatience" }, max: 1 },
+    { id: "rappels-off", trigger: { type: "signal", name: "config:rappels-off" }, action: { type: "toast-pool", pool: "rappels-off" } },
+    { id: "zapper", trigger: { type: "signal", name: "tv:zapper" }, action: { type: "toast-pool", pool: "zapper" } },
+    { id: "enregistrer", trigger: { type: "signal", name: "texte:enregistrer" }, action: { type: "toast-pool", pool: "enregistrer" } },
+    { id: "pub-cta", trigger: { type: "signal", name: "pub:cta" }, action: { type: "toast-pool", pool: "pub-cta" } },
+    { id: "actualiser", trigger: { type: "signal", name: "nav:actualiser" }, action: { type: "toast-pool", pool: "actualiser" } },
+  ],
+
+  strings: {
+    "nav.accueil.titre": "PigNet — Portail officiel",
+    "nav.accueil.sousTitre": "L'internet national. Tout ce qui existe, et rien de ce qui n'existe pas.",
+    "nav.etranger": "L'internet étranger est accessible le 12 de chaque mois, de 12 h 00 à 12 h 12, sur présentation d'une Pork ID de niveau VII.",
+    "nav.inconnu": "Erreur 412 — Adresse non homologuée. Cette page n'existe pas, ou pas encore, ou plus, selon la version officielle du jour.",
+    "nav.hors-ligne": "Cette notice existe sur Porkopédia mais n'a pas été synchronisée sur votre poste. Une demande de synchronisation a été ouverte en votre nom.",
+    "nav.statut": "Connexion PigNet : sécurisée par la bienveillance.",
+    "tv.canal": "Canal 1 — le seul",
+    "tv.zapper": "Aucune autre chaîne n'a été trouvée. Canal 1 a été ajouté à vos favoris.",
+    "config.luminosite": "Luminosité du Fondateur",
+    "config.crt": "Intensité du signal d'État (lignes de balayage)",
+    "config.hymne": "Volume de l'hymne national",
+    "config.langue.groinique": "Groinique (réservé au niveau de banquet VII)",
+    "config.confidentialite": "Partager mes données avec la République",
+    "config.confidentialite.note": "Ce réglage est déjà réglé pour vous.",
+    "config.rappels": "Rappels civiques",
+    "config.rappels.off": "Rappels civiques désactivés. Vous serez rappelé qu'ils sont désactivés.",
+    "affiche.surtitre": "République de Porkonia · Ministère des Systèmes Informatiques",
+    "affiche.slogan": "Le porc. La bière. Toujours plus.",
+    "affiche.sceau": "Poste homologué n° 0012-4471",
+    "boot.mire": "MIRE D'ÉTAT — CANAL 1 — NE PAS RÉGLER VOTRE TÉLÉVISEUR",
+    "boot.mire.sous": "La République règle votre téléviseur pour vous",
+    "login.titre": "Ouverture de session",
+    "login.motdepasse": "Mot de passe",
+    "login.valider": "Se présenter",
+    "login.invite": "Continuer sans exister",
+    "menu.titre": "Au programme",
+    "menu.soustitre": "Ce soir sur PorkOS",
+    "menu.verrouiller": "Verrouiller",
+    "menu.arreter": "Arrêter…",
+    "barre.direct": "Direct",
+    "bandeau.flash": "Flash",
+    "veille.titre": "Veille patriotique",
+    "veille.texte": "L'écran dort. La République veille. Touchez n'importe où pour reprendre votre service.",
+    "pub.fermeture": "Fermeture autorisée dans {s} s",
+    "pub.fermer": "Fermer (à regret)",
+    "maj.patientez": "Ne pas éteindre votre poste. De toute façon, il ne s'éteint pas.",
+    "maj.continuer": "Continuer",
+    "fichiers.verrouille": "Dossier verrouillé",
+    "fichiers.verrouille.ok": "Je ne voulais pas vraiment l'ouvrir",
+    "fichiers.vide": "Ce dossier est vide. Il a été vidé pour votre sécurité.",
+    "texte.lectureSeule": "Lecture seule — document officiel",
+    "nav.recherche": "Rechercher sur PigNet",
+    "nav.resultats": "Résultats homologués",
+    "nav.aucun": "Aucun résultat. La chose que vous cherchez n'existe pas, ce qui devrait vous rassurer.",
+    "nav.index": "Index complet de Porkopédia",
+    "nav.hors-ligne.titre": "Notice non synchronisée",
+    "nappe.regles": "Découvrez la table sans révéler de zone de nappe vide. Clic droit (ou appui long) : poser une assiette. Un chiffre indique combien de zones vides touchent la case.",
+    "nappe.incident": "INCIDENT PROTOCOLAIRE",
+    "nappe.conforme": "BANQUET CONFORME",
+    "nappe.modeAssiette": "Mode assiette",
+    "config.luminosite.note": "Réglage recommandé : 100 %. Réglage autorisé : 100 %.",
+    "config.crt.note": "En dessous de 12 %, le signal n'est plus d'État.",
+    "config.hymne.note": "Le volume minimal légal est de 12 %.",
+    "config.hymne.ecouter": "Écouter l'hymne",
+    "config.fond": "Fond d'écran",
+    "config.fond.affiche": "Affiche officielle",
+    "config.fond.mire": "Mire d'État",
+    "config.fond.trame": "Trame patriotique (sans portrait)",
+    "config.fond.aucun": "Aucun fond d'écran (option retirée)",
+    "config.langue": "Langue du système",
+    "config.langue.fr": "Français de la République",
+    "config.niveau": "Demander un niveau de banquet supérieur",
+    "config.maj": "Rechercher des mises à jour",
+    "config.apropos": "PorkOS 12.12, Édition Citoyenne. Licence d'État non cessible, non refusable, non résiliable. Aucun composant de ce système n'a été conçu à l'étranger, y compris les parties conçues à l'étranger.",
+  },
+};

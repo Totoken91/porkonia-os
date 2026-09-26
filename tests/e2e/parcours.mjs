@@ -1,93 +1,158 @@
 /**
- * Parcours de bout en bout (Chromium/Playwright) contre une instance lancée :
- *   BASE_URL=http://localhost:3000 node tests/e2e/parcours.mjs
- * Crée des données de test (préfixées « E2E ») dans la base courante : à lancer sur une base jetable
- * (PORKONIA_DATA_DIR=/tmp/porkonia-e2e npm run dev).
+ * Parcours de bout en bout sur l'export statique (out/) : démarrage → connexion → bureau → applis → mise à jour.
+ * Usage : npm run build && npm run test:e2e   (captures dans $SHOTS si défini)
  */
-import playwright from "playwright";
-const BASE = process.env.BASE_URL || "http://localhost:3000";
-const stamp = Date.now().toString(36);
-const ok = (cond, msg) => {
-  if (!cond) throw new Error("ÉCHEC : " + msg);
-  console.log("✓ " + msg);
-};
+import { execFile } from "node:child_process";
+import { createServer } from "node:http";
+import { readFile, stat } from "node:fs/promises";
+import { extname, join, resolve } from "node:path";
+import { chromium } from "playwright";
 
-const browser = await playwright.chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+const ROOT = resolve("out");
+const SHOTS = process.env.SHOTS;
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon" };
+
+const server = createServer(async (req, res) => {
+  let p = join(ROOT, decodeURIComponent(new URL(req.url, "http://x").pathname));
+  try {
+    if ((await stat(p)).isDirectory()) p = join(p, "index.html");
+    res.writeHead(200, { "content-type": TYPES[extname(p)] ?? "application/octet-stream" });
+    res.end(await readFile(p));
+  } catch {
+    res.writeHead(404).end();
+  }
+}).listen(0);
+const base = `http://127.0.0.1:${server.address().port}/`;
+
 const errors = [];
-page.on("pageerror", (e) => errors.push(e.message));
-const confirmDialog = async () => {
-  const dlg = page.locator("dialog[open]");
-  await dlg.waitFor();
-  await dlg.locator("button.pk-btn").first().click();
+const browser = await chromium.launch();
+
+/**
+ * Environnement à proxy sortant (conteneur) : Chromium n'y accède pas directement à Porkopédia.
+ * Les images sont alors relayées par curl, qui connaît le proxy. Tests uniquement ; l'appli, elle, lie les images d'origine.
+ */
+const cache = new Map();
+const relay = (url) => {
+  if (!cache.has(url))
+    cache.set(url, new Promise((ok) => execFile("curl", ["-sSfL", "--max-time", "20", url], { encoding: "buffer", maxBuffer: 1 << 26 }, (err, out) => ok(err ? null : out))));
+  return cache.get(url);
 };
+const shot = async (page, name) => SHOTS && page.screenshot({ path: join(SHOTS, `${name}.png`) });
+const step = (m) => console.log("✓", m);
 
 try {
-  // 1. Fiche personnage
-  await page.goto(`${BASE}/personnages/nouveau`);
-  await page.fill('input[name="canonicalName"]', `E2E Individu ${stamp}`);
-  await page.fill('textarea[name="appearance"]', "Chapeau melon réglementaire.");
-  await page.click("button:has-text('Créer la fiche')");
-  await page.waitForURL(/\/personnages\/per_/);
-  const charId = page.url().split("/").pop();
-  ok(await page.getByText(`E2E Individu ${stamp}`).first().isVisible(), "fiche personnage créée " + charId);
+  for (const viewport of [{ width: 1366, height: 800 }, { width: 390, height: 780 }]) {
+    const tag = viewport.width < 700 ? "mobile" : "bureau";
+    const ctx = await browser.newContext({ viewport });
+    if (process.env.HTTPS_PROXY)
+      await ctx.route("https://porkopedia.totoken.chatgpt.site/**", async (route) => {
+        const body = await relay(route.request().url());
+        return body ? route.fulfill({ body, contentType: /\.png$/i.test(route.request().url()) ? "image/png" : "image/jpeg" }) : route.abort();
+      });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => errors.push(`${tag}: ${e.message}`));
+    page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && errors.push(`${tag}: ${m.text()}`));
 
-  // modification + persistance après rechargement
-  await page.fill('input[name="role"]', "Testeur assermenté");
-  await page.click("button:has-text('Enregistrer (nouvelle révision 2)')");
-  await page.getByText("Fiche enregistrée (révision 2)").waitFor();
-  await page.reload();
-  ok((await page.inputValue('input[name="role"]')) === "Testeur assermenté", "modification persistée après rechargement");
+    await page.goto(base);
+    await page.getByTestId("boot-mire").waitFor();
+    await shot(page, `${tag}-01-mire`);
+    if (tag === "bureau") {
+      await page.getByTestId("boot-bios").waitFor({ timeout: 5000 });
+      await page.waitForTimeout(1500);
+      await shot(page, `${tag}-02-bios`);
+    }
+    await page.keyboard.press("Space");
+    await page.getByTestId("login").waitFor();
+    step(`${tag} : démarrage passé`);
 
-  // 2. Article
-  await page.goto(`${BASE}/articles/nouveau`);
-  await page.fill("input >> nth=0", `E2E Article ${stamp}`);
-  await page.fill('textarea[aria-label="Corps de l\'article (Markdown)"]', "## Section\n\nTexte **gras** et lien [[guichet-4|guichet]].\n\n| a | b |\n|---|---|\n| 1 | 2 |");
-  ok(await page.locator(".prose-porko table").first().isVisible(), "prévisualisation Markdown (tableau) affichée");
-  await page.getByLabel(`E2E Individu ${stamp}`).check();
-  await page.click("button:has-text('Créer le brouillon')");
-  await page.waitForURL(/\/articles\/art_/);
-  const artId = page.url().split("/").pop();
-  ok(true, "article créé " + artId);
+    await page.getByTestId("login-submit").click();
+    await page.getByTestId("login-message").waitFor();
+    if (!(await page.getByTestId("login-message").textContent()).includes("silence")) throw new Error("mot de passe vide accepté");
+    await page.getByTestId("login-password").fill("12");
+    await page.getByTestId("login-submit").click();
+    await page.getByText("patriotique").waitFor();
+    await shot(page, `${tag}-03-connexion`);
+    await page.getByTestId("start").waitFor({ timeout: 6000 });
+    await page.waitForTimeout(600);
+    await shot(page, `${tag}-04-bureau`);
+    step(`${tag} : connexion et bureau`);
 
-  // 3. Validation
-  await page.click("button:has-text('Valider pour publication')");
-  await confirmDialog();
-  await page.locator(".badge", { hasText: "Validé" }).first().waitFor();
-  ok(true, "article validé");
+    const open = async (id) => (tag === "mobile" ? page.getByTestId(`icon-${id}`).tap?.() ?? page.getByTestId(`icon-${id}`).click() : page.getByTestId(`icon-${id}`).dblclick());
+    const closeTop = () => page.locator(".pk-window.focused [data-testid=window-close]").click();
 
-  // 4. Publication
-  await page.goto(`${BASE}/publication`);
-  await page.click("button:has-text('Créer la publication')");
-  await confirmDialog();
-  await page.getByText(/Publication n°\d+ créée/).waitFor({ timeout: 15000 });
-  ok(true, "publication créée (non vérifiée)");
+    // Navigateur → notice Douzi → lien interne
+    await page.getByTestId("icon-d-nav").dblclick();
+    await page.getByTestId("window-navigateur").waitFor();
+    await page.getByTestId("nav-url").fill("porko://porkopedia/douzi");
+    await page.getByTestId("nav-url").press("Enter");
+    await page.locator(".notice h1", { hasText: "Sofiane Douzi" }).waitFor();
+    await shot(page, `${tag}-05-pignet`);
+    await page.getByTestId("nav-url").fill("https://google.com");
+    await page.getByTestId("nav-url").press("Enter");
+    await page.getByRole("heading", { name: "Internet étranger" }).waitFor();
+    step(`${tag} : PigNet (notice, internet étranger)`);
+    await closeTop();
 
-  // 5. API publique
-  const res = await page.request.get(`${BASE}/api/public/v1/articles/${artId}`);
-  const json = await res.json();
-  ok(res.status() === 200 && json.article.title === `E2E Article ${stamp}`, "API publique renvoie l'article publié");
-  const draft = await page.request.get(`${BASE}/api/public/v1/articles/la-prefecture-des-publications-article-de-demonstration`);
-  ok(draft.status() === 404, "un brouillon n'est PAS exposé par l'API publique");
+    // Channel Pork
+    await page.getByTestId("icon-d-tv").dblclick();
+    await page.getByTestId("tv-screen").waitFor();
+    await page.waitForTimeout(1500);
+    await shot(page, `${tag}-06-channel-pork`);
+    step(`${tag} : Channel Pork`);
+    await closeTop();
 
-  // 6. Contexte IA
-  await page.goto(`${BASE}/contextes?personnage=${charId}`);
-  await page.click("button:has-text('Assembler le paquet documentaire')");
-  const ctx = page.locator('textarea[aria-label="Contexte généré"]');
-  await ctx.waitFor();
-  const text = await ctx.inputValue();
-  ok(text.includes(`E2E Individu ${stamp}`) && text.includes("Chapeau melon"), "contexte IA contient la fiche et l'apparence");
-  ok(!text.includes("E2E Article"), "contexte IA n'inclut pas d'article non sélectionné");
+    // Nappe Vide : premier service toujours sûr
+    await page.getByTestId("icon-d-nappe").dblclick();
+    await page.getByTestId("nappe-grille").waitFor();
+    await page.locator(".nv").nth(40).click();
+    if ((await page.locator(".nv.ouverte").count()) < 1) throw new Error("aucune case servie");
+    await shot(page, `${tag}-07-nappe-vide`);
+    step(`${tag} : Nappe Vide`);
+    await closeTop();
 
-  // 7. Protection du portrait : une variante non homologuée ne peut pas devenir portrait
-  await page.goto(`${BASE}/personnages`);
-  await page.click("text=Agent Groinard (démo)");
-  await page.click("button[role=tab]:has-text('Portrait & galerie')");
-  const variantCard = page.locator(".pk-window", { hasText: "Variante non officielle" }).last();
-  ok(await variantCard.locator("button:has-text('Définir comme portrait')").isDisabled(), "variante non officielle : bouton portrait désactivé");
+    // Configuration : luminosité du Fondateur, puis mise à jour manuelle
+    await page.getByTestId("icon-d-config").dblclick();
+    await page.getByTestId("dialog").waitFor(); // dialogue de bienvenue
+    await page.locator("[data-testid=dialog] .pk-btn").first().click();
+    await page.getByTestId("config-luminosite").fill("40");
+    await page.getByText("Erreur 1212", { exact: false }).waitFor();
+    await shot(page, `${tag}-08-config-erreur`);
+    await page.locator("[data-testid=dialog] .pk-btn").first().click();
+    await page.getByRole("tab", { name: "Système" }).click();
+    await page.getByTestId("config-maj").click();
+    await page.getByTestId("update").waitFor();
+    await page.waitForTimeout(2000);
+    await shot(page, `${tag}-09-mise-a-jour`);
+    await page.getByTestId("update-done").waitFor({ timeout: 10000 });
+    await page.getByTestId("update-done").click();
+    step(`${tag} : configuration et mise à jour obligatoire`);
 
-  ok(errors.length === 0, "aucune erreur JavaScript dans la page" + (errors.length ? " : " + errors.join(" | ") : ""));
-  console.log("\nParcours complet réussi.");
+    // Menu « Au programme » → arrêt → veille patriotique
+    await page.getByTestId("start").click();
+    await page.getByTestId("programme").waitFor();
+    await shot(page, `${tag}-10-programme`);
+    await page.getByRole("button", { name: "Arrêter…" }).click();
+    await page.getByRole("button", { name: "Veille patriotique" }).click();
+    await page.getByTestId("veille").waitFor();
+    await page.getByTestId("veille").click();
+    await page.getByTestId("start").waitFor();
+    step(`${tag} : veille patriotique`);
+
+    if (tag === "bureau") {
+      // La pause publicitaire arrive d'elle-même (~30 s après la connexion) ; sa croix se mérite.
+      await page.getByTestId("ad").waitFor({ timeout: 90000 });
+      if (!(await page.getByTestId("ad-close").isDisabled())) throw new Error("pub fermable immédiatement");
+      await page.waitForTimeout(1200);
+      await shot(page, `${tag}-11-pub`);
+      await page.getByTestId("ad-close").click({ timeout: 10000 });
+      await page.getByTestId("ad").waitFor({ state: "detached" });
+      step(`${tag} : pause publicitaire`);
+    }
+    await ctx.close();
+  }
+  if (errors.length) throw new Error("Erreurs navigateur :\n" + errors.join("\n"));
+  console.log("Parcours complet : OK");
 } finally {
   await browser.close();
+  server.close();
 }

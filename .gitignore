@@ -6,13 +6,9 @@ coverage/
 next-env.d.ts
 .env
 .env.*
-!.env.example
-# Données locales (base, sauvegardes, instantanés) — jamais versionnées
+# Données locales de l'ancien atelier (voir la branche archive/atelier)
 /data/
 /data-demo/
 /imports/
 /backups/
-# Médias locaux : seuls les fichiers de démonstration sont versionnés
-/medias-locales/*
-!/medias-locales/demo/
-!/medias-locales/README.md
+/medias-locales/

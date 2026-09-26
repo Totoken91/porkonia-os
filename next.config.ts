@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
+/** PorkOS est un site 100 % statique : aucun serveur, déployable sur n'importe quel hébergement. */
 const nextConfig: NextConfig = {
+  output: "export",
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: {
-    // Documents sources volumineux (Bible visuelle DOCX ~16 Mo avec images).
-    serverActions: { bodySizeLimit: "60mb" },
-    proxyClientMaxBodySize: "60mb",
-  },
+  images: { unoptimized: true },
 };
 
 export default nextConfig;
