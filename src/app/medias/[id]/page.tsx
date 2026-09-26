@@ -93,6 +93,26 @@ export default async function MediaDetail({ params }: { params: Promise<{ id: st
               content: (
                 <div className="space-y-2">
                   <fieldset className="pk-fieldset">
+                    <legend>Usage et rôles (audit)</legend>
+                    <p>Usage : <b>{m.usage ?? "non classé"}</b> · <Link className="text-[#1d3f8f] underline" href="/medias/audit">audit des associations</Link></p>
+                    {(m.depictions ?? []).length > 0 ? (
+                      <ul className="list-disc pl-5 text-[12px]">
+                        {m.depictions!.map((d) => (
+                          <li key={d.characterId}>
+                            {db.characters.find((c) => c.id === d.characterId)?.canonicalName ?? d.characterId} — <b>{d.kind}</b> {d.confirmed ? "(confirmé)" : "(à confirmer)"} <span className="opacity-70">· {d.basis}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="italic">Rôles non audités.</p>
+                    )}
+                    {m.rawOriginal && (
+                      <p className="mt-1 text-[12px]">
+                        Original brut : {m.rawOriginal.status === "identique" ? "certifié identique" : m.rawOriginal.status === "differente" ? "différent (fichier distinct conservé)" : "non fourni"} — déclaré <code>{m.rawOriginal.declaredFilename ?? "?"}</code>
+                      </p>
+                    )}
+                  </fieldset>
+                  <fieldset className="pk-fieldset">
                     <legend>Personnages</legend>
                     {m.characterIds.length === 0 ? <p className="italic">Aucun.</p> : (
                       <ul className="list-disc pl-5">

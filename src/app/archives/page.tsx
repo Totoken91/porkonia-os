@@ -6,12 +6,16 @@ import { ActionButton } from "@/components/client";
 import { backupAction, verifyBackupAction } from "@/app/actions";
 import { dataDir, listBackupFiles } from "@/data/store";
 import { mediaRoot } from "@/media/local";
+import { readMediaBackupIndex } from "@/media/backup-index";
 
 export const metadata: Metadata = { title: "Direction des Archives" };
 
 export default async function ArchivesPage() {
   const db = await getDb();
   const files = await listBackupFiles();
+  const mb = await readMediaBackupIndex();
+  const liveMedia = db.media.filter((m) => !m.deletedAt);
+  const backedUp = liveMedia.filter((m) => m.backupPath).length;
   return (
     <Window title="Direction des Archives — Sauvegardes & exports" code="PK-801" icon={<IconArchive size={18} />} status={[`Données : ${dataDir()}`, `Médias locaux : ${mediaRoot()}`]}>
       <div className="grid gap-3 lg:grid-cols-2">
@@ -41,10 +45,39 @@ export default async function ArchivesPage() {
             </li>
           </ul>
           <Alert kind="info">
-            Médias : les fichiers ne sont jamais copiés automatiquement. Sauvegarde facultative : <code>npm run media:backup</code> (voir docs/BACKUP.md).
+            Les médias restent hébergés à leur emplacement (Porkopédia) : le catalogue d&apos;URL n&apos;est pas une sauvegarde. Copie physique indépendante :{" "}
+            <code>npm run media:backup</code>, contrôle : <code>npm run media:verify</code>.
           </Alert>
         </fieldset>
       </div>
+      <fieldset className="pk-fieldset">
+        <legend>Sauvegarde physique des médias</legend>
+        {mb ? (
+          <div className="space-y-1">
+            <p>
+              Dernière sauvegarde : <b>{fmtDate(mb.finishedAt)}</b> — {mb.summary.sauvegardes}/{mb.summary.total} médias ({(mb.summary.octets / 1e6).toFixed(1)} Mo),{" "}
+              {mb.summary.erreurs ? <span className="badge red">{mb.summary.erreurs} erreur(s)</span> : <span className="badge green">aucune erreur</span>}{" "}
+              {mb.summary.ecartsEmpreinte ? <span className="badge red">{mb.summary.ecartsEmpreinte} écart(s) d&apos;empreinte</span> : null}
+            </p>
+            <p>
+              Base : {backedUp}/{liveMedia.length} médias ont une copie physique enregistrée{liveMedia.length - backedUp ? ` — ${liveMedia.length - backedUp} sans copie (relancer npm run media:backup)` : ""}.
+              Stockage par empreinte (<code>fichiers/&lt;sha256&gt;</code>) et miroir des chemins d&apos;origine (<code>par-chemin/assets/…</code>) dans <code>{mb.dest}</code>.
+            </p>
+            {mb.identical.length > 0 && (
+              <details>
+                <summary>{mb.identical.length} fichier(s) identique(s) sous plusieurs chemins</summary>
+                <ul className="font-mono text-[11px]">
+                  {mb.identical.map((g, i) => (
+                    <li key={i}>{g.join(" = ")}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </div>
+        ) : (
+          <p className="italic">Aucune sauvegarde physique des médias. Lancer <code>npm run media:backup</code>.</p>
+        )}
+      </fieldset>
       <fieldset className="pk-fieldset">
         <legend>Fichiers de sauvegarde sur disque ({files.length})</legend>
         <p className="mb-1 text-[11px]">« Tester » lit la sauvegarde, la migre à blanc et la restaure dans un dossier temporaire : aucune donnée n&apos;est modifiée.</p>

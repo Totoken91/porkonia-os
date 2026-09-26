@@ -7,6 +7,7 @@ import type {
   Article,
   ArticleStatus,
   BibleEntry,
+  CanonStatus,
   Character,
   Database,
   EntityType,
@@ -154,6 +155,11 @@ export function setPortrait(
       throw new DomainError(`Le média « ${m.name} » n'est pas associé à ${c.canonicalName}. Associez-le d'abord explicitement.`, "PROTEGE");
     if (m.canonStatus !== "officiel")
       throw new DomainError(`Le média « ${m.name} » n'est pas homologué (statut : ${m.canonStatus}). Seul un média « officiel » peut devenir portrait.`, "PROTEGE");
+    if (m.usage && m.usage !== "portrait-source")
+      throw new DomainError(`« ${m.name} » est classé « ${m.usage} » : seul un média classé « portrait source » peut devenir portrait officiel.`, "PROTEGE");
+    const dep = m.depictions?.find((d) => d.characterId === c.id);
+    if (dep && (dep.kind === "lien-article" || dep.kind === "lien-indirect"))
+      throw new DomainError(`« ${m.name} » est seulement lié à ${c.canonicalName} (${dep.kind}) : il ne le représente pas.`, "PROTEGE");
     const other = db.characters.find((x) => x.id !== c.id && x.portraitMediaId === m.id && !x.deletedAt);
     if (other) throw new DomainError(`Ce média est déjà le portrait officiel de ${other.canonicalName}.`, "PROTEGE");
   }
@@ -183,6 +189,102 @@ export function setPortrait(
     "character",
     c,
     `Portrait : ${c.canonicalName} — ${previous ?? "aucun"} → ${mediaId ?? "aucun"}`,
+  );
+}
+
+export const VALIDATION_CHECKS = {
+  identite: "Nom canonique et surnoms corrects",
+  portrait: "Le portrait est bien la bonne personne (référence source)",
+  apparence: "L'apparence correspond à la Bible visuelle",
+  galerie: "La galerie a été auditée (associations vérifiées)",
+} as const;
+
+/** Validation humaine d'une fiche : « canon » exige que tous les points de contrôle soient cochés. */
+export function validateCharacter(
+  db: Database,
+  id: string,
+  input: { decision: CanonStatus; note: string; checklist: Record<string, boolean> },
+  expectedRevision?: number,
+): Character {
+  const c = findEntity(db, "character", id) as Character;
+  checkRevision(c, expectedRevision);
+  if (input.decision === "canon") {
+    const missing = Object.entries(VALIDATION_CHECKS).filter(([k]) => !input.checklist[k]);
+    if (missing.length) throw new DomainError(`Validation incomplète : ${missing.map(([, v]) => v).join(" ; ")}.`, "INVALIDE");
+    if (!c.portraitMediaId) throw new DomainError("Une fiche canonique doit avoir un portrait source.", "INVALIDE");
+  }
+  if (input.decision !== "canon" && !input.note.trim()) throw new DomainError("Indiquez le motif (fiche laissée en proposition ou archivée).", "INVALIDE");
+  touch(c, { status: input.decision, validation: { decision: input.decision, at: nowIso(), note: input.note.trim(), checklist: input.checklist } });
+  return commit(db, "character", c, `Validation : fiche « ${c.canonicalName} » → ${input.decision}${input.note.trim() ? ` (${input.note.trim()})` : ""}`);
+}
+
+/**
+ * Enregistre la photographie brute originale correspondant à une copie extraite (ex. image du DOCX).
+ * - Octets identiques → la copie est CERTIFIÉE identique à l'original brut ; aucun fichier en double.
+ * - Octets différents → l'original brut devient un média distinct (référence source) ; la copie extraite
+ *   est conservée intacte et le portrait n'est PAS changé automatiquement.
+ */
+export function registerRawOriginal(
+  db: Database,
+  mediaId: string,
+  raw: { uploadedFilename: string; sha256: string; width: number | null; height: number | null; ref: string | null; format: string | null },
+): Media {
+  const m = findEntity(db, "media", mediaId) as Media;
+  if (!m.sha256) throw new DomainError("La copie extraite n'a pas d'empreinte : comparaison impossible.", "INVALIDE");
+  const declared = m.external?.originalFilename ?? m.rawOriginal?.declaredFilename ?? null;
+  const identical = raw.sha256 === m.sha256;
+  let rawMediaId: string | null = null;
+  if (!identical) {
+    if (!raw.ref) throw new DomainError("Fichier brut non stocké.", "INVALIDE");
+    const existing = db.media.find((x) => x.sha256 === raw.sha256 && !x.deletedAt);
+    const rawMedia =
+      existing ??
+      createMedia(db, {
+        name: `Photographie brute originale — ${m.name.replace(/^Visage canonique — /, "")}`,
+        description: `Original brut déposé (${raw.uploadedFilename}) pour la copie extraite « ${m.name} ». Octets différents de la copie extraite.`,
+        kind: "photo",
+        location: "locale",
+        ref: raw.ref,
+        canonStatus: "officiel",
+        nature: "reference-source",
+        width: raw.width,
+        height: raw.height,
+        format: raw.format,
+        sha256: raw.sha256,
+        characterIds: [...m.characterIds],
+        source: `depot-manuel:${raw.uploadedFilename}`,
+      });
+    rawMedia.usage = "portrait-source";
+    rawMedia.depictions = m.characterIds.map((id) => ({ characterId: id, kind: "apparait" as const, basis: "Photographie brute originale déposée", confirmed: true }));
+    for (const cid of m.characterIds) {
+      const c = db.characters.find((x) => x.id === cid);
+      if (c && !c.galleryMediaIds.includes(rawMedia.id)) {
+        touch(c, { galleryMediaIds: [...c.galleryMediaIds, rawMedia.id] });
+        commit(db, "character", c, `Galerie : photographie brute originale ajoutée (portrait inchangé)`);
+      }
+    }
+    rawMediaId = rawMedia.id;
+  }
+  touch(m, {
+    rawOriginal: {
+      declaredFilename: declared,
+      status: identical ? "identique" : "differente",
+      uploadedFilename: raw.uploadedFilename,
+      ref: identical ? m.ref : raw.ref ?? undefined,
+      sha256: raw.sha256,
+      width: raw.width,
+      height: raw.height,
+      comparedAt: nowIso(),
+      mediaId: rawMediaId,
+    },
+  });
+  return commit(
+    db,
+    "media",
+    m,
+    identical
+      ? `Certification : « ${m.name} » identique octet pour octet à l'original brut ${raw.uploadedFilename}`
+      : `Comparaison : « ${m.name} » DIFFÉRENT de l'original brut ${raw.uploadedFilename} (conservés tous les deux)`,
   );
 }
 
@@ -588,18 +690,30 @@ function findPublication(db: Database, number: number) {
 }
 
 /** Étape « exportée pour Porkopédia » : le paquet a été téléchargé. Le site n'est PAS modifié. */
-export function markExported(db: Database, number: number) {
+export function markExported(db: Database, number: number, pkg?: { fileName: string; sha256: string; expectedAdded: string[] }) {
   const { idx, p } = findPublication(db, number);
-  db.publications[idx] = { ...p, exportedAt: nowIso() };
-  log(db, "Export publication", `Publication n°${number} exportée pour Porkopédia (paquet téléchargé). Aucun déploiement effectué.`, "publication", p.id);
+  const at = nowIso();
+  db.publications[idx] = { ...p, exportedAt: at, ...(pkg ? { exportedPackage: { ...pkg, at } } : {}) };
+  log(db, "Export publication", `Publication n°${number} exportée pour Porkopédia${pkg ? ` (${pkg.fileName}, SHA-256 ${pkg.sha256.slice(0, 16)}…)` : ""}. Aucun déploiement effectué.`, "publication", p.id);
 }
 
-/** Étape « déployée » : DÉCLARATION humaine (Porkonia OS ne peut pas déployer sur ChatGPT Sites). */
+/** Résultat d'une simulation (paquet appliqué à une COPIE locale du site). Ne prouve jamais un déploiement. */
+export function setSimulation(db: Database, number: number, sim: NonNullable<Publication["simulation"]>) {
+  const { idx, p } = findPublication(db, number);
+  db.publications[idx] = { ...p, simulation: sim };
+  log(db, "Simulation de publication", `Publication n°${number} simulée sur une copie du site : ${sim.ok ? "conforme" : "NON conforme"} (${sim.observed.added.length} ajout(s), ${sim.observed.modified.length} modification(s), ${sim.observed.removed.length} retrait(s))`, "publication", p.id);
+}
+
+/**
+ * Intégration SIGNALÉE par un humain (Porkonia OS ne peut pas déployer sur ChatGPT Sites).
+ * Ce n'est pas un déploiement confirmé : seule une vérification réussie l'établit.
+ */
 export function declareDeployment(db: Database, number: number, note: string) {
   const { idx, p } = findPublication(db, number);
-  if (!note.trim()) throw new DomainError("Indiquez comment et quand le déploiement a été fait.", "INVALIDE");
+  if (!note.trim()) throw new DomainError("Indiquez comment et quand l'intégration a été faite.", "INVALIDE");
+  if (!p.exportedAt) throw new DomainError("Exportez d'abord le paquet de cette publication.", "INVALIDE");
   db.publications[idx] = { ...p, deployment: { declaredAt: nowIso(), note: note.trim() } };
-  log(db, "Déploiement déclaré", `Publication n°${number} déclarée déployée sur Porkopédia : ${note.trim()}`, "publication", p.id);
+  log(db, "Intégration signalée", `Publication n°${number} : intégration sur Porkopédia signalée (non vérifiée) — ${note.trim()}`, "publication", p.id);
 }
 
 /** Vérification MANUELLE : un humain a contrôlé le site public. Exige un déploiement déclaré. */

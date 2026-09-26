@@ -103,7 +103,24 @@ export function CharacterForm({ character }: { character?: Character }) {
   );
 }
 
-type MediaLite = { id: string; name: string; thumb: string | null; canonStatus: MediaCanonStatus; ref: string; linkedTo: string[]; nature?: string };
+type MediaLite = {
+  id: string;
+  name: string;
+  thumb: string | null;
+  canonStatus: MediaCanonStatus;
+  ref: string;
+  linkedTo: string[];
+  nature?: string;
+  usage?: string | null;
+  role?: { kind: string; confirmed: boolean; basis: string } | null;
+};
+const ROLE_LABEL: Record<string, [string, string]> = {
+  "portrait-source": ["green", "Portrait source"],
+  apparait: ["blue", "Apparaît"],
+  "lien-article": ["grey", "Illustration de son article"],
+  "lien-indirect": ["grey", "Lien indirect"],
+};
+const ROLE_ORDER = ["portrait-source", "apparait", "lien-article", "lien-indirect"];
 
 export function GalleryPanel({
   character,
@@ -143,9 +160,15 @@ export function GalleryPanel({
 
       <fieldset className="pk-fieldset">
         <legend>Galerie ({gallery.length})</legend>
+        <p className="mb-1 text-[11px]">
+          Chaque image indique son rôle pour ce personnage. Un média peut représenter plusieurs personnages sans devenir leur portrait.{" "}
+          <a className="text-[#1d3f8f] underline" href={`/medias/audit?personnage=${character.id}`}>
+            Auditer cette galerie…
+          </a>
+        </p>
         {gallery.length === 0 && <p className="italic">Aucun média associé.</p>}
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
-          {gallery.map((m) => {
+          {[...gallery].sort((a, b) => (a.role ? ROLE_ORDER.indexOf(a.role.kind) : 9) - (b.role ? ROLE_ORDER.indexOf(b.role.kind) : 9)).map((m) => {
             const isPortrait = m.id === character.portraitMediaId;
             return (
               <div key={m.id} className="pk-window !p-2">
@@ -161,6 +184,15 @@ export function GalleryPanel({
                 <div className="flex flex-wrap items-center gap-1">
                   <MediaCanonBadge status={m.canonStatus} /> {isPortrait && <span className="badge green">Portrait</span>}
                   {m.nature === "reference-source" && <span className="badge blue">Référence source</span>}
+                  {m.role ? (
+                    <span className={`badge ${ROLE_LABEL[m.role.kind]?.[0] ?? "grey"}`} title={m.role.basis}>
+                      {ROLE_LABEL[m.role.kind]?.[1] ?? m.role.kind}
+                      {m.role.kind === "apparait" && !m.role.confirmed ? " ?" : ""}
+                    </span>
+                  ) : (
+                    <span className="badge amber" title="Association importée non auditée">Non audité</span>
+                  )}
+                  {m.usage === "scene-collective" && <span className="badge grey">Scène collective</span>}
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {!isPortrait && (

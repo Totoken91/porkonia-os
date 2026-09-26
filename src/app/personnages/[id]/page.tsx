@@ -27,6 +27,11 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
     ref: m.ref,
     linkedTo: m.characterIds.filter((x) => x !== c.id).map(name),
     nature: m.nature,
+    usage: m.usage ?? null,
+    role: (() => {
+      const d = m.depictions?.find((x) => x.characterId === c.id);
+      return d ? { kind: d.kind, confirmed: d.confirmed, basis: d.basis } : null;
+    })(),
   });
   const liveMedia = db.media.filter((m) => !m.deletedAt);
   const gallery = liveMedia.filter((m) => m.characterIds.includes(c.id)).map(lite);
@@ -43,6 +48,8 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
         <>
           <Link href="/personnages">← Registre</Link>
           <Link href={`/contextes?personnage=${c.id}`}>Préparer un contexte IA</Link>
+          <Link href={`/medias/audit?personnage=${c.id}`}>Auditer la galerie</Link>
+          <Link href={`/personnages/validation#${c.id}`}>Validation</Link>
         </>
       }
       status={[`ID permanent : ${c.id}`, `Révision ${c.revision}`, `Modifié le ${fmtDate(c.updatedAt)}`, `Source : ${c.provenance.source}`]}

@@ -372,17 +372,28 @@ export async function verifyBackupAction(fileName: string) {
 
 /* --------------------------- Étapes de publication ------------------------ */
 
-export async function markExportedAction(number: number) {
+export async function markExportedAction(number: number, withPackage = false) {
   return run(async () => {
-    await transaction((db) => ops.markExported(db, number));
-    return { message: `Publication n°${number} marquée « exportée ». Le site public n'est pas modifié.` };
+    let pkgInfo: { fileName: string; sha256: string; expectedAdded: string[] } | undefined;
+    if (withPackage) {
+      const { buildPorkopediaPackage } = await import("@/export/porkopedia-package");
+      const { latestRealExtraction } = await import("@/import/extractions");
+      const db = await readDb();
+      const pub = db.publications.find((p) => p.number === number);
+      if (!pub) throw new DomainError("Publication introuvable.", "INTROUVABLE");
+      const pkg = buildPorkopediaPackage(db as import("@/domain/types").Database, pub, await latestRealExtraction());
+      if (pkg.blocking.length) throw new DomainError(`Paquet bloqué : ${pkg.blocking.join(" ; ")}`, "INVALIDE");
+      pkgInfo = { fileName: pkg.fileName, sha256: pkg.scriptSha256, expectedAdded: pkg.expected.added };
+    }
+    await transaction((db) => ops.markExported(db, number, pkgInfo));
+    return { message: `Publication n°${number} exportée${pkgInfo ? ` (${pkgInfo.fileName})` : ""}. Le site public n'est pas modifié.` };
   });
 }
 
 export async function declareDeploymentAction(number: number, note: string) {
   return run(async () => {
     await transaction((db) => ops.declareDeployment(db, number, note));
-    return { message: `Déploiement de la n°${number} déclaré. À vérifier maintenant (manuellement ou automatiquement).` };
+    return { message: `Intégration de la n°${number} signalée — NON vérifiée. Lancez une vérification réelle.` };
   });
 }
 
@@ -394,9 +405,40 @@ export async function verifyPublicationAutoAction(number: number, extractionId: 
     const db = await readDb();
     const pub = db.publications.find((p) => p.number === number);
     if (!pub) throw new DomainError("Publication introuvable.", "INTROUVABLE");
+    if (!pub.exportedAt) throw new DomainError("Publication jamais exportée : rien ne peut encore être en ligne.", "INVALIDE");
+    const taken = ex.source.snapshotTakenAt ?? ex.extractedAt;
+    if (!taken || taken < pub.exportedAt)
+      throw new DomainError(`Cette extraction (instantané du ${taken}) est antérieure à l'export (${pub.exportedAt}) : elle ne peut pas prouver le déploiement. Relancez npm run porkopedia:extract.`, "INVALIDE");
     const details = verifyAgainstExtraction(pub, ex);
     await transaction((d) => ops.setAutomaticVerification(d, number, { extractionId, details }));
     const bad = details.filter((x) => !x.ok).length;
     return { message: bad === 0 ? `Vérification automatique : ${details.length} article(s) conformes sur le site.` : `Vérification automatique : ${bad} écart(s) sur ${details.length}.` };
+  });
+}
+
+/* --------------------------- Audit & validation -------------------------- */
+
+export async function applyMediaAuditAction(selections: import("@/domain/media-audit").AuditSelection[]) {
+  return run(async () => {
+    if (!selections.length) throw new DomainError("Aucune ligne sélectionnée.", "INVALIDE");
+    const { applyMediaClassification } = await import("@/domain/media-audit");
+    await createBackup(`avant classification de ${selections.length} média(s)`);
+    await transaction((db) => selections.forEach((s) => applyMediaClassification(db, s)));
+    return { message: `${selections.length} média(s) classé(s). Aucun portrait ni référence canonique modifié.` };
+  });
+}
+
+export async function validateCharacterAction(id: string, decision: import("@/domain/types").CanonStatus, note: string, checklist: Record<string, boolean>, expectedRevision: number) {
+  return run(async () => {
+    const c = await transaction((db) => ops.validateCharacter(db, id, { decision, note, checklist }, expectedRevision));
+    return { message: `« ${c.canonicalName} » : ${decision === "canon" ? "validée (canon)" : decision === "archive" ? "archivée" : "laissée en proposition"}.` };
+  });
+}
+
+export async function rawOriginalAsPortraitAction(characterId: string, rawMediaId: string) {
+  return run(async () => {
+    await createBackup("avant remplacement du portrait par la photographie brute");
+    const c = await transaction((db) => ops.setPortrait(db, characterId, rawMediaId, { confirmReplace: true }));
+    return { message: `Portrait de ${c.canonicalName} : photographie brute originale. La copie extraite du DOCX reste conservée dans la galerie.` };
   });
 }

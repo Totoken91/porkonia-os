@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "backup": "node scripts/backup.mjs",
-    "media:backup": "node scripts/media-backup.mjs",
+    "media:backup": "tsx scripts/media-backup.mts",
     "porkopedia:snapshot": "node scripts/porkopedia-snapshot.mjs",
     "test:e2e": "node tests/e2e/parcours.mjs",
     "porkopedia:extract": "node scripts/porkopedia-extract.mjs",
@@ -19,7 +19,9 @@
     "restore": "tsx scripts/restore.mts restore",
     "dev:demo": "PORKONIA_DEMO=1 PORKONIA_DATA_DIR=./data-demo next dev -p 3001",
     "import:report": "tsx scripts/import-report.mts",
-    "test:e2e:import": "node tests/e2e/import.mjs"
+    "test:e2e:import": "node tests/e2e/import.mjs",
+    "media:verify": "tsx scripts/media-backup.mts --verify",
+    "publication:simulate": "tsx scripts/publication-simulate.mts"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.9.12",
@@ -30,8 +32,12 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-markdown": "^10.1.0",
+    "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
-    "server-only": "^0.0.1"
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "server-only": "^0.0.1",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

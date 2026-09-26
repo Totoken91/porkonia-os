@@ -6,7 +6,8 @@ import { IconStamp } from "@/components/icons";
 import { latestPublication, previewPublication } from "@/domain/ops";
 import type { Database } from "@/domain/types";
 import { PublicationRowActions, PublishForm } from "./publication-controls";
-import { listExtractions } from "@/import/extractions";
+import { latestRealExtraction, listExtractions } from "@/import/extractions";
+import { buildPorkopediaPackage } from "@/export/porkopedia-package";
 
 export const metadata: Metadata = { title: "Préfecture des Publications" };
 
@@ -18,6 +19,8 @@ export default async function PublicationPage() {
   const drafts = db.articles.filter((a) => !a.deletedAt && a.status === "brouillon");
   const pubs = [...db.publications].sort((a, b) => b.number - a.number);
   const extractions = (await listExtractions()).map((e) => ({ id: e.id, label: `${e.id.slice(4, 12)} — ${fmtDate(e.snapshotTakenAt ?? e.extractedAt)}` }));
+  const baseline = await latestRealExtraction();
+  const pkg = last ? buildPorkopediaPackage(db, last, baseline) : null;
   const onSite = preview.articles.filter((pa) => {
     const a = db.articles.find((x) => x.id === pa.id);
     return !!a?.external && a.revision === a.external.importedRevision && a.siteSeen?.contentHash === a.external.contentHash;
@@ -94,6 +97,69 @@ export default async function PublicationPage() {
           )}
         </fieldset>
       </div>
+      {last && pkg && (
+        <fieldset className="pk-fieldset">
+          <legend>Paquet Porkopédia — publication n°{last.number}</legend>
+          <div className="grid gap-3 lg:grid-cols-2">
+            <div className="space-y-1 text-[12px]">
+              <p>
+                Delta calculé contre l&apos;extraction réelle <code>{pkg.baselineExtractionId ?? "aucune"}</code> : <b>+{pkg.delta.nouveaux.length}</b> nouvel(s) article(s),{" "}
+                <b>{pkg.delta.modifies.length}</b> modification(s), <b>{pkg.delta.inchanges}</b> déjà en ligne inchangés.
+              </p>
+              <ul className="list-disc pl-5">
+                {pkg.delta.nouveaux.map((a) => (
+                  <li key={a.id}>
+                    + <Link className="text-[#1d3f8f] underline" href={`/articles/${a.localId}`}>{a.title}</Link> → <code>#article={a.id}</code>
+                  </li>
+                ))}
+              </ul>
+              <p>
+                Fichier <code>{pkg.fileName}</code> · SHA-256 <code>{pkg.scriptSha256.slice(0, 16)}…</code> · à insérer après <code>{pkg.insertAfter}</code>
+              </p>
+              {pkg.blocking.length > 0 ? (
+                <Alert kind="error">
+                  <b>Export bloqué :</b>
+                  <ul className="list-disc pl-5">
+                    {pkg.blocking.map((b, i) => (
+                      <li key={i}>{b}</li>
+                    ))}
+                  </ul>
+                </Alert>
+              ) : (
+                <Alert kind="ok">Aucun blocage : le paquet peut être exporté.</Alert>
+              )}
+              {pkg.warnings.map((w, i) => (
+                <Alert key={i}>{w}</Alert>
+              ))}
+            </div>
+            <div className="space-y-1 text-[12px]">
+              <p>
+                <b>Simulation</b> (paquet appliqué à une copie locale du site, puis extrait dans le navigateur isolé) :{" "}
+                {last.simulation ? (
+                  <>
+                    <span className={`badge ${last.simulation.ok ? "green" : "red"}`}>{last.simulation.ok ? "conforme" : "non conforme"}</span> le {fmtDate(last.simulation.at)}
+                    {last.simulation.packageSha256 !== pkg.scriptSha256 && <span className="badge amber ml-1">paquet modifié depuis : relancer</span>}
+                  </>
+                ) : (
+                  <span className="badge amber">pas encore simulée</span>
+                )}
+              </p>
+              {last.simulation && (
+                <ul className="list-disc pl-5 text-[11px]">
+                  {last.simulation.messages.map((m, i) => (
+                    <li key={i}>{m}</li>
+                  ))}
+                </ul>
+              )}
+              <pre className="pk-grid-wrap !p-2 font-mono text-[11px]">npm run publication:simulate -- {last.number}</pre>
+              <details>
+                <summary className="cursor-pointer text-[#1d3f8f] underline">Instructions ChatGPT Sites (aperçu)</summary>
+                <pre className="pk-grid-wrap mt-1 max-h-80 whitespace-pre-wrap !p-2 font-mono text-[11px]">{pkg.instructions}</pre>
+              </details>
+            </div>
+          </div>
+        </fieldset>
+      )}
       <fieldset className="pk-fieldset">
         <legend>Registre des publications</legend>
         {pubs.length === 0 ? (
@@ -130,7 +196,7 @@ export default async function PublicationPage() {
                     <td>
                       <PublicationStages p={p} />
                       {p.verification.note && <div className="text-[11px]">{p.verification.note} ({fmtDate(p.verification.at)})</div>}
-                      {p.deployment && <div className="text-[11px]">Déploiement déclaré : {p.deployment.note}</div>}
+                      {p.deployment && <div className="text-[11px]">Intégration signalée (non probante) : {p.deployment.note}</div>}
                       {p.verification.details && p.verification.details.some((d) => !d.ok) && (
                         <details className="text-[11px]">
                           <summary>Écarts de la vérification automatique</summary>

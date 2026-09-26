@@ -63,6 +63,16 @@ export interface Character extends BaseEntity {
   status: CanonStatus;
   /** Identifiants dans les sources importées (ex. id d'article Porkopédia de la figure). */
   external?: { porkopediaId?: string; bibleName?: string } | null;
+  /** Dernière décision de validation humaine de la fiche. */
+  validation?: CharacterValidation | null;
+}
+
+export interface CharacterValidation {
+  decision: CanonStatus;
+  at: string;
+  note: string;
+  /** Points contrôlés par la personne qui valide. */
+  checklist: Record<string, boolean>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -159,6 +169,42 @@ export interface Media extends BaseEntity {
    */
   nature?: MediaNature;
   external?: MediaExternal | null;
+  /** Usage du média (classé par un humain, éventuellement à partir des suggestions de l'audit). */
+  usage?: MediaUsage | null;
+  /** Qui est représenté ou lié, et sur quelle base. Un média peut représenter plusieurs personnages. */
+  depictions?: Depiction[];
+  /** Photographie brute originale, distincte d'une copie extraite (DOCX…) quand l'identité n'est pas certifiée. */
+  rawOriginal?: RawOriginal | null;
+}
+
+export type MediaUsage = "portrait-source" | "illustration-narrative" | "scene-collective" | "variante-generee" | "archive";
+
+/** Nature du lien entre un média et un personnage. */
+export type DepictionKind = "portrait-source" | "apparait" | "lien-article" | "lien-indirect";
+
+export interface Depiction {
+  characterId: string;
+  kind: DepictionKind;
+  /** Base de l'association : « Bible visuelle », « légende », « nom de fichier », « article de la figure »… */
+  basis: string;
+  /** Confirmé par un humain (sinon : hypothèse à vérifier). */
+  confirmed: boolean;
+}
+
+export interface RawOriginal {
+  /** Nom de fichier déclaré par la source (ex. « SOURCE CANONIQUE NON MODIFIÉE • x.png »). */
+  declaredFilename: string | null;
+  /** « non-fournie » : seule la copie extraite existe ; son identité avec l'original brut n'est pas certifiable. */
+  status: "non-fournie" | "identique" | "differente";
+  /** Fichier brut déposé (s'il a été fourni). */
+  uploadedFilename?: string;
+  ref?: string;
+  sha256?: string;
+  width?: number | null;
+  height?: number | null;
+  comparedAt?: string;
+  /** Média créé pour la photographie brute (si différente de la copie extraite). */
+  mediaId?: string | null;
 }
 
 export type MediaNature = "reference-source" | "generation" | "indeterminee";
@@ -251,6 +297,17 @@ export interface PublishedArticle {
   media: { id: string; ref: string; location: MediaLocation; name: string }[];
 }
 
+export interface PublicationSimulation {
+  at: string;
+  ok: boolean;
+  baselineExtractionId: string;
+  simulatedExtractionId: string;
+  packageSha256: string;
+  expected: { added: string[]; modified: string[] };
+  observed: { added: string[]; modified: string[]; removed: string[] };
+  messages: string[];
+}
+
 export interface PublicationManifest {
   added: string[];
   modified: string[];
@@ -271,8 +328,15 @@ export interface Publication {
   restoredFrom?: number | null;
   /** Date du dernier export du paquet destiné à Porkopédia. */
   exportedAt?: string | null;
-  /** Déploiement sur Porkopédia DÉCLARÉ par un humain (Porkonia OS ne peut pas déployer). */
+  /** Paquet d'intégration exporté (fichier script + empreinte). */
+  exportedPackage?: { fileName: string; sha256: string; at: string; expectedAdded: string[] } | null;
+  /**
+   * Intégration sur Porkopédia SIGNALÉE par un humain (Porkonia OS ne peut pas déployer).
+   * Ce n'est PAS un déploiement confirmé : seule une vérification réussie établit le déploiement.
+   */
   deployment?: { declaredAt: string; note: string } | null;
+  /** Simulation avant déploiement : le paquet appliqué à une copie locale du site, puis extrait. */
+  simulation?: PublicationSimulation | null;
   verification: PublicationVerificationRecord;
 }
 

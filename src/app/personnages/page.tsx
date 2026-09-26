@@ -31,6 +31,9 @@ export default async function CharactersPage({ searchParams }: { searchParams: P
           <Link href="/personnages/nouveau" className="pk-btn primary">
             + Nouvelle fiche
           </Link>
+          <Link href="/personnages/validation" className="pk-btn">
+            Validation des fiches importées ({db.characters.filter((c) => !c.deletedAt && c.status === "proposition").length})
+          </Link>
           <form className="ml-auto flex flex-wrap items-center gap-2">
             <input name="q" defaultValue={q} placeholder="Nom, surnom, fonction, ID…" className="pk-input w-56" />
             <select name="statut" defaultValue={statut} className="pk-select w-36">

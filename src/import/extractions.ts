@@ -41,3 +41,13 @@ export async function loadExtraction(id: string): Promise<Extraction> {
   if (ex.format !== "porkonia-os/porkopedia-extraction@1" || ex.extractionId !== id) throw new Error("Fichier d'extraction invalide.");
   return ex;
 }
+
+/** Dernière extraction RÉELLE du site (les simulations sont stockées ailleurs et ne sont jamais listées ici). */
+export async function latestRealExtraction(): Promise<Extraction | null> {
+  const list = await listExtractions();
+  for (const e of list) {
+    const ex = await loadExtraction(e.id).catch(() => null);
+    if (ex && !/simulations?[\\/]/.test(ex.source.snapshotDir)) return ex;
+  }
+  return null;
+}

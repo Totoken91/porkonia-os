@@ -63,11 +63,22 @@ export function PublicationRowActions({
     <div className="flex min-w-72 flex-col gap-1">
       <div className="flex flex-wrap gap-1">
         <span className="text-[11px] font-bold">① Exporter :</span>
+        {isLatest && (
+          <ActionButton
+            className="pk-btn small primary"
+            action={markExportedAction.bind(null, number, true)}
+            onDone={(r) => {
+              if (r.ok) window.location.href = `/api/publications/${number}/porkopedia`;
+            }}
+          >
+            Paquet Porkopédia (ZIP)
+          </ActionButton>
+        )}
         {(["json", "md"] as const).map((f) => (
           <ActionButton
             key={f}
             className="pk-btn small"
-            action={markExportedAction.bind(null, number)}
+            action={markExportedAction.bind(null, number, false)}
             onDone={(r) => {
               if (r.ok) window.location.href = `/api/publications/${number}${f === "md" ? "?format=md" : ""}`;
             }}
@@ -77,17 +88,17 @@ export function PublicationRowActions({
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-1">
-        <span className="text-[11px] font-bold">② Déploiement :</span>
-        <input className="pk-input !w-44" value={deployNote} onChange={(e) => setDeployNote(e.target.value)} placeholder="Comment / quand (obligatoire)" />
+        <span className="text-[11px] font-bold">② Intégration :</span>
+        <input className="pk-input !w-44" value={deployNote} onChange={(e) => setDeployNote(e.target.value)} placeholder="Qui / quand / comment (obligatoire)" />
         <ActionButton
           className="pk-btn small"
-          disabled={!deployNote.trim()}
+          disabled={!deployNote.trim() || !exported}
           action={declareDeploymentAction.bind(null, number, deployNote)}
           confirm={{
-            title: "Déclarer un déploiement",
+            title: "Signaler une intégration",
             message: (
               <>
-                Vous déclarez avoir intégré vous-même la publication n°{number} sur Porkopédia (ChatGPT Sites).
+                Vous signalez avoir intégré vous-même la publication n°{number} sur Porkopédia (ChatGPT Sites).
                 {!exported && (
                   <>
                     <br />
@@ -95,13 +106,13 @@ export function PublicationRowActions({
                   </>
                 )}
                 <br />
-                Porkonia OS ne peut pas déployer lui-même : ce n&apos;est qu&apos;une déclaration, à vérifier ensuite.
+                Ce signalement ne vaut PAS déploiement : la publication ne sera « déployée et vérifiée » qu&apos;après une vérification réelle du site.
               </>
             ),
-            confirmLabel: "Déclarer",
+            confirmLabel: "Signaler",
           }}
         >
-          Déclarer déployée
+          Signaler l&apos;intégration
         </ActionButton>
       </div>
       <div className="flex flex-wrap items-center gap-1">
@@ -115,7 +126,7 @@ export function PublicationRowActions({
                 </option>
               ))}
             </select>
-            <ActionButton className="pk-btn small" disabled={!deployed || !ext} title={!deployed ? "Déclarez d'abord le déploiement" : undefined} action={verifyPublicationAutoAction.bind(null, number, ext)}>
+            <ActionButton className="pk-btn small" disabled={!exported || !ext} title={!exported ? "Exportez d'abord la publication" : "Utilisez une extraction faite APRÈS l'intégration"} action={verifyPublicationAutoAction.bind(null, number, ext)}>
               Comparer au site
             </ActionButton>
           </>

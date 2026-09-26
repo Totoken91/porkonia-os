@@ -127,21 +127,33 @@ export function Emblem({ size = 32, className = "" }: { size?: number; className
  */
 export function PublicationStages({ p }: { p: import("@/domain/types").Publication }) {
   const v = p.verification;
+  const deployed = v.status === "verifiee";
   return (
     <span className="inline-flex flex-wrap gap-1">
       <span className="badge grey" title="Instantané local immuable — le site public n'est pas modifié">Publication locale n°{p.number}</span>
-      {p.exportedAt ? <span className="badge blue" title={`Paquet exporté le ${fmtDate(p.exportedAt)}`}>Exportée</span> : <span className="badge grey">Non exportée</span>}
-      {p.deployment ? (
-        <span className="badge amber" title={`${p.deployment.note} — ${fmtDate(p.deployment.declaredAt)}`}>Déployée (déclaration manuelle)</span>
+      {p.exportedAt ? (
+        <span className="badge blue" title={`${p.exportedPackage ? `${p.exportedPackage.fileName} · SHA-256 ${p.exportedPackage.sha256.slice(0, 12)}… · ` : ""}${fmtDate(p.exportedAt)}`}>
+          Exportée{p.exportedPackage ? " (paquet Porkopédia)" : ""}
+        </span>
       ) : (
-        <span className="badge grey">Non déployée</span>
+        <span className="badge grey">Non exportée</span>
       )}
-      {v.status === "verifiee" ? (
-        <span className="badge green" title={v.note}>Vérifiée — {v.method === "automatique" ? "automatique" : "manuelle"}</span>
+      {p.simulation && (
+        <span className={`badge ${p.simulation.ok ? "green" : "red"}`} title={p.simulation.messages.join(" · ")}>
+          Simulation {p.simulation.ok ? "conforme" : "non conforme"}
+        </span>
+      )}
+      {p.deployment && !deployed && (
+        <span className="badge amber" title={`${p.deployment.note} — ${fmtDate(p.deployment.declaredAt)}`}>
+          Intégration signalée — non vérifiée
+        </span>
+      )}
+      {deployed ? (
+        <span className="badge green" title={v.note}>Déployée et vérifiée — {v.method === "automatique" ? "vérification automatique" : "vérification manuelle"}</span>
       ) : v.status === "echec" ? (
-        <span className="badge red" title={v.note}>Échec — vérif. {v.method}</span>
+        <span className="badge red" title={v.note}>Échec de vérification ({v.method})</span>
       ) : (
-        <span className="badge grey">Non vérifiée</span>
+        <span className="badge grey">Non déployée / non vérifiée</span>
       )}
     </span>
   );
