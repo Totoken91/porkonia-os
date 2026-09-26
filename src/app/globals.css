@@ -1,0 +1,538 @@
+@import "tailwindcss";
+
+/*
+ * PORKONIA OS — Édition Administrative 2005
+ * Identité originale : un système d'exploitation ministériel porkoniais,
+ * conçu en 1998, « modernisé » en 2005, jamais retouché depuis.
+ * Inspiration d'époque (reliefs biseautés, groupes gravés, dégradés de titre),
+ * sans reprendre de thème, d'icône ou d'asset d'un système existant.
+ *
+ * Palette : bordeaux République (#7a1016), ambre bière (#c98a1c),
+ * gris ministériel (#c9c5bb), vert porc (#3d7a35), papier administratif (#fbf8ef).
+ */
+@theme {
+  --font-sans: Tahoma, Verdana, "DejaVu Sans", "Segoe UI", sans-serif;
+  --font-mono: "Lucida Console", "Courier New", "DejaVu Sans Mono", monospace;
+  --color-bordeaux: #7a1016;
+  --color-bordeaux-light: #b0343a;
+  --color-ambre: #c98a1c;
+  --color-ambre-light: #ffe2a8;
+  --color-gris: #c9c5bb;
+  --color-gris-clair: #e4e0d6;
+  --color-papier: #fbf8ef;
+  --color-porc: #3d7a35;
+  --color-encre: #1a1a1a;
+  --color-lien: #1d3f8f;
+}
+
+:root {
+  --hi: #ffffff;
+  --lo: #8a867c;
+  --dk: #3a3833;
+  --face: #c9c5bb;
+  --title: linear-gradient(90deg, #4a080c 0%, #7a1016 35%, #a8621c 75%, #c98a1c 100%);
+  /* Reliefs biseautés (2 px) */
+  --raised: inset -1px -1px 0 var(--dk), inset 1px 1px 0 var(--hi), inset -2px -2px 0 var(--lo), inset 2px 2px 0 #eeebe3;
+  --sunken: inset 1px 1px 0 var(--lo), inset -1px -1px 0 var(--hi), inset 2px 2px 0 var(--dk), inset -2px -2px 0 #eeebe3;
+  --pressed: inset 1px 1px 0 var(--dk), inset -1px -1px 0 var(--hi), inset 2px 2px 0 var(--lo);
+}
+
+@layer base {
+html {
+  background: #3f5a52;
+}
+body {
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--color-encre);
+  /* « Bureau » ministériel : vert administratif avec trame de sceaux discrète (CSS pur). */
+  background-color: #3f5a52;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255, 226, 168, 0.07) 0 9px, transparent 10px),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.06) 0 2px, transparent 3px),
+    linear-gradient(180deg, #46645b 0%, #3a544c 100%);
+  background-size: 64px 64px, 32px 32px, 100% 100%;
+  background-attachment: fixed;
+}
+
+}
+
+@layer components {
+/* ------------------------------ Bandeau de la République ------------------------------ */
+.pk-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  background: var(--face);
+  box-shadow: var(--raised);
+  border-bottom: 3px solid var(--color-bordeaux);
+}
+.pk-banner .t1 {
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--color-bordeaux);
+  text-transform: uppercase;
+}
+.pk-banner .t2 {
+  font-size: 11px;
+  color: #4a463d;
+}
+.pk-banner .well {
+  margin-left: auto;
+  box-shadow: var(--sunken);
+  background: #e9e5da;
+  padding: 3px 8px;
+  font-size: 11px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* ------------------------------ Fenêtres ------------------------------ */
+.pk-window {
+  background: var(--face);
+  box-shadow: var(--raised), 3px 3px 0 rgba(0, 0, 0, 0.25);
+  padding: 3px;
+}
+.pk-titlebar {
+  background: var(--title);
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 3px 3px 3px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.45);
+}
+.pk-titlebar .code {
+  font-family: var(--font-mono);
+  font-weight: normal;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0 4px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+.pk-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+}
+.pk-ctl {
+  width: 16px;
+  height: 14px;
+  background: var(--face);
+  box-shadow: var(--raised);
+  color: #000;
+  text-shadow: none;
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+.pk-menubar {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--lo);
+  box-shadow: 0 1px 0 var(--hi);
+}
+.pk-menubar a,
+.pk-menubar span {
+  padding: 1px 8px;
+  color: #000;
+  text-decoration: none;
+}
+.pk-menubar a:hover {
+  background: var(--color-bordeaux);
+  color: #fff;
+}
+.pk-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-bottom: 1px solid var(--lo);
+  box-shadow: 0 1px 0 var(--hi);
+}
+.pk-body {
+  padding: 8px 6px;
+}
+.pk-statusbar {
+  display: flex;
+  gap: 3px;
+  padding-top: 3px;
+  font-size: 11px;
+}
+.pk-statusbar > * {
+  box-shadow: inset 1px 1px 0 var(--lo), inset -1px -1px 0 var(--hi);
+  padding: 2px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------ Boutons ------------------------------ */
+.pk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font: inherit;
+  color: #000;
+  min-height: 23px;
+  padding: 2px 12px;
+  border: none;
+  background: var(--face);
+  box-shadow: var(--raised);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.pk-btn:active:not(:disabled) {
+  box-shadow: var(--pressed);
+  padding: 3px 11px 1px 13px;
+}
+.pk-btn:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: -5px;
+}
+.pk-btn:disabled {
+  color: #8a867c;
+  text-shadow: 1px 1px 0 #fff;
+  cursor: default;
+}
+.pk-btn.primary {
+  font-weight: bold;
+  outline: 1px solid #000;
+  outline-offset: -1px;
+}
+.pk-btn.primary::before,
+.pk-btn.danger::before,
+.pk-btn.amber::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+}
+.pk-btn.primary::before {
+  background: var(--color-porc);
+  box-shadow: inset -1px -1px 0 #1f4a1a, inset 1px 1px 0 #8fcf83;
+}
+.pk-btn.danger {
+  color: #7a0f0f;
+}
+.pk-btn.danger::before {
+  background: #b3261e;
+  box-shadow: inset -1px -1px 0 #5a0f0a, inset 1px 1px 0 #f0948c;
+}
+.pk-btn.amber::before {
+  background: var(--color-ambre);
+  box-shadow: inset -1px -1px 0 #6a4500, inset 1px 1px 0 #ffd98a;
+}
+.pk-btn.small {
+  min-height: 18px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+
+/* ------------------------------ Champs ------------------------------ */
+.pk-input,
+.pk-select,
+.pk-textarea {
+  font: inherit;
+  background: #fff;
+  border: none;
+  box-shadow: var(--sunken);
+  padding: 4px 5px;
+  width: 100%;
+  color: #000;
+  border-radius: 0;
+}
+.pk-input:focus,
+.pk-select:focus,
+.pk-textarea:focus {
+  outline: 1px solid var(--color-bordeaux);
+  outline-offset: 0;
+}
+.pk-input[readonly],
+.pk-textarea[readonly] {
+  background: var(--color-gris-clair);
+}
+.pk-textarea {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.pk-label {
+  display: block;
+  margin-bottom: 2px;
+}
+.pk-fieldset {
+  border: 2px groove #f4f1ea;
+  padding: 6px 8px 8px;
+  margin: 0 0 8px;
+  min-width: 0;
+}
+.pk-fieldset > legend {
+  padding: 0 4px;
+  color: var(--color-bordeaux);
+  font-weight: bold;
+}
+
+/* ------------------------------ Tableaux ------------------------------ */
+.pk-grid-wrap {
+  background: #fff;
+  box-shadow: var(--sunken);
+  padding: 2px;
+  overflow: auto;
+}
+.pk-grid {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.pk-grid th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  font-weight: normal;
+  padding: 2px 6px;
+  background: var(--face);
+  box-shadow: var(--raised);
+  white-space: nowrap;
+}
+.pk-grid td {
+  padding: 3px 6px;
+  border-bottom: 1px dotted #cfcabd;
+  vertical-align: top;
+}
+.pk-grid tbody tr:hover td {
+  background: var(--color-bordeaux);
+  color: #fff;
+}
+.pk-grid tbody tr:hover td a {
+  color: #ffe2a8;
+}
+.pk-grid a {
+  color: var(--color-lien);
+}
+
+/* ------------------------------ Classeur des modules (navigation) ------------------------------ */
+.pk-nav {
+  background: var(--face);
+  box-shadow: var(--raised);
+  padding: 3px;
+}
+.pk-nav-head {
+  background: var(--title);
+  color: #fff;
+  font-weight: bold;
+  padding: 3px 6px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pk-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 3px 0 6px;
+}
+.pk-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 6px;
+  color: #000;
+  text-decoration: none;
+}
+.pk-nav li a:hover {
+  text-decoration: underline;
+}
+.pk-nav li a[aria-current="page"] {
+  background: var(--color-bordeaux);
+  color: #fff;
+  outline: 1px dotted #ffe2a8;
+  outline-offset: -2px;
+}
+.pk-nav .num {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  opacity: 0.6;
+}
+.pk-nav .note {
+  box-shadow: var(--sunken);
+  background: var(--color-papier);
+  padding: 5px 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 2px;
+}
+
+/* ------------------------------ Barre d'état globale ------------------------------ */
+.pk-footer {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  padding: 3px;
+  background: var(--face);
+  box-shadow: var(--raised);
+  font-size: 11px;
+}
+.pk-footer > span {
+  box-shadow: inset 1px 1px 0 var(--lo), inset -1px -1px 0 var(--hi);
+  padding: 2px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------ Divers ------------------------------ */
+.badge {
+  display: inline-block;
+  padding: 0 4px;
+  border: 1px solid;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.badge.green { background: #dfeedb; border-color: #3d7a35; color: #1f4a1a; }
+.badge.amber { background: #fff0cc; border-color: #c98a1c; color: #6a4500; }
+.badge.red { background: #f8dcd8; border-color: #b3261e; color: #7a0f0f; }
+.badge.blue { background: #e2e6f3; border-color: #1d3f8f; color: #1d3f8f; }
+.badge.grey { background: #ebe8e0; border-color: #8a867c; color: #3a3833; }
+.badge.demo { background: repeating-linear-gradient(45deg, #fff4b3, #fff4b3 4px, #ffe680 4px, #ffe680 8px); border-color: #8a6d00; color: #4a3a00; }
+
+.pk-alert {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  background: #fff6d8;
+  border: 1px solid #000;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+.pk-alert.error { background: #fbe1dd; }
+.pk-alert.ok { background: #e3f0de; }
+.pk-alert.info { background: #e8ebf5; }
+
+/* Compteurs façon afficheur de guichet */
+.stat-tile {
+  display: block;
+  background: var(--face);
+  box-shadow: var(--raised);
+  padding: 5px;
+  text-decoration: none;
+  color: #000;
+}
+.stat-tile:hover .l {
+  text-decoration: underline;
+}
+.stat-tile .n {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  line-height: 1.1;
+  color: #ffc24a;
+  background: #1c1a14;
+  box-shadow: var(--sunken);
+  padding: 3px 7px;
+  text-align: right;
+  text-shadow: 0 0 4px rgba(255, 180, 40, 0.6);
+  letter-spacing: 0.08em;
+}
+.stat-tile .l {
+  font-size: 11px;
+  padding: 3px 1px 0;
+}
+
+.pk-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 2px;
+  position: relative;
+  z-index: 1;
+}
+.pk-tab {
+  padding: 3px 10px;
+  font: inherit;
+  background: var(--face);
+  border: none;
+  box-shadow: inset 1px 1px 0 var(--hi), inset -1px 0 0 var(--dk), inset -2px 0 0 var(--lo);
+  margin-top: 2px;
+  cursor: pointer;
+}
+.pk-tab[aria-selected="true"] {
+  margin-top: 0;
+  padding-bottom: 5px;
+  margin-bottom: -2px;
+  font-weight: bold;
+}
+.pk-tabpanel {
+  background: var(--face);
+  box-shadow: var(--raised);
+  padding: 10px 8px;
+}
+
+/* Rendu des articles (prévisualisation encyclopédique, feuille « papier ») */
+.prose-porko {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #202122;
+  background: #fff;
+}
+.prose-porko h1, .prose-porko h2, .prose-porko h3 {
+  font-family: Georgia, serif;
+  font-weight: normal;
+  border-bottom: 1px solid #a2a9b1;
+  margin: 1em 0 0.4em;
+}
+.prose-porko h1 { font-size: 1.8em; }
+.prose-porko h2 { font-size: 1.45em; }
+.prose-porko h3 { font-size: 1.15em; border-bottom: none; font-weight: bold; }
+.prose-porko p { margin: 0.5em 0; }
+.prose-porko a { color: #365f91; }
+.prose-porko img { max-width: 100%; height: auto; border: 1px solid #c8ccd1; background: #f8f9fa; padding: 3px; }
+.prose-porko table { border-collapse: collapse; margin: 0.8em 0; }
+.prose-porko th, .prose-porko td { border: 1px solid #a2a9b1; padding: 3px 8px; }
+.prose-porko th { background: #eaecf0; }
+.prose-porko ul { list-style: disc; padding-left: 1.6em; }
+.prose-porko ol { list-style: decimal; padding-left: 1.6em; }
+.prose-porko blockquote { border-left: 4px solid #c8ccd1; padding-left: 10px; color: #444; }
+.prose-porko strong { font-weight: bold; }
+.prose-porko code { font-family: var(--font-mono); background: #f3f3f3; padding: 0 3px; }
+
+.diff-add { background: #d8f0d0; }
+.diff-del { background: #f8d4cf; text-decoration: line-through; }
+
+.thumb {
+  background: repeating-conic-gradient(#dcd8ce 0% 25%, #fff 0% 50%) 50% / 12px 12px;
+  box-shadow: var(--sunken);
+  padding: 2px;
+  object-fit: contain;
+}
+
+dialog.pk-dialog {
+  padding: 0;
+  border: none;
+  background: transparent;
+  max-width: min(520px, calc(100vw - 32px));
+}
+dialog.pk-dialog::backdrop {
+  background: rgba(20, 30, 25, 0.45);
+}
+}
