@@ -31,6 +31,8 @@ export function demoDatabase(): Database {
     publications: [],
     log: [],
     backups: [],
+    imports: [],
+    sources: [],
   };
 
   const groinard = createCharacter(db, {

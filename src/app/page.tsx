@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getDb } from "@/server/page-data";
 import { dashboardStats } from "@/domain/integrity";
-import { Alert, Window, fmtDate } from "@/components/ui";
+import { Alert, PublicationStages, Window, fmtDate } from "@/components/ui";
 import { IconArchive, IconBook, IconCamera, IconDashboard, IconPerson, IconRobot, IconScroll, IconShield, IconStamp } from "@/components/icons";
 import { ActionButton } from "@/components/client";
 import { backupAction } from "./actions";
@@ -110,7 +110,7 @@ export default async function Dashboard() {
               {pub ? (
                 <>
                   Dernière publication : <b>n°{pub.number}</b> du {fmtDate(pub.createdAt)} ({pub.articles.length} articles) —{" "}
-                  {pub.verification === "verifiee" ? <span className="badge green">Vérifiée</span> : pub.verification === "echec" ? <span className="badge red">Échec</span> : <span className="badge amber">Non vérifiée</span>}
+                  <PublicationStages p={pub} />
                 </>
               ) : (
                 <>Aucune publication. Porkopédia n&apos;est pas synchronisé automatiquement.</>

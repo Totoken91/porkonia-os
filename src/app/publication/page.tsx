@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getDb } from "@/server/page-data";
-import { Alert, Window, fmtDate } from "@/components/ui";
+import { Alert, PublicationStages, Window, fmtDate } from "@/components/ui";
 import { IconStamp } from "@/components/icons";
 import { latestPublication, previewPublication } from "@/domain/ops";
 import type { Database } from "@/domain/types";
@@ -120,8 +120,8 @@ export default async function PublicationPage() {
                       {p.contentHash.slice(0, 12)}…
                     </td>
                     <td>
-                      {p.verification === "verifiee" ? <span className="badge green">Vérifiée</span> : p.verification === "echec" ? <span className="badge red">Échec</span> : <span className="badge amber">Non vérifiée</span>}
-                      {p.verificationNote && <div className="text-[11px]">{p.verificationNote} ({fmtDate(p.verifiedAt)})</div>}
+                      <PublicationStages p={p} />
+                      {p.verification.note && <div className="text-[11px]">{p.verification.note} ({fmtDate(p.verification.at)})</div>}
                     </td>
                     <td>
                       <PublicationRowActions number={p.number} isLatest={p.number === last?.number} />

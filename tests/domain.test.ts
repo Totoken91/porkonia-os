@@ -3,11 +3,12 @@ import * as ops from "@/domain/ops";
 import { integrityReport } from "@/domain/integrity";
 import { buildContext } from "@/domain/context";
 import { expandInternalSyntax, buildLinkIndex } from "@/domain/markdown";
-import { SCHEMA_VERSION, type Database } from "@/domain/types";
+import type { Database } from "@/domain/types";
+import { emptyDatabase } from "@/domain/migrate";
 import { DomainError } from "@/domain/util";
 import { demoDatabase } from "@/data/fixtures";
 
-const empty = (): Database => ({ schemaVersion: SCHEMA_VERSION, characters: [], articles: [], media: [], bible: [], revisions: [], publications: [], log: [], backups: [] });
+const empty = (): Database => emptyDatabase();
 
 const char = (db: Database, name = "Luis Test") =>
   ops.createCharacter(db, { canonicalName: name, nicknames: [], role: "", description: "", appearance: "Apparence A", biography: "", affiliations: [], events: [], narrativeRefs: [], status: "canon" });
@@ -182,7 +183,8 @@ describe("publication", () => {
     expect(r.articles[0]!.body).toBe("Corps v1");
     expect(a.body).toBe("v3 en cours");
     expect(db.publications).toHaveLength(3);
-    expect(r.verification).toBe("non-verifiee");
+    expect(r.verification.status).toBe("non-verifiee");
+    expect(r.deployment).toBeNull();
   });
 });
 

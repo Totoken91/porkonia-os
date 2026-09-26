@@ -121,3 +121,28 @@ export function Emblem({ size = 32, className = "" }: { size?: number; className
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} width={size} height={size} alt="Emblème de la République de Porkonia" className={`shrink-0 ${className}`} />;
 }
+
+/**
+ * Étapes d'une publication, jamais confondues : une publication locale n'est PAS une mise à jour du site.
+ */
+export function PublicationStages({ p }: { p: import("@/domain/types").Publication }) {
+  const v = p.verification;
+  return (
+    <span className="inline-flex flex-wrap gap-1">
+      <span className="badge grey" title="Instantané local immuable — le site public n'est pas modifié">Publication locale n°{p.number}</span>
+      {p.exportedAt ? <span className="badge blue" title={`Paquet exporté le ${fmtDate(p.exportedAt)}`}>Exportée</span> : <span className="badge grey">Non exportée</span>}
+      {p.deployment ? (
+        <span className="badge amber" title={`${p.deployment.note} — ${fmtDate(p.deployment.declaredAt)}`}>Déployée (déclaration manuelle)</span>
+      ) : (
+        <span className="badge grey">Non déployée</span>
+      )}
+      {v.status === "verifiee" ? (
+        <span className="badge green" title={v.note}>Vérifiée — {v.method === "automatique" ? "automatique" : "manuelle"}</span>
+      ) : v.status === "echec" ? (
+        <span className="badge red" title={v.note}>Échec — vérif. {v.method}</span>
+      ) : (
+        <span className="badge grey">Non vérifiée</span>
+      )}
+    </span>
+  );
+}

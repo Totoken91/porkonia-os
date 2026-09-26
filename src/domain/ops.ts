@@ -59,7 +59,7 @@ function checkRevision(entity: { revision: number; id: string }, expected: numbe
   }
 }
 
-function commit<T extends AnyEntity>(db: Database, type: Exclude<EntityType, "publication">, entity: T, message: string): T {
+export function commit<T extends AnyEntity>(db: Database, type: Exclude<EntityType, "publication">, entity: T, message: string): T {
   db.revisions.push({
     id: newId("revision"),
     entityType: type,
@@ -73,7 +73,7 @@ function commit<T extends AnyEntity>(db: Database, type: Exclude<EntityType, "pu
   return entity;
 }
 
-function touch<T extends AnyEntity>(entity: T, patch: Partial<T>): T {
+export function touch<T extends AnyEntity>(entity: T, patch: Partial<T>): T {
   for (const [k, v] of Object.entries(patch)) if (v !== undefined) (entity as unknown as Record<string, unknown>)[k] = v;
   entity.revision += 1;
   entity.updatedAt = nowIso();
@@ -156,6 +156,19 @@ export function setPortrait(
       throw new DomainError(`Le média « ${m.name} » n'est pas homologué (statut : ${m.canonStatus}). Seul un média « officiel » peut devenir portrait.`, "PROTEGE");
     const other = db.characters.find((x) => x.id !== c.id && x.portraitMediaId === m.id && !x.deletedAt);
     if (other) throw new DomainError(`Ce média est déjà le portrait officiel de ${other.canonicalName}.`, "PROTEGE");
+  }
+  if (c.portraitMediaId && c.portraitMediaId !== mediaId) {
+    const current = db.media.find((m) => m.id === c.portraitMediaId);
+    const next = mediaId ? db.media.find((m) => m.id === mediaId) : undefined;
+    if (current?.nature === "reference-source" && next?.nature !== "reference-source") {
+      throw new DomainError(
+        `Le portrait actuel de ${c.canonicalName} est une RÉFÉRENCE SOURCE canonique. Il ne peut être remplacé que par une autre référence source, jamais par une image générée ou de nature inconnue.`,
+        "PROTEGE",
+      );
+    }
+    if (!mediaId && current?.nature === "reference-source" && !opts.confirmReplace) {
+      throw new DomainError("Retirer une référence source canonique exige une confirmation explicite.", "PROTEGE");
+    }
   }
   if (c.portraitMediaId && c.portraitMediaId !== mediaId && !opts.confirmReplace) {
     throw new DomainError(
@@ -241,7 +254,7 @@ export function resolveArticle(db: Database, key: string): Article | undefined {
 /* -------------------------------- Médias --------------------------------- */
 
 export type MediaInput = Pick<Media, "name" | "description" | "kind" | "location" | "ref" | "canonStatus"> &
-  Partial<Pick<Media, "thumbnailRef" | "width" | "height" | "format" | "sha256" | "variantOf" | "characterIds" | "articleIds">> & {
+  Partial<Pick<Media, "thumbnailRef" | "width" | "height" | "format" | "sha256" | "variantOf" | "characterIds" | "articleIds" | "nature" | "external">> & {
     source?: string;
   };
 
@@ -298,7 +311,7 @@ function guessFormat(ref: string): string | null {
   return m ? m[1]!.toLowerCase() : null;
 }
 
-type MediaMeta = Pick<Media, "name" | "description" | "kind" | "canonStatus" | "thumbnailRef" | "width" | "height" | "format">;
+type MediaMeta = Pick<Media, "name" | "description" | "kind" | "canonStatus" | "thumbnailRef" | "width" | "height" | "format" | "nature">;
 
 /** Métadonnées modifiables librement. Le chemin/URL (`ref`) nécessite `updateMediaRef` avec confirmation. */
 export function updateMedia(db: Database, id: string, patch: Partial<MediaMeta>, expectedRevision?: number): Media {
@@ -531,8 +544,9 @@ export function publish(db: Database, note: string, restoredFrom?: Publication):
     manifest: content.manifest,
     contentHash: sha256(JSON.stringify(content.articles)),
     restoredFrom: restoredFrom?.number ?? null,
-    verification: "non-verifiee",
-    verifiedAt: null,
+    exportedAt: null,
+    deployment: null,
+    verification: { status: "non-verifiee" },
   };
   if (!restoredFrom) {
     for (const a of db.articles) {
@@ -561,12 +575,57 @@ export function restorePublication(db: Database, number: number, note: string): 
   return publish(db, note || `Restauration de la publication n°${number}`, src);
 }
 
-/** La vérification est déclarée par un humain après contrôle réel de Porkopédia — jamais automatiquement. */
-export function setVerification(db: Database, number: number, status: PublicationVerification, note: string) {
+function findPublication(db: Database, number: number) {
   const idx = db.publications.findIndex((p) => p.number === number);
   if (idx < 0) throw new DomainError(`Publication n°${number} introuvable.`, "INTROUVABLE");
-  const p = db.publications[idx]!;
+  return { idx, p: db.publications[idx]! };
+}
+
+/** Étape « exportée pour Porkopédia » : le paquet a été téléchargé. Le site n'est PAS modifié. */
+export function markExported(db: Database, number: number) {
+  const { idx, p } = findPublication(db, number);
+  db.publications[idx] = { ...p, exportedAt: nowIso() };
+  log(db, "Export publication", `Publication n°${number} exportée pour Porkopédia (paquet téléchargé). Aucun déploiement effectué.`, "publication", p.id);
+}
+
+/** Étape « déployée » : DÉCLARATION humaine (Porkonia OS ne peut pas déployer sur ChatGPT Sites). */
+export function declareDeployment(db: Database, number: number, note: string) {
+  const { idx, p } = findPublication(db, number);
+  if (!note.trim()) throw new DomainError("Indiquez comment et quand le déploiement a été fait.", "INVALIDE");
+  db.publications[idx] = { ...p, deployment: { declaredAt: nowIso(), note: note.trim() } };
+  log(db, "Déploiement déclaré", `Publication n°${number} déclarée déployée sur Porkopédia : ${note.trim()}`, "publication", p.id);
+}
+
+/** Vérification MANUELLE : un humain a contrôlé le site public. Exige un déploiement déclaré. */
+export function setVerification(db: Database, number: number, status: PublicationVerification, note: string) {
+  const { idx, p } = findPublication(db, number);
+  if (status !== "non-verifiee" && !p.deployment)
+    throw new DomainError("Déclarez d'abord le déploiement sur Porkopédia avant de le vérifier.", "INVALIDE");
+  if (status !== "non-verifiee" && !note.trim()) throw new DomainError("Le constat de vérification est obligatoire.", "INVALIDE");
   // Le contenu reste figé : on recrée l'enveloppe avec les mêmes articles gelés.
-  db.publications[idx] = { ...p, verification: status, verificationNote: note, verifiedAt: nowIso() };
-  log(db, "Vérification publication", `Publication n°${number} : ${status}${note ? ` — ${note}` : ""}`, "publication", p.id);
+  db.publications[idx] = { ...p, verification: { status, method: "manuelle", at: nowIso(), note: note.trim() } };
+  log(db, "Vérification manuelle", `Publication n°${number} : ${status}${note ? ` — ${note}` : ""}`, "publication", p.id);
+}
+
+/** Vérification AUTOMATIQUE : résultat d'une comparaison avec une extraction réelle du site public. */
+export function setAutomaticVerification(
+  db: Database,
+  number: number,
+  result: { extractionId: string; details: NonNullable<Publication["verification"]["details"]> },
+) {
+  const { idx, p } = findPublication(db, number);
+  const ok = result.details.length > 0 && result.details.every((d) => d.ok);
+  const bad = result.details.filter((d) => !d.ok).length;
+  db.publications[idx] = {
+    ...p,
+    verification: {
+      status: ok ? "verifiee" : "echec",
+      method: "automatique",
+      at: nowIso(),
+      note: ok ? `Tous les articles (${result.details.length}) retrouvés sur le site.` : `${bad} article(s) absent(s) ou différent(s) sur le site.`,
+      details: result.details,
+      extractionId: result.extractionId,
+    },
+  };
+  log(db, "Vérification automatique", `Publication n°${number} comparée à l'extraction ${result.extractionId} : ${ok ? "conforme" : `${bad} écart(s)`}`, "publication", p.id);
 }
