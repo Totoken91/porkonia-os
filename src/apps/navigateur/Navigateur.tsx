@@ -80,7 +80,7 @@ export function Navigateur() {
 }
 
 function Accueil({ go }: { go(u: string): void }) {
-  const { str } = useOs();
+  const { str, pack } = useOs();
   const [q, setQ] = useState("");
   return (
     <div className="portail">
@@ -95,6 +95,14 @@ function Accueil({ go }: { go(u: string): void }) {
         <input className="pk-input" placeholder={str("nav.recherche")} value={q} onChange={(e) => setQ(e.target.value)} data-testid="nav-search" />
         <button className="pk-btn primary">Rechercher</button>
       </form>
+      <div className="depeches">
+        <b>{str("nav.depeches")}</b>
+        <ul>
+          {pack.news.slice(0, 6).map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+      </div>
       <h2>Porkopédia — notices synchronisées sur votre poste</h2>
       <ul className="vignettes">
         {ARTICLES.map((a) => (

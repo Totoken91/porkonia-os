@@ -372,4 +372,7 @@
   .notice table { border-collapse: collapse; }
   .notice th, .notice td { border: 1px solid #a2a9b1; padding: 3px 8px; }
   .lcd { font-family: var(--font-crt); background: #15110d; color: #ff3b2f; box-shadow: var(--sunken); padding: 0 5px; font-size: 22px; line-height: 1; letter-spacing: 0.06em; text-shadow: 0 0 6px rgba(255, 59, 47, 0.6); }
+  .depeches { border: 1px solid #c8ccd1; background: #fbf9f4; padding: 6px 10px; }
+  .depeches b { display: block; font: bold 12px var(--font-serif); color: var(--color-rouge-sombre); border-bottom: 1px solid #e0d6c0; padding-bottom: 3px; margin-bottom: 4px; }
+  .depeches li { padding: 2px 0; border-bottom: 1px dotted #e0d6c0; }
 }
