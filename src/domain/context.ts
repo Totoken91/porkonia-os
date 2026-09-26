@@ -4,61 +4,10 @@
  */
 import type { BibleCategory, Database, Provenance } from "./types";
 import { mediaUrl } from "./markdown";
-import { estimateTokens } from "./util";
 
-export const TASKS = {
-  illustration: {
-    label: "Créer une illustration",
-    bible: ["regles-visuelles", "contraintes-generation"] as BibleCategory[],
-    wantsAppearance: true,
-    wantsMedia: true,
-  },
-  "edition-article": {
-    label: "Modifier / enrichir un article",
-    bible: ["regles-narratives", "chronologie", "geographie", "organisations"] as BibleCategory[],
-    wantsAppearance: false,
-    wantsMedia: false,
-  },
-  "ecriture-scene": {
-    label: "Écrire une scène narrative",
-    bible: ["regles-narratives", "traditions", "geographie"] as BibleCategory[],
-    wantsAppearance: true,
-    wantsMedia: false,
-  },
-  video: {
-    label: "Préparer une vidéo / publicité",
-    bible: ["regles-visuelles", "regles-narratives", "contraintes-generation"] as BibleCategory[],
-    wantsAppearance: true,
-    wantsMedia: true,
-  },
-  libre: { label: "Tâche libre", bible: [] as BibleCategory[], wantsAppearance: true, wantsMedia: true },
-} as const;
-
-export type TaskKey = keyof typeof TASKS;
-
-export const TARGETS = {
-  generique: "Générique (tout modèle)",
-  chatgpt: "ChatGPT / GPT Image",
-  claude: "Claude",
-  midjourney: "Midjourney / générateur d'images",
-  video: "Générateur vidéo (Kling, Sora…)",
-} as const;
-export type TargetKey = keyof typeof TARGETS;
-
-export interface ContextRequest {
-  task: TaskKey;
-  instruction: string;
-  characterIds: string[];
-  articleId?: string | null;
-  /** Catégories de Bible supplémentaires (en plus de celles de la tâche). */
-  extraBible: BibleCategory[];
-  /** Entrées de Bible cochées individuellement (prioritaires sur les catégories). */
-  bibleIds?: string[];
-  style?: string;
-  target: TargetKey;
-  detail: "court" | "detaille";
-  includeRelations: boolean;
-}
+export { TASKS, TARGETS } from "./context-config";
+export type { TaskKey, TargetKey, ContextRequest } from "./context-config";
+import { TASKS, TARGETS, type ContextRequest } from "./context-config";
 
 export interface ContextSource {
   kind: string;
@@ -189,5 +138,5 @@ export function buildContext(db: Database, req: ContextRequest): ContextPackage 
 
   out.push("", "---", `_Paquet généré par Porkonia OS le ${new Date().toISOString().slice(0, 10)} — ${sources.length} source(s)._`);
   const markdown = out.filter((l, i, arr) => !(l === "" && arr[i - 1] === "")).join("\n");
-  return { markdown, tokens: estimateTokens(markdown), sources, files, warnings };
+  return { markdown, tokens: Math.ceil(markdown.length / 3.6), sources, files, warnings };
 }

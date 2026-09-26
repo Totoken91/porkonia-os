@@ -1,8 +1,8 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import type { Character, MediaCanonStatus } from "@/domain/types";
 import { linkMediaAction, saveCharacter, saveRelations, setPortraitAction, trashAction, type ActionResult } from "@/app/actions";
-import { ActionButton, ResultMessage } from "@/components/client";
+import { ActionButton, ResultMessage, useVersionedForm } from "@/components/client";
 import { MediaCanonBadge } from "@/components/ui";
 
 function Row({ label, children, wide }: { label: string; children: React.ReactNode; wide?: boolean }) {
@@ -15,13 +15,14 @@ function Row({ label, children, wide }: { label: string; children: React.ReactNo
 }
 
 export function CharacterForm({ character }: { character?: Character }) {
-  const [state, action, pending] = useActionState<ActionResult | null, FormData>(saveCharacter, null);
+  const { state, formAction: action, pending, formKey, expectedRevision, onChange } = useVersionedForm(saveCharacter, character?.revision);
   const c = character;
   return (
-    <form action={action} className="space-y-2">
-      <ResultMessage result={state} />
+    <>
+    <ResultMessage result={state} />
+    <form key={formKey} action={action} onChange={onChange} className="space-y-2">
       {c && <input type="hidden" name="id" value={c.id} />}
-      {c && <input type="hidden" name="expectedRevision" value={c.revision} />}
+      {c && <input type="hidden" name="expectedRevision" value={expectedRevision ?? ""} />}
       <fieldset className="pk-fieldset">
         <legend>Identité</legend>
         <div className="grid gap-2 lg:grid-cols-2">
@@ -98,6 +99,7 @@ export function CharacterForm({ character }: { character?: Character }) {
         )}
       </div>
     </form>
+    </>
   );
 }
 

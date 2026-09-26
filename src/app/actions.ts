@@ -12,9 +12,9 @@ import { buildContext, type ContextRequest } from "@/domain/context";
 import { createBackup, readDb, transaction } from "@/data/store";
 import { checkMediaLink } from "@/media/link-check";
 
-export type ActionResult = { ok: true; message: string; id?: string } | { ok: false; error: string; code?: string };
+export type ActionResult = { ok: true; message: string; id?: string; revision?: number } | { ok: false; error: string; code?: string };
 
-async function run(fn: () => Promise<{ message: string; id?: string }>): Promise<ActionResult> {
+async function run(fn: () => Promise<{ message: string; id?: string; revision?: number }>): Promise<ActionResult> {
   try {
     const r = await fn();
     revalidatePath("/", "layout");
@@ -107,7 +107,7 @@ export async function saveArticle(input: {
     };
     if (input.id) {
       const a = await transaction((db) => ops.updateArticle(db, input.id!, fields, input.expectedRevision));
-      return { message: `Article enregistré (révision ${a.revision}, statut ${a.status}).`, id: a.id };
+      return { message: `Article enregistré (révision ${a.revision}, statut ${a.status}).`, id: a.id, revision: a.revision };
     }
     const a = await transaction((db) => ops.createArticle(db, fields));
     return { message: "Article créé en brouillon.", id: a.id };

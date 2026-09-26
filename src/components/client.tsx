@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { ActionResult } from "@/app/actions";
 import { IconWarning } from "./icons";
@@ -165,4 +165,32 @@ export function Clock() {
     return () => clearInterval(t);
   }, []);
   return <span>{now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "--:--"}</span>;
+}
+
+/**
+ * Formulaire versionné : la révision attendue est figée dès la première saisie.
+ * - Pas de saisie en cours : le formulaire se recharge avec l'état le plus récent.
+ * - Saisie en cours et élément modifié ailleurs : l'enregistrement est refusé (conflit)
+ *   au lieu d'écraser silencieusement. Le message de résultat survit au rechargement.
+ */
+export function useVersionedForm(
+  action: (prev: ActionResult | null, f: FormData) => Promise<ActionResult>,
+  revision: number | undefined,
+) {
+  const [state, formAction, pending] = useActionState<ActionResult | null, FormData>(action, null);
+  const [frozen, setFrozen] = useState<number | null>(null);
+  useEffect(() => {
+    if (state?.ok) setFrozen(null);
+  }, [state]);
+  const rev = frozen ?? revision;
+  return {
+    state,
+    formAction,
+    pending,
+    formKey: String(rev ?? "new"),
+    expectedRevision: rev,
+    onChange: () => {
+      if (frozen === null && revision !== undefined) setFrozen(revision);
+    },
+  };
 }

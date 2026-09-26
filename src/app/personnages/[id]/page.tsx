@@ -62,7 +62,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
       {c.status === "proposition" && <Alert kind="info">Proposition non validée : ces informations ne sont pas canoniques.</Alert>}
       <Tabs
         tabs={[
-          { label: "Fiche", content: <CharacterForm key={c.revision} character={c} /> },
+          { label: "Fiche", content: <CharacterForm character={c} /> },
           {
             label: `Portrait & galerie (${gallery.length})`,
             content: <GalleryPanel character={c} gallery={gallery} others={others} />,

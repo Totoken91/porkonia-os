@@ -74,7 +74,7 @@ function commit<T extends AnyEntity>(db: Database, type: Exclude<EntityType, "pu
 }
 
 function touch<T extends AnyEntity>(entity: T, patch: Partial<T>): T {
-  Object.assign(entity, patch);
+  for (const [k, v] of Object.entries(patch)) if (v !== undefined) (entity as unknown as Record<string, unknown>)[k] = v;
   entity.revision += 1;
   entity.updatedAt = nowIso();
   return entity;
