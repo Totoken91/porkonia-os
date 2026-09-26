@@ -104,7 +104,8 @@ export function buildContext(db: Database, req: ContextRequest): ContextPackage 
     if (article.subtitle) out.push(`_${article.subtitle}_`);
     out.push(`Section : ${article.section || "—"} · Slug : ${article.slug}${article.aliases.length ? ` · Alias : ${article.aliases.join(", ")}` : ""}`);
     if (article.lead) out.push("", article.lead.trim());
-    const body = req.task === "edition-article" || req.detail === "detaille" ? article.body.trim() : clip(article.body, "court", 1200);
+    const source = article.format === "html" ? htmlToText(article.body) : article.body;
+    const body = req.task === "edition-article" || req.detail === "detaille" ? source.trim() : clip(source, "court", 1200);
     out.push("", body);
     out.push("", prov(article.provenance, article.revision));
   }
@@ -118,7 +119,9 @@ export function buildContext(db: Database, req: ContextRequest): ContextPackage 
       (explicit.has(b.id) ||
         (explicit.size === 0 &&
           cats.has(b.category) &&
-          (b.characterIds.length === 0 || b.characterIds.some((id) => req.characterIds.includes(id))))),
+          (b.category === "personnages"
+            ? b.characterIds.some((id) => req.characterIds.includes(id)) // fiches de personnages : seulement ceux sélectionnés
+            : b.characterIds.length === 0 || b.characterIds.some((id) => req.characterIds.includes(id))))),
   );
   if (bible.length) {
     out.push("", "## Extraits de la Bible canonique");
@@ -139,4 +142,26 @@ export function buildContext(db: Database, req: ContextRequest): ContextPackage 
   out.push("", "---", `_Paquet généré par Porkonia OS le ${new Date().toISOString().slice(0, 10)} — ${sources.length} source(s)._`);
   const markdown = out.filter((l, i, arr) => !(l === "" && arr[i - 1] === "")).join("\n");
   return { markdown, tokens: Math.ceil(markdown.length / 3.6), sources, files, warnings };
+}
+
+/** Conversion HTML → texte lisible pour les contextes (titres, paragraphes, listes, légendes). */
+export function htmlToText(html: string): string {
+  return html
+    .replace(/<h2[^>]*>/gi, "\n## ")
+    .replace(/<h3[^>]*>/gi, "\n### ")
+    .replace(/<li[^>]*>/gi, "\n- ")
+    .replace(/<figcaption[^>]*>/gi, "\n[Légende] ")
+    .replace(/<img[^>]*src="([^"]+)"[^>]*>/gi, "\n[Image : $1]")
+    .replace(/<\/(p|div|h2|h3|figure|ul|ol|table|tr)>/gi, "\n")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n\s*\n+/g, "\n\n")
+    .trim();
 }

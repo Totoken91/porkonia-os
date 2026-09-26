@@ -9,6 +9,7 @@ next-env.d.ts
 !.env.example
 # Données locales (base, sauvegardes, instantanés) — jamais versionnées
 /data/
+/data-demo/
 /imports/
 /backups/
 # Médias locaux : seuls les fichiers de démonstration sont versionnés

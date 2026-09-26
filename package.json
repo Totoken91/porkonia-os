@@ -14,11 +14,17 @@
     "media:backup": "node scripts/media-backup.mjs",
     "porkopedia:snapshot": "node scripts/porkopedia-snapshot.mjs",
     "test:e2e": "node tests/e2e/parcours.mjs",
-    "porkopedia:extract": "node scripts/porkopedia-extract.mjs"
+    "porkopedia:extract": "node scripts/porkopedia-extract.mjs",
+    "backup:verify": "tsx scripts/restore.mts verify",
+    "restore": "tsx scripts/restore.mts restore",
+    "dev:demo": "PORKONIA_DEMO=1 PORKONIA_DATA_DIR=./data-demo next dev -p 3001",
+    "import:report": "tsx scripts/import-report.mts",
+    "test:e2e:import": "node tests/e2e/import.mjs"
   },
   "dependencies": {
     "@xmldom/xmldom": "^0.9.12",
     "diff": "^9.0.0",
+    "dompurify": "^3.4.16",
     "fflate": "^0.8.3",
     "next": "^16.3.6",
     "react": "^19.3.0",

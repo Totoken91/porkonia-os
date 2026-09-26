@@ -6,6 +6,7 @@ import path from "node:path";
 const dir = mkdtempSync(path.join(tmpdir(), "porkonia-test-"));
 beforeAll(() => {
   process.env.PORKONIA_DATA_DIR = dir;
+  process.env.PORKONIA_DEMO = "1";
 });
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 

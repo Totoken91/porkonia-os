@@ -5,7 +5,7 @@
  * - Écriture : `transaction()` travaille sur une COPIE ; si la fonction lève une
  *   erreur, rien n'est écrit (rollback implicite). Écriture tmp + fsync + rename.
  * - Migration de schéma : copie intégrale « pre-migration » écrite et vérifiée AVANT.
- * - Premier lancement : base initialisée avec les données de démonstration.
+ * - Premier lancement : base vide (ou données de démonstration si PORKONIA_DEMO=1).
  *
  * Utilisable par l'application (via store.ts, protégé « server-only ») et par les scripts CLI.
  */
@@ -53,7 +53,8 @@ async function load(): Promise<Database> {
     stat = null;
   }
   if (!stat) {
-    const seed = process.env.PORKONIA_EMPTY_DB === "1" ? emptyDatabase() : demoDatabase();
+    // Base réelle : vide par défaut. Base de démonstration : PORKONIA_DEMO=1 (npm run dev:demo → data-demo/).
+    const seed = process.env.PORKONIA_DEMO === "1" ? demoDatabase() : emptyDatabase();
     await writeAtomic(file, JSON.stringify(seed, null, 1));
     stat = await fs.stat(file);
     cache = { db: seed, mtimeMs: stat.mtimeMs, file };

@@ -4,7 +4,7 @@ import type { BibleCategory } from "./types";
 export const TASKS = {
   illustration: {
     label: "Créer une illustration",
-    bible: ["regles-visuelles", "contraintes-generation"] as BibleCategory[],
+    bible: ["regles-visuelles", "contraintes-generation", "personnages"] as BibleCategory[],
     wantsAppearance: true,
     wantsMedia: true,
   },
@@ -16,13 +16,13 @@ export const TASKS = {
   },
   "ecriture-scene": {
     label: "Écrire une scène narrative",
-    bible: ["regles-narratives", "traditions", "geographie"] as BibleCategory[],
+    bible: ["regles-narratives", "traditions", "geographie", "personnages"] as BibleCategory[],
     wantsAppearance: true,
     wantsMedia: false,
   },
   video: {
     label: "Préparer une vidéo / publicité",
-    bible: ["regles-visuelles", "regles-narratives", "contraintes-generation"] as BibleCategory[],
+    bible: ["regles-visuelles", "regles-narratives", "contraintes-generation", "personnages"] as BibleCategory[],
     wantsAppearance: true,
     wantsMedia: true,
   },

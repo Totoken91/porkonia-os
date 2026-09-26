@@ -26,3 +26,27 @@ if (h(src) !== h(out)) {
   process.exit(2);
 }
 console.log(`Sauvegarde vérifiée : ${out}\nSHA-256 : ${h(out)}`);
+
+// Documents sources (DOCX…) et images extraites de la Bible : fichiers immuables nommés par empreinte / chemin,
+// copiés s'ils manquent dans la destination (jamais écrasés).
+import { readdirSync, statSync } from "node:fs";
+const copyTree = (from, to) => {
+  if (!existsSync(from)) return 0;
+  let n = 0;
+  for (const e of readdirSync(from)) {
+    const a = path.join(from, e);
+    const b = path.join(to, e);
+    if (statSync(a).isDirectory()) n += copyTree(a, b);
+    else if (!existsSync(b)) {
+      mkdirSync(to, { recursive: true });
+      copyFileSync(a, b);
+      if (h(a) !== h(b)) throw new Error(`Copie corrompue : ${b}`);
+      n += 1;
+    }
+  }
+  return n;
+};
+const mediaRoot = process.env.PORKONIA_MEDIA_ROOT || path.join(process.cwd(), "medias-locales");
+const nOrig = copyTree(path.join(dataDir, "originals"), path.join(dest, "originals"));
+const nBible = copyTree(path.join(mediaRoot, "bible-visuelle"), path.join(dest, "medias-locales", "bible-visuelle"));
+console.log(`Documents sources copiés : ${nOrig} · images de la Bible copiées : ${nBible} (fichiers déjà présents ignorés)`);

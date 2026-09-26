@@ -14,6 +14,8 @@ src/data/store.ts  ◄── transaction(db => ops.*(db, …))
    ▼
 src/export/*  →  /api/export, /api/medias/export, /api/publications/:n, /api/public/v1/*
 src/media/*   →  /api/media/local/* (lecture seule, confinée), vérification de liens
+src/bible/*   →  analyse DOCX (pure) + stockage des originaux et images (/api/bible/*)
+src/import/*  →  lecture des extractions produites par scripts/porkopedia-extract.mjs (Chromium isolé, CLI)
 ```
 
 Séparation demandée : interface (`src/app`, `src/components`) · logique métier (`src/domain`) · accès aux données (`src/data`) · médias (`src/media`) · export/publication (`src/export`, routes `api/`) · contextes IA (`src/domain/context*.ts`).
@@ -47,8 +49,8 @@ Séparation demandée : interface (`src/app`, `src/components`) · logique méti
 - Aucune clé côté navigateur. `robots: noindex`.
 - API publique : GET seulement, contenu **publié** uniquement, CORS limité à `PORKONIA_PUBLIC_CORS_ORIGIN` (défaut : Porkopédia).
 
-## Limites connues V1
+## Limites connues
 
 - Un seul utilisateur, pas de comptes.
-- Stockage fichier : pas d'accès concurrent multi-processus (un seul serveur Next).
-- Import (Porkopédia, DOCX) non encore implémenté — voir MIGRATION.md.
+- Stockage fichier : pas d'accès concurrent multi-processus (un seul serveur Next). Base réelle ≈ 9 Mo après import complet.
+- L'extraction de Porkopédia se lance en ligne de commande (choix de sécurité : le serveur n'exécute jamais le code du site).

@@ -1,5 +1,18 @@
 # Publication
 
+## Étapes (strictement séparées)
+
+| Étape | Qui | Signification |
+|---|---|---|
+| Brouillon | éditeur | contenu en cours |
+| Validé | éditeur | prêt à entrer dans la prochaine publication |
+| Inclus dans une publication locale | Porkonia OS | instantané immuable **local** — le site n'est pas modifié |
+| Exportée pour Porkopédia | Porkonia OS | paquet JSON/Markdown téléchargé |
+| Déployée sur Porkopédia | **déclaration humaine** | Porkonia OS ne peut pas déployer sur ChatGPT Sites |
+| Vérifiée | humain (**manuelle**) ou extraction (**automatique**) | la méthode est toujours affichée |
+
+La vérification **automatique** compare chaque article publié avec une extraction réelle du site (`npm run porkopedia:extract`) : présence (id Porkopédia, slug ou alias) et similarité du texte ≥ 90 %. Tout écart → « échec », détaillé par article.
+
 ## Circuit
 
 1. **Brouillon** — toute création ou modification de contenu.

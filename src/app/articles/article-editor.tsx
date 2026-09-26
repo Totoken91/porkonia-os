@@ -6,6 +6,7 @@ import type { LinkIndex } from "@/domain/markdown";
 import { saveArticle, setArticleStatusAction, trashAction, type ActionResult } from "@/app/actions";
 import { ActionButton, ResultMessage } from "@/components/client";
 import { MarkdownView } from "@/components/markdown-view";
+import { HtmlView } from "@/components/html-view";
 
 type Draft = {
   title: string;
@@ -101,6 +102,7 @@ export function ArticleEditor({
       else router.refresh();
     });
 
+  const isHtml = article?.format === "html";
   const [linkKey, setLinkKey] = useState("");
   const [mediaKey, setMediaKey] = useState("");
 
@@ -166,6 +168,8 @@ export function ArticleEditor({
 
       <div className="pk-window !p-0">
         <div className="pk-toolbar">
+          {isHtml && <span className="badge amber">HTML d&apos;origine Porkopédia — conservé sans conversion</span>}
+          {!isHtml && (<>
           <button type="button" className="pk-btn small" onClick={() => insert("\n## ", "\n", "Titre de section")}>
             Titre
           </button>
@@ -227,6 +231,7 @@ export function ArticleEditor({
           >
             Insérer l&apos;image
           </button>
+          </>)}
           <span className="ml-auto flex gap-1">
             {(["edit", "split", "preview"] as const).map((v) => (
               <button key={v} type="button" className="pk-btn small" aria-pressed={view === v} style={view === v ? { fontWeight: "bold" } : undefined} onClick={() => setView(v)}>
@@ -243,7 +248,7 @@ export function ArticleEditor({
               value={draft.body}
               onChange={(e) => set("body", e.target.value)}
               spellCheck
-              aria-label="Corps de l'article (Markdown)"
+              aria-label={isHtml ? "Corps de l'article (HTML)" : "Corps de l'article (Markdown)"}
             />
           )}
           {view !== "edit" && (
@@ -257,13 +262,13 @@ export function ArticleEditor({
                   <b>{draft.lead}</b>
                 </p>
               )}
-              <MarkdownView body={draft.body} index={index} />
+              {isHtml ? <HtmlView html={draft.body} baseUrl={article?.external?.baseUrl} /> : <MarkdownView body={draft.body} index={index} />}
             </div>
           )}
         </div>
         <div className="pk-statusbar px-1 pb-1">
           <span className="flex-1">
-            {dirty ? "● Modifications non enregistrées" : "Aucune modification en attente"} — syntaxe : [[id-ou-slug|texte]] · ![légende](media:med_…)
+            {dirty ? "● Modifications non enregistrées" : "Aucune modification en attente"} — {isHtml ? "HTML : liens data-article=\"id\", images assets/… (hébergées sur Porkopédia)" : "syntaxe : [[id-ou-slug|texte]] · ![légende](media:med_…)"}
           </span>
           <span>{draft.body.length} caractères</span>
         </div>

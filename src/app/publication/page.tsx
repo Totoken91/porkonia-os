@@ -6,6 +6,7 @@ import { IconStamp } from "@/components/icons";
 import { latestPublication, previewPublication } from "@/domain/ops";
 import type { Database } from "@/domain/types";
 import { PublicationRowActions, PublishForm } from "./publication-controls";
+import { listExtractions } from "@/import/extractions";
 
 export const metadata: Metadata = { title: "Préfecture des Publications" };
 
@@ -16,6 +17,11 @@ export default async function PublicationPage() {
   const title = (id: string) => db.articles.find((a) => a.id === id)?.title ?? last?.articles.find((a) => a.id === id)?.title ?? id;
   const drafts = db.articles.filter((a) => !a.deletedAt && a.status === "brouillon");
   const pubs = [...db.publications].sort((a, b) => b.number - a.number);
+  const extractions = (await listExtractions()).map((e) => ({ id: e.id, label: `${e.id.slice(4, 12)} — ${fmtDate(e.snapshotTakenAt ?? e.extractedAt)}` }));
+  const onSite = preview.articles.filter((pa) => {
+    const a = db.articles.find((x) => x.id === pa.id);
+    return !!a?.external && a.revision === a.external.importedRevision && a.siteSeen?.contentHash === a.external.contentHash;
+  }).length;
   const Section = ({ label, ids, cls }: { label: string; ids: string[]; cls: string }) =>
     ids.length ? (
       <div>
@@ -43,14 +49,17 @@ export default async function PublicationPage() {
       ]}
     >
       <Alert kind="info">
-        Circuit : <b>Brouillon → Validation → Prévisualisation → Publication (instantané immuable) → Intégration manuelle sur Porkopédia → Vérification</b>.
+        Étapes strictement séparées : <b>Brouillon → Validé → Inclus dans une publication locale → Exportée pour Porkopédia → Déployée (déclaration
+        humaine) → Vérifiée (manuellement ou automatiquement par extraction du site)</b>. Une publication locale <b>n&apos;est pas</b> une mise à jour du
+        site public.
         Porkopédia (ChatGPT Sites) ne peut pas être modifié automatiquement depuis ici : voir <code>docs/CHATGPT_SITES_INTEGRATION.md</code>.
       </Alert>
       <div className="grid gap-3 lg:grid-cols-2">
         <fieldset className="pk-fieldset">
           <legend>Prévisualisation de la prochaine publication</legend>
           <p className="mb-1">
-            {preview.articles.length} article(s) seront inclus (validés ou déjà publiés). {drafts.length} brouillon(s) exclu(s)
+            {preview.articles.length} article(s) seront inclus (validés ou déjà publiés), dont <b>{onSite}</b> identiques à la version constatée sur
+            Porkopédia et <b>{preview.articles.length - onSite}</b> à déployer. {drafts.length} brouillon(s) exclu(s)
             {drafts.length > 0 && " — un article déjà publié puis remis en brouillon conserve sa version publiée"}.
           </p>
           <div className="space-y-1">
@@ -98,7 +107,7 @@ export default async function PublicationPage() {
                   <th>Date</th>
                   <th>Contenu</th>
                   <th>Empreinte</th>
-                  <th>Vérification Porkopédia</th>
+                  <th>Étapes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -112,8 +121,7 @@ export default async function PublicationPage() {
                       {p.restoredFrom && <div className="badge amber">copie de la n°{p.restoredFrom}</div>}
                       {p.note && <div className="text-[11px] italic">{p.note}</div>}
                       <div className="mt-1 flex gap-1">
-                        <a className="pk-btn small" href={`/api/publications/${p.number}`}>Paquet JSON</a>
-                        <a className="pk-btn small" href={`/api/publications/${p.number}?format=md`}>Markdown</a>
+
                       </div>
                     </td>
                     <td className="font-mono text-[10px]" title={p.contentHash}>
@@ -122,9 +130,24 @@ export default async function PublicationPage() {
                     <td>
                       <PublicationStages p={p} />
                       {p.verification.note && <div className="text-[11px]">{p.verification.note} ({fmtDate(p.verification.at)})</div>}
+                      {p.deployment && <div className="text-[11px]">Déploiement déclaré : {p.deployment.note}</div>}
+                      {p.verification.details && p.verification.details.some((d) => !d.ok) && (
+                        <details className="text-[11px]">
+                          <summary>Écarts de la vérification automatique</summary>
+                          <ul>
+                            {p.verification.details
+                              .filter((d) => !d.ok)
+                              .map((d) => (
+                                <li key={d.id}>
+                                  {d.title} — {d.found ? `similarité ${Math.round(d.similarity * 100)} %` : "absent du site"}
+                                </li>
+                              ))}
+                          </ul>
+                        </details>
+                      )}
                     </td>
                     <td>
-                      <PublicationRowActions number={p.number} isLatest={p.number === last?.number} />
+                      <PublicationRowActions number={p.number} isLatest={p.number === last?.number} exported={!!p.exportedAt} deployed={!!p.deployment} extractions={extractions} />
                     </td>
                   </tr>
                 ))}

@@ -77,7 +77,7 @@ export function DemoBadge({ show }: { show?: boolean }) {
 const ARTICLE_STATUS: Record<ArticleStatus, [string, string]> = {
   brouillon: ["amber", "Brouillon"],
   valide: ["blue", "Validé"],
-  publie: ["green", "Publié"],
+  publie: ["green", "Inclus pub. locale"],
 };
 export function ArticleStatusBadge({ status }: { status: ArticleStatus }) {
   const [c, l] = ARTICLE_STATUS[status];

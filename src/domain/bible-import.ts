@@ -282,7 +282,9 @@ export function applyBibleImport(db: Database, an: DocxAnalysis, plan: BiblePlan
     const s = an.sections.find((x) => x.path === sp.path)!;
     const category = dec.categories[sp.key] ?? s.suggestedCategory;
     if (!category) throw new DomainError(`Choisissez une catégorie pour la section « ${s.path} ».`, "INVALIDE");
-    const characterIds = [...new Set(s.images.map((f) => charByPortrait.get(f)?.id).filter((x): x is string => !!x))];
+    // Rattachement direct seulement si la section concerne UN personnage ; sinon les fiches « Visage canonique » font foi.
+    const linked = [...new Set(s.images.map((f) => charByPortrait.get(f)?.id).filter((x): x is string => !!x))];
+    const characterIds = linked.length === 1 ? linked : [];
     const body = mdWithMedia(s.markdown);
     if (sp.existingId) {
       const b = findEntity(db, "bible", sp.existingId) as BibleEntry;

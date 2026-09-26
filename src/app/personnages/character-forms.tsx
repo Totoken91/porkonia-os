@@ -103,7 +103,7 @@ export function CharacterForm({ character }: { character?: Character }) {
   );
 }
 
-type MediaLite = { id: string; name: string; thumb: string | null; canonStatus: MediaCanonStatus; ref: string; linkedTo: string[] };
+type MediaLite = { id: string; name: string; thumb: string | null; canonStatus: MediaCanonStatus; ref: string; linkedTo: string[]; nature?: string };
 
 export function GalleryPanel({
   character,
@@ -160,13 +160,20 @@ export function GalleryPanel({
                 </div>
                 <div className="flex flex-wrap items-center gap-1">
                   <MediaCanonBadge status={m.canonStatus} /> {isPortrait && <span className="badge green">Portrait</span>}
+                  {m.nature === "reference-source" && <span className="badge blue">Référence source</span>}
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {!isPortrait && (
                     <ActionButton
                       className="pk-btn small"
-                      disabled={m.canonStatus !== "officiel"}
-                      title={m.canonStatus !== "officiel" ? "Média non homologué : passez-le d'abord au statut « officiel »." : undefined}
+                      disabled={m.canonStatus !== "officiel" || (portrait?.nature === "reference-source" && m.nature !== "reference-source")}
+                      title={
+                        m.canonStatus !== "officiel"
+                          ? "Média non homologué : passez-le d'abord au statut « officiel »."
+                          : portrait?.nature === "reference-source" && m.nature !== "reference-source"
+                            ? "Le portrait actuel est une référence source canonique : il ne peut pas être remplacé par une image générée ou de nature inconnue."
+                            : undefined
+                      }
                       action={setPortraitAction.bind(null, character.id, m.id, !!character.portraitMediaId)}
                       confirm={{
                         title: character.portraitMediaId ? "Remplacer le portrait officiel" : "Définir le portrait officiel",

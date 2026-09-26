@@ -171,6 +171,14 @@ export function EditMediaForm({ media }: { media: Media }) {
           </div>
         </div>
         <label className="block">
+          <span className="pk-label">Nature de l&apos;image</span>
+          <select name="nature" defaultValue={media.nature ?? "indeterminee"} className="pk-select max-w-md">
+            <option value="reference-source">Référence source (photo canonique non modifiée)</option>
+            <option value="generation">Génération (image produite par une IA)</option>
+            <option value="indeterminee">Indéterminée</option>
+          </select>
+        </label>
+        <label className="block">
           <span className="pk-label">Description</span>
           <textarea name="description" defaultValue={media.description} rows={2} className="pk-textarea" />
         </label>

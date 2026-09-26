@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { applyPorkopediaImport, planPorkopediaImport, undoImport, type Extraction } from "@/domain/porkopedia-import";
 import { emptyDatabase } from "@/domain/migrate";
+import { verifyAgainstExtraction } from "@/domain/verify";
 import * as ops from "@/domain/ops";
 import type { Article, Database } from "@/domain/types";
 
@@ -186,5 +187,36 @@ describe("import Porkopédia", () => {
     applyPorkopediaImport(db, ex, plan, { "article:alpha": "restaurer" });
     expect(byPk(db, "alpha").deletedAt).toBeFalsy();
     expect(db.articles.filter((a) => a.external?.id === "alpha")).toHaveLength(1);
+  });
+});
+
+describe("états de publication et vérification automatique", () => {
+  it("sépare publication locale, export, déploiement déclaré et vérifications", () => {
+    const db = emptyDatabase();
+    applyPorkopediaImport(db, ex, planPorkopediaImport(db, ex), {});
+    const pub = ops.publish(db, "Lot 1");
+    expect(pub.verification.status).toBe("non-verifiee");
+    expect(pub.exportedAt).toBeNull();
+    expect(pub.deployment).toBeNull();
+    // Pas de vérification sans déploiement déclaré
+    expect(() => ops.setVerification(db, pub.number, "verifiee", "vu")).toThrow(/déploiement/);
+    ops.markExported(db, pub.number);
+    ops.declareDeployment(db, pub.number, "Collé dans ChatGPT Sites le 26/09");
+    // Vérification automatique contre l'extraction du site : contenu identique
+
+    const p1 = db.publications.find((p) => p.number === pub.number)!;
+    const details = verifyAgainstExtraction(p1, ex);
+    expect(details.every((d) => d.found && d.similarity === 1)).toBe(true);
+    ops.setAutomaticVerification(db, pub.number, { extractionId: ex.extractionId, details });
+    const v = db.publications.find((p) => p.number === pub.number)!.verification;
+    expect(v).toMatchObject({ status: "verifiee", method: "automatique" });
+    // Un article absent du site fait échouer la vérification automatique
+    const partial = clone();
+    partial.articles = partial.articles.filter((a) => a.id !== "beta");
+    const d2 = verifyAgainstExtraction(p1, partial);
+    ops.setAutomaticVerification(db, pub.number, { extractionId: partial.extractionId, details: d2 });
+    expect(db.publications.find((p) => p.number === pub.number)!.verification.status).toBe("echec");
+    // Le contenu publié reste figé
+    expect(Object.isFrozen(db.publications.find((p) => p.number === pub.number)!.articles)).toBe(true);
   });
 });

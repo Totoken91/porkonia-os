@@ -317,6 +317,10 @@ type MediaMeta = Pick<Media, "name" | "description" | "kind" | "canonStatus" | "
 export function updateMedia(db: Database, id: string, patch: Partial<MediaMeta>, expectedRevision?: number): Media {
   const m = findEntity(db, "media", id) as Media;
   checkRevision(m, expectedRevision);
+  if (patch.nature && patch.nature !== "reference-source" && m.nature === "reference-source") {
+    const portraitOf = db.characters.find((c) => c.portraitMediaId === m.id && !c.deletedAt);
+    if (portraitOf) throw new DomainError(`Ce média est la référence source canonique de ${portraitOf.canonicalName} : sa nature ne peut pas être déclassée.`, "PROTEGE");
+  }
   if (patch.canonStatus && patch.canonStatus !== "officiel" && m.canonStatus === "officiel") {
     const portraitOf = db.characters.find((c) => c.portraitMediaId === m.id && !c.deletedAt);
     if (portraitOf)
@@ -464,6 +468,8 @@ export function restoreRevision(
 function toPublished(db: Database, a: Article): PublishedArticle {
   return {
     id: a.id,
+    externalId: a.external?.id ?? null,
+    format: a.format ?? "markdown",
     slug: a.slug,
     aliases: [...a.aliases],
     revision: a.revision,

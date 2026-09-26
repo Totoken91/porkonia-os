@@ -23,6 +23,12 @@
 
 Aucune fausse synchronisation : l'indicateur reste « non vérifiée » tant qu'un humain n'a pas contrôlé.
 
+## Lecture automatisée du site (sans écriture)
+
+`npm run porkopedia:extract` lit le site public (GET/HEAD uniquement) et en extrait le contenu réellement affiché, dans un navigateur isolé. Utilisé pour :
+- l'importation (docs/IMPORT.md) ;
+- la **vérification automatique** d'une publication déployée (docs/PUBLISHING.md).
+
 ## Évolution possible (phase 4, à valider)
 
 Si ChatGPT Sites permet d'ajouter un script chargeant des données distantes :

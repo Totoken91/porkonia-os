@@ -26,6 +26,7 @@ export default async function CharacterPage({ params }: { params: Promise<{ id: 
     canonStatus: m.canonStatus,
     ref: m.ref,
     linkedTo: m.characterIds.filter((x) => x !== c.id).map(name),
+    nature: m.nature,
   });
   const liveMedia = db.media.filter((m) => !m.deletedAt);
   const gallery = liveMedia.filter((m) => m.characterIds.includes(c.id)).map(lite);

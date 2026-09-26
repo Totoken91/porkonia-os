@@ -11,17 +11,29 @@
 | Sauvegarde vérifiée (relecture + SHA-256) | bouton « Sauvegarder », `npm run backup`, automatique avant chaque publication/restauration |
 | Export complet autonome | `/api/export` (format `porkonia-os/export@1`) |
 | Copie facultative des fichiers médias | `npm run media:backup` |
+| Copie pré-migration automatique | `data/backups/pre-migration-v<n>-*.json` |
+| Sauvegarde automatique avant chaque import / annulation d'import | `data/backups/` |
+| Documents sources intacts (lecture seule, nommés par empreinte) | `data/originals/` |
 
 Emplacements : base `data/porkonia-db.json`, sauvegardes `data/backups/`, médias sauvegardés `backups/media/`. Ces dossiers ne sont **pas versionnés** dans Git : copiez-les régulièrement sur un support externe (`npm run backup -- --dest /media/disque/porkonia`).
 
-## Restaurer une sauvegarde (procédure manuelle, explicite)
+## Vérifier qu'une sauvegarde est restaurable
 
-1. Arrêter le serveur.
-2. Sauvegarder l'état actuel : `npm run backup`.
-3. Copier le fichier choisi : `cp data/backups/porkonia-XXXX.json data/porkonia-db.json`.
-4. Relancer `npm run dev`, vérifier le tableau de bord et le journal.
+- Écran **Direction des Archives** → « Tester la restauration » (aucune modification), ou `npm run backup:verify -- data/backups/<fichier>.json`.
+- Le test lit le fichier, contrôle la structure, applique la migration à blanc et restaure dans un dossier temporaire en comparant les décomptes.
 
-Il n'existe volontairement aucun bouton « restaurer la base » : l'opération remplace tout et doit rester délibérée.
+## Restaurer une sauvegarde (explicite, en ligne de commande)
+
+```bash
+npm run restore -- data/backups/porkonia-XXXX.json            # vérification seule
+npm run restore -- data/backups/porkonia-XXXX.json --confirm  # restauration
+```
+
+La restauration : vérifie → sauvegarde l'état actuel → remplace la base atomiquement → relit et compare les décomptes → journalise. Il n'existe volontairement aucun bouton « restaurer la base ».
+
+## Git n'est pas une sauvegarde des données
+
+`data/`, `data-demo/`, `imports/`, `backups/` et les médias locaux ne sont **pas** versionnés. `npm run backup -- --dest <disque externe>` copie la base **et** les documents originaux (`data/originals/`) et les images extraites de la Bible (`medias-locales/bible-visuelle/`), fichiers immuables jamais écrasés.
 
 ## Médias
 

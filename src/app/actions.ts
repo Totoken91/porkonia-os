@@ -185,6 +185,7 @@ export async function updateMediaAction(_prev: ActionResult | null, f: FormData)
           width: num("width"),
           height: num("height"),
           format: str(f, "format").trim() || null,
+          nature: (str(f, "nature") || undefined) as import("@/domain/types").MediaNature | undefined,
         },
         rev(f),
       ),
@@ -320,4 +321,82 @@ export async function backupAction() {
 export async function buildContextAction(req: ContextRequest) {
   const db = await readDb();
   return buildContext(db as import("@/domain/types").Database, req);
+}
+
+/* ------------------------------ Importations ------------------------------ */
+
+export async function applyPorkopediaImportAction(extractionId: string, decisions: Record<string, string>, options: import("@/domain/porkopedia-import").ImportOptions) {
+  return run(async () => {
+    const { loadExtraction } = await import("@/import/extractions");
+    const imp = await import("@/domain/porkopedia-import");
+    const ex = await loadExtraction(extractionId);
+    const backup = await createBackup(`avant import Porkopédia ${extractionId}`);
+    const batch = await transaction((db) => imp.applyPorkopediaImport(db, ex, imp.planPorkopediaImport(db, ex, options), decisions as Record<string, import("@/domain/porkopedia-import").Decision>));
+    return { message: `Import ${batch.id} appliqué (${batch.changes.length} changement(s)). Sauvegarde préalable : ${backup.file.split("/").pop()}`, id: batch.id };
+  });
+}
+
+export async function undoImportAction(batchId: string) {
+  return run(async () => {
+    const { undoImport } = await import("@/domain/porkopedia-import");
+    await createBackup(`avant annulation de l'import ${batchId}`);
+    const b = await transaction((db) => undoImport(db, batchId));
+    return { message: `Import ${batchId} annulé : ${b.undoReport?.length ?? 0} élément(s) traité(s). Rien n'a été supprimé définitivement.`, id: b.id };
+  });
+}
+
+export async function applyBibleImportAction(sha: string, decisions: import("@/domain/bible-import").BibleDecisions) {
+  return run(async () => {
+    const store = await import("@/bible/docx-store");
+    const bi = await import("@/domain/bible-import");
+    const an = await store.loadAnalysis(sha);
+    const db0 = await readDb();
+    const plan0 = bi.planBibleImport(db0 as import("@/domain/types").Database, an);
+    const files = plan0.images.filter((i) => i.action === "creer" && (decisions.images[i.key] ?? "importer") === "importer").map((i) => i.file);
+    const backup = await createBackup(`avant import de la Bible ${an.filename}`);
+    const stored = await store.materializeImages(sha, files);
+    const batch = await transaction((db) => bi.applyBibleImport(db, an, bi.planBibleImport(db, an), decisions, stored));
+    return { message: `Import ${batch.id} appliqué : ${Object.entries(batch.summary).map(([k, v]) => `${k} ${v}`).join(", ")}. ${stored.written.length} image(s) copiée(s) à l'identique. Sauvegarde préalable : ${backup.file.split("/").pop()}`, id: batch.id };
+  });
+}
+
+export async function verifyBackupAction(fileName: string) {
+  return run(async () => {
+    const { verifyBackup, backupDir } = await import("@/data/store");
+    if (!/^[\w.-]+\.json$/.test(fileName)) throw new DomainError("Nom de fichier invalide.", "INVALIDE");
+    const r = await verifyBackup(`${backupDir()}/${fileName}`);
+    if (!r.ok) throw new DomainError(`NON restaurable : ${r.messages.join(" ; ")}`, "INVALIDE");
+    return { message: `Restaurable ✓ — ${Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ")}. ${r.messages.join(" ")}` };
+  });
+}
+
+/* --------------------------- Étapes de publication ------------------------ */
+
+export async function markExportedAction(number: number) {
+  return run(async () => {
+    await transaction((db) => ops.markExported(db, number));
+    return { message: `Publication n°${number} marquée « exportée ». Le site public n'est pas modifié.` };
+  });
+}
+
+export async function declareDeploymentAction(number: number, note: string) {
+  return run(async () => {
+    await transaction((db) => ops.declareDeployment(db, number, note));
+    return { message: `Déploiement de la n°${number} déclaré. À vérifier maintenant (manuellement ou automatiquement).` };
+  });
+}
+
+export async function verifyPublicationAutoAction(number: number, extractionId: string) {
+  return run(async () => {
+    const { loadExtraction } = await import("@/import/extractions");
+    const { verifyAgainstExtraction } = await import("@/domain/verify");
+    const ex = await loadExtraction(extractionId);
+    const db = await readDb();
+    const pub = db.publications.find((p) => p.number === number);
+    if (!pub) throw new DomainError("Publication introuvable.", "INTROUVABLE");
+    const details = verifyAgainstExtraction(pub, ex);
+    await transaction((d) => ops.setAutomaticVerification(d, number, { extractionId, details }));
+    const bad = details.filter((x) => !x.ok).length;
+    return { message: bad === 0 ? `Vérification automatique : ${details.length} article(s) conformes sur le site.` : `Vérification automatique : ${bad} écart(s) sur ${details.length}.` };
+  });
 }

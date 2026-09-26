@@ -683,3 +683,13 @@
     background: rgba(40, 25, 10, 0.45);
   }
 }
+
+/* HTML d'origine de Porkopédia (classes du site public) */
+@layer components {
+  .porko-html .lead { font-size: 1.05em; }
+  .porko-html .notice { border: 1px solid #c8ccd1; border-left: 4px solid #b4863f; background: #f8f4ea; padding: 6px 10px; margin: 0.6em 0; }
+  .porko-html figure { margin: 0.8em 0; display: inline-block; max-width: 100%; }
+  .porko-html figure.wide, .porko-html figure.douzi-scene { display: block; }
+  .porko-html figcaption { font-size: 0.85em; color: #54595d; }
+  .porko-html img { max-height: 420px; }
+}

@@ -75,6 +75,8 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
                       {a.title}
                     </Link>{" "}
                     <DemoBadge show={a.isDemo} />
+                    {a.external && <span className="badge blue" title={`#article=${a.external.id}`}>Porkopédia</span>}{" "}
+                    {a.protection && <span className="badge red">Protégé</span>}
                     {a.subtitle && <div className="text-[11px] opacity-80">{a.subtitle}</div>}
                   </td>
                   <td className="hidden md:table-cell">{a.section || "—"}</td>

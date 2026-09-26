@@ -3,7 +3,7 @@ import { getDb } from "@/server/page-data";
 import { Alert, Window, fmtDate } from "@/components/ui";
 import { IconArchive } from "@/components/icons";
 import { ActionButton } from "@/components/client";
-import { backupAction } from "@/app/actions";
+import { backupAction, verifyBackupAction } from "@/app/actions";
 import { dataDir, listBackupFiles } from "@/data/store";
 import { mediaRoot } from "@/media/local";
 
@@ -25,7 +25,8 @@ export default async function ArchivesPage() {
             Créer une sauvegarde maintenant
           </ActionButton>
           <p className="mt-2 text-[11px]">
-            Restauration d&apos;une sauvegarde : procédure manuelle et explicite décrite dans <code>docs/BACKUP.md</code> (jamais automatique).
+            Restauration : opération explicite en ligne de commande, jamais depuis un bouton —{" "}
+            <code>npm run restore -- data/backups/&lt;fichier&gt;.json --confirm</code> (l&apos;état actuel est sauvegardé avant). Voir <code>docs/BACKUP.md</code>.
           </p>
         </fieldset>
         <fieldset className="pk-fieldset">
@@ -44,6 +45,34 @@ export default async function ArchivesPage() {
           </Alert>
         </fieldset>
       </div>
+      <fieldset className="pk-fieldset">
+        <legend>Fichiers de sauvegarde sur disque ({files.length})</legend>
+        <p className="mb-1 text-[11px]">« Tester » lit la sauvegarde, la migre à blanc et la restaure dans un dossier temporaire : aucune donnée n&apos;est modifiée.</p>
+        <div className="pk-grid-wrap max-h-80">
+          <table className="pk-grid">
+            <thead>
+              <tr>
+                <th>Fichier</th>
+                <th>Test de restauration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.slice(0, 40).map((f) => (
+                <tr key={f}>
+                  <td className="font-mono text-[11px]">
+                    {f} {f.startsWith("pre-migration") && <span className="badge amber">avant migration</span>}
+                  </td>
+                  <td>
+                    <ActionButton className="pk-btn small" action={verifyBackupAction.bind(null, f)}>
+                      Tester la restauration
+                    </ActionButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
       <fieldset className="pk-fieldset">
         <legend>Sauvegardes enregistrées ({db.backups.length})</legend>
         <div className="pk-grid-wrap max-h-80">

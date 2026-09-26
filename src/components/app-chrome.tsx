@@ -107,6 +107,13 @@ export function AppBar({ republic }: { republic: ReactNode }) {
             ]}
           />
           <Menu
+            label="Importations"
+            items={[
+              { label: "Bureau des Importations", href: "/import" },
+              { label: "Importer la Bible visuelle (DOCX)", href: "/import#bible" },
+            ]}
+          />
+          <Menu
             label="Archives"
             items={[
               { label: "Sauvegardes & exports", href: "/archives" },

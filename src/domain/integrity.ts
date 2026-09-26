@@ -44,6 +44,12 @@ export function integrityReport(db: Database): IntegrityIssue[] {
       const target = resolveArticle(db, m[1]!.trim());
       if (!target || target.deletedAt) issues.push({ level: "avertissement", entityType: "article", entityId: a.id, message: `Lien interne non résolu : [[${m[1]}]].` });
     }
+    if (a.format === "html") {
+      for (const m of a.body.matchAll(/data-article=["']([^"']+)["']/g)) {
+        const target = resolveArticle(db, m[1]!);
+        if (!target || target.deletedAt) issues.push({ level: "avertissement", entityType: "article", entityId: a.id, message: `Lien Porkopédia non résolu : data-article="${m[1]}".` });
+      }
+    }
     for (const m of a.body.matchAll(MEDIA_REF)) {
       const med = mediaById.get(m[1]!);
       if (!med || med.deletedAt) issues.push({ level: "erreur", entityType: "article", entityId: a.id, message: `Image insérée introuvable : media:${m[1]}.` });

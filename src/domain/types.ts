@@ -235,6 +235,9 @@ export interface PublicationVerificationRecord {
 
 export interface PublishedArticle {
   id: string;
+  /** Identifiant Porkopédia (#article=...) si l'article provient du site. */
+  externalId?: string | null;
+  format?: "markdown" | "html";
   slug: string;
   aliases: string[];
   revision: number;

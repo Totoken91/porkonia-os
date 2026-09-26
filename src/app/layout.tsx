@@ -9,6 +9,7 @@ import {
   IconBook,
   IconCamera,
   IconDashboard,
+  IconExport,
   IconLog,
   IconPerson,
   IconRobot,
@@ -36,6 +37,7 @@ const MODULES = [
   { href: "/publication", label: "Préfecture des Publications", icon: IconStamp },
 ];
 const TOOLS = [
+  { href: "/import", label: "Bureau des Importations", icon: IconExport },
   { href: "/integrite", label: "Contrôle national d'intégrité", icon: IconShield },
   { href: "/archives", label: "Direction des Archives", icon: IconArchive },
   { href: "/corbeille", label: "Corbeille", icon: IconTrash },

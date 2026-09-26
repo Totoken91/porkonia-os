@@ -58,6 +58,28 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         <DemoBadge show={a.isDemo} />
         <span className="font-mono text-[11px]">lien Porkopédia : #article={a.slug}</span>
       </div>
+      {a.protection && (
+        <Alert kind="error">
+          <b>Article protégé.</b> {a.protection.reason} Toute mise à jour par importation exige une validation humaine explicite ; l&apos;historique conserve
+          toutes les versions.
+        </Alert>
+      )}
+      {a.external && (
+        <Alert kind="info">
+          Importé de Porkopédia (<code>#article={a.external.id}</code>) le {fmtDate(a.external.importedAt)} — extraction <code>{a.external.extractionId}</code>. Créé
+          par <b>{a.external.origin}</b>
+          {a.external.modifiedBy.length > 0 && (
+            <>
+              , puis modifié par : <b>{a.external.modifiedBy.join(" → ")}</b>
+            </>
+          )}
+          . {a.revision > a.external.importedRevision ? (
+            <span className="badge amber">Modifié localement depuis l&apos;import</span>
+          ) : (
+            <span className="badge green">Identique à la version constatée sur le site le {fmtDate(a.siteSeen?.at)}</span>
+          )}
+        </Alert>
+      )}
       {a.deletedAt && (
         <Alert kind="error">
           Article dans la corbeille depuis le {fmtDate(a.deletedAt)}.{" "}

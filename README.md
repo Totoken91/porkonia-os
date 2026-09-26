@@ -14,7 +14,10 @@ npm run dev
 # → http://localhost:3000
 ```
 
-Au premier lancement, `data/porkonia-db.json` est créé avec des **données de démonstration** (marquées « DÉMO », non canoniques). Pour partir d'une base vide : `PORKONIA_EMPTY_DB=1 npm run dev` (après avoir supprimé/renommé `data/`).
+Deux bases indépendantes :
+
+- **Base réelle** (`data/`, `npm run dev`) : vide au premier lancement, alimentée par le **Bureau des Importations** (Porkopédia + Bible visuelle). Voir `docs/IMPORT.md`.
+- **Base de démonstration** (`data-demo/`, `npm run dev:demo` sur le port 3001) : données inventées marquées « DÉMO », pour tester sans risque.
 
 Aucun compte Supabase ni clé n'est nécessaire. Variables facultatives : voir `.env.example`.
 
@@ -27,7 +30,12 @@ Aucun compte Supabase ni clé n'est nécessaire. Variables facultatives : voir `
 | `npm run test:e2e` | Parcours navigateur complet (serveur lancé, **base jetable** : `PORKONIA_DATA_DIR=/tmp/pk npm run dev`) |
 | `npm run backup` | Copie vérifiée de la base (option `-- --dest <dossier>`) |
 | `npm run media:backup` | Sauvegarde facultative des fichiers médias référencés (`--dry-run` possible) |
-| `npm run porkopedia:snapshot` | Instantané lecture seule du site public pour préparer l'import |
+| `npm run porkopedia:snapshot` | Instantané lecture seule du site public (sources brutes) |
+| `npm run porkopedia:extract -- --check-media` | Extraction du contenu réellement affiché (navigateur isolé) → `imports/<ext_id>/` |
+| `npm run import:report` | Rapport d'importation (Markdown), lecture seule |
+| `npm run backup:verify -- <fichier>` | Vérifie qu'une sauvegarde est restaurable (restauration d'essai en dossier temporaire) |
+| `npm run restore -- <fichier> --confirm` | Restaure une sauvegarde (l'état actuel est sauvegardé avant) |
+| `npm run test:e2e:import` | Parcours navigateur de l'import (voir en-tête du fichier) |
 
 ## Modules
 
@@ -37,9 +45,10 @@ Aucun compte Supabase ni clé n'est nécessaire. Variables facultatives : voir `
 | Registre national des individus | `/personnages` | Opérationnel : fiches, statuts canon/proposition/archive, portrait protégé, galerie, relations, historique |
 | Ministère du Lore | `/articles` | Opérationnel : Markdown + aperçu, tableaux, liens internes `[[id|texte]]`, images `media:`, alias, validation, comparaison de versions |
 | Archives audiovisuelles | `/medias` | Opérationnel : références externes/locales, doublons, variantes, vérification des liens, export CSV/JSON |
-| Bible canonique | `/bible` | Saisie manuelle avec provenance. **Import DOCX : phase 3** |
+| Bible canonique | `/bible` | Consultation par chapitres, saisie manuelle, **import DOCX** (sections, images d'origine, portraits canoniques) |
+| Bureau des Importations | `/import` | Porkopédia + Bible : prévisualisation, conflits, décisions, annulation, registre |
 | Contextes IA | `/contextes` | Opérationnel, déterministe, sans appel IA |
-| Préfecture des Publications | `/publication` | Instantanés immuables, manifeste, paquets JSON/Markdown, restauration, vérification déclarative |
+| Préfecture des Publications | `/publication` | Publication locale immuable → export → déploiement **déclaré** → vérification manuelle ou **automatique** (comparaison avec une extraction du site) |
 | Intégrité, Archives, Corbeille, Journal | menu « Outils et tâches » | Opérationnels |
 | API publique lecture seule | `/api/public/v1/…` | Opérationnelle localement (contenu publié uniquement) |
 
@@ -47,7 +56,9 @@ Aucun compte Supabase ni clé n'est nécessaire. Variables facultatives : voir `
 
 - `docs/ARCHITECTURE.md` — organisation du code et choix techniques
 - `docs/DATA_MODEL.md` — modèle de données
-- `docs/MIGRATION.md` — import de l'existant (Porkopédia, Bible DOCX), phase 2 PostgreSQL
+- `docs/IMPORT.md` — importation Porkopédia et Bible visuelle
+- `docs/IMPORT_REPORT.md` — rapport de la première importation réelle
+- `docs/MIGRATION.md` — migrations de schéma, passage futur à PostgreSQL
 - `docs/PUBLISHING.md` — circuit de publication et API
 - `docs/BACKUP.md` — sauvegardes et restauration
 - `docs/CHATGPT_SITES_INTEGRATION.md` — contraintes et procédure pour Porkopédia

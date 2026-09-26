@@ -1,4 +1,4 @@
-# Modèle de données (schéma v1)
+# Modèle de données (schéma v2)
 
 Source : `src/domain/types.ts`. Tous les identifiants sont **permanents** et préfixés : `per_` (personnage), `art_` (article), `med_` (média), `bib_` (Bible), `pub_` (publication), `rev_`, `log_`, `sav_`.
 
@@ -24,6 +24,16 @@ Source : `src/domain/types.ts`. Tous les identifiants sont **permanents** et pr�
 - **Revision** : `entityType, entityId, revision, snapshot (état complet après écriture), message, createdAt`.
 - **Publication** : `number, createdAt, note, articles[] (PublishedArticle figés), manifest {added, modified, removed, unchanged}, contentHash (SHA-256), restoredFrom, verification (non-verifiee|verifiee|echec), verificationNote, verifiedAt`.
 - **OperationLog**, **BackupRecord**.
+- **ImportBatch** (v2) : `kind (porkopedia|bible-docx), sourceId, sourceHash, summary, decisions, changes[{entityType, entityId, action (cree|modifie|restaure), revisionBefore, revisionAfter}], status (appliquee|annulee), undoReport`.
+- **SourceDocument** (v2) : `filename, sha256, bytes, storedAt (data/originals/<sha>.docx)`.
+
+## Ajouts v2 sur les entités
+
+- **Article** : `format (markdown|html)`, `external {source: porkopedia, id, contentHash, origin, modifiedBy[], importedRevision, baseUrl, extractionId}`, `protection {reason}`, `siteSeen {contentHash, at, extractionId}`. Un article dont `revision > external.importedRevision` a été modifié localement.
+- **Media** : `nature (reference-source|generation|indeterminee)`, `external {source, originalRef, foundIn[], displayed, documentSha256, originalFilename}`.
+- **Character** : `external {porkopediaId, bibleName}`.
+- **BibleEntry** : `external {source: bible-docx, documentSha256, sectionPath, textHash, importedRevision}`.
+- **Publication** : `exportedAt`, `deployment {declaredAt, note}` (déclaration humaine), `verification {status, method (manuelle|automatique), at, note, details[], extractionId}`. `PublishedArticle.externalId`, `format`.
 
 ## Invariants (appliqués dans `src/domain/ops.ts`, testés)
 
@@ -34,3 +44,5 @@ Source : `src/domain/types.ts`. Tous les identifiants sont **permanents** et pr�
 5. Restaurer une révision = copier l'ancien état dans une **nouvelle** révision.
 6. Une publication n'inclut jamais un brouillon ; un article publié repassé en brouillon garde sa dernière version publiée.
 7. Restaurer une publication = nouvelle publication identique ; les brouillons ne sont pas touchés.
+8. Un portrait de nature `reference-source` ne peut être remplacé que par une autre référence source ; son média ne peut être déclassé.
+9. Vérification manuelle d'une publication : impossible sans déploiement déclaré ; constat obligatoire.

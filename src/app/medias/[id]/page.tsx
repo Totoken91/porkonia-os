@@ -67,8 +67,12 @@ export default async function MediaDetail({ params }: { params: Promise<{ id: st
               <tr><td className="pr-2 align-top font-bold">Référence</td><td className="break-all font-mono"><a href={url} target="_blank" rel="noreferrer" className="text-[#1d3f8f] underline">{m.ref}</a></td></tr>
               <tr><td className="pr-2 font-bold">Dimensions</td><td>{m.width ? `${m.width} × ${m.height} px` : "—"}</td></tr>
               <tr><td className="pr-2 font-bold">Format</td><td>{m.format ?? "—"}</td></tr>
+              <tr><td className="pr-2 font-bold">Nature</td><td>{m.nature === "reference-source" ? "Référence source (non modifiée)" : m.nature === "generation" ? "Génération" : "Indéterminée"}</td></tr>
+              {m.external && (
+                <tr><td className="pr-2 align-top font-bold">Origine</td><td className="break-all">{m.external.source} — <code>{m.external.originalRef}</code>{m.external.originalFilename ? ` (fichier source : ${m.external.originalFilename})` : ""}{m.external.displayed === false ? " — non affichée lors de l'extraction" : ""}</td></tr>
+              )}
               <tr><td className="pr-2 font-bold">SHA-256</td><td className="break-all font-mono">{m.sha256 ?? "non calculée"}</td></tr>
-              <tr><td className="pr-2 font-bold">Sauvegarde</td><td className="break-all">{m.backupPath ?? "aucune copie de sauvegarde"}</td></tr>
+              <tr><td className="pr-2 font-bold">Sauvegarde</td><td className="break-all">{m.location === "externe" ? "Référence externe : ce catalogue N'EST PAS une copie du fichier (voir npm run media:backup)." : m.external?.source === "bible-docx" ? "Copie octet pour octet extraite du DOCX original (conservé)." : m.backupPath ?? "aucune copie de sauvegarde"}</td></tr>
               <tr>
                 <td className="pr-2 font-bold">Vérification</td>
                 <td>
