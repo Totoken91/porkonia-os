@@ -7,10 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
 import { useSonTv } from "./sonTv";
-import { at, live, voiceAt } from "./timeline";
-
-/** Décalage entre chaînes (s), pour qu'elles ne commencent pas toutes leur grille ensemble. */
-const DECALAGE = 97;
+import { DECALAGE, at, live, voiceAt } from "./timeline";
 
 export function ChannelPork() {
   const { pack, str, signal, settings, playSound } = useOs();

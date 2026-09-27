@@ -95,6 +95,13 @@ try {
     // Navigateur → notice Douzi → lien interne
     await page.getByTestId("icon-d-nav").dblclick();
     await page.getByTestId("window-navigateur").waitFor();
+    // Portail : une du jour, sondage (le vote est compté, ceux des voisins aussi), rubrique → index
+    await page.getByTestId("portail-une").waitFor();
+    await page.getByTestId("portail-voter").click();
+    await page.getByTestId("portail-resultats").waitFor();
+    await page.locator("[data-testid=portail-compteur] .chiffres i").first().waitFor();
+    await page.locator(".portail .rubriques .lien").first().click();
+    await page.locator(".notice.index h1").waitFor();
     await page.getByTestId("nav-url").fill("porko://porkopedia/douzi");
     await page.getByTestId("nav-url").press("Enter");
     await page.locator(".notice h1", { hasText: "Sofiane Douzi" }).waitFor();

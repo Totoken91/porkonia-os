@@ -162,6 +162,26 @@ export interface Channel {
   grid: string[];
 }
 
+/** Portail officiel PigNet (page d'accueil du navigateur). */
+export interface Portal {
+  /** Compteur de visites : valeur au 1er janvier 2000, puis tant de visites par jour. */
+  compteur: { base: number; parJour: number };
+  /** Saint du jour, tiré selon la date. */
+  saints: string[];
+  /** Dépêche défilante « Dernière minute ». */
+  flash: string;
+  /** Services de l'État (colonne de gauche) : une adresse PigNet ou une action. */
+  services: { label: string; note: string; url?: string; action?: ActionRef }[];
+  sondage: { question: string; options: string[]; resultats: number[]; merci: string };
+  bourse: { nom: string; base: number; unite: string }[];
+  meteo: { villes: string[]; ciels: string[]; mousses: string[] };
+  annonces: string[];
+  pub: { image: string; texte: string; cta: string };
+  badges: string[];
+  construction: string;
+  pied: string;
+}
+
 /* ---------------------------- Actions & règles ---------------------------- */
 
 /** Action système déclenchable par une icône, un bouton de dialogue ou une règle. */
@@ -240,6 +260,7 @@ export interface ContentPack {
   updates: ForcedUpdate[];
   programs: Program[];
   channels: Channel[];
+  portal: Portal;
   rules: EventRule[];
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;

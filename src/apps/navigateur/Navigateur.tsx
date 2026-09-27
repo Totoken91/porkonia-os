@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { useMenuCommands, useOs, useWin } from "@/os/context";
-import { HOME, articleUrl, parseUrl, search, searchUrl } from "./url";
+import { DECALAGE, live } from "@/apps/channel-pork/timeline";
+import { compteur, cours, duJour, jour, meteo } from "./portail";
+import { HOME, articleUrl, parseUrl, rubriqueUrl, search, searchUrl } from "./url";
 
 interface Article {
   id: string;
@@ -80,7 +82,7 @@ export function Navigateur() {
       </div>
       <div className="pk-body page-web" onClick={onLink} data-testid="nav-page">
         {route.kind === "accueil" && <Accueil go={go} />}
-        {route.kind === "index" && <Index go={go} />}
+        {route.kind === "index" && <Index go={go} section={route.section} />}
         {route.kind === "recherche" && <Recherche q={route.q} go={go} />}
         {route.kind === "article" && <Notice id={route.id} go={go} />}
         {route.kind === "etranger" && <Erreur titre="Internet étranger" texte={str("nav.etranger")} code="PK-012" />}
@@ -95,57 +97,258 @@ export function Navigateur() {
 }
 
 function Accueil({ go }: { go(u: string): void }) {
-  const { str, pack } = useOs();
+  const { str, pack, runAction, openApp, signal } = useOs();
+  const portail = pack.portal;
   const [q, setQ] = useState("");
+  const [portee, setPortee] = useState<"tout" | "porkopedia" | "etranger">("tout");
+  const [vote, setVote] = useState<number | null>(null);
+  const [choix, setChoix] = useState(0);
+  const [maintenant, setMaintenant] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setMaintenant(new Date()), 15_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const une = ARTICLES[jour(maintenant) % ARTICLES.length]!;
+  const rubriques = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of CATALOG) if (c.section) m.set(c.section, (m.get(c.section) ?? 0) + 1);
+    return [...m.entries()].sort((x, y) => y[1] - x[1]).slice(0, 12);
+  }, []);
+  const direct = pack.channels.map((c, i) => ({ c, d: live(c, pack.programs, maintenant.getTime() / 1000, i * DECALAGE) }));
+  const date = maintenant.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const rechercher = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (portee === "etranger") return go(`https://${q.trim() || "ailleurs"}.etranger`);
+    if (q.trim()) go(searchUrl(q));
+  };
+
   return (
     <div className="portail">
-      <header>
-        <img src="/brand/embleme-128.png" alt="" width={72} height={72} />
-        <div>
+      <header className="portail-tete">
+        <img src="/brand/embleme-128.png" alt="" width={64} height={64} />
+        <div className="portail-titre">
           <h1>{str("nav.accueil.titre")}</h1>
           <p>{str("nav.accueil.sousTitre")}</p>
         </div>
+        <div className="portail-date">
+          <b>{date}</b>
+          <span>{str("portail.saint", { saint: duJour(portail.saints, maintenant) })}</span>
+        </div>
       </header>
-      <form className="portail-recherche" onSubmit={(e) => { e.preventDefault(); if (q.trim()) go(searchUrl(q)); }}>
+
+      <div className="portail-flash" aria-label="Dernière minute">
+        <span>{portail.flash.repeat(2)}</span>
+      </div>
+
+      <form className="portail-recherche" onSubmit={rechercher}>
         <input className="pk-input" placeholder={str("nav.recherche")} value={q} onChange={(e) => setQ(e.target.value)} data-testid="nav-search" />
         <button className="pk-btn primary">Rechercher</button>
+        <span className="portail-portee">
+          {(["tout", "porkopedia", "etranger"] as const).map((k) => (
+            <label key={k}>
+              <input type="radio" name="portee" checked={portee === k} onChange={() => setPortee(k)} /> {str(`portail.portee.${k}`)}
+            </label>
+          ))}
+        </span>
       </form>
-      <div className="depeches">
-        <b>{str("nav.depeches")}</b>
+
+      <div className="portail-grille">
+        <aside>
+          <section className="cadre">
+            <h3>{str("portail.rubriques")}</h3>
+            <ul className="rubriques">
+              {rubriques.map(([s, n]) => (
+                <li key={s}>
+                  <button className="lien" onClick={() => go(rubriqueUrl(s))}>{s}</button> <small>({n})</small>
+                </li>
+              ))}
+            </ul>
+            <button className="lien plus" onClick={() => go("porko://porkopedia")}>{str("nav.index")}…</button>
+          </section>
+          <section className="cadre">
+            <h3>{str("portail.services")}</h3>
+            <ul className="services">
+              {portail.services.map((sv) => (
+                <li key={sv.label}>
+                  <button className="lien" onClick={() => (sv.url ? go(sv.url) : sv.action && runAction(sv.action))}>{sv.label}</button>
+                  <small>{sv.note}</small>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </aside>
+
+        <main>
+          <section className="cadre une" data-testid="portail-une">
+            <h3>{str("portail.une")}</h3>
+            <div className="une-corps">
+              {une.image && <img src={une.image} alt="" referrerPolicy="no-referrer" />}
+              <div>
+                <h2>{une.title}</h2>
+                <p className="une-sous">{une.sub}</p>
+                <p>{une.lead}</p>
+                <button className="pk-btn small" onClick={() => go(articleUrl(une.id))}>{str("portail.lire")} ▸</button>
+              </div>
+            </div>
+          </section>
+          <section className="cadre depeches">
+            <h3>{str("nav.depeches")}</h3>
+            <ul>
+              {pack.news.map((n) => {
+                const [rub, ...reste] = n.split(" — ");
+                return (
+                  <li key={n}>{reste.length ? <><b>{rub}</b> — {reste.join(" — ")}</> : n}</li>
+                );
+              })}
+            </ul>
+          </section>
+          <section className="cadre">
+            <h3>{str("portail.notices")}</h3>
+            <ul className="vignettes">
+              {ARTICLES.map((a) => (
+                <li key={a.id}>
+                  <a data-article={a.id} href="#">
+                    {a.image ? <img src={a.image} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span className="sans-image" />}
+                    <b>{a.title}</b>
+                    <span>{a.sub}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </main>
+
+        <aside>
+          <section className="cadre direct">
+            <h3>{str("portail.direct")}</h3>
+            <ul>
+              {direct.map(({ c, d }, i) => (
+                <li key={c.id}>
+                  <button className="lien" onClick={() => openApp("channel-pork")}>
+                    <span className="direct-num">{String(i + 1).padStart(2, "0")}</span> {d.program.title}
+                  </button>
+                  <small>{c.name} · {str("tv.aSuivre").toLowerCase()} : {d.suivant.title}</small>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="cadre sondage">
+            <h3>{str("portail.sondage")}</h3>
+            <p><b>{portail.sondage.question}</b></p>
+            {vote === null ? (
+              <form onSubmit={(e) => { e.preventDefault(); setVote(choix); }}>
+                {portail.sondage.options.map((o, i) => (
+                  <label key={o}>
+                    <input type="radio" name="sondage" checked={choix === i} onChange={() => setChoix(i)} /> {o}
+                  </label>
+                ))}
+                <button className="pk-btn small" data-testid="portail-voter">{str("portail.voter")}</button>
+              </form>
+            ) : (
+              <div className="resultats" data-testid="portail-resultats">
+                {portail.sondage.options.map((o, i) => (
+                  <div key={o}>
+                    <span>{o}</span>
+                    <i style={{ width: `${Math.min(100, portail.sondage.resultats[i]!)}%` }} />
+                    <em>{portail.sondage.resultats[i]} %</em>
+                  </div>
+                ))}
+                <small>{portail.sondage.merci}</small>
+              </div>
+            )}
+          </section>
+          <section className="cadre bourse">
+            <h3>{str("portail.bourse")}</h3>
+            <table>
+              <tbody>
+                {cours(portail.bourse, maintenant).map((x) => (
+                  <tr key={x.nom}>
+                    <td>{x.nom}</td>
+                    <td className="n">{x.valeur.toLocaleString("fr-FR")} {x.unite}</td>
+                    <td className={`n ${x.variation >= 0 ? "hausse" : "baisse"}`}>{x.variation >= 0 ? "▲" : "▼"} {Math.abs(x.variation).toLocaleString("fr-FR")} %</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+          <section className="cadre meteo">
+            <h3>{str("portail.meteo")}</h3>
+            <ul>
+              {meteo(portail.meteo, maintenant).map((m) => (
+                <li key={m.ville}>
+                  <b>{m.ville}</b> · {m.ciel}, mousse {m.mousse}
+                </li>
+              ))}
+            </ul>
+          </section>
+          <button className="portail-pub" onClick={() => signal("pub:cta")} aria-label={str("portail.pub")}>
+            <img src={portail.pub.image} alt="" />
+            <span>
+              <b>{portail.pub.texte}</b>
+              <u>{portail.pub.cta}</u>
+            </span>
+          </button>
+        </aside>
+      </div>
+
+      <section className="cadre annonces">
+        <h3>{str("portail.annonces")}</h3>
         <ul>
-          {pack.news.slice(0, 6).map((n) => (
-            <li key={n}>{n}</li>
+          {portail.annonces.map((a) => (
+            <li key={a}>{a}</li>
           ))}
         </ul>
-      </div>
-      <h2>Porkopédia — notices synchronisées sur votre poste</h2>
-      <ul className="vignettes">
-        {ARTICLES.map((a) => (
-          <li key={a.id}>
-            <a data-article={a.id} href="#">
-              {a.image && <img src={a.image} alt="" loading="lazy" referrerPolicy="no-referrer" />}
-              <b>{a.title}</b>
-              <span>{a.sub}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      <p className="portail-pied">
-        <button className="lien" onClick={() => go("porko://porkopedia")}>{str("nav.index")}</button> · {CATALOG.length} notices recensées · Source : {porkopedia.source}
-      </p>
+      </section>
+
+      <footer className="portail-pied">
+        <p className="construction">
+          <span>{portail.construction}</span>
+        </p>
+        <p className="badges">
+          {portail.badges.map((b) => (
+            <span key={b}>{b}</span>
+          ))}
+        </p>
+        <p className="compteur" data-testid="portail-compteur">
+          {str("portail.compteur.avant")}{" "}
+          <span className="chiffres">
+            {String(compteur(portail.compteur, maintenant))
+              .padStart(9, "0")
+              .split("")
+              .map((c, i) => (
+                <i key={i}>{c}</i>
+              ))}
+          </span>
+          {str("portail.compteur.apres")}
+        </p>
+        <p>
+          {str("portail.maj")} · <button className="lien" onClick={() => go("porko://porkopedia")}>{str("nav.index")}</button> · {CATALOG.length} notices recensées · Source : {porkopedia.source}
+        </p>
+        <p>{portail.pied}</p>
+      </footer>
     </div>
   );
 }
 
-function Index({ go }: { go(u: string): void }) {
+function Index({ go, section }: { go(u: string): void; section?: string }) {
   const { str } = useOs();
+  const racine = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!section) return;
+    const h = [...(racine.current?.querySelectorAll("h2") ?? [])].find((x) => x.textContent === section);
+    // Défilement de la page seule (jamais de l'écran autour).
+    const page = h?.closest(".page-web");
+    if (h && page) page.scrollTop += h.getBoundingClientRect().top - page.getBoundingClientRect().top - 6;
+  }, [section]);
   const sections = useMemo(() => {
     const m = new Map<string, typeof CATALOG>();
     for (const c of CATALOG) m.set(c.section || "Divers", [...(m.get(c.section || "Divers") ?? []), c]);
     return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr"));
   }, []);
   return (
-    <div className="notice index">
+    <div className="notice index" ref={racine}>
       <h1>{str("nav.index")}</h1>
       <p>Les notices en gras sont consultables sur votre poste. Les autres font l'objet d'une demande de synchronisation.</p>
       {sections.map(([s, items]) => (

@@ -4,6 +4,7 @@ import { porkosPack } from "@/content/packs/porkos";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { APPS } from "@/apps/registry";
 import { parseUrl, search } from "@/apps/navigateur/url";
+import { compteur, cours, duJour, jour, meteo } from "@/apps/navigateur/portail";
 import { at, gridOf, live, loopLength, programLength, voiceAt } from "@/apps/channel-pork/timeline";
 import { existsSync } from "node:fs";
 import { checkPassword } from "@/components/Login";
@@ -171,5 +172,37 @@ describe("Exécuter", async () => {
     expect(resolveCommand("defrag c:", porkosPack.run.aliases, porkosPack.apps)).toBeNull();
     for (const a of Object.values(porkosPack.run.aliases)) if ("app" in a) expect(porkosPack.apps.some((x) => x.id === a.app)).toBe(true);
     expect(resolveCommand("  Format   C: ", porkosPack.run.aliases, porkosPack.apps)).toEqual({ action: { type: "fatal" } });
+  });
+});
+
+describe("portail PigNet", () => {
+  const d = new Date(2026, 8, 27, 11, 30);
+  it("change chaque jour mais reste le même pour tous le même jour", () => {
+    expect(jour(new Date(2000, 0, 1, 23))).toBe(0);
+    expect(jour(d)).toBe(jour(new Date(2026, 8, 27, 0, 1)));
+    expect(duJour(porkosPack.portal.saints, d)).toBe(duJour(porkosPack.portal.saints, new Date(2026, 8, 27, 22)));
+    const saints = new Set(Array.from({ length: 30 }, (_, i) => duJour(porkosPack.portal.saints, new Date(2026, 8, i + 1))));
+    expect(saints.size).toBeGreaterThan(3);
+  });
+  it("fait monter le compteur de visites", () => {
+    const c = porkosPack.portal.compteur;
+    expect(compteur(c, new Date(2026, 8, 27, 12))).toBeGreaterThan(compteur(c, new Date(2026, 8, 27, 11)));
+    expect(compteur(c, new Date(2026, 8, 28, 0))).toBeGreaterThanOrEqual(compteur(c, new Date(2026, 8, 27, 23, 59, 59)));
+  });
+  it("cote la bourse et annonce la météo de chaque ville", () => {
+    const b = cours(porkosPack.portal.bourse, d);
+    expect(b).toHaveLength(porkosPack.portal.bourse.length);
+    for (const x of b) {
+      expect(x.valeur).toBeGreaterThan(0);
+      expect(Math.abs(x.variation)).toBeLessThan(60);
+    }
+    expect(cours(porkosPack.portal.bourse, d)).toEqual(b);
+    const m = meteo(porkosPack.portal.meteo, d);
+    expect(m.map((x) => x.ville)).toEqual(porkosPack.portal.meteo.villes);
+    for (const x of m) expect(porkosPack.portal.meteo.ciels).toContain(x.ciel);
+  });
+  it("oriente la recherche et les rubriques vers les bonnes pages", () => {
+    expect(parseUrl("porko://porkopedia?rubrique=Villes%20de%20Porkonia")).toEqual({ kind: "index", section: "Villes de Porkonia" });
+    for (const s of porkosPack.portal.services) if (s.url) expect(["index", "etranger", "article", "accueil"]).toContain(parseUrl(s.url).kind);
   });
 });

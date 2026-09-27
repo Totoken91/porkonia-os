@@ -1,7 +1,7 @@
 /** Adresses PigNet (porko://…) → pages. Logique pure, testée. */
 export type Route =
   | { kind: "accueil" }
-  | { kind: "index" }
+  | { kind: "index"; section?: string }
   | { kind: "article"; id: string }
   | { kind: "recherche"; q: string }
   | { kind: "etranger"; url: string }
@@ -16,13 +16,18 @@ export function parseUrl(raw: string): Route {
   const m = /^porko:\/\/([^/?#]+)\/?([^?#]*)(?:\?(.*))?$/i.exec(url);
   if (!m) return { kind: "recherche", q: url };
   const [, host = "", path = "", query = ""] = m;
-  if (host === "porkopedia") return path ? { kind: "article", id: decodeURIComponent(path) } : { kind: "index" };
+  if (host === "porkopedia") {
+    if (path) return { kind: "article", id: decodeURIComponent(path) };
+    const section = new URLSearchParams(query).get("rubrique");
+    return section ? { kind: "index", section } : { kind: "index" };
+  }
   if (host === "recherche") return { kind: "recherche", q: new URLSearchParams(query).get("q") ?? "" };
   return { kind: "inconnu", url };
 }
 
 export const articleUrl = (id: string) => `porko://porkopedia/${id}`;
 export const searchUrl = (q: string) => `porko://recherche?q=${encodeURIComponent(q)}`;
+export const rubriqueUrl = (section: string) => `porko://porkopedia?rubrique=${encodeURIComponent(section)}`;
 
 const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 

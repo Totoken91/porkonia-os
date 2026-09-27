@@ -28,6 +28,9 @@ export function voiceAt(p: Program, t: number): { index: number; src: string; of
   return found;
 }
 
+/** Décalage entre chaînes (s), pour qu'elles ne commencent pas toutes leur grille ensemble. */
+export const DECALAGE = 97;
+
 /** Programmes d'une chaîne, dans l'ordre de sa grille (les identifiants inconnus sont ignorés). */
 export function gridOf(c: Channel, programs: Program[]): Program[] {
   return c.grid.map((id) => programs.find((p) => p.id === id)).filter((p): p is Program => !!p);
