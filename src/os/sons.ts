@@ -1,9 +1,10 @@
 /**
- * Sons système synthétisés (aucun fichier audio) : carillon de démarrage, alertes, arrêt,
- * claquement du tube, démagnétisation et neige du téléviseur entre deux chaînes. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
+ * Sons système : carillon de démarrage, alertes, arrêt, démagnétisation et neige du téléviseur sont synthétisés ;
+ * la machine elle-même (interrupteur, ventilateur, disque dur, lecteur de disquette, tube, bip du POST) joue des
+ * échantillons pré-calculés (`public/audio/pc/`), avec la synthèse en secours s'ils ne chargent pas. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
  * avant cela, les appels sont silencieusement ignorés.
  */
-export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque" | "neige" | "demarrage-pc";
+export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque" | "neige" | "demarrage-pc" | "disquette";
 
 let ctx: AudioContext | null = null;
 
@@ -31,6 +32,62 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", liberer, true);
 }
 
+/** Échantillons de la machine, téléchargés dès le chargement de la page et décodés au premier besoin. */
+const PC = "/audio/pc/";
+const ECHANTILLONS = ["demarrage-pc.mp3", "ecran-allumage.mp3", "bip-post.mp3", "disquette.mp3", "disque-0.mp3", "disque-1.mp3", "disque-2.mp3", "disque-3.mp3", "ambiance.wav"];
+const octets = new Map<string, Promise<ArrayBuffer | null>>();
+const decodes = new Map<string, Promise<AudioBuffer | null>>();
+
+function telecharger(nom: string) {
+  let p = octets.get(nom);
+  if (!p) {
+    p = fetch(PC + nom).then((r) => (r.ok ? r.arrayBuffer() : null)).catch(() => null);
+    octets.set(nom, p);
+  }
+  return p;
+}
+
+if (typeof window !== "undefined" && typeof fetch === "function") setTimeout(() => ECHANTILLONS.forEach(telecharger), 300);
+
+function echantillon(a: AudioContext, nom: string) {
+  let p = decodes.get(nom);
+  if (!p) {
+    p = telecharger(nom).then((b) => (b ? a.decodeAudioData(b.slice(0)).catch(() => null) : null));
+    decodes.set(nom, p);
+  }
+  return p;
+}
+
+/** Joue un échantillon vers `sortie` (ou les haut-parleurs) ; `secours` s'il est introuvable. Rend la source lancée. */
+async function lire(nom: string, volume: number, secours?: () => void, sortie?: AudioNode, boucle = false) {
+  const a = audio();
+  if (!a) return null;
+  const buf = await echantillon(a, nom);
+  if (!buf) {
+    secours?.();
+    return null;
+  }
+  const src = a.createBufferSource();
+  src.buffer = buf;
+  src.loop = boucle;
+  const g = a.createGain();
+  g.gain.value = volume;
+  src.connect(g).connect(sortie ?? a.destination);
+  src.start();
+  return src;
+}
+
+/** Une seule rafale de disque à la fois : la tête ne cherche pas deux secteurs en même temps. */
+let disqueOccupeJusqua = 0;
+function rafaleDisque(volume: number, sortie?: AudioNode) {
+  const a = audio();
+  if (!a || a.currentTime < disqueOccupeJusqua) return;
+  disqueOccupeJusqua = a.currentTime + 0.5;
+  void lire(`disque-${Math.floor(Math.random() * 4)}.mp3`, volume * (0.6 + Math.random() * 0.4), () => {
+    for (let i = 0; i < 3; i++) setTimeout(() => bruit(0.018, volume * 0.9, 2600), i * (40 + Math.random() * 60));
+  }, sortie);
+}
+
 /** Tampon de bruit (blanc ou brun) réutilisable, bouclé pour les sons continus. */
 function tamponBruit(a: AudioContext, secondes: number, brun: boolean) {
   const buf = a.createBuffer(1, Math.floor(a.sampleRate * secondes), a.sampleRate);
@@ -45,10 +102,10 @@ function tamponBruit(a: AudioContext, secondes: number, brun: boolean) {
 }
 
 /**
- * Démarrage du PC : le ventilateur prend de la vitesse, le disque dur monte en régime (sifflement qui grimpe),
+ * Secours synthétique du démarrage du PC : le ventilateur prend de la vitesse, le disque dur monte en régime (sifflement qui grimpe),
  * puis quelques claquements de tête. Programmé même si le son n'est pas encore libéré : il part au premier geste.
  */
-function demarragePc(volume: number) {
+function demarragePcSynth(volume: number) {
   const a = audio();
   if (!a) return;
   const t0 = a.currentTime + 0.05;
@@ -106,8 +163,9 @@ function demarragePc(volume: number) {
 let ambianceEnCours: { arreter(): void } | null = null;
 
 /**
- * Ambiance de fond tant que la machine est allumée : souffle du ventilateur, ronflement du secteur (50 Hz)
- * et sifflement très aigu du transformateur du tube (15,7 kHz). `volume` 0 ou machine éteinte : on arrête.
+ * Ambiance de fond tant que la machine est allumée : boucle enregistrée (ventilateur, ronflement du secteur,
+ * sifflement du transformateur du tube) et, de temps en temps, le disque dur qui s'active tout seul comme il
+ * le faisait toujours, sans raison connue. `volume` 0 ou machine éteinte : on arrête.
  */
 export function ambiance(allumee: boolean, volume = 0.5) {
   if (!allumee || volume <= 0) {
@@ -123,6 +181,42 @@ export function ambiance(allumee: boolean, volume = 0.5) {
   sortie.gain.setValueAtTime(0.0001, t0);
   sortie.gain.exponentialRampToValueAtTime(volume, t0 + 2.5);
   sortie.connect(a.destination);
+  let arrete = false;
+  let boucle: AudioBufferSourceNode | null = null;
+  let secours: { arreter(): void } | null = null;
+  let minuterie: ReturnType<typeof setTimeout> | undefined;
+  const grattement = () => {
+    minuterie = setTimeout(() => {
+      if (arrete) return;
+      rafaleDisque(0.5, sortie);
+      if (Math.random() < 0.35) setTimeout(() => !arrete && rafaleDisque(0.4, sortie), 600 + Math.random() * 500);
+      grattement();
+    }, 6000 + Math.random() * 16000);
+  };
+  void lire("ambiance.wav", 1, () => {
+    if (!arrete) secours = ambianceSynth(a, sortie);
+  }, sortie, true).then((src) => {
+    if (arrete) src?.stop();
+    else boucle = src;
+  });
+  grattement();
+  ambianceEnCours = {
+    arreter() {
+      arrete = true;
+      clearTimeout(minuterie);
+      const t = a.currentTime;
+      sortie.gain.cancelScheduledValues(t);
+      sortie.gain.setValueAtTime(Math.max(0.0001, sortie.gain.value), t);
+      sortie.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+      boucle?.stop(t + 0.9);
+      secours?.arreter();
+    },
+  };
+}
+
+/** Secours synthétique de l'ambiance : souffle brun, 50 Hz et ses harmoniques, 15,7 kHz. */
+function ambianceSynth(a: AudioContext, sortie: AudioNode) {
+  const t0 = a.currentTime + 0.05;
   const sources: AudioScheduledSourceNode[] = [];
   const vent = a.createBufferSource();
   vent.buffer = tamponBruit(a, 4, true);
@@ -144,13 +238,9 @@ export function ambiance(allumee: boolean, volume = 0.5) {
     sources.push(o);
   }
   for (const src of sources) src.start(t0);
-  ambianceEnCours = {
+  return {
     arreter() {
-      const t = a.currentTime;
-      sortie.gain.cancelScheduledValues(t);
-      sortie.gain.setValueAtTime(Math.max(0.0001, sortie.gain.value), t);
-      sortie.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
-      for (const src of sources) src.stop(t + 0.9);
+      for (const src of sources) src.stop(a.currentTime + 0.9);
     },
   };
 }
@@ -237,18 +327,23 @@ export function jouer(son: Son, volume = 0.7) {
         volume,
       );
     case "allumage":
-      bruit(0.12, volume, 400);
-      // Sifflement du transformateur ligne (15,7 kHz) : les plus jeunes l'entendront.
-      return jouerNotes([{ f: 15734, t: 0.05, d: 1.6, g: 0.012, type: "sine" }, { f: 60, t: 0, d: 0.25, g: 0.2, type: "sine" }], volume);
+      // Claquement du tube, crépitement de la haute tension et sifflement du transformateur ligne (15,7 kHz).
+      return void lire("ecran-allumage.mp3", volume, () => {
+        bruit(0.12, volume, 400);
+        jouerNotes([{ f: 15734, t: 0.05, d: 1.6, g: 0.012, type: "sine" }, { f: 60, t: 0, d: 0.25, g: 0.2, type: "sine" }], volume);
+      });
     case "bip":
-      // Bip du POST : un seul, court, tout va bien (ou presque).
-      return jouerNotes([{ f: 1000, t: 0, d: 0.16, g: 0.08, type: "square" }], volume);
+      // Bip du POST par le haut-parleur de la carte mère : un seul, court, tout va bien (ou presque).
+      return void lire("bip-post.mp3", volume, () => jouerNotes([{ f: 1000, t: 0, d: 0.16, g: 0.08, type: "square" }], volume));
+    case "disquette":
+      // Le lecteur A: vérifie qu'il n'y a pas de disquette, comme chaque fois depuis 1987.
+      return void lire("disquette.mp3", volume);
     case "disque":
-      // Tête de lecture qui cherche : quelques clics secs filtrés.
-      for (let i = 0; i < 3; i++) setTimeout(() => bruit(0.018, volume * 0.9, 2600), i * (40 + Math.random() * 60));
-      return;
+      // Tête de lecture qui cherche.
+      return rafaleDisque(volume);
     case "demarrage-pc":
-      return demarragePc(volume);
+      // Interrupteur, relais de l'alimentation, ventilateur qui prend son régime, disque dur qui monte et cherche.
+      return void lire("demarrage-pc.mp3", volume, () => demarragePcSynth(volume));
     case "neige":
       // Souffle blanc entre deux chaînes, à peine filtré.
       return bruit(0.32, volume * 0.7, 5200);
