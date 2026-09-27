@@ -40,7 +40,8 @@ const poserMarque = (on: boolean) => {
 
 export function PorkOS({ pack }: { pack: ContentPack }) {
   const [phase, setPhase] = useState<Phase>({ kind: "boot" });
-  const [power, setPower] = useState(true);
+  // La machine attend qu'on appuie sur le bouton : ce clic libère aussi le son du navigateur.
+  const [power, setPower] = useState(false);
   const [bootId, setBootId] = useState(0);
   const [brutal, setBrutal] = useState<boolean | null>(null);
   const [settings, setSettingsState] = useState<Settings>(DEFAULT_SETTINGS);

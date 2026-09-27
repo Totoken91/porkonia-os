@@ -3,7 +3,7 @@
  * Moniteur d'État 14" : boîtier beige, tube cathodique 800×600 (lignes, grille RGB, reflet, bombé),
  * bouton marche/arrêt, démagnétisation et voyant. Mis à l'échelle de la fenêtre du navigateur.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
 import { ambiance, jouer } from "@/os/sons";
@@ -29,7 +29,10 @@ interface Props {
 export function Monitor({ children, crt, power, onPower, sons, nette, str }: Props) {
   const [box, setBox] = useState<{ vw: number; vh: number; dpr: number } | null>(null);
   const [ignore, setIgnore] = useState(false);
-  const [tube, setTube] = useState<Tube>("allumage");
+  const [tube, setTube] = useState<Tube>(power ? "allumage" : "eteint");
+  // Tant qu'on n'a jamais allumé, une invitation clignote à côté du bouton d'alimentation.
+  const [jamaisAllume, setJamaisAllume] = useState(!power);
+  const premier = useRef(true);
   const [degauss, setDegauss] = useState(false);
 
   useEffect(() => {
@@ -40,7 +43,11 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   }, []);
 
   useEffect(() => {
+    const debut = premier.current;
+    premier.current = false;
+    if (!power && debut) return; // éteinte au chargement : rien à animer
     if (power) {
+      setJamaisAllume(false);
       setTube("allumage");
       if (sons) {
         jouer("allumage", 0.6);
@@ -95,6 +102,12 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   );
   if (!box) return <div className="piece" />;
   const portrait = box.vh > box.vw && box.vw < 600;
+
+  // Un bouton physique ne garde pas le focus : sinon Espace (pour passer le BIOS) rééteindrait la machine.
+  const appuyer = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.currentTarget.blur();
+    onPower();
+  };
 
   const demagnetiser = () => {
     if (degauss || !power) return;
@@ -151,7 +164,12 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
                     <i />
                   </button>
                   <span className={`voyant${power ? " allume" : ""}`} aria-hidden="true" />
-                  <button className="bouton-marche" onClick={onPower} aria-pressed={power} title={str("moniteur.alimentation")} aria-label={str("moniteur.alimentation")} data-testid="power">
+                  {jamaisAllume && !power && (
+                    <span className="invite-allumer" aria-hidden="true">
+                      {str("moniteur.allumer")} ▸
+                    </span>
+                  )}
+                  <button className="bouton-marche" onClick={appuyer} aria-pressed={power} title={str("moniteur.alimentation")} aria-label={str("moniteur.alimentation")} data-testid="power">
                     <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
                       <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
@@ -162,8 +180,13 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
           </div>
         </div>
       </div>
+      {!bezel && jamaisAllume && !power && (
+        <span className="invite-allumer flottant" aria-hidden="true">
+          {str("moniteur.allumer")} ▸
+        </span>
+      )}
       {!bezel && (
-        <button className="bouton-marche flottant" onClick={onPower} aria-pressed={power} aria-label={str("moniteur.alimentation")} data-testid="power">
+        <button className="bouton-marche flottant" onClick={appuyer} aria-pressed={power} aria-label={str("moniteur.alimentation")} data-testid="power">
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>

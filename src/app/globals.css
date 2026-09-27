@@ -188,6 +188,10 @@
   }
   .bouton-marche[aria-pressed="true"] { transform: translateY(2px); box-shadow: 0 1px 0 #9f9379, inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px #b6aa8d; }
   .bouton-marche.flottant { position: fixed; right: 10px; bottom: 10px; z-index: 9998; }
+  .invite-allumer { font: italic 12px/1 var(--font-serif); color: #7c6f58; white-space: nowrap; animation: invite 1.4s ease-in-out infinite; }
+  .invite-allumer.flottant { position: fixed; right: 52px; bottom: 20px; z-index: 9998; color: #d8ccb0; }
+  @keyframes invite { 50% { opacity: 0.25; } }
+  @media (prefers-reduced-motion: reduce) { .invite-allumer { animation: none; } }
   .rotation {
     position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
     background: rgba(14, 12, 10, 0.93); color: var(--color-creme); text-align: center; font-size: 15px; line-height: 1.45;

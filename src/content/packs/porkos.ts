@@ -1480,6 +1480,7 @@ export const porkosPack: ContentPack = {
     "config.sons.tester": "Tester",
     "barre.sons": "Sons système : cliquez pour couper (le Ministère entendra quand même)",
     "moniteur.alimentation": "Marche / arrêt",
+    "moniteur.allumer": "Appuyez pour allumer",
     "moniteur.demagnetiser": "Démagnétiser",
     "veille.titre": "Veille patriotique",
     "veille.texte": "L'écran dort. La République veille. Touchez n'importe où pour reprendre votre service.",

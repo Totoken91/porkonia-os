@@ -77,6 +77,11 @@ try {
     const fermerPubs = () => page.addLocatorHandler(page.getByTestId("ad"), () => page.getByTestId("ad-close").click({ timeout: 15000 }));
     if (tag === "mobile") await fermerPubs();
     await page.goto(base);
+    // La machine attend qu'on l'allume (ce clic libère aussi le son).
+    await page.waitForTimeout(400);
+    if (await page.getByTestId("boot-bios").count()) throw new Error("la machine s'allume toute seule");
+    await shot(page, `${tag}-00-eteint`);
+    await page.getByTestId("power").click();
     await page.getByTestId("boot-bios").waitFor();
     if (tag === "bureau") {
       await page.waitForTimeout(2500);
@@ -285,6 +290,7 @@ try {
     if (tag === "bureau") {
       // Arrêt brutal (rechargement) : ScanDisque au démarrage suivant
       await page.reload();
+      await page.getByTestId("power").click();
       await page.getByTestId("boot-scandisk").waitFor();
       await page.waitForTimeout(2500);
       await shot(page, `${tag}-13-scandisk`);
