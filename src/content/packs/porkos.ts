@@ -292,7 +292,7 @@ export const porkosPack: ContentPack = {
     { id: "bienvenue", kind: "bienvenue", title: "Bienvenue dans PorkOS", icon: "embleme", size: { w: 560, h: 350 }, single: true, menu: "accessoires", blurb: "Revoir l'écran de bienvenue" },
     { id: "mail", kind: "mail", title: "Courrier d'État", icon: "mail", size: { w: 720, h: 470 }, single: true, menu: "programmes", blurb: "Votre courrier, déjà lu" },
     { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 620, h: 450 }, menu: "programmes", blurb: "Le monde, tel qu'homologué" },
-    { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 540, h: 430 }, single: true, menu: "programmes", blurb: "Canal 1, le seul" },
+    { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 580, h: 540 }, single: true, menu: "programmes", blurb: "Canal 1, le seul" },
     { id: "nappe-vide", kind: "nappe-vide", title: "Nappe Vide", icon: "nappe", size: { w: 260, h: 330 }, single: true, menu: "programmes", blurb: "Jeu de protocole pour toute la famille" },
     { id: "fichiers", kind: "fichiers", title: "Mes documents", icon: "dossier", size: { w: 480, h: 340 }, menu: "accessoires", blurb: "Vos papiers, en ordre" },
     { id: "texte", kind: "texte", title: "Bloc-notes d'État", icon: "texte", size: { w: 460, h: 380 }, menu: "accessoires", blurb: "Écrire, sous réserve" },

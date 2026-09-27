@@ -85,7 +85,18 @@
   .moniteur.nu .ecran { border-radius: 0; box-shadow: none; }
   .tube { position: absolute; inset: 0; transform-origin: center; overflow: hidden; overflow: clip; }
   .crt { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; transition: opacity 0.4s; }
-  .crt-lignes { z-index: 9001; background: repeating-linear-gradient(180deg, rgba(0, 0, 0, calc(0.34 * var(--crt))) 0 1px, transparent 1px 3px); }
+  /* Lignes de balayage : une par ligne paire, au profil adouci (le faisceau est rond, pas carré). */
+  .crt-lignes {
+    z-index: 9001;
+    background: repeating-linear-gradient(180deg, rgba(0, 0, 0, calc(0.3 * var(--crt))) 0, rgba(0, 0, 0, calc(0.12 * var(--crt))) 0.8px, transparent 1.2px, transparent 2px);
+  }
+  /* Halo : les zones claires débordent un peu (phosphore généreux). */
+  .crt-halo { z-index: 9000; backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); -webkit-backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); mix-blend-mode: screen; opacity: calc(0.28 * var(--crt)); }
+  /* Grain : bruit du signal, qui fourmille. */
+  .crt-grain { z-index: 9002; background-image: var(--grain); background-size: 128px 128px; mix-blend-mode: overlay; opacity: calc(0.09 * var(--crt)); animation: fourmille 0.5s steps(5) infinite; }
+  @keyframes fourmille { 0% { background-position: 0 0; } 20% { background-position: -37px 19px; } 40% { background-position: 53px -71px; } 60% { background-position: -91px -13px; } 80% { background-position: 17px 83px; } 100% { background-position: 0 0; } }
+  .tube.convergence { filter: url(#crt-convergence); }
+  .filtres-crt { position: absolute; width: 0; height: 0; }
   .crt-grille {
     z-index: 9002;
     background: repeating-linear-gradient(90deg, rgba(255, 30, 60, calc(0.07 * var(--crt))) 0 1px, rgba(30, 255, 100, calc(0.05 * var(--crt))) 1px 2px, rgba(40, 90, 255, calc(0.07 * var(--crt))) 2px 3px);
@@ -101,12 +112,25 @@
     z-index: 9005;
     background:
       radial-gradient(ellipse 55% 35% at 26% 10%, rgba(255, 255, 255, 0.11), transparent 70%),
+      radial-gradient(ellipse 90% 80% at 50% 45%, rgba(255, 255, 255, 0.025), transparent 60%),
       linear-gradient(162deg, rgba(255, 255, 255, 0.06) 0%, transparent 26%, transparent 82%, rgba(255, 255, 255, 0.035) 100%);
   }
   .crt-lueur { z-index: 9006; opacity: 0; background: radial-gradient(ellipse 50% 50% at 50% 50%, #ffffff 0%, #d9ecff 30%, rgba(160, 200, 255, 0.4) 55%, transparent 75%); }
 
-  .tube-allume .tube { animation: scintille 5s infinite steps(1); }
-  @keyframes scintille { 0%, 100% { opacity: 1; } 31% { opacity: 0.985; } 32% { opacity: 1; } 71% { opacity: 0.99; } 72% { opacity: 1; } }
+  .tube-allume .tube { animation: scintille 23s infinite steps(1); }
+  /* Scintillement du secteur, et de temps en temps un parasite (le frigo démarre) qui fait sauter l'image. */
+  @keyframes scintille {
+    0%, 100% { opacity: 1; transform: none; }
+    31% { opacity: 0.985; }
+    32% { opacity: 1; }
+    71% { opacity: 0.99; }
+    72% { opacity: 1; }
+    93.0% { transform: none; }
+    93.3% { transform: translateX(1.5px) skewX(0.5deg); }
+    93.6% { transform: translateX(-1px) skewX(-0.3deg); }
+    93.9% { transform: translate(0.5px, -1px); }
+    94.2% { transform: none; }
+  }
   .tube-allumage .tube { animation: allumage 1.1s ease-out both; }
   @keyframes allumage {
     0%, 15% { transform: scale(1, 0.004); filter: brightness(6); }
@@ -146,7 +170,7 @@
     100% { transform: none; filter: none; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .crt-roulant, .tube-allume .tube, .degauss .tube { animation: none; }
+    .crt-roulant, .tube-allume .tube, .degauss .tube, .crt-grain { animation: none; }
   }
 
   .facade { position: absolute; left: 46px; right: 46px; bottom: 20px; height: 34px; display: flex; align-items: center; gap: 16px; color: #6d624c; z-index: 1; }
@@ -415,20 +439,9 @@
 
   /* ============================== Channel Pork ============================== */
   .tv { background: #0c0a08; }
-  .tv-ecran { position: relative; flex: 1; min-height: 200px; overflow: hidden; background: #000; }
-  .tv-ecran::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px), radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.6) 100%); }
-  .tv-image, .tv-ecran video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(0.8) contrast(1.1) sepia(0.15); animation: kenburns linear forwards; }
-  @keyframes kenburns { from { transform: scale(1.02); } to { transform: scale(1.12) translate(-1.5%, -1%); } }
-  @media (prefers-reduced-motion: reduce) { .tv-image { animation: none; } }
-  .tv-logo { position: absolute; top: 12px; right: 14px; z-index: 2; display: flex; flex-direction: column; align-items: flex-end; font-family: var(--font-display); font-weight: 900; text-transform: uppercase; color: var(--color-creme); text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7); }
-  .tv-logo span { font-size: 18px; line-height: 1; }
-  .tv-logo i { font-style: normal; font-size: 12px; letter-spacing: 0.2em; background: var(--color-rouge); padding: 0 5px; text-shadow: none; }
-  .tv-chyron { position: absolute; left: 0; right: 0; bottom: 18%; z-index: 2; display: flex; font-family: var(--font-display); text-transform: uppercase; font-weight: 800; font-size: 14px; }
-  .tv-chyron b { background: var(--color-rouge); color: var(--color-creme); padding: 3px 12px; font-weight: 900; }
-  .tv-chyron span { background: var(--color-creme); color: var(--color-noir); padding: 3px 12px; flex: 1; }
-  .tv-mention { position: absolute; left: 12px; top: 12px; z-index: 2; font-family: var(--font-display); font-size: 11px; line-height: 1.2; color: var(--color-creme); background: rgba(0, 0, 0, 0.55); padding: 2px 6px; max-width: 60%; }
-  .tv-soustitre { position: absolute; left: 8%; right: 8%; bottom: 3%; z-index: 2; text-align: center; font-family: var(--font-crt); font-size: 17px; line-height: 1.1; color: #fff7d6; text-shadow: 2px 2px 0 #000, -1px -1px 0 #000; }
-  .tv-pause { position: absolute; left: 14px; top: 40px; z-index: 2; font-family: var(--font-crt); font-size: 32px; color: #fff; text-shadow: 2px 2px 0 #000; }
+  .tv-ecran { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; background: #0b0908; }
+  /* Écran de téléviseur 4:3 : le canvas VHS est agrandi en douceur (flou de la bande), coins bombés. */
+  .tv-canvas { display: block; image-rendering: auto; border-radius: 16px / 13px; box-shadow: 0 0 0 3px #1a1512, 0 0 18px rgba(0, 0, 0, 0.9); background: #050308; }
   .tv-commandes { background: var(--face); }
   .tv-progression { flex: 1; min-width: 80px; height: 10px; padding: 0; }
   .tv-progression i { display: block; height: 100%; background: var(--color-rouge); }

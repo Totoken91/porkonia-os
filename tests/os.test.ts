@@ -139,3 +139,20 @@ describe("gestionnaire de fenêtres : disposition et session", () => {
     expect(r.windows.find((w) => w.id === r.focusedId)!.appId).toBe("b");
   });
 });
+
+describe("rendu VHS", async () => {
+  const { wrapText, timecode, lineOffset, VHS } = await import("@/apps/channel-pork/vhs");
+  it("est en 4:3", () => expect(VHS.w / VHS.h).toBeCloseTo(4 / 3));
+  it("découpe les sous-titres et formate le code temporel", () => {
+    expect(wrapText("un deux trois quatre", 9, (s) => s.length)).toEqual(["un deux", "trois", "quatre"]);
+    expect(wrapText("anticonstitutionnellement", 5, (s) => s.length)).toEqual(["anticonstitutionnellement"]);
+    expect(timecode(67)).toBe("0:01:07");
+    expect(timecode(3725)).toBe("1:02:05");
+  });
+  it("déforme fortement la bande de tracking et les dernières lignes, à peine le reste", () => {
+    const d = { t: 1, tracking: 100, force: 1, alea: 1 };
+    expect(Math.abs(lineOffset(50, 288, d))).toBeLessThan(1.7);
+    expect(Math.abs(lineOffset(100, 288, d))).toBeGreaterThan(10);
+    expect(lineOffset(286, 288, { ...d, tracking: null })).toBeGreaterThan(4);
+  });
+});

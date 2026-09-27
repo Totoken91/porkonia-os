@@ -58,6 +58,23 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   const fit = box ? Math.min((box.vw * (bezel ? 0.98 : 1)) / W, (box.vh * (bezel ? 0.98 : 1)) / H) : 1;
   const scale = box ? echelle(fit, box.dpr, nette) : 1;
   const zoom = Math.max(1, Math.round(scale));
+  const crtEff = (scale < 0.85 ? crt * 0.35 : crt) / 100;
+  // Grain du tube : une petite tuile de bruit générée une fois, animée en CSS.
+  const [grain, setGrain] = useState<string | null>(null);
+  useEffect(() => {
+    const c = document.createElement("canvas");
+    c.width = c.height = 128;
+    const g = c.getContext("2d");
+    if (!g) return;
+    const img = g.createImageData(128, 128);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = Math.random() * 255;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+    setGrain(c.toDataURL());
+  }, []);
   const curseurs = useMemo(
     () =>
       ({
@@ -85,13 +102,27 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
             <div className="cadre-tube">
               <div
                 className={`ecran tube-${tube}${degauss ? " degauss" : ""}`}
-                style={{ width: SCREEN.w, height: SCREEN.h, "--crt": (scale < 0.85 ? crt * 0.35 : crt) / 100, ...curseurs } as React.CSSProperties}
+                style={{ width: SCREEN.w, height: SCREEN.h, "--crt": crtEff, "--grain": grain ? `url(${grain})` : "none", ...curseurs } as React.CSSProperties}
               >
-                <div className="tube">
+                {/* Aberration chromatique : rouge et bleu légèrement décalés, comme sur un tube mal convergé. */}
+                <svg className="filtres-crt" aria-hidden="true" width="0" height="0">
+                  <filter id="crt-convergence" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+                    <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+                    <feOffset in="r" dx={0.25 + 0.75 * crtEff} dy="0" result="r2" />
+                    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="v" />
+                    <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+                    <feOffset in="b" dx={-(0.25 + 0.75 * crtEff)} dy="0" result="b2" />
+                    <feBlend in="r2" in2="v" mode="screen" result="rv" />
+                    <feBlend in="rv" in2="b2" mode="screen" />
+                  </filter>
+                </svg>
+                <div className={`tube${crtEff > 0.12 ? " convergence" : ""}`}>
                   {tube !== "eteint" && <ScaleContext.Provider value={scale}>{children}</ScaleContext.Provider>}
                 </div>
                 {tube !== "eteint" && <InfoBulles />}
+                <div className="crt crt-halo" aria-hidden="true" />
                 <div className="crt crt-lignes" aria-hidden="true" />
+                <div className="crt crt-grain" aria-hidden="true" />
                 <div className="crt crt-grille" aria-hidden="true" />
                 <div className="crt crt-roulant" aria-hidden="true" />
                 <div className="crt crt-vignette" aria-hidden="true" />

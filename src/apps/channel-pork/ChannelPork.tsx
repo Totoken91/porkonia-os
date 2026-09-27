@@ -2,6 +2,7 @@
 /** Channel Pork : Canal 1, le seul. Diaporama d'archives + sous-titres + bandeau (ou vraie vidéo si fournie). */
 import { useEffect, useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
+import { EcranVhs } from "./EcranVhs";
 import { at, programLength } from "./timeline";
 
 export function ChannelPork() {
@@ -29,6 +30,7 @@ export function ChannelPork() {
 
   const { slide, subtitle } = at(p, t);
   const s = p.slides[slide]!;
+  const debut = p.slides.slice(0, slide).reduce((acc, x) => acc + x.seconds, 0);
   const zap = (d: number) => {
     setIdx((i) => (i + d + programs.length) % programs.length);
     setT(0);
@@ -47,26 +49,19 @@ export function ChannelPork() {
 
   return (
     <div className="app-col tv">
-      <div className="tv-ecran" data-testid="tv-screen">
-        {p.videoSrc ? (
-          <video src={p.videoSrc} autoPlay={playing} controls={false} onEnded={() => zap(1)} />
-        ) : (
-          <img key={`${idx}-${slide}`} src={s.image} alt="" className="tv-image" referrerPolicy="no-referrer" style={{ animationDuration: `${s.seconds + 1}s` }} />
-        )}
-        <div className="tv-logo">
-          <span>{p.channel}</span>
-          <i>Direct</i>
-        </div>
-        {bandeau && s.chyron && (
-          <div className="tv-chyron">
-            <b>{p.kind === "publicite" ? "Pub" : "Info"}</b>
-            <span>{s.chyron}</span>
-          </div>
-        )}
-        {s.caption && <div className="tv-mention">{s.caption}</div>}
-        {soustitres && subtitle && <p className="tv-soustitre">{subtitle}</p>}
-        {!playing && <div className="tv-pause">Pause</div>}
-      </div>
+      <EcranVhs
+        image={p.videoSrc ? null : s.image}
+        video={p.videoSrc}
+        progression={Math.min(1, (t - debut) / s.seconds)}
+        cle={`${idx}-${slide}`}
+        programme={`${idx}-${p.id}`}
+        temps={t}
+        lecture={playing}
+        chaine={p.channel}
+        bandeau={bandeau && s.chyron ? { etiquette: p.kind === "publicite" ? "Pub" : "Info", texte: s.chyron } : null}
+        mention={s.caption}
+        soustitre={soustitres ? subtitle : null}
+      />
       <div className="pk-toolbar tv-commandes">
         <button className="pk-btn small" onClick={() => zap(-1)}>◂ Programme précédent</button>
         <button className="pk-btn small" onClick={() => setPlaying((x) => !x)}>{playing ? "Pause" : "Lecture"}</button>
