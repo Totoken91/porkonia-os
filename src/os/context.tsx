@@ -5,6 +5,7 @@ import type { ActionRef, ContentPack, UserProfile } from "@/content/types";
 import type { Rng } from "./rng";
 import type { Son } from "./sons";
 import type { Boite, Brouillon, Dossier } from "./mailbox";
+import type { MenuItem } from "@/components/Menu";
 import type { Settings } from "./settings";
 import type { Win } from "./windows";
 
@@ -25,6 +26,8 @@ export interface OsApi {
   showScreensaver(): void;
   /** Messagerie du poste (état partagé : appli Courrier, zone de notification, règles). */
   mail: MailApi;
+  /** Menu contextuel à l'endroit d'un clic (coordonnées du navigateur converties en coordonnées d'écran). */
+  showMenu(at: { clientX: number; clientY: number }, items: MenuItem[]): void;
 }
 
 export interface MailApi {

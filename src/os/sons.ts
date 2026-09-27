@@ -3,7 +3,7 @@
  * claquement du tube et démagnétisation. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
  * avant cela, les appels sont silencieusement ignorés.
  */
-export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne";
+export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque";
 
 let ctx: AudioContext | null = null;
 
@@ -105,6 +105,13 @@ export function jouer(son: Son, volume = 0.7) {
       bruit(0.12, volume, 400);
       // Sifflement du transformateur ligne (15,7 kHz) : les plus jeunes l'entendront.
       return jouerNotes([{ f: 15734, t: 0.05, d: 1.6, g: 0.012, type: "sine" }, { f: 60, t: 0, d: 0.25, g: 0.2, type: "sine" }], volume);
+    case "bip":
+      // Bip du POST : un seul, court, tout va bien (ou presque).
+      return jouerNotes([{ f: 1000, t: 0, d: 0.16, g: 0.08, type: "square" }], volume);
+    case "disque":
+      // Tête de lecture qui cherche : quelques clics secs filtrés.
+      for (let i = 0; i < 3; i++) setTimeout(() => bruit(0.018, volume * 0.9, 2600), i * (40 + Math.random() * 60));
+      return;
     case "demagnetiser":
       bruit(0.5, volume * 0.6, 300);
       return jouerNotes([{ f: 50, t: 0, d: 0.9, g: 0.25, type: "sawtooth", glisse: 40 }], volume);

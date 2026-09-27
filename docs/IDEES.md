@@ -8,25 +8,29 @@ Cocher au fur et à mesure.
 - [x] **Vraie police d'époque** : police bitmap pixel (Pixel Operator, CC0) pour toute l'interface, identique sur tous les systèmes (plus de repli vers une police moderne lisse sur Linux/Android), avec option de mise à l'échelle entière pour des pixels nets.
 - [x] **Barres de menus dans les fenêtres** (Fichier, Édition, Affichage, ?) : menus déroulants par appli, entrées fonctionnelles et entrées absurdes (« Édition › Annuler la dernière pensée »), boîte « À propos de… » par appli.
 - [x] **Appli Mail** : les mails existent déjà dans le pack ; client d'époque (dossiers, liste, aperçu). Brique centrale du futur spin-off d'enquête.
-- [ ] **Mode mobile soigné** : baisser automatiquement l'effet tube en petite taille (rayures), mode « écran seul » sans moniteur, zoom au double-tap.
+- [ ] **Mode mobile soigné** : ~~baisser automatiquement l'effet tube en petite taille (rayures)~~ (fait), mode « écran seul » sans moniteur, zoom au double-tap.
 
 ## Illusion visuelle
 
-- [ ] Démarrage plus crédible : bip du BIOS, bruit de disque dur pendant le chargement, compteur « Chargement des pilotes (7/12) ».
+- [x] Démarrage plus crédible : bip du BIOS, bruit de disque dur pendant le chargement, compteur « Chargement des pilotes (7/12) ».
 - [ ] Effets d'écran ponctuels : léger glitch à l'apparition d'une pub, image qui « saute » à la démagnétisation, rémanence d'une seconde à l'extinction.
 - [ ] Fonds d'écran en pixel art (Douzi City la nuit, Grand Banquet tramé en 16 couleurs) plutôt que des aplats unis.
-- [ ] Animations de menus d'époque (déroulement en 100 ms) et info-bulles jaunes au survol après une demi-seconde.
-- [ ] Plus d'icônes dans la zone de notification (réseau PigNet qui clignote, antivirus d'État) avec leurs bulles.
-- [ ] Double-clic sur l'horloge : « Date et heure », qui refuse toute modification.
+- [x] Animations de menus d'époque (déroulement en 100 ms) et info-bulles jaunes au survol après une demi-seconde.
+- [x] Plus d'icônes dans la zone de notification (réseau PigNet qui clignote, antivirus d'État) avec leurs bulles.
+- [x] Double-clic sur l'horloge : « Date et heure », qui refuse toute modification.
 
 ## Expérience et interactions
 
+- [x] Gestion des fenêtres d'époque : menu système sur l'icône de titre (double-clic = fermer), clic droit sur les boutons de tâche, Cascade / Mosaïque / Réduire toutes les fenêtres, lancement rapide avec « Afficher le bureau ».
+- [x] Écran d'exception fatale (commandes secrètes `format c:`, `rm -rf /`, `deltree c:`).
+- [ ] Alt+Tab / Alt+F4 : interceptés par le système hôte, impossibles à simuler dans un navigateur ; à remplacer par un raccourci maison si besoin.
+
 - [ ] Glisser-déposer entre fenêtres : fichier sur la Poubelle d'État (refusé), image sur le Bloc-notes (qui s'offusque).
 - [ ] Explorateur plus complet : affichage liste/icônes, barre d'adresse, raccourcis clavier (Ctrl+C refusé « pour votre sécurité »).
-- [ ] Plantages occasionnels : « PigNet Navigateur a cessé de répondre avec loyauté » (Attendre / Fermer / Signaler un collègue).
+- [x] Plantages occasionnels : « PigNet Navigateur a cessé de répondre avec loyauté » (Attendre / Fermer / Signaler un collègue).
 - [ ] Nouveaux jeux ou accessoires : Réussite du Banquet (solitaire), Paint d'État dont le seul pinceau dessine le Fondateur.
-- [ ] Commandes secrètes dans Exécuter (`sudo`, `rm`, `douzi`, Konami code…) déclenchant une séquence du Ministère.
-- [ ] Sauvegarde de session : retrouver ses fenêtres au retour, sauf après un arrêt brutal (ScanDisque fait la morale).
+- [x] Commandes secrètes dans Exécuter (`sudo`, `rm`, `douzi`, Konami code…) déclenchant une séquence du Ministère.
+- [x] Sauvegarde de session : retrouver ses fenêtres au retour, sauf après un arrêt brutal (ScanDisque fait la morale).
 
 ## Contenu et lore
 

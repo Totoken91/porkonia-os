@@ -564,4 +564,32 @@
   .courrier-actions { display: flex; gap: 6px; justify-content: flex-end; }
   .tb-courrier { animation: clignote-courrier 1.2s steps(1) 4; }
   @keyframes clignote-courrier { 50% { opacity: 0.2; } }
+
+  /* ============================== Simulation d'OS : finitions ============================== */
+  .icone-systeme { display: grid; place-items: center; width: 18px; height: 18px; padding: 0; border: none; background: none; }
+  .gel { position: absolute; inset: 24px 3px 3px 3px; z-index: 50; background: rgba(255, 255, 255, 0.55); cursor: var(--c-sablier) !important; }
+  .pk-window:has(.gel) .pk-titlebar { background: var(--title-off); }
+  .fatal { position: absolute; inset: 0; z-index: 8700; display: grid; place-items: center; background: #5c0f14; color: #efe3c6; padding: 60px; font-family: var(--font-mono); line-height: 20px; white-space: pre-wrap; }
+  .fatal > div { max-width: 620px; display: flex; flex-direction: column; gap: 18px; }
+  .fatal-titre { text-align: center; }
+  .fatal-titre span { background: #efe3c6; color: #5c0f14; padding: 0 8px; }
+  .fatal-suite { text-align: center; }
+  .tb-rapide { display: flex; align-items: center; gap: 1px; }
+  .tb-rapide button { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: none; background: none; }
+  .tb-rapide button:hover { box-shadow: inset 1px 1px 0 var(--hi), inset -1px -1px 0 var(--dk); }
+  .tb-rapide button:active { box-shadow: inset 1px 1px 0 var(--dk), inset -1px -1px 0 var(--hi); }
+  .tb-reseau { display: grid; place-items: center; }
+  .tb-reseau .lampe { fill: #2f6f5c; }
+  .tb-reseau .lampe.a { animation: lampe 2.6s steps(1) infinite; }
+  .tb-reseau .lampe.b { animation: lampe 3.4s steps(1) infinite 0.7s; }
+  .tb-reseau.actif .lampe { animation-duration: 0.3s, 0.3s; }
+  @keyframes lampe { 0%, 60% { fill: #2f6f5c; } 61%, 70% { fill: #7cf06a; } 71%, 100% { fill: #2f6f5c; } }
+  .info-bulle { position: absolute; z-index: 8990; max-width: 300px; padding: 1px 4px 2px; background: #ffffe1; color: #000; border: 1px solid #000; white-space: pre-wrap; pointer-events: none; box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25); }
+  .chargement-pilotes { position: absolute; left: 0; right: 0; bottom: 30px; text-align: center; font-family: var(--font-mono); color: #e9c9a2; }
+  /* Menus d'époque : ils se déroulent vers le bas en un dixième de seconde. */
+  .menu-deroulant, .menu-contexte, .menu-porkos, .menu-sous { animation: deroule 110ms steps(4, end); }
+  .menu-porkos { animation-name: monte; }
+  @keyframes deroule { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+  @keyframes monte { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+  @media (prefers-reduced-motion: reduce) { .menu-deroulant, .menu-contexte, .menu-porkos, .menu-sous, .tb-reseau .lampe { animation: none; } }
 }

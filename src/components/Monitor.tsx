@@ -8,6 +8,7 @@ import { ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
 import { jouer } from "@/os/sons";
 import { cursorCss } from "./pixel";
+import { InfoBulles } from "./InfoBulles";
 
 export const SCREEN = { w: 800, h: 600 };
 const COQUE = { x: 58, top: 52, bottom: 82 };
@@ -84,11 +85,12 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
             <div className="cadre-tube">
               <div
                 className={`ecran tube-${tube}${degauss ? " degauss" : ""}`}
-                style={{ width: SCREEN.w, height: SCREEN.h, "--crt": crt / 100, ...curseurs } as React.CSSProperties}
+                style={{ width: SCREEN.w, height: SCREEN.h, "--crt": (scale < 0.85 ? crt * 0.35 : crt) / 100, ...curseurs } as React.CSSProperties}
               >
                 <div className="tube">
                   {tube !== "eteint" && <ScaleContext.Provider value={scale}>{children}</ScaleContext.Provider>}
                 </div>
+                {tube !== "eteint" && <InfoBulles />}
                 <div className="crt crt-lignes" aria-hidden="true" />
                 <div className="crt crt-grille" aria-hidden="true" />
                 <div className="crt crt-roulant" aria-hidden="true" />

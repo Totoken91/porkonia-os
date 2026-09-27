@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
-import type { Win } from "@/os/windows";
+import type { Win, WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
 
 function Clock() {
+  const { str, runAction } = useOs();
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
@@ -14,7 +15,22 @@ function Clock() {
     return () => clearInterval(id);
   }, []);
   return (
-    <span className="heure" title={now ? now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : undefined}>
+    <span
+      className="heure"
+      onDoubleClick={() => {
+        const d = new Date();
+        runAction({
+          type: "dialog",
+          dialog: {
+            title: str("barre.dateheure.titre"),
+            icon: "info",
+            body: str("barre.dateheure", { date: d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }), heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) }),
+            buttons: [{ label: "OK" }],
+          },
+        });
+      }}
+      data-testid="horloge"
+      title={now ? now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : undefined}>
       {now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "12:12"}
     </span>
   );
@@ -24,12 +40,16 @@ interface Props {
   windows: Win[];
   focusedId: string | null;
   onTask(w: Win): void;
+  dispatch(a: WinAction): void;
+  onLayout(op: "desktop" | "cascade" | "tile"): void;
+  /** Activité en cours (chargement) : le témoin réseau s'affole. */
+  busy: boolean;
 }
 
 type Sub = "programmes" | "accessoires" | null;
 
-export function Taskbar({ windows, focusedId, onTask }: Props) {
-  const { pack, str, openApp, runAction, settings, setSettings, mail } = useOs();
+export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy }: Props) {
+  const { pack, str, openApp, runAction, settings, setSettings, mail, showMenu } = useOs();
   const nonLus = mail.boite.messages.filter((m) => m.folder === "reception" && !m.read).length;
   const [open, setOpen] = useState(false);
   const [sub, setSub] = useState<Sub>(null);
@@ -127,17 +147,53 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
           </ul>
         </div>
       )}
-      <nav className="taskbar">
+      <nav
+        className="taskbar"
+        onContextMenu={(e) => {
+          if ((e.target as HTMLElement).closest("button")) return;
+          e.preventDefault();
+          showMenu(e, [
+            { label: str("barre.cascade"), onSelect: () => onLayout("cascade") },
+            { label: str("barre.mosaique"), onSelect: () => onLayout("tile") },
+            { label: str("barre.reduire"), onSelect: () => onLayout("desktop") },
+            { separator: true },
+            { label: str("barre.proprietes"), onSelect: () => openApp("config") },
+          ]);
+        }}
+      >
         <button ref={startBtn} className="tb-start pk-btn" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)} data-testid="start">
           <img src="/brand/embleme-64.png" alt="" width={18} height={18} />
           <b>{str("demarrer")}</b>
         </button>
         <span className="tb-poignee" />
+        <div className="tb-rapide">
+          <button onClick={() => onLayout("desktop")} title={str("barre.bureau")} aria-label={str("barre.bureau")} data-testid="afficher-bureau">
+            <Icon name="bureau" size={16} />
+          </button>
+          <button onClick={() => openApp("navigateur")} title="PigNet Navigateur" aria-label="PigNet Navigateur">
+            <Icon name="navigateur" size={16} />
+          </button>
+          <button onClick={() => openApp("mail")} title="Courrier d'État" aria-label="Courrier d'État">
+            <Icon name="mail" size={16} />
+          </button>
+        </div>
+        <span className="tb-poignee" />
         <div className="tb-tasks">
           {windows.map((w) => {
             const m = pack.apps.find((a) => a.id === w.appId);
             return (
-              <button key={w.id} data-task={w.id} className="tb-task pk-btn" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)} title={w.title}>
+              <button key={w.id} data-task={w.id} className="tb-task pk-btn" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  showMenu(e, [
+                    { label: str("barre.restaurer"), disabled: !w.minimized && !w.maximized, onSelect: () => (w.minimized ? dispatch({ type: "focus", id: w.id }) : dispatch({ type: "toggleMaximize", id: w.id })) },
+                    { label: str("barre.reduire1"), disabled: w.minimized, onSelect: () => dispatch({ type: "minimize", id: w.id }) },
+                    { label: str("barre.agrandir"), disabled: w.maximized && !w.minimized, onSelect: () => (w.maximized ? dispatch({ type: "focus", id: w.id }) : (dispatch({ type: "focus", id: w.id }), dispatch({ type: "toggleMaximize", id: w.id }))) },
+                    { separator: true },
+                    { label: str("barre.fermer"), bold: true, onSelect: () => dispatch({ type: "close", id: w.id }) },
+                  ]);
+                }}
+                title={w.title}>
                 {m && <Icon name={m.icon} size={16} />}
                 <span>{w.title}</span>
               </button>
@@ -156,6 +212,15 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
               {settings.sons ? <path d="M11 5c1 1 1 5 0 6M13 3c2 2 2 8 0 10" fill="none" stroke="#000" /> : <path d="M11 5l4 6M15 5l-4 6" stroke="#b3121b" strokeWidth="1.5" />}
             </svg>
           </button>
+          <span className={`tb-reseau${busy ? " actif" : ""}`} title={str("barre.reseau")} aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges">
+              <rect x="1" y="2" width="8" height="6" fill="#e8e0cc" stroke="#000" />
+              <rect x="2.5" y="3.5" width="5" height="3" className="lampe a" />
+              <rect x="7" y="8" width="8" height="6" fill="#e8e0cc" stroke="#000" />
+              <rect x="8.5" y="9.5" width="5" height="3" className="lampe b" />
+              <path d="M5 8v3h2" fill="none" stroke="#000" />
+            </svg>
+          </span>
           <span title="Douzi Ambrée : niveau de mousse conforme">
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M3 5h8v9H3z" fill="#e0a526" stroke="#2a2118" />

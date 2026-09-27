@@ -193,6 +193,18 @@ try {
     await closeTop();
     step(`${tag} : Exécuter…`);
 
+    // Exécuter « format c: » : écran d'exception fatale, une touche pour revenir
+    await page.getByTestId("start").click();
+    await page.getByTestId("menu-executer").click();
+    await page.getByTestId("executer-champ").fill("format c:");
+    await page.getByTestId("executer-champ").press("Enter");
+    await page.getByTestId("fatal").waitFor();
+    if (tag === "bureau") await shot(page, `${tag}-17-fatal`);
+    await page.waitForTimeout(600);
+    await page.keyboard.press("Space");
+    await page.getByTestId("fatal").waitFor({ state: "detached" });
+    step(`${tag} : exception fatale`);
+
     // Curseur : jamais le curseur de texte sur l'interface (régression)
     const curseur = await page.locator(".tb-start").evaluate((el) => getComputedStyle(el).cursor);
     if (!curseur.startsWith("url(")) throw new Error(`curseur d'interface invalide : ${curseur}`);
@@ -225,6 +237,20 @@ try {
       step(`${tag} : ScanDisque après arrêt brutal`);
     }
 
+    // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche
+    await page.getByTestId("icon-d-docs").dblclick();
+    await page.getByTestId("window-fichiers").waitFor();
+    await page.locator("[data-testid=window-fichiers] [data-testid=menu-systeme]").click();
+    await page.getByTestId("menu-contexte").waitFor();
+    if (tag === "bureau") await shot(page, `${tag}-18-menu-systeme`);
+    await page.keyboard.press("Escape");
+    await page.getByTestId("afficher-bureau").click();
+    await page.getByTestId("window-fichiers").waitFor({ state: "hidden" });
+    await page.locator(".tb-task", { hasText: "Mes documents" }).click({ button: "right" });
+    await page.getByRole("menuitem", { name: "Restaurer" }).click();
+    await page.getByTestId("window-fichiers").waitFor();
+    step(`${tag} : menu système, afficher le bureau, menu des tâches`);
+
     // Arrêt propre → « vous pouvez éteindre » → bouton d'alimentation → rallumage
     await page.getByTestId("start").click();
     await page.getByRole("button", { name: "Arrêter…" }).click();
@@ -238,6 +264,13 @@ try {
     await page.getByTestId("power").click();
     await page.getByTestId("boot-bios").waitFor({ timeout: 5000 });
     step(`${tag} : arrêt, extinction et rallumage`);
+
+    // Après un arrêt propre, la session rouvre les fenêtres laissées ouvertes
+    await page.keyboard.press("Escape");
+    await page.getByTestId("login-password").fill("12");
+    await page.getByTestId("login-submit").click();
+    await page.getByTestId("window-fichiers").waitFor({ timeout: 10000 });
+    step(`${tag} : fenêtres restaurées après un arrêt propre`);
     await ctx.close();
   }
   if (errors.length) throw new Error("Erreurs navigateur :\n" + errors.join("\n"));

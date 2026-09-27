@@ -13,6 +13,39 @@ type Dessin = (t: Toile) => void;
 /* ================================ 32 × 32 ================================ */
 
 export const DESSINS: Record<Nom, Dessin> = {
+  /** Afficher le bureau : sous-main vert, feuille et crayon. */
+  bureau: (t) => {
+    t.poly(
+      [
+        [4, 10],
+        [28, 10],
+        [31, 26],
+        [1, 26],
+      ],
+      "n",
+    );
+    t.poly(
+      [
+        [6, 12],
+        [26, 12],
+        [28, 24],
+        [4, 24],
+      ],
+      "t",
+    );
+    t.dither(6, 12, 22, 12, "T", 1);
+    t.hline(5, 11, 23, "N");
+    t.hline(2, 26, 29, "z");
+    t.rect(9, 14, 8, 8, "W");
+    t.hline(10, 16, 6, "g");
+    t.hline(10, 18, 5, "g");
+    t.hline(10, 20, 6, "g");
+    for (let k = 0; k < 9; k++) {
+      t.set(26 - k, 13 + k, "Y");
+      t.set(27 - k, 13 + k, "y");
+    }
+    t.pts([[18, 22], [17, 23]], "k");
+  },
   /** Dossier jaune entrouvert, feuilles qui dépassent. */
   dossier: (t) => {
     // dos et onglet
@@ -490,6 +523,28 @@ export const DESSINS: Record<Nom, Dessin> = {
 /* ================================ 16 × 16 ================================ */
 
 export const DESSINS16: Record<Nom, Dessin> = {
+  bureau: (t) => {
+    t.poly(
+      [
+        [2, 5],
+        [13, 5],
+        [15, 13],
+        [0, 13],
+      ],
+      "n",
+    );
+    t.poly(
+      [
+        [3, 6],
+        [12, 6],
+        [13, 12],
+        [2, 12],
+      ],
+      "t",
+    );
+    t.rect(4, 7, 4, 4, "W");
+    t.line(12, 6, 8, 10, "y");
+  },
   dossier: (t) => {
     t.rect(1, 3, 6, 2, "o");
     t.rect(1, 4, 13, 9, "o");

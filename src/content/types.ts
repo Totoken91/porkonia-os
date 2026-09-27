@@ -8,7 +8,7 @@
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
 export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
 
-export type IconKey = "embleme" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -166,7 +166,13 @@ export type ActionRef =
   | { type: "restart" }
   | { type: "lock" }
   | { type: "signal"; name: string }
-  | { type: "mail"; id: string };
+  | { type: "mail"; id: string }
+  /** Un programme ouvert cesse de répondre un moment. */
+  | { type: "freeze" }
+  /** Écran d'exception fatale (texte en plein écran), puis retour au bureau. */
+  | { type: "fatal" }
+  /** Action système interne sur une fenêtre (boîtes « ne répond pas »). */
+  | { type: "window"; op: "close" | "unfreeze"; id: string };
 
 export type Trigger =
   | { type: "login"; delay: number }
@@ -204,13 +210,15 @@ export interface ContentPack {
     bios: string[];
     splash: { title: string; slogan: string };
     skipHint: string;
+    /** Pilotes affichés pendant le chargement. */
+    drivers: string[];
     /** Contrôle affiché au démarrage suivant un arrêt brutal (courant coupé, onglet fermé). */
     scandisk: { title: string; lines: string[]; outro: string };
   };
   /** Fermeture propre du système. */
   shutdown: { closing: string; safe: string; restarting: string };
   /** Boîte « Exécuter… » : commandes reconnues. */
-  run: { prompt: string; aliases: Record<string, { app: string; args?: Record<string, string> }>; notFound: string };
+  run: { prompt: string; aliases: Record<string, { app: string; args?: Record<string, string> } | { action: ActionRef }>; notFound: string };
   login: { prompt: string; emptyPassword: string; acceptedAny: string[]; patriotic: string; wrongPassword: string; guestNotice: string };
   /** Dépêches de l'agence de presse nationale (portail PigNet). */
   news: string[];

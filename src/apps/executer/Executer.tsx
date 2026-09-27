@@ -1,12 +1,17 @@
 "use client";
 /** Boîte « Exécuter… » : ouvre un programme par son nom (alias du pack), sinon refuse poliment. */
 import { useState } from "react";
+import type { ActionRef } from "@/content/types";
 import { Icon } from "@/components/Icon";
 import { useOs, useWin } from "@/os/context";
 
-export function resolveCommand(cmd: string, aliases: Record<string, { app: string; args?: Record<string, string> }>, apps: { id: string; title: string }[]) {
-  const k = cmd.trim().toLowerCase().replace(/\.exe$/, "").replace(/\s+/g, "");
+type Cible = { app: string; args?: Record<string, string> } | { action: ActionRef };
+
+export function resolveCommand(cmd: string, aliases: Record<string, Cible>, apps: { id: string; title: string }[]): Cible | null {
+  const brut = cmd.trim().toLowerCase().replace(/\s+/g, " ").replace(/\.exe$/, "");
+  const k = brut.replace(/\s+/g, "");
   if (!k) return null;
+  if (aliases[brut]) return aliases[brut];
   if (aliases[k]) return aliases[k];
   const app = apps.find((a) => a.id === k || a.title.toLowerCase().replace(/\s+/g, "") === k);
   return app ? { app: app.id } : null;
@@ -20,7 +25,8 @@ export function Executer() {
     const hit = resolveCommand(cmd, pack.run.aliases, pack.apps);
     if (hit) {
       close();
-      openApp(hit.app, hit.args);
+      if ("action" in hit) runAction(hit.action);
+      else openApp(hit.app, hit.args);
     } else if (cmd.trim())
       runAction({ type: "dialog", dialog: { title: str("executer.introuvable"), icon: "erreur", body: pack.run.notFound.replace("{cmd}", cmd.trim()), buttons: [{ label: "OK" }] } });
   };

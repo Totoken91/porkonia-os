@@ -53,7 +53,27 @@ export type WinAction =
   | { type: "move"; id: string; x: number; y: number; vp: Viewport }
   | { type: "resize"; id: string; w: number; h: number; vp: Viewport }
   | { type: "retitle"; id: string; title: string }
-  | { type: "closeAll" };
+  | { type: "closeAll" }
+  /** Réduit toutes les fenêtres (bouton « Afficher le bureau »). */
+  | { type: "minimizeAll" }
+  /** Dispose les fenêtres visibles en cascade, ou en mosaïque. */
+  | { type: "cascade"; vp: Viewport }
+  | { type: "tile"; vp: Viewport }
+  /** Restaure une session enregistrée. */
+  | { type: "restore"; windows: SavedWin[]; vp: Viewport };
+
+/** Ce qu'on retient d'une fenêtre entre deux sessions. */
+export interface SavedWin {
+  appId: string;
+  title: string;
+  args: Record<string, string>;
+  rect: WinRect;
+  minimized: boolean;
+  maximized: boolean;
+}
+
+export const saveWindows = (s: WinState): SavedWin[] =>
+  [...s.windows].sort((a, b) => a.z - b.z).map(({ appId, title, args, rect, minimized, maximized }) => ({ appId, title, args, rect, minimized, maximized }));
 
 function topVisible(ws: Win[]): string | null {
   const v = ws.filter((w) => !w.minimized).sort((a, b) => b.z - a.z);
@@ -114,5 +134,43 @@ export function winReducer(s: WinState, a: WinAction): WinState {
       return { ...s, windows: s.windows.map((w) => (w.id === a.id ? { ...w, title: a.title } : w)) };
     case "closeAll":
       return { ...emptyWinState(), seq: s.seq };
+    case "minimizeAll":
+      return { ...s, focusedId: null, windows: s.windows.map((w) => ({ ...w, minimized: true })) };
+    case "cascade": {
+      const order = s.windows.filter((w) => !w.minimized).sort((a, b) => a.z - b.z);
+      const pos = new Map(order.map((w, i) => [w.id, i]));
+      return {
+        ...s,
+        windows: s.windows.map((w) => {
+          const i = pos.get(w.id);
+          if (i === undefined) return w;
+          return { ...w, maximized: false, rect: constrain({ ...w.rect, x: 6 + i * 26, y: 6 + i * 26 }, a.vp) };
+        }),
+      };
+    }
+    case "tile": {
+      const order = s.windows.filter((w) => !w.minimized).sort((a, b) => a.z - b.z);
+      if (!order.length) return s;
+      const cols = Math.ceil(Math.sqrt(order.length));
+      const rows = Math.ceil(order.length / cols);
+      const W = Math.floor(a.vp.w / cols);
+      const H = Math.floor((a.vp.h - a.vp.bottom) / rows);
+      const pos = new Map(order.map((w, i) => [w.id, i]));
+      return {
+        ...s,
+        windows: s.windows.map((w) => {
+          const i = pos.get(w.id);
+          if (i === undefined) return w;
+          return { ...w, maximized: false, rect: { x: (i % cols) * W, y: Math.floor(i / cols) * H, w: W, h: H } };
+        }),
+      };
+    }
+    case "restore": {
+      let seq = s.seq;
+      let z = s.nextZ;
+      const windows: Win[] = a.windows.map((sw) => ({ ...sw, rect: constrain(sw.rect, a.vp), id: `w${++seq}`, z: z++ }));
+      const top = [...windows].reverse().find((w) => !w.minimized);
+      return { windows: [...s.windows, ...windows], focusedId: top?.id ?? s.focusedId, nextZ: z, seq };
+    }
   }
 }

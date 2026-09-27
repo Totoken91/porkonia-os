@@ -16,14 +16,30 @@ interface Props {
   dispatch(a: WinAction): void;
   /** Déplacement « par le contour » (réglage d'époque) : seule une silhouette suit la souris. */
   outline?: boolean;
+  /** Le programme « ne répond pas » : fenêtre voilée, titre suffixé, clic = boîte de dialogue. */
+  frozen?: boolean;
+  onFrozenClick?(): void;
   children: React.ReactNode;
 }
 
-export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, children }: Props) {
+export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, frozen, onFrozenClick, children }: Props) {
   const scale = useScale();
   const [ghost, setGhost] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const final = useRef<WinAction | null>(null);
-  const { runAction, str, pack } = useOs();
+  const { runAction, str, pack, showMenu } = useOs();
+  const menuSysteme = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    showMenu({ clientX: r.left, clientY: r.bottom }, [
+      { label: str("barre.restaurer"), disabled: !win.maximized, onSelect: () => dispatch({ type: "toggleMaximize", id: win.id }) },
+      { label: str("barre.deplacer"), disabled: true },
+      { label: str("barre.taille"), disabled: true },
+      { label: str("barre.reduire1"), onSelect: () => dispatch({ type: "minimize", id: win.id }) },
+      { label: str("barre.agrandir"), disabled: win.maximized, onSelect: () => dispatch({ type: "toggleMaximize", id: win.id }) },
+      { separator: true },
+      { label: str("barre.fermer"), bold: true, onSelect: () => dispatch({ type: "close", id: win.id }) },
+    ]);
+  };
 
   /* ------------------------------ Barre de menus ------------------------------ */
   const handlers = useRef<{ current: MenuHandlers }>({ current: {} });
@@ -138,8 +154,23 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, chi
       data-win={win.id}
     >
       <header className="pk-titlebar" onPointerDown={start("move")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onDoubleClick={() => dispatch({ type: "toggleMaximize", id: win.id })}>
-        <Icon name={manifest.icon} size={16} />
-        <h2>{win.title}</h2>
+        <button
+          className="icone-systeme"
+          aria-label={str("barre.fermer")}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={menuSysteme}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            dispatch({ type: "close", id: win.id });
+          }}
+          data-testid="menu-systeme"
+        >
+          <Icon name={manifest.icon} size={16} />
+        </button>
+        <h2>
+          {win.title}
+          {frozen && str("gel.suffixe")}
+        </h2>
         <div className="pk-controls">
           <button className="pk-ctl" aria-label="Réduire" onClick={() => dispatch({ type: "minimize", id: win.id })}>
             <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 7h6" stroke="currentColor" strokeWidth="2" /></svg>
@@ -158,6 +189,17 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, chi
       </header>
       {manifest.menus && <MenuBar menus={manifest.menus} open={menuOpen} setOpen={setMenuOpen} run={run} enabled={enabled} checked={checked} />}
       <WinContext.Provider value={api}>{children}</WinContext.Provider>
+      {frozen && (
+        <div
+          className="gel"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onFrozenClick?.();
+          }}
+          data-testid="fenetre-gelee"
+        />
+      )}
       {!win.maximized && <div className="pk-resize" onPointerDown={start("resize")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />}
     </section>
     {ghost && <div className="contour-fenetre" style={{ left: ghost.x, top: ghost.y, width: ghost.w, height: ghost.h, zIndex: win.z + 1 }} aria-hidden="true" />}

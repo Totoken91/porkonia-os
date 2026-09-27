@@ -126,7 +126,8 @@ describe("Exécuter", async () => {
     expect(resolveCommand("  NAPPE ", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "nappe-vide" });
     expect(resolveCommand("notepad.exe", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "texte" });
     expect(resolveCommand("Channel Pork", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "channel-pork" });
-    expect(resolveCommand("format c:", porkosPack.run.aliases, porkosPack.apps)).toBeNull();
-    for (const a of Object.values(porkosPack.run.aliases)) expect(porkosPack.apps.some((x) => x.id === a.app)).toBe(true);
+    expect(resolveCommand("defrag c:", porkosPack.run.aliases, porkosPack.apps)).toBeNull();
+    for (const a of Object.values(porkosPack.run.aliases)) if ("app" in a) expect(porkosPack.apps.some((x) => x.id === a.app)).toBe(true);
+    expect(resolveCommand("  Format   C: ", porkosPack.run.aliases, porkosPack.apps)).toEqual({ action: { type: "fatal" } });
   });
 });

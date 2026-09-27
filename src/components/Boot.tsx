@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import type { ContentPack } from "@/content/types";
 import { makeStr } from "@/os/context";
+import { jouer } from "@/os/sons";
 
 type Stage = "scandisk" | "bios" | "chargement";
 const MEMOIRE = 640;
 
-export function Boot({ pack, brutal, onDone }: { pack: ContentPack; brutal: boolean; onDone(skipped: boolean): void }) {
+export function Boot({ pack, brutal, sons, onDone }: { pack: ContentPack; brutal: boolean; sons: boolean; onDone(skipped: boolean): void }) {
+  const [pilote, setPilote] = useState(0);
   const [stage, setStage] = useState<Stage>(brutal ? "scandisk" : "bios");
   const [scan, setScan] = useState(0);
   const [mem, setMem] = useState(0);
@@ -40,6 +42,18 @@ export function Boot({ pack, brutal, onDone }: { pack: ContentPack; brutal: bool
     } else t = setTimeout(() => onDone(false), 3200);
     return () => clearTimeout(t);
   }, [stage, mem, lines, scan, pack.boot.bios.length, onDone]);
+
+  // Bip du POST au début du BIOS, disque dur qui gratte pendant le chargement, pilotes qui défilent.
+  useEffect(() => {
+    if (stage === "bios" && sons) jouer("bip", 0.5);
+    if (stage !== "chargement") return;
+    const total = pack.boot.drivers.length;
+    const id = setInterval(() => {
+      setPilote((n) => Math.min(total, n + 1));
+      if (sons && Math.random() < 0.7) jouer("disque", 0.6);
+    }, Math.max(120, Math.floor(2800 / Math.max(1, total))));
+    return () => clearInterval(id);
+  }, [stage, sons, pack.boot.drivers.length]);
 
   if (stage === "scandisk") {
     const sd = pack.boot.scandisk;
@@ -86,6 +100,11 @@ export function Boot({ pack, brutal, onDone }: { pack: ContentPack; brutal: bool
         </div>
         <p>{pack.boot.splash.slogan}</p>
       </div>
+      {pack.boot.drivers.length > 0 && (
+        <p className="chargement-pilotes" data-testid="boot-pilotes">
+          {str("boot.pilotes", { n: Math.max(1, pilote), total: pack.boot.drivers.length, pilote: pack.boot.drivers[Math.max(0, Math.min(pilote, pack.boot.drivers.length) - 1)]! })}
+        </p>
+      )}
       <div className="chargement-barre" aria-label={str("boot.chargement")} />
     </div>
   );

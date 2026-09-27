@@ -113,3 +113,29 @@ describe("icônes pixel", async () => {
     }
   });
 });
+
+describe("gestionnaire de fenêtres : disposition et session", () => {
+  const vp2: Viewport = { w: 800, h: 600, bottom: 28 };
+  const ouvrir = (s = emptyWinState(), id = "a") => winReducer(s, { type: "open", appId: id, title: id, size: { w: 400, h: 300 }, vp: vp2 });
+  it("cascade, mosaïque, tout réduire", () => {
+    let s = ouvrir(ouvrir(ouvrir(), "b"), "c");
+    s = winReducer(s, { type: "cascade", vp: vp2 });
+    expect(s.windows.map((w) => w.rect.x)).toEqual([6, 32, 58]);
+    s = winReducer(s, { type: "tile", vp: vp2 });
+    const r = s.windows.map((w) => w.rect);
+    expect(r[0]).toEqual({ x: 0, y: 0, w: 400, h: 286 });
+    expect(r[2]).toEqual({ x: 0, y: 286, w: 400, h: 286 });
+    s = winReducer(s, { type: "minimizeAll" });
+    expect(s.windows.every((w) => w.minimized)).toBe(true);
+    expect(s.focusedId).toBeNull();
+  });
+  it("enregistre et restaure une session", async () => {
+    const { saveWindows } = await import("@/os/windows");
+    let s = ouvrir(ouvrir(), "b");
+    s = winReducer(s, { type: "minimize", id: "w1" });
+    const saved = saveWindows(s);
+    const r = winReducer(emptyWinState(), { type: "restore", windows: saved, vp: vp2 });
+    expect(r.windows.map((w) => [w.appId, w.minimized])).toEqual([["a", true], ["b", false]]);
+    expect(r.windows.find((w) => w.id === r.focusedId)!.appId).toBe("b");
+  });
+});

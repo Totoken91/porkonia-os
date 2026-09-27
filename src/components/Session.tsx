@@ -12,7 +12,8 @@ import { emptyRuleState, schedule, type SchedulerInput } from "@/os/scheduler";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
-import { emptyWinState, winReducer, type Viewport, type WinAction } from "@/os/windows";
+import { emptyWinState, saveWindows, winReducer, type SavedWin, type Viewport, type WinAction } from "@/os/windows";
+import { ContextMenu, type MenuItem, type MenuState } from "./Menu";
 import { Desktop, type Rect } from "./Desktop";
 import { Economiseur } from "./Economiseur";
 import { SCREEN } from "./Monitor";
@@ -44,9 +45,11 @@ interface Props {
   onSleep(): void;
   onShutdown(): void;
   onRestart(): void;
+  /** Restaurer les fenêtres de la session précédente (faux après un arrêt brutal). */
+  restaurer: boolean;
 }
 
-export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart }: Props) {
+export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart, restaurer }: Props) {
   const vp = VP;
   const [wins, dispatchRaw] = useReducer(winReducer, undefined, emptyWinState);
   const [toasts, setToasts] = useState<LiveToast[]>([]);
@@ -56,6 +59,9 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const [busy, setBusy] = useState(0);
   const [zooms, setZooms] = useState<Zoom[]>([]);
   const [saver, setSaver] = useState(false);
+  const [ctxMenu, setCtxMenu] = useState<MenuState | null>(null);
+  const [gele, setGele] = useState<Record<string, boolean>>({});
+  const [fatal, setFatal] = useState(false);
   const cleCourrier = `porkos.courrier.${pack.id}`;
   const [boite, setBoiteState] = useState<Boite>(() => initBoite(pack.mails));
   const boiteRef = useRef(boite);
@@ -216,6 +222,23 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           return onRestart();
         case "signal":
           return feed({ kind: "signal", name: a.name });
+        case "freeze": {
+          // On ne gèle qu'un programme à l'arrière-plan : on le découvre figé en y revenant.
+          const cands = live.current.wins.windows.filter((w) => !w.minimized && w.id !== live.current.wins.focusedId && !["bienvenue", "executer"].includes(w.appId));
+          if (!cands.length) return;
+          const w = pick(rng, cands);
+          setGele((g) => ({ ...g, [w.id]: true }));
+          setTimeout(() => setGele((g) => ({ ...g, [w.id]: false })), 7000 + Math.floor(rng() * 5000));
+          return;
+        }
+        case "fatal":
+          setFatal(true);
+          playSound("erreur");
+          return;
+        case "window":
+          if (a.op === "close") dispatchRaw({ type: "close", id: a.id });
+          setGele((g) => ({ ...g, [a.id]: false }));
+          return;
         case "mail": {
           const m = pack.mails.find((x) => x.id === a.id);
           if (m && !boiteRef.current.messages.some((x) => x.id === m.id)) arrive(m);
@@ -300,9 +323,67 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       playSound,
       showScreensaver: () => setSaver(true),
       mail,
+      showMenu: (at, items: MenuItem[]) => {
+        const ecran = document.querySelector<HTMLElement>(".ecran");
+        if (!ecran) return;
+        const r = ecran.getBoundingClientRect();
+        const k = SCREEN.w / r.width;
+        setCtxMenu({ x: (at.clientX - r.left) * k, y: (at.clientY - r.top) * k, items });
+      },
     }),
     [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail],
   );
+
+  // Session : on retrouve ses fenêtres, sauf après un arrêt brutal.
+  const cleFenetres = `porkos.fenetres.${pack.id}`;
+  const restaurationFaite = useRef(false);
+  useEffect(() => {
+    let saved: SavedWin[] = [];
+    try {
+      const raw = JSON.parse(window.localStorage.getItem(cleFenetres) ?? "[]");
+      if (Array.isArray(raw)) saved = raw.filter((w) => w && pack.apps.some((a) => a.id === w.appId) && w.rect && typeof w.rect.x === "number" && w.appId !== "executer");
+    } catch {
+      /* rien à restaurer */
+    }
+    if (saved.length) {
+      if (restaurer) {
+        dispatchRaw({ type: "restore", windows: saved, vp: VP });
+        setTimeout(() => pushToast(pack.os.name, str("session.restauree")), 2500);
+      } else setTimeout(() => pushToast(pack.os.name, str("session.perdue")), 2500);
+    }
+    restaurationFaite.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!restaurationFaite.current) return;
+    try {
+      window.localStorage.setItem(cleFenetres, JSON.stringify(saveWindows(wins)));
+    } catch {
+      /* session non retenue */
+    }
+  }, [wins, cleFenetres]);
+
+  /** Fenêtre gelée cliquée : la boîte « … a cessé de répondre ». */
+  const surGel = (id: string) => {
+    const w = live.current.wins.windows.find((x) => x.id === id);
+    if (!w) return;
+    const app = pack.apps.find((a) => a.id === w.appId)?.title ?? w.title;
+    runAction({
+      type: "dialog",
+      dialog: {
+        title: str("gel.titre", { app }),
+        icon: "erreur",
+        body: str("gel.texte", { app }),
+        buttons: [
+          { label: str("gel.attendre") },
+          { label: str("gel.fermer"), then: { type: "window", op: "close", id } },
+          { label: str("gel.signaler"), then: { type: "toast", toast: { title: str("gel.signaler"), body: str("gel.signale") } } },
+        ],
+      },
+    });
+  };
+
+  const layout = (op: "desktop" | "cascade" | "tile") => dispatch(op === "desktop" ? { type: "minimizeAll" } : { type: op, vp: VP });
 
   const closeToast = useCallback((key: number) => setToasts((ts) => ts.filter((t) => t.key !== key)), []);
   const launch = useCallback(
@@ -325,7 +406,17 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
             const m = pack.apps.find((a) => a.id === w.appId)!;
             const App = APPS[m.kind];
             return (
-              <WindowFrame key={w.id} win={w} manifest={m} focused={wins.focusedId === w.id} vp={vp} dispatch={dispatch} outline={!settings.contenuFenetres}>
+              <WindowFrame
+                key={w.id}
+                win={w}
+                manifest={m}
+                focused={wins.focusedId === w.id}
+                vp={vp}
+                dispatch={dispatch}
+                outline={!settings.contenuFenetres}
+                frozen={!!gele[w.id]}
+                onFrozenClick={() => surGel(w.id)}
+              >
                 <App />
               </WindowFrame>
             );
@@ -341,6 +432,9 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           windows={wins.windows}
           focusedId={wins.focusedId}
           onTask={(w) => dispatch(w.id === wins.focusedId && !w.minimized ? { type: "minimize", id: w.id } : { type: "focus", id: w.id })}
+          dispatch={dispatch}
+          onLayout={layout}
+          busy={busy > 0}
         />
         {dialogs[0] && (
           <DialogBox
@@ -371,18 +465,56 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
             }}
           />
         )}
+        {ctxMenu && <ContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} bounds={{ w: SCREEN.w, h: SCREEN.h }} />}
         {saver && <Economiseur onExit={exitSaver} />}
+        {fatal && (
+          <EcranFatal
+            titre={str("fatal.titre")}
+            texte={str("fatal.texte")}
+            suite={str("fatal.suite")}
+            onExit={() => {
+              setFatal(false);
+              const f = live.current.wins.focusedId;
+              if (f) dispatch({ type: "close", id: f });
+            }}
+          />
+        )}
       </div>
     </OsContext.Provider>
   );
 }
 
-/** Rectangle en pointillés qui file d'un point à un autre (ouverture, réduction, restauration). */
+/** Écran d'exception fatale : texte d'époque en plein écran ; une touche ou un clic pour revenir. */
+function EcranFatal({ titre, texte, suite, onExit }: { titre: string; texte: string; suite: string; onExit(): void }) {
+  useEffect(() => {
+    const debut = Date.now();
+    const sortir = () => Date.now() - debut > 500 && onExit();
+    window.addEventListener("keydown", sortir);
+    window.addEventListener("pointerdown", sortir);
+    return () => {
+      window.removeEventListener("keydown", sortir);
+      window.removeEventListener("pointerdown", sortir);
+    };
+  }, [onExit]);
+  return (
+    <div className="fatal" data-testid="fatal">
+      <div>
+        <p className="fatal-titre">
+          <span>{titre}</span>
+        </p>
+        <p>{texte}</p>
+        <p className="fatal-suite">{suite}</p>
+      </div>
+    </div>
+  );
+}
+
 /** Horodatage des messages livrés ou envoyés pendant la session. */
 function maintenant() {
   return `aujourd'hui ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+/** Rectangle en pointillés qui file d'un point à un autre (ouverture, réduction, restauration). */
 function ZoomRect({ from, to, onDone }: { from: Rect; to: Rect; onDone(): void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
