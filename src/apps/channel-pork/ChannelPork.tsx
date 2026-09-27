@@ -81,6 +81,18 @@ export function ChannelPork() {
         image={p.videoSrc ? null : s.image}
         video={p.videoSrc}
         cadrage={s.focus}
+        fixe={s.fixe}
+        bulletin={
+          s.meteo
+            ? {
+                titre: s.meteo.titre,
+                points: s.meteo.points.flatMap((pt) => {
+                  const pos = pack.carteMeteo.lieux[pt.lieu];
+                  return pos ? [{ x: pos[0], y: pos[1], nom: pt.lieu, icone: pt.icone, temp: pt.temp, texte: pt.texte, vent: pt.vent }] : [];
+                }),
+              }
+            : null
+        }
         progression={Math.min(1, (t - debut) / s.seconds)}
         cle={`${cleProgramme}-${slide}`}
         programme={cleProgramme}
@@ -89,7 +101,7 @@ export function ChannelPork() {
         numero={ci + 1}
         bandeau={bandeau && s.chyron ? { etiquette, texte: s.chyron } : null}
         mention={s.caption}
-        soustitre={soustitres ? subtitle : null}
+        soustitre={soustitres && !s.meteo ? subtitle : null}
       />
       <div className="pk-toolbar tv-commandes">
         <button className="pk-btn small" onClick={() => zap(-1)} data-testid="tv-precedente">◂ Chaîne</button>

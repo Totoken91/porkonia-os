@@ -115,6 +115,17 @@ describe("Channel Pork", () => {
     expect(live(c, porkosPack.programs, 1000, 97)).toEqual(live(c, porkosPack.programs, 1097));
   });
 
+  it("place chaque point du bulletin météo sur un lieu de la carte", () => {
+    const lieux = porkosPack.carteMeteo.lieux;
+    const meteo = porkosPack.programs.find((p) => p.kind === "meteo")!;
+    for (const s of meteo.slides) {
+      expect(s.meteo, s.image).toBeTruthy();
+      for (const pt of s.meteo!.points) expect(lieux[pt.lieu], pt.lieu).toBeDefined();
+    }
+    for (const [x, y] of Object.values(lieux)) expect(x >= 0 && x <= 1 && y >= 0 && y <= 1).toBe(true);
+    expect(porkosPack.channels.some((c) => c.grid.includes(meteo.id))).toBe(true);
+  });
+
   it("donne une voix et une image à chaque réplique de chaque émission", () => {
     for (const p of porkosPack.programs) {
       expect(p.subtitles.every((s) => s.voice), p.id).toBe(true);

@@ -6,6 +6,7 @@
  * affichage du magnétoscope (net, par-dessus). Aucune lecture de pixels : les images d'origine restent des liens.
  */
 import { useEffect, useRef } from "react";
+import { type Bulletin, dessinerBulletin } from "./meteoCanvas";
 import { VHS, lineOffset, wrapText } from "./vhs";
 
 export interface EcranVhsProps {
@@ -21,6 +22,10 @@ export interface EcranVhsProps {
   numero: number;
   /** Point de l'image à garder dans le cadre 4:3 (0–1). */
   cadrage?: [number, number];
+  /** Image fixe, sans zoom lent (cartes météo). */
+  fixe?: boolean;
+  /** Bulletin météo dessiné sur la carte. */
+  bulletin?: Bulletin | null;
   bandeau: { etiquette: string; texte: string } | null;
   mention?: string;
   soustitre: string | null;
@@ -248,7 +253,8 @@ export function EcranVhs(props: EcranVhsProps) {
         }
         if (src && !glitch) {
           // Recadrage 4:3 et zoom lent (Ken Burns)
-          const zoom = 1.04 + 0.09 * (reduit ? 0 : p.progression);
+          const lent = !reduit && !p.fixe;
+          const zoom = p.fixe ? 1 : 1.04 + 0.09 * (lent ? p.progression : 0);
           const cible = W / H;
           let cw = sw;
           let ch = sw / cible;
@@ -260,11 +266,12 @@ export function EcranVhs(props: EcranVhsProps) {
           ch /= zoom;
           const [fx, fy] = p.cadrage ?? [0.5, 0.35];
           const borne = (x: number) => Math.max(0, Math.min(1, x));
-          const sx = (sw - cw) * borne(fx + 0.12 * (reduit ? 0 : p.progression - 0.5));
+          const sx = (sw - cw) * borne(fx + 0.12 * (lent ? p.progression - 0.5 : 0));
           const sy = (sh - ch) * borne(fy);
           b.filter = "saturate(1.3) contrast(1.06) sepia(0.14)";
           b.drawImage(src, sx, sy, cw, ch, 0, 0, W, H);
           b.filter = "none";
+          if (p.bulletin) dessinerBulletin(b, p.bulletin, W, H, reduit ? 0 : t);
         } else {
           // Pas de signal : neige
           b.drawImage(bruits[n % 4]!, 0, 0);

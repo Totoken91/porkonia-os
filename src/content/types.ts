@@ -141,17 +141,28 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
-  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport";
+  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo";
   /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
   etiquette?: string;
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */
   videoSrc?: string;
-  /** `focus` : point à garder dans le cadre 4:3 (0–1 en largeur et en hauteur ; défaut 0,5 et 0,35). */
-  slides: { image: string; seconds: number; caption?: string; chyron?: string; focus?: [number, number] }[];
+  /**
+   * `focus` : point à garder dans le cadre 4:3 (0–1 en largeur et en hauteur ; défaut 0,5 et 0,35).
+   * `fixe` : pas de zoom lent (cartes). `meteo` : bulletin dessiné sur la carte (lieux de `carteMeteo`).
+   */
+  slides: { image: string; seconds: number; caption?: string; chyron?: string; focus?: [number, number]; fixe?: boolean; meteo?: BulletinMeteo }[];
   /** Sous-titres, synchronisés sur le temps total du programme ; `voice` : voix off enregistrée de la réplique. */
   subtitles: { at: number; text: string; voice?: string }[];
   /** Musique de fond (bouclée, baissée sous la voix). */
   music?: string;
+}
+
+export type IconeMeteo = "soleil" | "eclaircies" | "nuages" | "pluie" | "neige" | "brouillard" | "confettis" | "mousse" | "vent";
+
+/** Un écran du bulletin météo : un titre et des lieux de la carte, avec pictogramme, température, légende ou vent. */
+export interface BulletinMeteo {
+  titre: string;
+  points: { lieu: string; icone?: IconeMeteo; temp?: number; texte?: string; vent?: { dir: number; force: number } }[];
 }
 
 /** Chaîne en direct : sa grille tourne en boucle sur l'horloge réelle (on arrive en cours d'émission). */
@@ -261,6 +272,8 @@ export interface ContentPack {
   programs: Program[];
   channels: Channel[];
   portal: Portal;
+  /** Carte météo stylisée et position des lieux (0–1). */
+  carteMeteo: { image: string; lieux: Record<string, [number, number]> };
   rules: EventRule[];
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;
