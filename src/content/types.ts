@@ -6,7 +6,7 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
 
 export type IconKey = "embleme" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
 
@@ -86,7 +86,17 @@ export interface Mail {
   subject: string;
   body: string;
   read?: boolean;
+  /** Pièces jointes : chemins du système de fichiers du pack (ouvrables), ou simples noms (confisqués). */
   attachments?: string[];
+  /** Absent au départ : livré en cours de session par une règle (action « mail »). */
+  later?: boolean;
+}
+
+/** Messagerie : adresse du poste, réponses automatiques de l'administration, dossier surveillé. */
+export interface MailboxSpec {
+  address: string;
+  signature: string;
+  autoReplies: { from: string; body: string }[];
 }
 
 /* -------------------------------- Messages -------------------------------- */
@@ -155,7 +165,8 @@ export type ActionRef =
   | { type: "shutdown" }
   | { type: "restart" }
   | { type: "lock" }
-  | { type: "signal"; name: string };
+  | { type: "signal"; name: string }
+  | { type: "mail"; id: string };
 
 export type Trigger =
   | { type: "login"; delay: number }
@@ -188,6 +199,7 @@ export interface ContentPack {
   welcome: { title: string; intro: string; tips: string[]; links: { label: string; action: ActionRef }[] };
   filesystem: FsNode;
   mails: Mail[];
+  mailbox: MailboxSpec;
   boot: {
     bios: string[];
     splash: { title: string; slogan: string };

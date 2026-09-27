@@ -20,6 +20,7 @@ function problems(pack: ContentPack): string[] {
     if (a.type === "toast-pool" && !pack.toastPools[a.pool]?.length) out.push(`${where}: pool vide ${a.pool}`);
     if (a.type === "ad" && a.id && !pack.ads.some((x) => x.id === a.id)) out.push(`${where}: pub inconnue ${a.id}`);
     if (a.type === "update" && !pack.updates.some((x) => x.id === a.id)) out.push(`${where}: mise à jour inconnue ${a.id}`);
+    if (a.type === "mail" && !pack.mails.some((x) => x.id === a.id && x.later)) out.push(`${where}: courrier tardif inconnu ${a.id}`);
     if (a.type === "dialog") a.dialog.buttons.forEach((b) => b.then && checkAction(b.then, where));
   };
   for (const a of pack.apps) if (!(a.kind in APPS)) out.push(`appli ${a.id}: type ${a.kind} sans composant`);
@@ -46,7 +47,7 @@ function problems(pack: ContentPack): string[] {
 describe("pack PorkOS", () => {
   it("est cohérent", () => expect(problems(porkosPack)).toEqual([]));
   it("déclenche des signaux que le système émet vraiment", () => {
-    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:zapper", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser"];
+    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:zapper", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser", "courrier:relever"];
     for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect(emitted).toContain(r.trigger.name);
   });
   it("ne référence que des images d'origine (aucune copie locale hors emblème)", () => {

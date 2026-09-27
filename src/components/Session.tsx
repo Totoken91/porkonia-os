@@ -6,11 +6,12 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { ActionRef, Ad, ContentPack, DesktopIcon, DialogSpec, ForcedUpdate, UserProfile } from "@/content/types";
 import { APPS } from "@/apps/registry";
-import { OsContext, makeStr, type OsApi } from "@/os/context";
+import { OsContext, makeStr, type MailApi, type OsApi } from "@/os/context";
 import { makeRng, pick } from "@/os/rng";
 import { emptyRuleState, schedule, type SchedulerInput } from "@/os/scheduler";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
+import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
 import { emptyWinState, winReducer, type Viewport, type WinAction } from "@/os/windows";
 import { Desktop, type Rect } from "./Desktop";
 import { Economiseur } from "./Economiseur";
@@ -55,6 +56,31 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const [busy, setBusy] = useState(0);
   const [zooms, setZooms] = useState<Zoom[]>([]);
   const [saver, setSaver] = useState(false);
+  const cleCourrier = `porkos.courrier.${pack.id}`;
+  const [boite, setBoiteState] = useState<Boite>(() => initBoite(pack.mails));
+  const boiteRef = useRef(boite);
+  const setBoite = useCallback(
+    (f: (b: Boite) => Boite) => {
+      const next = f(boiteRef.current);
+      boiteRef.current = next;
+      setBoiteState(next);
+      try {
+        window.localStorage.setItem(cleCourrier, JSON.stringify(next));
+      } catch {
+        /* courrier non retenu */
+      }
+    },
+    [cleCourrier],
+  );
+  useEffect(() => {
+    try {
+      const b = sanitizeBoite(JSON.parse(window.localStorage.getItem(cleCourrier) ?? "null"), pack.mails);
+      boiteRef.current = b;
+      setBoiteState(b);
+    } catch {
+      /* boîte neuve */
+    }
+  }, [cleCourrier, pack.mails]);
 
   const rng = useMemo(() => makeRng(Date.now() & 0xffffffff), []);
   const str = useMemo(() => makeStr(pack), [pack]);
@@ -136,6 +162,13 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [pack.apps, feed, rng, zoom],
   );
 
+  /** Un message arrive : il est déposé, la zone de notification sonne. */
+  const arrive = (m: import("@/content/types").Mail) => {
+    setBoite((b) => deliver(b, m, maintenant()));
+    pushToast(str("courrier.arrive.titre"), str("courrier.arrive", { de: m.from.replace(/\s*<[^>]*>/, ""), objet: m.subject }));
+    playSound("ding");
+  };
+
   const pushToast = useCallback((title: string, body: string) => {
     const key = ++counter.current;
     setToasts((ts) => [...ts.slice(-2), { key, title, body }]);
@@ -183,6 +216,11 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           return onRestart();
         case "signal":
           return feed({ kind: "signal", name: a.name });
+        case "mail": {
+          const m = pack.mails.find((x) => x.id === a.id);
+          if (m && !boiteRef.current.messages.some((x) => x.id === m.id)) arrive(m);
+          return;
+        }
       }
     },
     [pack, rng, pushToast, openApp, onSleep, onLock, onShutdown, onRestart, feed],
@@ -218,6 +256,36 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     if (premier) playSound(premier.icon === "erreur" ? "erreur" : "ding");
   }, [premier, playSound]);
 
+  const mail = useMemo<MailApi>(
+    () => ({
+      boite,
+      lire: (id, lu = true) => setBoite((b) => markRead(b, id, lu)),
+      deplacer: (id, dossier: Dossier) => setBoite((b) => move(b, id, dossier)),
+      brouillon: (d: Brouillon, id?: string) => {
+        let nid = id ?? "";
+        setBoite((b) => {
+          const [nb, i] = saveDraft(b, d, pack.mailbox.address, maintenant(), id);
+          nid = i;
+          return nb;
+        });
+        return nid;
+      },
+      envoyer: (d: Brouillon, draftId?: string) => {
+        setBoite((b) => send(b, d, pack.mailbox.address, maintenant(), draftId)[0]);
+        // L'administration répond toujours, et vite : c'est même la seule chose qu'elle fait vite.
+        const r = pick(rng, pack.mailbox.autoReplies);
+        const id = `auto-${Date.now()}`;
+        setTimeout(
+          () => arrive({ id, folder: "reception", from: r.from, to: pack.mailbox.address, date: "", subject: /^re\s*:/i.test(d.subject) ? d.subject : `RE: ${d.subject || "(sans objet)"}`, body: r.body }),
+          8000 + Math.floor(rng() * 7000),
+        );
+      },
+      relever: () => feed({ kind: "signal", name: "courrier:relever" }),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [boite, setBoite, pack, rng, feed],
+  );
+
   const api = useMemo<OsApi>(
     () => ({
       pack,
@@ -231,8 +299,9 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       rng,
       playSound,
       showScreensaver: () => setSaver(true),
+      mail,
     }),
-    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound],
+    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail],
   );
 
   const closeToast = useCallback((key: number) => setToasts((ts) => ts.filter((t) => t.key !== key)), []);
@@ -309,6 +378,11 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
 }
 
 /** Rectangle en pointillés qui file d'un point à un autre (ouverture, réduction, restauration). */
+/** Horodatage des messages livrés ou envoyés pendant la session. */
+function maintenant() {
+  return `aujourd'hui ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
 function ZoomRect({ from, to, onDone }: { from: Rect; to: Rect; onDone(): void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

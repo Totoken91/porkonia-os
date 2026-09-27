@@ -16,6 +16,8 @@ src/
     settings.ts           réglages (localStorage, assainis)
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
     sons.ts               sons système synthétisés (WebAudio, aucun fichier)
+    mailbox.ts            boîte aux lettres (livraison, lecture, corbeille sans destruction, brouillons, envoi, réponses)
+    menus.ts              lettres d'accès et raccourcis des barres de menus
     context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis
   components/             coque : Monitor (tube, alimentation), Boot (ScanDisque, BIOS), Login, Session, Desktop, Menu, Economiseur,
                           Wallpaper, WindowFrame, Taskbar, Overlays, Icon + pixel.ts (icônes et curseurs en pixel art)
@@ -28,7 +30,8 @@ src/
 1. `PorkOS` gère l'alimentation (bouton du moniteur) et enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle) : (ScanDisque si le poste n'a pas été arrêté proprement) → PorkBIOS → chargement → connexion → session → fermeture → « vous pouvez éteindre ». Un marqueur en localStorage détecte les arrêts brutaux, y compris un onglet fermé.
 2. `Session` tient les fenêtres (`winReducer`), la file de dialogues, les flash infos, la pub et la mise à jour en cours.
 3. Toutes les secondes, `schedule()` reçoit un `tick` ; ouvrir une appli envoie `app-open` ; une appli peut émettre un `signal` (`nappe:incident`, `tv:zapper`…). Les règles du pack décident de ce qui en découle.
-4. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou une bulle, lancer une pub, une mise à jour, la veille ou le verrouillage.
+4. Une règle peut livrer un courrier tardif (action `mail`) : il arrive dans la boîte de réception, avec bulle et enveloppe dans la zone de notification. La boîte est retenue dans le navigateur.
+5. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou une bulle, lancer une pub, une mise à jour, la veille ou le verrouillage.
 
 ## Ajouter…
 

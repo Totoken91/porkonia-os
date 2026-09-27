@@ -29,7 +29,8 @@ interface Props {
 type Sub = "programmes" | "accessoires" | null;
 
 export function Taskbar({ windows, focusedId, onTask }: Props) {
-  const { pack, str, openApp, runAction, settings, setSettings } = useOs();
+  const { pack, str, openApp, runAction, settings, setSettings, mail } = useOs();
+  const nonLus = mail.boite.messages.filter((m) => m.folder === "reception" && !m.read).length;
   const [open, setOpen] = useState(false);
   const [sub, setSub] = useState<Sub>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -144,6 +145,11 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
           })}
         </div>
         <div className="tb-tray">
+          {nonLus > 0 && (
+            <button className="tb-son tb-courrier" onClick={() => openApp("mail")} title={str("courrier.nonlus", { n: nonLus })} aria-label={str("courrier.nonlus", { n: nonLus })} data-testid="tray-courrier">
+              <Icon name="mail" size={16} />
+            </button>
+          )}
           <button className="tb-son" onClick={() => setSettings({ sons: !settings.sons })} title={str("barre.sons")} aria-pressed={settings.sons} aria-label={str("config.sons")}>
             <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
               <path d="M2 6h3l4-3v10l-4-3H2z" fill="#e8e0cc" stroke="#000" />

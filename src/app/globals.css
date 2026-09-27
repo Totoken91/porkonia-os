@@ -41,13 +41,15 @@
 
 @layer components {
   /* ============================== Curseurs d'époque ============================== */
-  .ecran { cursor: var(--c-fleche), default; }
+  /* Les variables contiennent déjà leur repli (« url(…) x y, default ») : ne rien ajouter derrière. */
+  .ecran { cursor: var(--c-fleche); user-select: none; -webkit-user-select: none; }
+  .ecran input, .ecran textarea, .ecran .page-web, .ecran .selectionnable { user-select: text; -webkit-user-select: text; }
   /* Police pixel : une seule taille native (16 px) pour tout le texte d'interface. */
   .ecran small { font-size: inherit; }
   .ecran * { cursor: inherit; }
   .ecran input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), .ecran textarea { cursor: text; }
-  .ecran a, .ecran .lien { cursor: var(--c-main), pointer; }
-  .bureau.occupe, .bureau.occupe * { cursor: var(--c-sablier), progress !important; }
+  .ecran a, .ecran .lien { cursor: var(--c-main); }
+  .bureau.occupe, .bureau.occupe * { cursor: var(--c-sablier) !important; }
 
   /* ============================== La pièce et le moniteur ============================== */
   .piece {
@@ -524,4 +526,42 @@
   .executer-boutons { display: flex; justify-content: flex-end; gap: 6px; }
   .executer-boutons .pk-btn { min-width: 76px; }
   .config .ligne { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+  /* ============================== Courrier d'État ============================== */
+  .courrier-outils .outil { min-height: 24px; }
+  .separateur-outils { width: 2px; height: 20px; margin: 0 3px; box-shadow: inset 1px 0 0 var(--lo), inset -1px 0 0 var(--hi); }
+  .courrier-corps { flex: 1; min-height: 0; display: grid; grid-template-columns: 150px 1fr; gap: 3px; padding: 3px 0 0; }
+  .courrier-dossiers { list-style: none; margin: 0; overflow: auto; background: #fffdf7; }
+  .courrier-dossiers button { width: 100%; display: flex; align-items: center; gap: 5px; padding: 2px 3px; border: none; background: none; text-align: left; white-space: nowrap; }
+  .courrier-dossiers button[aria-selected="true"] span { background: var(--color-rouge-sombre); color: #fff; }
+  .courrier-dossiers span { padding: 0 2px; }
+  .gras { font-weight: bold; }
+  .courrier-droite { min-height: 0; display: grid; grid-template-rows: 44% 1fr; gap: 3px; }
+  .courrier-liste { overflow: auto; background: #fffdf7; outline: none; padding: 0; }
+  .courrier-liste table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .courrier-liste th { position: sticky; top: 0; z-index: 1; text-align: left; font-weight: normal; padding: 1px 4px; background: var(--face); box-shadow: var(--raised); white-space: nowrap; }
+  .courrier-liste td { padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 18px; }
+  .courrier-liste .col-icone { width: 34px; }
+  .courrier-liste .col-date { width: 118px; }
+  .courrier-liste tr.non-lu td { font-weight: bold; }
+  .courrier-liste tbody tr[aria-selected="true"] td { background: var(--color-rouge-sombre); color: #fff; }
+  .enveloppe { display: inline-block; width: 13px; height: 9px; vertical-align: -1px; background: #fff; border: 1px solid #000; position: relative; }
+  .enveloppe::after { content: ""; position: absolute; left: 1px; top: -3px; width: 8px; height: 8px; border: solid #000; border-width: 0 1px 1px 0; transform: rotate(45deg) scale(0.9); }
+  .enveloppe:not(.ouverte) { background: #f5c542; }
+  .trombone { display: inline-block; width: 5px; height: 11px; margin-left: 4px; vertical-align: -2px; border: 1px solid #555; border-radius: 3px; }
+  .courrier-apercu { overflow: auto; background: #fffdf7; padding: 0; display: flex; flex-direction: column; }
+  .courrier-entete { display: grid; grid-template-columns: max-content 1fr; gap: 0 8px; padding: 4px 8px; background: var(--face); border-bottom: 1px solid var(--lo); margin: 0; }
+  .courrier-entete dt { color: #6d5f45; }
+  .courrier-entete dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .courrier-pj { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 3px 8px; border-bottom: 1px solid var(--lo); }
+  .courrier-pj .pj { display: inline-flex; align-items: center; gap: 4px; padding: 0 3px; border: 1px dotted transparent; background: none; color: #1d3f8f; text-decoration: underline; }
+  .courrier-pj .pj:disabled { color: #9b8f78; text-decoration: none; }
+  .courrier-message { padding: 8px 10px; white-space: pre-wrap; line-height: 18px; }
+  .courrier-vide { padding: 8px 10px; }
+  .courrier-redaction { min-height: 0; display: flex; flex-direction: column; gap: 4px; }
+  .courrier-redaction label { display: grid; grid-template-columns: 60px 1fr; align-items: center; }
+  .courrier-texte { flex: 1; min-height: 0; resize: none; white-space: pre-wrap; line-height: 18px; }
+  .courrier-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .tb-courrier { animation: clignote-courrier 1.2s steps(1) 4; }
+  @keyframes clignote-courrier { 50% { opacity: 0.2; } }
 }

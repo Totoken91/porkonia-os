@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef } from "react";
 import type { ActionRef, ContentPack, UserProfile } from "@/content/types";
 import type { Rng } from "./rng";
 import type { Son } from "./sons";
+import type { Boite, Brouillon, Dossier } from "./mailbox";
 import type { Settings } from "./settings";
 import type { Win } from "./windows";
 
@@ -22,6 +23,17 @@ export interface OsApi {
   playSound(son: Son): void;
   /** Lance l'écran de veille (aperçu). */
   showScreensaver(): void;
+  /** Messagerie du poste (état partagé : appli Courrier, zone de notification, règles). */
+  mail: MailApi;
+}
+
+export interface MailApi {
+  boite: Boite;
+  lire(id: string, lu?: boolean): void;
+  deplacer(id: string, dossier: Dossier): void;
+  envoyer(d: Brouillon, draftId?: string): void;
+  brouillon(d: Brouillon, id?: string): string;
+  relever(): void;
 }
 
 export type MenuHandlers = Record<string, (arg?: string) => void>;

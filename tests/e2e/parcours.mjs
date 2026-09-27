@@ -193,6 +193,25 @@ try {
     await closeTop();
     step(`${tag} : Exécuter…`);
 
+    // Curseur : jamais le curseur de texte sur l'interface (régression)
+    const curseur = await page.locator(".tb-start").evaluate((el) => getComputedStyle(el).cursor);
+    if (!curseur.startsWith("url(")) throw new Error(`curseur d'interface invalide : ${curseur}`);
+
+    // Courrier d'État : lire un message, répondre, retrouver l'envoi
+    await page.getByTestId("icon-d-mail").dblclick();
+    await page.getByTestId("window-mail").waitFor();
+    await page.getByTestId("courrier-message-m4").click();
+    await page.getByTestId("courrier-apercu").getByText("sourire non conforme", { exact: false }).waitFor();
+    if (tag === "bureau") await shot(page, `${tag}-16-courrier`);
+    await page.getByTestId("courrier-repondre").click();
+    await page.getByTestId("courrier-objet").waitFor();
+    if ((await page.getByTestId("courrier-objet").inputValue()) !== "RE: Pork ID : photographie refusée") throw new Error("objet de réponse inattendu");
+    await page.getByTestId("courrier-envoyer").click();
+    await page.getByTestId("courrier-dossier-envoyes").waitFor();
+    await page.locator("[data-testid=courrier-liste] tbody tr", { hasText: "RE: Pork ID" }).waitFor();
+    await closeTop();
+    step(`${tag} : Courrier d'État (lecture, réponse, envoi)`);
+
     if (tag === "bureau") {
       // Arrêt brutal (rechargement) : ScanDisque au démarrage suivant
       await page.reload();
