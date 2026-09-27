@@ -570,6 +570,39 @@
   .tuner-txt { grid-column: 4; grid-row: 1 / span 2; height: auto; align-self: stretch; font-family: var(--font-pixel-mono); color: #5dd6ff; }
   .tuner-txt.actif { color: #0f0d0c; background: #5dd6ff; box-shadow: inset 1px 1px 0 #1a6f8a; }
 
+  /* ============================== PorkAmp ============================== */
+  .amp { height: 100%; display: flex; flex-direction: column; gap: 4px; padding: 3px 5px 5px; color: #e2bd62; background: linear-gradient(#3a3531, #26221f); border: 1px solid #0f0d0c; box-shadow: inset 1px 1px 0 #5b534b, inset -1px -1px 0 #141210; }
+  .amp-titre { display: flex; align-items: center; gap: 6px; height: 18px; padding-left: 4px; border-bottom: 1px solid #141210; box-shadow: 0 1px 0 #4a443e; background: linear-gradient(90deg, #6b1a1f 0 4px, transparent 4px); }
+  .amp-logo { font: italic bold 15px/1 var(--font-serif); color: #e2bd62; text-shadow: 0 1px 0 #000; letter-spacing: 0.04em; }
+  .amp-sous { flex: 1; color: #8f7a4c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .amp-ecran { display: flex; gap: 6px; padding: 4px; background: #000; border: 1px solid #0f0d0c; box-shadow: 0 0 0 1px #4a443e; }
+  .amp-gauche { display: grid; grid-template-columns: 14px auto; grid-template-rows: 32px 34px; column-gap: 4px; align-items: center; color: #5dff72; }
+  .amp-etat { grid-row: 1; align-self: start; padding-top: 4px; }
+  .amp-temps { grid-row: 1; font-family: var(--font-pixel-mono); font-size: 32px; line-height: 32px; text-shadow: 0 0 6px rgba(93, 255, 114, 0.45); }
+  .amp-temps.clignote { animation: clignote-amp 1s steps(1) infinite; }
+  @keyframes clignote-amp { 50% { opacity: 0; } }
+  .amp-spectre { grid-column: 1 / span 2; width: 152px; height: 34px; image-rendering: pixelated; }
+  .amp-droite { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .amp-defile { white-space: nowrap; overflow: hidden; color: #5dff72; }
+  .amp-defile span { display: inline-block; animation: defile-lcd 16s linear infinite; }
+  .amp-infos { color: #3fa84e; }
+  .amp .amp-position, .amp .amp-volume { height: 16px; }
+  .amp input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: #141210; box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 #4a443e; }
+  .amp input[type="range"]::-moz-range-track { height: 4px; background: #141210; box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 #4a443e; }
+  .amp input[type="range"]::-webkit-slider-thumb { width: 14px; height: 10px; margin-top: -3px; background: linear-gradient(#e2bd62, #a27f2c); box-shadow: inset 1px 1px 0 #ffe7a0, inset -1px -1px 0 #5a4210; }
+  .amp input[type="range"]::-moz-range-thumb { width: 14px; height: 10px; background: linear-gradient(#e2bd62, #a27f2c); box-shadow: inset 1px 1px 0 #ffe7a0, inset -1px -1px 0 #5a4210; }
+  .amp-commandes { display: flex; align-items: center; gap: 3px; }
+  .amp-commandes .tuner-bouton { width: 24px; height: 20px; }
+  .amp-commandes .amp-bascule { width: auto; padding: 0 4px; font-size: inherit; }
+  .amp-bascule.actif { color: #5dff72; }
+  .amp-volume { flex: 1; min-width: 40px; }
+  .amp-liste { flex: 1; min-height: 0; overflow-y: auto; margin: 0; padding: 2px; list-style: none; background: #000; border: 1px solid #0f0d0c; box-shadow: 0 0 0 1px #4a443e; color: #5dff72; }
+  .amp-liste li { display: flex; justify-content: space-between; gap: 6px; padding: 0 2px; cursor: var(--c-main); }
+  .amp-liste li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .amp-liste li.courante { color: #fff; background: #1b3a8a; }
+  .amp-pied { color: #8f7a4c; text-align: right; }
+  @media (prefers-reduced-motion: reduce) { .amp-defile span, .amp-temps.clignote { animation: none; } }
+
   /* ============================== PorkTexte (télétexte) ============================== */
   .ttx { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; padding: 6px 10px; background: #000; color: #fff; font-family: var(--font-pixel-mono); letter-spacing: 4px; overflow: hidden; }
   .ttx-ligne { display: block; min-height: 16px; white-space: pre; text-align: left; }

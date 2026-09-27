@@ -21,6 +21,9 @@ function audio(): AudioContext | null {
   }
 }
 
+/** Contexte audio partagé du poste (PorkAmp y branche son analyseur de spectre). */
+export const contexteAudio = () => audio();
+
 // Le navigateur ne libère le son qu'après un geste : on relance le contexte au premier clic ou à la première touche.
 if (typeof window !== "undefined") {
   const liberer = () => {

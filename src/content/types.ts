@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp";
 
-export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -44,7 +44,7 @@ export interface AppManifest {
   /** Texte de la boîte « À propos de… ». */
   about?: string;
   /** Fenêtre habillée : pas de barre de titre ni de menus, l'appli dessine son propre boîtier. */
-  habillage?: "tuner";
+  habillage?: "tuner" | "lecteur";
 }
 
 export interface DesktopIcon {
@@ -329,6 +329,8 @@ export interface ContentPack {
   /** Carte météo stylisée et position des lieux (0–1). */
   carteMeteo: { image: string; lieux: Record<string, [number, number]> };
   rules: EventRule[];
+  /** PorkAmp, lecteur de musique : pistes (fichiers de public/audio) et textes de l'afficheur. */
+  lecteur: { slogan: string; infos: string; pistes: { titre: string; artiste: string; src: string }[] };
   /** Télétexte de PorkTV : pages, et barre de liens colorés en bas d'écran. */
   teletexte: { nom: string; pages: TeletextePage[]; fastext: { texte: string; page: number }[]; introuvable: string; recherche: string };
   /** Distinctions civiques (succès) et rangs atteints selon leur nombre (seuils croissants, le premier à 0). */

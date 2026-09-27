@@ -302,6 +302,21 @@ try {
     await closeTop();
     step(`${tag} : Courrier d'État (lecture, réponse, envoi)`);
 
+    // PorkAmp : lecture d'un morceau, le temps avance, arrêt
+    await page.getByTestId("icon-d-porkamp").dblclick();
+    await page.getByTestId("window-porkamp").waitFor();
+    await page.getByTestId("amp-lecture").click();
+    await page.waitForFunction(() => window.__lectures.some((s) => /viteau-merci-copain\.mp3/.test(s)), null, { timeout: 8000 }).catch(async () => {
+      throw new Error(`PorkAmp muet : ${await page.evaluate(() => window.__lectures.join(" "))}`);
+    });
+    await page.locator("[data-testid=amp-temps]", { hasNotText: "0:00" }).waitFor({ timeout: 8000 });
+    if (tag === "bureau") await shot(page, `${tag}-20-porkamp`);
+    await page.getByTestId("amp-suivante").click();
+    await page.getByTestId("amp-titre").getByText("Sous la neige", { exact: false }).waitFor();
+    await page.getByTestId("amp-stop").click();
+    await closeTop();
+    step(`${tag} : PorkAmp (lecture, piste suivante, arrêt)`);
+
     // Mes décorations : la connexion et le courrier envoyé ont été décorés, et le restent
     await page.getByTestId("icon-d-decorations").dblclick();
     await page.getByTestId("window-distinctions").waitFor();

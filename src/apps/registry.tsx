@@ -10,6 +10,7 @@ import { Fichiers, Texte, Visionneuse } from "./fichiers/Fichiers";
 import { Navigateur } from "./navigateur/Navigateur";
 import { NappeVide } from "./nappe-vide/NappeVide";
 import { Distinctions } from "./distinctions/Distinctions";
+import { PorkAmp } from "./porkamp/PorkAmp";
 
 export const APPS: Record<AppKind, ComponentType> = {
   bienvenue: Bienvenue,
@@ -23,4 +24,5 @@ export const APPS: Record<AppKind, ComponentType> = {
   visionneuse: Visionneuse,
   texte: Texte,
   distinctions: Distinctions,
+  porkamp: PorkAmp,
 };

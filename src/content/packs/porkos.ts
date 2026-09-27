@@ -281,6 +281,7 @@ export const porkosPack: ContentPack = {
     { id: "texte", kind: "texte", title: "Bloc-notes d'État", icon: "texte", size: { w: 460, h: 380 }, menu: "accessoires", blurb: "Écrire, sous réserve" },
     { id: "visionneuse", kind: "visionneuse", title: "Visionneuse", icon: "image", size: { w: 520, h: 420 } },
     { id: "executer", kind: "executer", title: "Exécuter", icon: "executer", size: { w: 380, h: 170 }, single: true },
+    { id: "porkamp", kind: "porkamp", title: "PorkAmp", icon: "musique", size: { w: 320, h: 300 }, habillage: "lecteur", single: true, menu: "programmes", blurb: "Le lecteur qui fouette le jambon" },
     { id: "distinctions", kind: "distinctions", title: "Mes décorations", icon: "medaille", size: { w: 470, h: 420 }, single: true, menu: "accessoires", blurb: "Le mérite, dûment constaté" },
     { id: "config", kind: "config", title: "Panneau de configuration", icon: "config", size: { w: 480, h: 470 }, single: true, menu: "systeme", blurb: "Réglez, nous ajusterons" },
   ],
@@ -293,6 +294,7 @@ export const porkosPack: ContentPack = {
     { id: "d-nappe", label: "Nappe Vide", icon: "nappe", open: { app: "nappe-vide" } },
     { id: "d-docs", label: "Mes documents", icon: "dossier", open: { app: "fichiers" } },
     { id: "d-config", label: "Réglages d'État", icon: "config", open: { app: "config" } },
+    { id: "d-porkamp", label: "PorkAmp", icon: "musique", open: { app: "porkamp" } },
     { id: "d-decorations", label: "Mes décorations", icon: "medaille", open: { app: "distinctions" } },
     { id: "d-poubelle", label: "Poubelle d'État", icon: "poubelle", open: { action: { type: "dialog-ref", id: "poubelle" } } },
   ],
@@ -583,6 +585,9 @@ export const porkosPack: ContentPack = {
       courrier: { app: "mail" },
       outlook: { app: "mail" },
       decorations: { app: "distinctions" },
+      porkamp: { app: "porkamp" },
+      winamp: { app: "porkamp" },
+      musique: { app: "porkamp" },
       medailles: { app: "distinctions" },
       distinctions: { app: "distinctions" },
       "format c:": { action: { type: "fatal" } },
@@ -1322,6 +1327,18 @@ export const porkosPack: ContentPack = {
     { id: "actualiser", trigger: { type: "signal", name: "nav:actualiser" }, action: { type: "toast-pool", pool: "actualiser" } },
   ],
 
+  // PorkAmp : les morceaux de DJ Viteau déjà diffusés sur Canal 1 Zouk.
+  lecteur: {
+    slogan: "Ça fouette vraiment le jambon.",
+    infos: "128 kbit/s · 44 kHz · stéréo d'État",
+    pistes: [
+      { artiste: "DJ Viteau", titre: "Merci Copain (Remastered)", src: `${V}viteau-merci-copain.mp3` },
+      { artiste: "DJ Viteau", titre: "Sous la neige de Douzi City", src: `${V}viteau-neige.mp3` },
+      { artiste: "DJ Viteau", titre: "Petit Question (Remastered)", src: `${V}viteau-petit-question.mp3` },
+      { artiste: "DJ Viteau", titre: "Tchimbakala dort", src: `${V}viteau-tchimbakala.mp3` },
+    ],
+  },
+
   // PorkTexte, le télétexte de Canal 1 (touche TXT de PorkTV). Les pages à source sont composées depuis le pack.
   teletexte: {
     nom: "PORKTEXTE",
@@ -1404,6 +1421,7 @@ export const porkosPack: ContentPack = {
     { id: "arret-brutal", titre: "Médaille de l'Arrêt brutal", metal: "argent", trigger: { type: "signal", name: "session:perdue" }, motif: "Pour avoir éteint sans prévenir. ScanDisque vous a pardonné. Nous, nous avons un dossier." },
     { id: "teletexte", titre: "Médaille du Télétexte", metal: "bronze", trigger: { type: "signal", name: "tv:txt:100" }, indice: "Consulter le télétexte de Canal 1.", motif: "Pour avoir lu le télétexte. Quelqu'un devait bien le faire." },
     { id: "page-999", titre: "Médaille de la Page réservée", metal: "argent", trigger: { type: "signal", name: "tv:txt:999" }, motif: "Pour avoir consulté une page qui n'existe pas. Vous ne l'avez pas lue." },
+    { id: "melomane", titre: "Médaille du Mélomane", metal: "bronze", trigger: { type: "signal", name: "porkamp:fin" }, indice: "Écouter un morceau de PorkAmp jusqu'au bout.", motif: "Pour avoir écouté un morceau en entier. DJ Viteau a été informé, et ému." },
     { id: "explorateur", titre: "Ordre de l'Explorateur du poste", metal: "or", trigger: { type: "toutes-applis" }, indice: "Ouvrir chacun des programmes du poste.", motif: "Pour avoir ouvert chaque programme du poste. Il n'y en a pas d'autres. Ne cherchez pas." },
     { id: "complet", titre: "Médaille de la Complétude", metal: "or", trigger: { type: "toutes-distinctions" }, indice: "Obtenir toutes les autres distinctions.", motif: "Pour avoir obtenu toutes les distinctions. Il n'y a plus rien à obtenir. Continuez quand même." },
   ],
@@ -1413,7 +1431,7 @@ export const porkosPack: ContentPack = {
     { seuil: 7, titre: "Citoyen décoré" },
     { seuil: 12, titre: "Citoyen d'honneur" },
     { seuil: 18, titre: "Citoyen exemplaire" },
-    { seuil: 23, titre: "Citoyen intégral" },
+    { seuil: 24, titre: "Citoyen intégral" },
   ],
 
   strings: {
@@ -1447,6 +1465,18 @@ export const porkosPack: ContentPack = {
     "tv.activerSon": "Le son a été retenu par votre navigateur. Cliquer pour l'activer",
     "tv.aSuivre": "À suivre",
     "tv.teletexte": "Télétexte (PorkTexte)",
+    "amp.lecture": "Lecture",
+    "amp.pause": "Pause",
+    "amp.stop": "Arrêt",
+    "amp.precedente": "Piste précédente",
+    "amp.suivante": "Piste suivante",
+    "amp.alea": "Aléa",
+    "amp.boucle": "Boucle",
+    "amp.volume": "Volume",
+    "amp.position": "Position",
+    "amp.liste": "Liste de lecture",
+    "amp.total": "{n} pistes · {duree}",
+    "amp.arrete": "*** PorkAmp : {slogan} ***  ",
     "tv.txt": "TXT",
     "tv.etiquette.journal": "Info",
     "tv.etiquette.publicite": "Pub",
