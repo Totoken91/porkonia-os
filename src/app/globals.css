@@ -461,7 +461,6 @@
   .nv[data-adj="5"] { color: var(--color-rouge-sombre); }
   .nv[data-adj="6"] { color: #1c6b6b; }
   .nv[data-adj="7"], .nv[data-adj="8"] { color: var(--color-noir); }
-  .nappe-regles { color: #6d5f45; max-width: 380px; text-align: center; }
 
   /* ============================== Configuration ============================== */
   .config .pk-tabpanel { flex: 1; }
