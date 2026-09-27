@@ -25,7 +25,7 @@ Cocher au fur et à mesure.
 - [x] Écran d'exception fatale (commandes secrètes `format c:`, `rm -rf /`, `deltree c:`).
 - [ ] Alt+Tab / Alt+F4 : interceptés par le système hôte, impossibles à simuler dans un navigateur ; à remplacer par un raccourci maison si besoin.
 
-- [ ] Glisser-déposer entre fenêtres : fichier sur la Poubelle d'État (refusé), image sur le Bloc-notes (qui s'offusque).
+- [x] Glisser-déposer entre fenêtres et vers le bureau, la Poubelle et les dossiers.
 - [ ] Explorateur plus complet : affichage liste/icônes, barre d'adresse, raccourcis clavier (Ctrl+C refusé « pour votre sécurité »).
 - [x] Plantages occasionnels : « PigNet Navigateur a cessé de répondre avec loyauté » (Attendre / Fermer / Signaler un collègue).
 - [ ] Nouveaux jeux ou accessoires : Réussite du Banquet (solitaire), Paint d'État dont le seul pinceau dessine le Fondateur.
@@ -63,13 +63,13 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 
 - [x] PorkAmp : lecteur d'époque dans son boîtier (temps, titre défilant, analyseur de spectre branché sur la vraie sortie, aléa, boucle, liste de lecture, touches Z X C V B), morceaux de DJ Viteau.
 - [x] Télétexte sur PorkTV (PorkTexte) : touche TXT, sommaire 100, programmes des cinq chaînes en direct (101), météo de la mousse, bourse du jambon, dépêches, petites annonces, sous-pages tournantes, compteur de recherche, page 999 secrète ; remplace le guide perdu.
-- [ ] Poubelle d'État fonctionnelle : glisser des fichiers dedans, la vider demande une autorisation préfectorale.
-- [ ] Calculatrice d'État (TVA sur la bière, arrondis au profit de l'État), PorkPaint à tampons officiels, Défragmenteur.
-- [ ] Ergonomie : raccourci maison pour changer de fenêtre, copier-coller, documents du Bloc-notes persistants, calendrier au clic sur l'horloge.
+- [x] Gestion de fichiers d'OS : disque modifiable (créer, renommer, couper, copier, coller), glisser-déposer entre fenêtres, vers le bureau, dans un dossier ; Poubelle d'État fonctionnelle (jeter, restaurer, vider) ; Bloc-notes qui enregistre vraiment.
+- [x] Calculatrice d'État (douze chiffres, touche ×12, division par zéro = table vide), Défragmenteur (disque qui se range, blocs système immobiles), PorkPaint (crayon, pinceau, gomme, pot, tampons chope/jambon/saucisse/groin, dessins enregistrés sur le disque).
+- [ ] Ergonomie : raccourci maison pour changer de fenêtre, calendrier au clic sur l'horloge. (Copier-coller de fichiers et documents persistants : faits.)
 
 ### 3. Contenu (à faire valider : rien d'inventé n'est présenté comme canon)
 
-- [x] Distinctions civiques : 24 médailles (bronze, argent, or) dans « Mes décorations », rangs de « Citoyen ordinaire » à « Citoyen intégral », fanfare et bulle cliquable à la remise, retenues dans le navigateur.
+- [x] Distinctions civiques : 25 médailles (bronze, argent, or) dans « Mes décorations », rangs de « Citoyen ordinaire » à « Citoyen intégral », fanfare et bulle cliquable à la remise, retenues dans le navigateur.
 - [ ] Courrier : plus de mails, qui arrivent au fil des sessions et réagissent à ce qu'on a fait.
 - [ ] PigNet : pages perso de citoyens (livre d'or, compteur, « en construction »), annuaire des sites, services de l'État.
 - [ ] Channel Pork : un jeu télévisé, d'autres pubs que la Douzi Ambrée.

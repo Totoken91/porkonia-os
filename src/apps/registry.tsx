@@ -11,6 +11,9 @@ import { Navigateur } from "./navigateur/Navigateur";
 import { NappeVide } from "./nappe-vide/NappeVide";
 import { Distinctions } from "./distinctions/Distinctions";
 import { PorkAmp } from "./porkamp/PorkAmp";
+import { Calculatrice } from "./calculatrice/Calculatrice";
+import { Defrag } from "./defrag/Defrag";
+import { Paint } from "./paint/Paint";
 
 export const APPS: Record<AppKind, ComponentType> = {
   bienvenue: Bienvenue,
@@ -25,4 +28,7 @@ export const APPS: Record<AppKind, ComponentType> = {
   texte: Texte,
   distinctions: Distinctions,
   porkamp: PorkAmp,
+  calculatrice: Calculatrice,
+  defrag: Defrag,
+  paint: Paint,
 };

@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp" | "calculatrice" | "defrag" | "paint";
 
-export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique" | "calculatrice" | "defrag" | "paint";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -333,6 +333,11 @@ export interface ContentPack {
   rules: EventRule[];
   /** PorkAmp, lecteur de musique : pistes (fichiers de public/audio) et textes de l'afficheur. */
   lecteur: { slogan: string; infos: string; pistes: { titre: string; artiste: string; src: string }[] };
+  /** Accessoires : familles et messages du Défragmenteur, palette et tampons de PorkPaint. */
+  accessoires: {
+    defrag: { familles: string[]; messages: string[]; fin: string };
+    paint: { palette: string[]; tampons: { nom: string; motif: string[] }[] };
+  };
   /** Télétexte de PorkTV : pages, et barre de liens colorés en bas d'écran. */
   teletexte: { nom: string; pages: TeletextePage[]; fastext: { texte: string; page: number }[]; introuvable: string; recherche: string };
   /** Distinctions civiques (succès) et rangs atteints selon leur nombre (seuils croissants, le premier à 0). */

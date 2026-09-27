@@ -557,6 +557,49 @@ export const DESSINS: Record<Nom, Dessin> = {
     t.pts([[23, 25], [22, 26]], "Y");
     t.pts([[25, 28], [26, 27]], "o");
   },
+  /** Calculatrice d'État : boîtier beige, écran à cristaux verts, touches, et la touche ×12 dorée. */
+  calculatrice: (t) => {
+    t.rect(7, 2, 18, 28, "e");
+    t.bevel(7, 2, 18, 28, "E", "f");
+    t.rect(9, 4, 14, 6, "G");
+    t.hline(10, 5, 12, "v");
+    t.pts([[19, 7], [20, 7], [21, 7], [21, 8], [20, 8]], "V");
+    for (let r = 0; r < 4; r++)
+      for (let c = 0; c < 3; c++) {
+        t.rect(9 + c * 4, 12 + r * 4, 3, 3, "g");
+        t.hline(9 + c * 4, 14 + r * 4, 3, "d");
+      }
+    t.rect(21, 12, 2, 7, "r");
+    t.rect(21, 20, 2, 7, "y");
+    t.vline(22, 20, 7, "o");
+  },
+  /** Défragmenteur : carte de blocs colorés, à moitié rangée, sous une loupe de secteur. */
+  defrag: (t) => {
+    t.rect(2, 4, 28, 22, "W");
+    t.bevel(2, 4, 28, 22, "g", "D");
+    const couleurs = ["r", "y", "B", "v", "p", "W", "k"];
+    for (let r = 0; r < 5; r++)
+      for (let c = 0; c < 6; c++) {
+        const i = r < 2 ? Math.floor(c / 2) : (r * 7 + c * 3) % couleurs.length;
+        t.rect(4 + c * 4, 6 + r * 4, 3, 3, couleurs[i]!);
+      }
+    t.rect(4, 27, 24, 3, "d");
+    t.rect(4, 27, 15, 3, "B");
+  },
+  /** PorkPaint : palette de bois à trous de couleurs, et un pinceau trempé dans le bordeaux. */
+  paint: (t) => {
+    t.ellipse(14, 18, 12, 9, "N");
+    t.ellipse(14, 18, 12, 9, "n", true);
+    t.disc(19, 22, 2.2, "E");
+    t.disc(8, 16, 2, "r");
+    t.disc(12, 12, 2, "y");
+    t.disc(18, 12, 2, "B");
+    t.disc(9, 22, 2, "v");
+    t.line(20, 17, 29, 3, "z");
+    t.line(21, 17, 30, 3, "O");
+    t.rect(19, 16, 3, 3, "g");
+    t.pts([[18, 19], [19, 19], [18, 20]], "m");
+  },
 };
 
 /* ================================ 16 × 16 ================================ */
@@ -802,5 +845,27 @@ export const DESSINS16: Record<Nom, Dessin> = {
     t.vline(13, 7, 6, "y");
     t.line(13, 7, 15, 9, "y");
     t.disc(11.5, 13, 1.5, "y");
+  },
+  calculatrice: (t) => {
+    t.rect(3, 0, 10, 16, "e");
+    t.rect(4, 1, 8, 3, "G");
+    t.hline(5, 2, 5, "v");
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) t.rect(4 + c * 3, 5 + r * 3, 2, 2, r === 3 && c === 2 ? "y" : "d");
+  },
+  defrag: (t) => {
+    t.rect(1, 2, 14, 11, "W");
+    const couleurs = ["r", "y", "B", "v"];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) t.rect(2 + c * 3, 3 + r * 3, 2, 2, couleurs[(r * 3 + c) % 4]!);
+    t.rect(1, 14, 14, 2, "d");
+    t.rect(1, 14, 9, 2, "B");
+  },
+  paint: (t) => {
+    t.ellipse(7, 9, 6, 5, "N");
+    t.disc(10, 11, 1.2, "E");
+    t.pts([[4, 8], [5, 8]], "r");
+    t.pts([[7, 6], [8, 6]], "y");
+    t.pts([[4, 11], [5, 11]], "B");
+    t.line(10, 8, 15, 1, "z");
+    t.pts([[9, 9], [10, 9]], "m");
   },
 };

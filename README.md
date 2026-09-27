@@ -36,9 +36,10 @@ npm run build && npm run test:e2e   # parcours complet (bureau + mobile), captur
 | Channel Pork | Cinq chaînes en direct (toutes « Canal 1 », dont Canal 1 Météo et sa carte redessinée façon bulletin des années 90, et Canal 1 Zouk, chaîne de clips de DJ Viteau) calées sur l'horloge : on arrive en cours d'émission, on regarde ou on zappe. Rendu VHS 4:3, voix off et musique (`public/audio/channel-pork/`), bandeaux défilants, sous-titres, afficheur « en cours / à suivre » du logiciel PorkTV, télétexte PorkTexte (touche TXT : programmes en direct, météo, bourse, dépêches, annonces ; pages dans `teletexte` du pack) (vidéo réelle possible via `videoSrc`). |
 | Nappe Vide | Démineur du protocole des banquets : zones de nappe vide, assiettes, Petit banquet → Niveau VII. |
 | PorkAmp | Lecteur de musique d'époque dans son boîtier : afficheur, analyseur de spectre, liste de lecture (morceaux de DJ Viteau), aléa, boucle, touches Z X C V B ; pistes dans `lecteur` du pack. |
-| Mes décorations | Distinctions civiques (succès) : 24 médailles décernées par ce qu'on fait sur le poste (regarder un dossier B.R.U.M.E. jusqu'au bout, réussir le Niveau VII, tenter `format c:`…), dont des secrètes, et un rang ; contenu dans `distinctions` et `rangs` du pack. |
+| Mes décorations | Distinctions civiques (succès) : 25 médailles décernées par ce qu'on fait sur le poste (regarder un dossier B.R.U.M.E. jusqu'au bout, réussir le Niveau VII, tenter `format c:`…), dont des secrètes, et un rang ; contenu dans `distinctions` et `rangs` du pack. |
 | Panneau de configuration | Réglages qui agissent vraiment (signal CRT, fond d'écran, rappels, hymne) et d'autres qui refusent poliment. |
-| Mes documents | Système de fichiers du pack, Bloc-notes d'État, Visionneuse. |
+| Mes documents | Disque du poste (copie modifiable du système de fichiers du pack, retenue dans le navigateur) : créer, renommer, couper, copier, coller, glisser-déposer entre fenêtres et vers le bureau, Poubelle d'État (jeter, restaurer, vider) ; Bloc-notes d'État qui enregistre, Visionneuse. |
+| Accessoires | Calculatrice d'État (douze chiffres, touche ×12), Défragmenteur de disque, PorkPaint (dessins enregistrés sur le disque) ; textes, palette et tampons dans `accessoires` du pack. |
 
 ## Tout est données
 

@@ -237,6 +237,26 @@ const MENUS: Record<string, MenuSpec[]> = {
     aide("Bloc-notes d'État"),
   ],
 
+  calculatrice: [
+    { label: "&Édition", items: [{ label: "&Copier", shortcut: "Ctrl+C", command: "calc.copier" }, { label: "C&oller", disabled: true }] },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "&Standard", command: "calc.standard", radio: true },
+        { label: "S&cientifique", action: refus("Calculatrice d'État", "Le mode scientifique est réservé aux scientifiques d'État. Ils calculent déjà le nombre de chaises pour jeudi.") },
+      ],
+    },
+    aide("Calculatrice d'État"),
+  ],
+  defrag: [
+    { label: "&Fichier", items: [{ label: "&Démarrer", command: "defrag.demarrer" }, { label: "&Autre disque", command: "defrag.nouveau" }, SEP, { label: "&Quitter", command: "fenetre.fermer" }] },
+    aide("Défragmenteur"),
+  ],
+  paint: [
+    { label: "&Fichier", items: [{ label: "&Nouveau", command: "paint.nouveau" }, { label: "Enregistrer &sous…", shortcut: "Ctrl+S", command: "paint.enregistrer" }, SEP, IMPRIMER, SEP, { label: "&Quitter", command: "fenetre.fermer" }] },
+    { label: "&Image", items: [{ label: "&Effacer l'image", command: "paint.nouveau" }, { label: "&Retourner", action: refus("PorkPaint", "Le retournement d'image est réservé aux images qui l'ont demandé.") }] },
+    aide("PorkPaint"),
+  ],
   distinctions: [
     { label: "&Fichier", items: [{ label: "&Imprimer le diplôme…", action: toast("Impression", "Le diplôme sera imprimé à la préfecture et encadré à vos frais.") }, SEP, { label: "&Fermer", command: "fenetre.fermer" }] },
     { label: "&Affichage", items: [{ label: "&Toutes les distinctions", command: "decor.filtre", arg: "toutes", radio: true }, { label: "&Obtenues seulement", command: "decor.filtre", arg: "obtenues", radio: true }, { label: "À &obtenir", command: "decor.filtre", arg: "manquantes", radio: true }] },
@@ -267,6 +287,9 @@ const ABOUT: Record<string, string> = {
   fichiers: "Mes documents 12.12\nVos papiers, en ordre. L'ordre a été choisi pour vous.",
   texte: "Bloc-notes d'État 12.12\nÉcrire est un droit. Enregistrer est une autre affaire.",
   visionneuse: "Visionneuse 12.12\nLes images sont conformes. Leurs sujets, presque tous.",
+  calculatrice: "Calculatrice d'État 12.12\nDouze chiffres. Pas un de plus.\n\nLes résultats sont exacts à la chaise près.",
+  defrag: "Défragmenteur de disque 12.12\nRemet le porc avec le porc, la bière avec la bière.",
+  paint: "PorkPaint 12.12\nDessinez. Les dessins restent à vous, sur ce poste, qui est à l'État.",
   distinctions: "Mes décorations 12.12\nLe mérite, dûment constaté.\n\nToute distinction est définitive, sauf décision contraire.",
 };
 
@@ -297,6 +320,9 @@ export const porkosPack: ContentPack = {
     { id: "visionneuse", kind: "visionneuse", title: "Visionneuse", icon: "image", size: { w: 520, h: 420 } },
     { id: "executer", kind: "executer", title: "Exécuter", icon: "executer", size: { w: 380, h: 170 }, single: true },
     { id: "porkamp", kind: "porkamp", title: "PorkAmp", icon: "musique", size: { w: 320, h: 300 }, habillage: "lecteur", single: true, menu: "programmes", blurb: "Le lecteur qui fouette le jambon" },
+    { id: "calculatrice", kind: "calculatrice", title: "Calculatrice d'État", icon: "calculatrice", size: { w: 236, h: 318 }, single: true, menu: "accessoires", blurb: "Douze chiffres, pas un de plus" },
+    { id: "defrag", kind: "defrag", title: "Défragmenteur de disque", icon: "defrag", size: { w: 470, h: 432 }, single: true, menu: "systeme", blurb: "Remet le porc avec le porc" },
+    { id: "paint", kind: "paint", title: "PorkPaint", icon: "paint", size: { w: 470, h: 360 }, menu: "accessoires", blurb: "Dessinez, c'est autorisé" },
     { id: "distinctions", kind: "distinctions", title: "Mes décorations", icon: "medaille", size: { w: 470, h: 420 }, single: true, menu: "accessoires", blurb: "Le mérite, dûment constaté" },
     { id: "config", kind: "config", title: "Panneau de configuration", icon: "config", size: { w: 480, h: 470 }, single: true, menu: "systeme", blurb: "Réglez, nous ajusterons" },
   ],
@@ -602,6 +628,12 @@ export const porkosPack: ContentPack = {
       outlook: { app: "mail" },
       decorations: { app: "distinctions" },
       porkamp: { app: "porkamp" },
+      calc: { app: "calculatrice" },
+      calculatrice: { app: "calculatrice" },
+      defrag: { app: "defrag" },
+      paint: { app: "paint" },
+      mspaint: { app: "paint" },
+      porkpaint: { app: "paint" },
       winamp: { app: "porkamp" },
       musique: { app: "porkamp" },
       medailles: { app: "distinctions" },
@@ -1343,6 +1375,34 @@ export const porkosPack: ContentPack = {
     { id: "actualiser", trigger: { type: "signal", name: "nav:actualiser" }, action: { type: "toast-pool", pool: "actualiser" } },
   ],
 
+  // Accessoires du poste.
+  accessoires: {
+    defrag: {
+      familles: ["Charcuterie", "Bières", "Documents", "Pilotes", "Photos de banquet"],
+      messages: [
+        "Regroupement des fichiers de charcuterie par date d'abattage.",
+        "Déplacement des bières vers les secteurs froids du disque.",
+        "Les pilotes de la brasserie passent devant : ils ont la clé du frigo.",
+        "SAUCISSE.DLL refuse d'être rangé à côté de VEGETAL.SYS. Négociation en cours.",
+        "Un bloc système ne bouge pas. Il n'a jamais bougé. Personne ne sait ce qu'il contient.",
+        "Compactage des secteurs vides : ils prenaient la place des secteurs pleins.",
+        "Les photos de banquet sont rangées par nombre de convives, puis par nombre de chopes.",
+        "Le disque fait un bruit de friteuse. C'est normal, il chauffe le jambon.",
+      ],
+      fin: "Défragmentation terminée. Le disque est rangé. Il était déjà rangé, mais différemment.",
+    },
+    paint: {
+      // Indice 0 : ivoire du papier ; puis encre, bordeaux, or, et les couleurs de toujours.
+      palette: ["#f8f4e9", "#24201c", "#661323", "#b58b4d", "#c01018", "#f5c542", "#3c9a2c", "#2468d8", "#8a5a0a", "#f29a97", "#808080", "#c0c0c0", "#ffffff", "#6e4318", "#5fb4ee", "#1e5e1a"],
+      tampons: [
+        { nom: "Chope", motif: ["..ccccc...", ".cccccccc.", ".1111111..", ".1555551..", ".15555511.", ".155555.1.", ".155555.1.", ".15555511.", ".1555551..", ".1111111.."] },
+        { nom: "Jambon", motif: ["......cc..", ".....cccc.", "....99cc..", "...9999...", "..999999..", ".99999999.", ".9999999d.", ".999999dd.", "..9999dd..", "...dddd..."] },
+        { nom: "Saucisse", motif: ["..........", "..dddddd..", ".d888888d.", "d88888888d", "d8888c888d", ".d888888d.", "..dddddd..", ".........."] },
+        { nom: "Groin", motif: ["...9999...", ".99999999.", "9999999999", "9911991199", "9911991199", "9999999999", ".99999999.", "...9999..."] },
+      ],
+    },
+  },
+
   // PorkAmp : les morceaux de DJ Viteau déjà diffusés sur Canal 1 Zouk.
   lecteur: {
     slogan: "Ça fouette vraiment le jambon.",
@@ -1438,6 +1498,7 @@ export const porkosPack: ContentPack = {
     { id: "teletexte", titre: "Médaille du Télétexte", metal: "bronze", trigger: { type: "signal", name: "tv:txt:100" }, indice: "Consulter le télétexte de Canal 1.", motif: "Pour avoir lu le télétexte. Quelqu'un devait bien le faire." },
     { id: "page-999", titre: "Médaille de la Page réservée", metal: "argent", trigger: { type: "signal", name: "tv:txt:999" }, motif: "Pour avoir consulté une page qui n'existe pas. Vous ne l'avez pas lue." },
     { id: "melomane", titre: "Médaille du Mélomane", metal: "bronze", trigger: { type: "signal", name: "porkamp:fin" }, indice: "Écouter un morceau de PorkAmp jusqu'au bout.", motif: "Pour avoir écouté un morceau en entier. DJ Viteau a été informé, et ému." },
+    { id: "defrag", titre: "Médaille du Rangement", metal: "bronze", trigger: { type: "signal", name: "defrag:fin" }, indice: "Défragmenter le disque jusqu'au bout.", motif: "Pour avoir regardé des carrés changer de place pendant une minute. Le disque vous remercie. Il ne l'a pas demandé." },
     { id: "explorateur", titre: "Ordre de l'Explorateur du poste", metal: "or", trigger: { type: "toutes-applis" }, indice: "Ouvrir chacun des programmes du poste.", motif: "Pour avoir ouvert chaque programme du poste. Il n'y en a pas d'autres. Ne cherchez pas." },
     { id: "complet", titre: "Médaille de la Complétude", metal: "or", trigger: { type: "toutes-distinctions" }, indice: "Obtenir toutes les autres distinctions.", motif: "Pour avoir obtenu toutes les distinctions. Il n'y a plus rien à obtenir. Continuez quand même." },
   ],
@@ -1447,7 +1508,7 @@ export const porkosPack: ContentPack = {
     { seuil: 7, titre: "Citoyen décoré" },
     { seuil: 12, titre: "Citoyen d'honneur" },
     { seuil: 18, titre: "Citoyen exemplaire" },
-    { seuil: 24, titre: "Citoyen intégral" },
+    { seuil: 25, titre: "Citoyen intégral" },
   ],
 
   strings: {
@@ -1481,7 +1542,27 @@ export const porkosPack: ContentPack = {
     "tv.activerSon": "Le son a été retenu par votre navigateur. Cliquer pour l'activer",
     "tv.aSuivre": "À suivre",
     "tv.teletexte": "Télétexte (PorkTexte)",
-    "amp.lecture": "Lecture",
+    "calc.table-vide": "Division par zéro : table vide. On ne partage pas un repas entre personne.",
+    "calc.trop-gros": "Trop grand pour douze chiffres. Adressez-vous à une calculatrice de banquet.",
+    "calc.onze": "Onze. Il manque une chaise.",
+    "calc.douze": "Douze. Le compte est bon.",
+    "calc.sept": "Sept : c'est un niveau de banquet, pas un résultat.",
+    "calc.douzaine": "Multiplier par douze",
+    "defrag.demarrer": "Démarrer",
+    "defrag.pause": "Pause",
+    "defrag.reprendre": "Reprendre",
+    "defrag.nouveau": "Autre disque",
+    "defrag.avancement": "{pct} % rangé",
+    "defrag.pret": "Le disque C: est fragmenté à {pct} %. Cliquez sur Démarrer.",
+    "defrag.systeme": "Système (immobile)",
+    "defrag.libre": "Libre",
+    "paint.crayon": "Crayon",
+    "paint.pinceau": "Pinceau",
+    "paint.gomme": "Gomme",
+    "paint.seau": "Pot de peinture",
+    "paint.tampon": "Tampon",
+    "paint.nouveau": "Nouveau",
+    "paint.nom": "Dessin.png",
     "amp.pause": "Pause",
     "amp.stop": "Arrêt",
     "amp.precedente": "Piste précédente",

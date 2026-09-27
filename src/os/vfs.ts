@@ -194,7 +194,8 @@ export function sanitizeDisque(v: unknown, fs: FsNode): Disque {
       case "texte":
         return typeof o.content === "string" ? { type: "texte", name: o.name, content: o.content.slice(0, 100_000), ...(typeof o.date === "string" ? { date: o.date } : {}), ...protege } : null;
       case "image":
-        return typeof o.src === "string" && /^(https:\/\/|\/)/.test(o.src)
+        // Images d'origine (liens) ou dessins de PorkPaint (PNG embarqué, taille bornée).
+        return typeof o.src === "string" && (/^(https:\/\/|\/)/.test(o.src) || (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(o.src) && o.src.length < 300_000))
           ? { type: "image", name: o.name, src: o.src, ...(typeof o.caption === "string" ? { caption: o.caption } : {}), ...(typeof o.date === "string" ? { date: o.date } : {}), ...protege }
           : null;
       case "lien":

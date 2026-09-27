@@ -13,6 +13,8 @@ src/
     scheduler.ts          règles d'événements → actions (déterministe)
     rng.ts                aléatoire rejouable (mulberry32)
     fs.ts                 chemins du système de fichiers du pack
+    vfs.ts                disque du poste : opérations pures (créer, renommer, déplacer, copier, jeter, restaurer), Bureau, assainissement
+    glisser.ts            glisser-déposer de fichiers (type de données, zones [data-depot])
     settings.ts           réglages (localStorage, assainis)
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
     sons.ts               sons système (WebAudio) : carillons synthétisés, machine en échantillons (public/audio/pc/, scripts/sons-pc.py)

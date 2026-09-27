@@ -624,6 +624,52 @@
   .ttx-w { color: #fff; } .ttx-y { color: #ffe74a; } .ttx-c { color: #5dd6ff; } .ttx-g { color: #5dff72; }
   .ttx-r { color: #ff4a4a; } .ttx-m { color: #ff5ae8; } .ttx-b { color: #5a7cff; }
 
+  /* ============================== Calculatrice d'État ============================== */
+  .calc { padding: 8px; gap: 6px; background: var(--face); }
+  .calc-ecran { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 8px; background: #b9c9a6; color: #1d2a14; }
+  .calc-ecran b { font-family: var(--font-pixel-mono); font-size: 32px; line-height: 32px; font-weight: normal; letter-spacing: 1px; }
+  .calc-op { font-family: var(--font-pixel-mono); color: #3c5a2c; }
+  .calc-note { min-height: 32px; color: var(--color-rouge-sombre); }
+  .calc-touches { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: 30px; gap: 4px; }
+  .calc-touche { padding: 0; min-width: 0; }
+  .calc-touche.rouge { color: var(--color-rouge-sombre); }
+  .calc-touche.op { color: #173c8c; }
+  .calc-touche.or { color: #6e4318; background: #f1dfae; }
+  .calc-touche.egal { grid-row: span 3; }
+  .calc-touche.plus { grid-row: span 2; }
+  .calc-touche.zero { grid-column: span 2; }
+  .calc-touche.enfoncee { box-shadow: var(--pressed); }
+
+  /* ============================== Défragmenteur ============================== */
+  .defrag { padding: 8px; gap: 6px; background: var(--face); }
+  .defrag-carte { display: grid; grid-template-columns: repeat(45, 1fr); gap: 1px; padding: 3px; background: #b3a384; }
+  .defrag-carte i { height: 8px; }
+  .defrag-carte i.lu { background: #5dff72 !important; }
+  .defrag-carte i.ecrit { background: #ff4a3a !important; }
+  .defrag-legende { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+  .defrag-legende i { display: inline-block; width: 9px; height: 9px; border: 1px solid #6d5f45; vertical-align: -1px; }
+  .defrag-pied { display: flex; flex-direction: column; gap: 4px; }
+  .defrag-barre { height: 14px; padding: 2px; background: #fffdf7; }
+  .defrag-barre div { height: 100%; background: repeating-linear-gradient(90deg, var(--color-rouge-sombre) 0 9px, transparent 9px 11px); }
+  .defrag-message { margin: 0; min-height: 32px; }
+  .defrag-boutons { display: flex; align-items: center; justify-content: space-between; }
+
+  /* ============================== PorkPaint ============================== */
+  .paint { background: var(--face); }
+  .paint-corps { flex: 1; min-height: 0; display: flex; gap: 6px; padding: 6px; }
+  .paint-outils { display: grid; grid-template-columns: 26px 26px; grid-auto-rows: 26px; gap: 2px; align-content: start; }
+  .paint-outil { padding: 0; min-width: 0; display: grid; place-items: center; }
+  .paint-outil.actif, .paint-tampons .actif { box-shadow: var(--pressed); background: #fffdf7; }
+  .paint-tampons { grid-column: 1 / span 2; display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+  .paint-tampons .pk-btn { min-width: 0; padding: 1px 2px; }
+  .paint-feuille { flex: 1; overflow: auto; padding: 3px; background: #807560; }
+  .paint-toile { display: block; width: 320px; height: 200px; image-rendering: pixelated; background: #f8f4e9; cursor: crosshair; touch-action: none; }
+  .paint-palette { display: flex; align-items: center; gap: 2px; padding: 4px 6px 6px; }
+  .paint-courante { width: 22px; height: 22px; margin-right: 6px; box-shadow: var(--sunken); border: 3px solid var(--face); }
+  .paint-couleur { width: 14px; height: 14px; padding: 0; border: none; box-shadow: var(--sunken); }
+  .paint-couleur.actif { outline: 1px dotted #000; outline-offset: 1px; }
+  .paint-enregistrer { margin-left: auto; }
+
   /* ============================== Mes décorations ============================== */
   .decor { background: var(--face); }
   .decor-tete { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--lo); }
