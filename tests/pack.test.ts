@@ -64,6 +64,7 @@ describe("pack PorkOS", () => {
       const n = t.name.replace(/\*$/, "");
       if (n.startsWith("executer:")) expect(Object.keys(porkosPack.run.aliases)).toContain(n.slice(9));
       else if (n.startsWith("nappe:conforme:")) expect(["petit", "grand", "vii"]).toContain(n.slice(15));
+      else if (n.startsWith("tv:txt:")) expect(porkosPack.teletexte.pages.map((p) => String(p.numero))).toContain(n.slice(7));
       else if (n.startsWith("tv:integral:")) expect(porkosPack.programs.some((p) => p.id.startsWith(n.slice(12)))).toBe(true);
       else expect(emis).toContain(n);
     }

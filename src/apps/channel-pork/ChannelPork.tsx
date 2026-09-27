@@ -9,6 +9,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useOs, useWin } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
+import { Teletexte } from "./Teletexte";
+import { voisine } from "./teletexte";
 import { useSonTv } from "./sonTv";
 import { DECALAGE, at, live, sousTitre, voiceAt } from "./timeline";
 
@@ -62,7 +64,27 @@ export function ChannelPork() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cleProgramme]);
 
+  // Télétexte : page affichée (null = image), chiffres en cours de saisie.
+  const [txt, setTxt] = useState<number | null>(null);
+  const [saisie, setSaisie] = useState("");
+  const allerPage = (n: number) => {
+    setSaisie("");
+    setTxt(n);
+    signal(`tv:txt:${n}`);
+  };
+  const basculerTxt = () => {
+    setSaisie("");
+    if (txt === null) allerPage(100);
+    else setTxt(null);
+  };
+  const chiffre = (c: string) => {
+    const s2 = saisie + c;
+    if (s2.length < 3) setSaisie(s2);
+    else allerPage(Number(s2));
+  };
+
   const zap = (d: number) => {
+    if (txt !== null) return allerPage(voisine(pack, txt, d > 0 ? 1 : -1));
     const n = chaines.length;
     setCi((i) => (i + d + n) % n);
     playSound("neige");
@@ -80,8 +102,8 @@ export function ChannelPork() {
   };
 
   // Télécommande au clavier, seulement quand le poste est au premier plan.
-  const commandes = useRef({ zap, regler });
-  commandes.current = { zap, regler };
+  const commandes = useRef({ zap, regler, basculerTxt, chiffre, enTxt: txt !== null });
+  commandes.current = { zap, regler, basculerTxt, chiffre, enTxt: txt !== null };
   useEffect(() => {
     if (!focused) return;
     const touche = (e: KeyboardEvent) => {
@@ -91,6 +113,9 @@ export function ChannelPork() {
       else if (e.key === "ArrowDown" || e.key === "PageDown") c.zap(-1);
       else if (e.key === "+" || e.key === "=") c.regler(1);
       else if (e.key === "-") c.regler(-1);
+      else if (e.key === "t" || e.key === "T") c.basculerTxt();
+      else if (c.enTxt && /^[0-9]$/.test(e.key)) c.chiffre(e.key);
+      else if (c.enTxt && e.key === "Escape") c.basculerTxt();
       else return;
       e.preventDefault();
     };
@@ -156,6 +181,7 @@ export function ChannelPork() {
           mention={s.caption}
           soustitre={!s.meteo && !s.fond ? subtitle : null}
         />
+        {txt !== null && <Teletexte page={txt} saisie={saisie} maintenant={maintenant} onPage={allerPage} />}
         {son.bloque && (
           <button className="pk-btn tv-activer-son" onClick={son.debloquer} data-testid="tv-activer-son">
             {str("tv.activerSon")}
@@ -197,6 +223,9 @@ export function ChannelPork() {
           </button>
           <button className="tuner-bouton" aria-label={str("tv.volumePlus")} onClick={() => regler(1)} data-testid="tv-volume-plus">
             +
+          </button>
+          <button className={`tuner-bouton tuner-txt${txt !== null ? " actif" : ""}`} aria-label={str("tv.teletexte")} aria-pressed={txt !== null} onClick={basculerTxt} data-testid="tv-txt">
+            {str("tv.txt")}
           </button>
         </div>
       </div>

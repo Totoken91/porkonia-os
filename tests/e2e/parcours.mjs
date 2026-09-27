@@ -175,6 +175,21 @@ try {
     await page.waitForFunction((t0) => performance.now() - t0 > 1500, await page.evaluate(() => performance.now()), { polling: "raf" });
     await shot(page, `${tag}-06b-channel-pork-zap`);
     step(`${tag} : Channel Pork (direct, musique, voix off, zapping)`);
+    // PorkTexte : sommaire, lien vers les programmes, page absente, retour à l'image
+    await page.getByTestId("tv-txt").click();
+    await page.locator(".ttx-titre", { hasText: "SOMMAIRE" }).waitFor();
+    await page.getByTestId("tv-teletexte").locator(".ttx-lien").first().click();
+    await page.locator(".ttx-titre", { hasText: "PROGRAMMES" }).waitFor();
+    await page.getByTestId("tv-teletexte").getByText("EN COURS").first().waitFor();
+    if (tag === "bureau") {
+      await page.waitForTimeout(400);
+      await shot(page, `${tag}-06c-teletexte`);
+      for (const k of "123") await page.keyboard.press(k);
+      await page.getByTestId("tv-teletexte").getByText("Page non diffusée.").waitFor({ timeout: 4000 });
+    }
+    await page.getByTestId("tv-txt").click();
+    await page.getByTestId("tv-teletexte").waitFor({ state: "detached" });
+    step(`${tag} : PorkTexte (sommaire, programmes, page absente)`);
     await closeTop();
 
     // Nappe Vide : premier service toujours sûr

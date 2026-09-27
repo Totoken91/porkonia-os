@@ -561,11 +561,30 @@
   .tuner-vu { display: inline-flex; gap: 2px; }
   .tuner-vu i { width: 6px; height: 10px; background: rgba(255, 182, 64, 0.16); }
   .tuner-vu i.plein { background: #ffb640; box-shadow: 0 0 4px rgba(255, 182, 64, 0.6); }
-  .tuner-commandes { display: grid; grid-template-columns: auto 30px 30px; grid-auto-rows: 26px; column-gap: 4px; row-gap: 4px; align-items: center; }
+  .tuner-commandes { display: grid; grid-template-columns: auto 30px 30px 34px; grid-auto-rows: 26px; column-gap: 4px; row-gap: 4px; align-items: center; }
   .tuner-legende { color: #8f7a4c; text-align: right; padding-right: 2px; }
   .tuner-bouton { height: 24px; display: grid; place-items: center; padding: 0; border: 1px solid #0f0d0c; border-radius: 2px; color: #e2bd62; background: linear-gradient(#4f4841, #2f2b27); box-shadow: inset 1px 1px 0 #736a60, inset -1px -1px 0 #1c1917; cursor: var(--c-main); }
   .tuner-bouton:active { background: #2a2623; box-shadow: inset 1px 1px 0 #111; color: #ffd27a; }
   @media (prefers-reduced-motion: reduce) { .tuner-lcd-defile span { animation: none; } }
+
+  .tuner-txt { grid-column: 4; grid-row: 1 / span 2; height: auto; align-self: stretch; font-family: var(--font-pixel-mono); color: #5dd6ff; }
+  .tuner-txt.actif { color: #0f0d0c; background: #5dd6ff; box-shadow: inset 1px 1px 0 #1a6f8a; }
+
+  /* ============================== PorkTexte (télétexte) ============================== */
+  .ttx { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; padding: 6px 10px; background: #000; color: #fff; font-family: var(--font-pixel-mono); letter-spacing: 4px; overflow: hidden; }
+  .ttx-ligne { display: block; min-height: 16px; white-space: pre; text-align: left; }
+  .ttx-entete { color: #fff; }
+  .ttx-cherche { color: #ffe74a; }
+  .ttx-titre { display: flex; align-items: flex-end; justify-content: space-between; margin: 4px 0 6px; padding: 0 4px; background: #0018c8; color: #ffe74a; font-size: 32px; line-height: 32px; letter-spacing: 2px; }
+  .ttx-titre small { font-size: 16px; line-height: 16px; letter-spacing: 4px; color: #fff; padding-bottom: 2px; }
+  .ttx-corps { flex: 1; min-height: 0; }
+  .ttx-lien { width: 100%; padding: 0; border: none; background: none; font: inherit; letter-spacing: inherit; cursor: var(--c-main); }
+  .ttx-lien:hover { background: #0018c8; }
+  .ttx-fastext { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ttx-fastext button { padding: 0; border: none; background: none; font: inherit; letter-spacing: 1px; text-align: left; cursor: var(--c-main); }
+  .ttx-fastext button:hover { text-decoration: underline; }
+  .ttx-w { color: #fff; } .ttx-y { color: #ffe74a; } .ttx-c { color: #5dd6ff; } .ttx-g { color: #5dff72; }
+  .ttx-r { color: #ff4a4a; } .ttx-m { color: #ff5ae8; } .ttx-b { color: #5a7cff; }
 
   /* ============================== Mes décorations ============================== */
   .decor { background: var(--face); }

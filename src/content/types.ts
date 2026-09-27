@@ -253,6 +253,18 @@ export interface EventRule {
   unlessSetting?: string;
 }
 
+/* ------------------------------- Télétexte -------------------------------- */
+
+/** Page du télétexte de Canal 1 : lignes écrites (liens vers d'autres pages possibles) et/ou données du pack. */
+export interface TeletextePage {
+  numero: number;
+  titre: string;
+  lignes?: { texte: string; couleur?: "w" | "y" | "c" | "g" | "r" | "m" | "b"; page?: number }[];
+  source?: "programmes" | "meteo" | "bourse" | "depeches" | "annonces";
+  /** Absente du défilement CH+/CH− : on n'y arrive qu'en tapant son numéro. */
+  cachee?: boolean;
+}
+
 /* ------------------------------ Distinctions ------------------------------ */
 
 /**
@@ -317,6 +329,8 @@ export interface ContentPack {
   /** Carte météo stylisée et position des lieux (0–1). */
   carteMeteo: { image: string; lieux: Record<string, [number, number]> };
   rules: EventRule[];
+  /** Télétexte de PorkTV : pages, et barre de liens colorés en bas d'écran. */
+  teletexte: { nom: string; pages: TeletextePage[]; fastext: { texte: string; page: number }[]; introuvable: string; recherche: string };
   /** Distinctions civiques (succès) et rangs atteints selon leur nombre (seuils croissants, le premier à 0). */
   distinctions: Distinction[];
   rangs: { seuil: number; titre: string }[];

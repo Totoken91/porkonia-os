@@ -1322,6 +1322,65 @@ export const porkosPack: ContentPack = {
     { id: "actualiser", trigger: { type: "signal", name: "nav:actualiser" }, action: { type: "toast-pool", pool: "actualiser" } },
   ],
 
+  // PorkTexte, le télétexte de Canal 1 (touche TXT de PorkTV). Les pages à source sont composées depuis le pack.
+  teletexte: {
+    nom: "PORKTEXTE",
+    recherche: "RECHERCHE",
+    introuvable: "Page non diffusée.\nElle l'a peut-être été. Elle le sera peut-être. Dans le doute, elle a été notée.",
+    fastext: [
+      { texte: "Programmes", page: 101 },
+      { texte: "Météo", page: 200 },
+      { texte: "Bourse", page: 300 },
+      { texte: "Sommaire", page: 100 },
+    ],
+    pages: [
+      {
+        numero: 100,
+        titre: "SOMMAIRE",
+        lignes: [
+          { texte: "Le service d'information de Canal 1, diffusé entre les lignes de l'image.", couleur: "c" },
+          { texte: "" },
+          { texte: "Programmes des cinq chaînes", page: 101, couleur: "y" },
+          { texte: "Météo de la mousse", page: 200, couleur: "y" },
+          { texte: "Bourse du jambon", page: 300, couleur: "y" },
+          { texte: "Dernière minute", page: 400, couleur: "y" },
+          { texte: "Petites annonces", page: 500, couleur: "y" },
+          { texte: "Sous-titrage", page: 888, couleur: "y" },
+          { texte: "" },
+          { texte: "Tapez le numéro de la page au clavier, ou utilisez les touches CH+ et CH−.", couleur: "g" },
+        ],
+      },
+      { numero: 101, titre: "PROGRAMMES", source: "programmes" },
+      { numero: 200, titre: "MÉTÉO DE LA MOUSSE", source: "meteo" },
+      { numero: 300, titre: "BOURSE DU JAMBON", source: "bourse", lignes: [{ texte: "Cours officiels. Toute baisse est provisoire.", couleur: "c" }, { texte: "" }] },
+      { numero: 400, titre: "DERNIÈRE MINUTE", source: "depeches" },
+      { numero: 500, titre: "PETITES ANNONCES", source: "annonces" },
+      {
+        numero: 888,
+        titre: "SOUS-TITRAGE",
+        lignes: [
+          { texte: "Canal 1 sous-titre l'intégralité de ses programmes, directement dans l'image, par souci d'économie.", couleur: "w" },
+          { texte: "" },
+          { texte: "Les sous-titres sont jaunes pour être vus. Ils ne peuvent pas être désactivés, ni lus trop vite.", couleur: "c" },
+          { texte: "" },
+          { texte: "Retour au sommaire", page: 100, couleur: "y" },
+        ],
+      },
+      {
+        numero: 999,
+        titre: "PAGE RÉSERVÉE",
+        cachee: true,
+        lignes: [
+          { texte: "Cette page n'existe pas.", couleur: "r" },
+          { texte: "" },
+          { texte: "Vous ne l'avez pas lue. Nous non plus. Merci de votre discrétion, qui a été enregistrée.", couleur: "w" },
+          { texte: "" },
+          { texte: "Retour au sommaire", page: 100, couleur: "y" },
+        ],
+      },
+    ],
+  },
+
   // Distinctions civiques : succès du poste. Motifs et médailles inventés pour PorkOS, sans prétention de canon.
   distinctions: [
     { id: "connexion", titre: "Médaille de la Présence", metal: "bronze", trigger: { type: "signal", name: "session:ouverte" }, indice: "Ouvrir une session.", motif: "Pour s'être identifié. La République vous reconnaissait déjà, mais le geste compte." },
@@ -1343,6 +1402,8 @@ export const porkosPack: ContentPack = {
     { id: "sudo", titre: "Brevet d'Aspirant administrateur", metal: "argent", trigger: { type: "signal", name: "executer:sudo" }, motif: "Pour avoir demandé les pleins pouvoirs. Demande reçue, classée, encadrée." },
     { id: "fatal", titre: "Croix du Démolisseur", metal: "argent", trigger: { type: "signal", name: "systeme:fatal" }, motif: "Pour avoir tenté d'effacer le poste de l'État. Le poste s'en souvient. Il a une excellente mémoire." },
     { id: "arret-brutal", titre: "Médaille de l'Arrêt brutal", metal: "argent", trigger: { type: "signal", name: "session:perdue" }, motif: "Pour avoir éteint sans prévenir. ScanDisque vous a pardonné. Nous, nous avons un dossier." },
+    { id: "teletexte", titre: "Médaille du Télétexte", metal: "bronze", trigger: { type: "signal", name: "tv:txt:100" }, indice: "Consulter le télétexte de Canal 1.", motif: "Pour avoir lu le télétexte. Quelqu'un devait bien le faire." },
+    { id: "page-999", titre: "Médaille de la Page réservée", metal: "argent", trigger: { type: "signal", name: "tv:txt:999" }, motif: "Pour avoir consulté une page qui n'existe pas. Vous ne l'avez pas lue." },
     { id: "explorateur", titre: "Ordre de l'Explorateur du poste", metal: "or", trigger: { type: "toutes-applis" }, indice: "Ouvrir chacun des programmes du poste.", motif: "Pour avoir ouvert chaque programme du poste. Il n'y en a pas d'autres. Ne cherchez pas." },
     { id: "complet", titre: "Médaille de la Complétude", metal: "or", trigger: { type: "toutes-distinctions" }, indice: "Obtenir toutes les autres distinctions.", motif: "Pour avoir obtenu toutes les distinctions. Il n'y a plus rien à obtenir. Continuez quand même." },
   ],
@@ -1352,7 +1413,7 @@ export const porkosPack: ContentPack = {
     { seuil: 7, titre: "Citoyen décoré" },
     { seuil: 12, titre: "Citoyen d'honneur" },
     { seuil: 18, titre: "Citoyen exemplaire" },
-    { seuil: 21, titre: "Citoyen intégral" },
+    { seuil: 23, titre: "Citoyen intégral" },
   ],
 
   strings: {
@@ -1385,6 +1446,8 @@ export const porkosPack: ContentPack = {
     "tv.signal": "SIGNAL",
     "tv.activerSon": "Le son a été retenu par votre navigateur. Cliquer pour l'activer",
     "tv.aSuivre": "À suivre",
+    "tv.teletexte": "Télétexte (PorkTexte)",
+    "tv.txt": "TXT",
     "tv.etiquette.journal": "Info",
     "tv.etiquette.publicite": "Pub",
     "tv.etiquette.education": "Leçon",
