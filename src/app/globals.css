@@ -158,9 +158,6 @@
   }
   .bouton-marche[aria-pressed="true"] { transform: translateY(2px); box-shadow: 0 1px 0 #9f9379, inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px #b6aa8d; }
   .bouton-marche.flottant { position: fixed; right: 10px; bottom: 10px; z-index: 9998; }
-  .pied { position: relative; display: flex; flex-direction: column; align-items: center; height: 64px; }
-  .pied .col { width: 250px; height: 26px; background: linear-gradient(180deg, #a99d82, #cfc4a8 45%, #c2b699); clip-path: polygon(9% 0, 91% 0, 100% 100%, 0 100%); }
-  .pied .socle { width: 430px; height: 30px; border-radius: 50% / 45%; background: radial-gradient(ellipse at 50% 25%, #e6ddc8, #c7bb9f 65%, #a69a7f); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.65), inset 0 -3px 4px rgba(0, 0, 0, 0.15); }
   .rotation {
     position: fixed; inset: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px;
     background: rgba(14, 12, 10, 0.93); color: var(--color-creme); text-align: center; font-size: 15px; line-height: 1.45;

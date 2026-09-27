@@ -1,7 +1,7 @@
 "use client";
 /**
  * Moniteur d'État 14" : boîtier beige, tube cathodique 800×600 (lignes, grille RGB, reflet, bombé),
- * bouton marche/arrêt, démagnétisation, voyant et pied. Mis à l'échelle de la fenêtre du navigateur.
+ * bouton marche/arrêt, démagnétisation et voyant. Mis à l'échelle de la fenêtre du navigateur.
  */
 import { useEffect, useMemo, useState } from "react";
 import { ScaleContext } from "@/os/context";
@@ -9,7 +9,7 @@ import { jouer } from "@/os/sons";
 import { cursorCss } from "./pixel";
 
 export const SCREEN = { w: 800, h: 600 };
-const COQUE = { x: 58, top: 52, bottom: 82, pied: 64 };
+const COQUE = { x: 58, top: 52, bottom: 82 };
 
 type Tube = "allumage" | "allume" | "extinction" | "eteint";
 
@@ -50,7 +50,7 @@ export function Monitor({ children, crt, power, onPower, sons, str }: Props) {
 
   const bezel = !!box && box.vw >= 720 && box.vh >= 520;
   const W = SCREEN.w + (bezel ? COQUE.x * 2 : 0);
-  const H = SCREEN.h + (bezel ? COQUE.top + COQUE.bottom + COQUE.pied : 0);
+  const H = SCREEN.h + (bezel ? COQUE.top + COQUE.bottom : 0);
   const scale = box ? Math.min((box.vw * (bezel ? 0.98 : 1)) / W, (box.vh * (bezel ? 0.98 : 1)) / H) : 1;
   const zoom = Math.max(1, Math.round(scale));
   const curseurs = useMemo(
@@ -114,12 +114,6 @@ export function Monitor({ children, crt, power, onPower, sons, str }: Props) {
               </div>
             )}
           </div>
-          {bezel && (
-            <div className="pied" aria-hidden="true">
-              <i className="col" />
-              <i className="socle" />
-            </div>
-          )}
         </div>
       </div>
       {!bezel && (
