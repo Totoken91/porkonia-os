@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
-import { jouer } from "@/os/sons";
+import { ambiance, jouer } from "@/os/sons";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
 
@@ -42,7 +42,10 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   useEffect(() => {
     if (power) {
       setTube("allumage");
-      if (sons) jouer("allumage", 0.6);
+      if (sons) {
+        jouer("allumage", 0.6);
+        jouer("demarrage-pc", 0.7);
+      }
       const t = setTimeout(() => setTube("allume"), 1100);
       return () => clearTimeout(t);
     }
@@ -51,6 +54,12 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [power]);
+
+  // Ronronnement de la machine allumée (ventilateur, secteur, sifflement du tube).
+  useEffect(() => {
+    ambiance(power && sons, 0.55);
+    return () => ambiance(false);
+  }, [power, sons]);
 
   const bezel = !!box && box.vw >= 720 && box.vh >= 520;
   const W = SCREEN.w + (bezel ? COQUE.x * 2 : 0);

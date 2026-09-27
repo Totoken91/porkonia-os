@@ -73,6 +73,9 @@ try {
     page.on("pageerror", (e) => errors.push(`${tag}: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && errors.push(`${tag}: ${m.text()}`));
 
+    // Les pubs de PorkOS arrivent à heure aléatoire : hors de l'étape qui les teste, on les ferme dès qu'elles gênent.
+    const fermerPubs = () => page.addLocatorHandler(page.getByTestId("ad"), () => page.getByTestId("ad-close").click({ timeout: 15000 }));
+    if (tag === "mobile") await fermerPubs();
     await page.goto(base);
     await page.getByTestId("boot-bios").waitFor();
     if (tag === "bureau") {
@@ -100,6 +103,18 @@ try {
     await shot(page, `${tag}-04-bureau`);
     step(`${tag} : connexion et bureau`);
 
+    /** Ouvre le menu Démarrer puis clique `cible` ; si une pub surprise a refermé le menu entre-temps, on recommence. */
+    const viaDemarrer = async (cible) => {
+      for (let essai = 0; ; essai++) {
+        await page.getByTestId("start").click();
+        try {
+          await cible().click({ timeout: 5000 });
+          return;
+        } catch (e) {
+          if (essai >= 2) throw e;
+        }
+      }
+    };
     const open = async (id) => (tag === "mobile" ? page.getByTestId(`icon-${id}`).tap?.() ?? page.getByTestId(`icon-${id}`).click() : page.getByTestId(`icon-${id}`).dblclick());
     const closeTop = () => page.locator(".pk-window.focused [data-testid=window-close]").click();
 
@@ -204,6 +219,7 @@ try {
       await page.getByTestId("ad-close").click({ timeout: 10000 });
       await page.getByTestId("ad").waitFor({ state: "detached" });
       step(`${tag} : pause publicitaire`);
+      await fermerPubs();
     }
 
     // Icônes : glisser vers une autre case de la grille, menu contextuel du bureau
@@ -226,8 +242,7 @@ try {
     step(`${tag} : icônes sur grille, glisser-déposer, clic droit`);
 
     // Exécuter…
-    await page.getByTestId("start").click();
-    await page.getByTestId("menu-executer").click();
+    await viaDemarrer(() => page.getByTestId("menu-executer"));
     await page.getByTestId("executer-champ").fill("nappe");
     await page.getByTestId("executer-champ").press("Enter");
     await page.getByTestId("window-nappe-vide").waitFor();
@@ -235,8 +250,7 @@ try {
     step(`${tag} : Exécuter…`);
 
     // Exécuter « format c: » : écran d'exception fatale, une touche pour revenir
-    await page.getByTestId("start").click();
-    await page.getByTestId("menu-executer").click();
+    await viaDemarrer(() => page.getByTestId("menu-executer"));
     await page.getByTestId("executer-champ").fill("format c:");
     await page.getByTestId("executer-champ").press("Enter");
     await page.getByTestId("fatal").waitFor();
@@ -284,20 +298,34 @@ try {
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche
     await page.getByTestId("icon-d-docs").dblclick();
     await page.getByTestId("window-fichiers").waitFor();
-    await page.locator("[data-testid=window-fichiers] [data-testid=menu-systeme]").click();
-    await page.getByTestId("menu-contexte").waitFor();
+    for (let essai = 0; ; essai++) {
+      await page.locator("[data-testid=window-fichiers] [data-testid=menu-systeme]").click();
+      try {
+        await page.getByTestId("menu-contexte").waitFor({ timeout: 5000 });
+        break;
+      } catch (e) {
+        if (essai >= 2) throw e;
+      }
+    }
     if (tag === "bureau") await shot(page, `${tag}-18-menu-systeme`);
     await page.keyboard.press("Escape");
     await page.getByTestId("afficher-bureau").click();
     await page.getByTestId("window-fichiers").waitFor({ state: "hidden" });
-    await page.locator(".tb-task", { hasText: "Mes documents" }).click({ button: "right" });
-    await page.getByRole("menuitem", { name: "Restaurer" }).click();
+    // Une pub surprise peut refermer le menu entre son ouverture et le clic : on le rouvre alors.
+    for (let essai = 0; ; essai++) {
+      await page.locator(".tb-task", { hasText: "Mes documents" }).click({ button: "right" });
+      try {
+        await page.getByRole("menuitem", { name: "Restaurer" }).click({ timeout: 5000 });
+        break;
+      } catch (e) {
+        if (essai >= 2) throw e;
+      }
+    }
     await page.getByTestId("window-fichiers").waitFor();
     step(`${tag} : menu système, afficher le bureau, menu des tâches`);
 
     // Arrêt propre → « vous pouvez éteindre » → bouton d'alimentation → rallumage
-    await page.getByTestId("start").click();
-    await page.getByRole("button", { name: "Arrêter…" }).click();
+    await viaDemarrer(() => page.getByRole("button", { name: "Arrêter…" }));
     await page.getByRole("button", { name: "Arrêter", exact: true }).click();
     await page.getByTestId("fermeture").waitFor();
     await page.getByTestId("securite").waitFor({ timeout: 8000 });

@@ -28,6 +28,8 @@ export interface EcranVhsProps {
   zoom?: number;
   /** Fond uni : l'image est posée entière dessus (logo). */
   fond?: string;
+  /** Volume (0–10) à afficher par le téléviseur après un réglage, sinon null. */
+  osdVolume?: number | null;
   /** Incrustation de clip musical (artiste, titre), en bas à gauche. */
   clip?: { artiste: string; titre: string; mention?: string } | null;
   /** Bulletin météo dessiné sur la carte. */
@@ -434,6 +436,22 @@ export function EcranVhs(props: EcranVhsProps) {
         o.fillText(String(p.numero).padStart(2, "0"), 16, 12);
         o.font = `20px ${police}`;
         osd(p.chaine.toUpperCase(), 56, 18);
+      }
+      if (p.osdVolume !== null && p.osdVolume !== undefined) {
+        // Barre de volume du téléviseur : pavés verts, nette, par-dessus l'image.
+        const y = Math.round(H * 0.62);
+        o.font = `20px ${police}`;
+        o.textAlign = "left";
+        o.fillStyle = "rgba(0,0,0,0.6)";
+        o.fillText("VOLUME", 41, y + 1);
+        o.fillStyle = "#5dff72";
+        o.fillText("VOLUME", 40, y);
+        for (let i = 0; i < 10; i++) {
+          o.fillStyle = "rgba(0,0,0,0.6)";
+          o.fillRect(131 + i * 20, y + 3, 14, 16);
+          o.fillStyle = i < p.osdVolume ? "#5dff72" : "rgba(93,255,114,0.18)";
+          o.fillRect(130 + i * 20, y + 2, 14, 16);
+        }
       }
       o.textAlign = "left";
     };

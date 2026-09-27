@@ -143,6 +143,43 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
     setGhost(null);
   };
 
+  if (manifest.habillage) {
+    // Fenêtre habillée : l'appli dessine son boîtier ; on la déplace en l'attrapant par une zone [data-poignee].
+    return (
+      <>
+        <section
+          className={`pk-window habille habille-${manifest.habillage}${focused ? " focused" : ""}`}
+          style={{ left: win.rect.x, top: win.rect.y, width: win.rect.w, height: win.rect.h, zIndex: win.z, display: win.minimized ? "none" : undefined }}
+          onPointerDownCapture={() => !focused && dispatch({ type: "focus", id: win.id })}
+          onPointerDown={(e) => {
+            const t = e.target as HTMLElement;
+            if (t.closest("[data-poignee]") && !t.closest("button, canvas")) start("move")(e);
+          }}
+          onPointerMove={move}
+          onPointerUp={end}
+          onPointerCancel={end}
+          aria-label={win.title}
+          data-testid={`window-${win.appId}`}
+          data-win={win.id}
+        >
+          <WinContext.Provider value={api}>{children}</WinContext.Provider>
+          {frozen && (
+            <div
+              className="gel"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onFrozenClick?.();
+              }}
+              data-testid="fenetre-gelee"
+            />
+          )}
+        </section>
+        {ghost && <div className="contour-fenetre" style={{ left: ghost.x, top: ghost.y, width: ghost.w, height: ghost.h, zIndex: win.z + 1 }} aria-hidden="true" />}
+      </>
+    );
+  }
+
   return (
     <>
     <section

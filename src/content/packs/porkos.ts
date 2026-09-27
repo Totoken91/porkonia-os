@@ -115,37 +115,6 @@ const MENUS: Record<string, MenuSpec[]> = {
     aide("PigNet Navigateur"),
   ],
 
-  "channel-pork": [
-    {
-      label: "&Fichier",
-      items: [
-        { label: "&Enregistrer l'émission", shortcut: "Ctrl+S", action: refus("Magnétoscope d'État", "L'enregistrement des programmes est inutile : ils sont rediffusés en permanence.") },
-        SEP,
-        { label: "&Fermer", command: "fenetre.fermer" },
-      ],
-    },
-    {
-      label: "&Chaînes",
-      items: [
-        { label: "Chaîne &suivante", shortcut: "Ctrl+→", command: "tv.suivant" },
-        { label: "Chaîne &précédente", shortcut: "Ctrl+←", command: "tv.precedent" },
-        SEP,
-        { label: "&Zapper au hasard", shortcut: "Ctrl+Z", command: "tv.zapper" },
-        { label: "&Chaîne 2", disabled: true },
-      ],
-    },
-    {
-      label: "&Affichage",
-      items: [
-        { label: "&Sous-titres", command: "tv.soustitres" },
-        { label: "&Bandeau d'information", command: "tv.bandeau" },
-        SEP,
-        { label: "S&on", command: "tv.son" },
-        { label: "&Volume (fixé par décret)", disabled: true },
-      ],
-    },
-    aide("Channel Pork"),
-  ],
 
   "nappe-vide": [
     {
@@ -300,7 +269,7 @@ export const porkosPack: ContentPack = {
     { id: "bienvenue", kind: "bienvenue", title: "Bienvenue dans PorkOS", icon: "embleme", size: { w: 560, h: 350 }, single: true, menu: "accessoires", blurb: "Revoir l'écran de bienvenue" },
     { id: "mail", kind: "mail", title: "Courrier d'État", icon: "mail", size: { w: 720, h: 470 }, single: true, menu: "programmes", blurb: "Votre courrier, déjà lu" },
     { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 700, h: 480 }, menu: "programmes", blurb: "Le monde, tel qu'homologué" },
-    { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 580, h: 540 }, single: true, menu: "programmes", blurb: "Cinq chaînes, toutes Canal 1" },
+    { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 560, h: 478 }, habillage: "tele", single: true, menu: "programmes", blurb: "Cinq chaînes, toutes Canal 1" },
     { id: "nappe-vide", kind: "nappe-vide", title: "Nappe Vide", icon: "nappe", size: { w: 260, h: 330 }, single: true, menu: "programmes", blurb: "Jeu de protocole pour toute la famille" },
     { id: "fichiers", kind: "fichiers", title: "Mes documents", icon: "dossier", size: { w: 480, h: 340 }, menu: "accessoires", blurb: "Vos papiers, en ordre" },
     { id: "texte", kind: "texte", title: "Bloc-notes d'État", icon: "texte", size: { w: 460, h: 380 }, menu: "accessoires", blurb: "Écrire, sous réserve" },
@@ -1351,6 +1320,15 @@ export const porkosPack: ContentPack = {
     "nav.statut": "Connexion PigNet : sécurisée par la bienveillance.",
     "tv.canal": "Guide des programmes",
     "tv.enCours": "En ce moment",
+    "tv.marque": "PORKONIA",
+    "tv.modele": "Téléviseur d'État · 14 pouces",
+    "tv.chaine": "CH",
+    "tv.volume": "VOL",
+    "tv.chainePlus": "Chaîne suivante",
+    "tv.chaineMoins": "Chaîne précédente",
+    "tv.volumePlus": "Monter le volume",
+    "tv.volumeMoins": "Baisser le volume",
+    "tv.eteindre": "Éteindre le téléviseur",
     "tv.activerSon": "Le son a été retenu par votre navigateur. Cliquer pour l'activer",
     "tv.aSuivre": "À suivre",
     "tv.etiquette.journal": "Info",

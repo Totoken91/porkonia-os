@@ -24,6 +24,8 @@ export function useSonTv(o: {
   calage?: { cle: string; t: number };
   voix: { cle: string; src: string; offset: number } | null;
   precharge: string[];
+  /** Volume du téléviseur (0–1). */
+  volume: number;
 }) {
   const musique = useRef<HTMLAudioElement | null>(null);
   const voix = useRef<HTMLAudioElement | null>(null);
@@ -35,6 +37,8 @@ export function useSonTv(o: {
   const calage = useRef(o.calage);
   calage.current = o.calage;
   const cleCalage = o.calage?.cle ?? null;
+  const volume = useRef(o.volume);
+  volume.current = o.volume;
 
   const lancer = useCallback((a: HTMLAudioElement) => {
     void a.play().then(
@@ -53,7 +57,7 @@ export function useSonTv(o: {
     const meme = !c && musique.current?.src.endsWith(o.musique) && musique.current.loop;
     const a = meme ? musique.current! : new Audio(o.musique);
     a.loop = !c;
-    if (!meme) a.volume = c ? CLIP : MUSIQUE;
+    if (!meme) a.volume = (c ? CLIP : MUSIQUE) * volume.current;
     if (c && c.t > 0.5) {
       const depuis = performance.now();
       a.addEventListener(
@@ -102,6 +106,7 @@ export function useSonTv(o: {
     if (!a || cleVoix.current !== v.cle) {
       a?.pause();
       a = new Audio(v.src);
+      a.volume = volume.current;
       voix.current = a;
       cleVoix.current = v.cle;
       if (v.offset > 0.4) {
@@ -130,8 +135,9 @@ export function useSonTv(o: {
       const m = musique.current;
       if (!m) return;
       const parle = !!voix.current && !voix.current.paused && !voix.current.ended;
-      const cible = calage.current ? CLIP : parle ? MUSIQUE_SOUS_VOIX : MUSIQUE;
+      const cible = (calage.current ? CLIP : parle ? MUSIQUE_SOUS_VOIX : MUSIQUE) * volume.current;
       m.volume = Math.max(0, Math.min(1, m.volume + (cible - m.volume) * 0.35));
+      if (voix.current) voix.current.volume = volume.current;
     }, 60);
     return () => clearInterval(id);
   }, [o.actif]);
