@@ -46,3 +46,37 @@ Cocher au fur et à mesure.
 - [ ] Carte de partage (Open Graph) : image du moniteur allumé, titre et description soignés.
 - [ ] Charger les notices Porkopédia (130 Ko) seulement à l'ouverture de PigNet.
 - [ ] Accessibilité et clavier : Tab dans les fenêtres, Alt+F4, Alt+Tab.
+
+## Audit du 27 septembre 2026
+
+Parcours complet et inventaire du code. Le mobile est hors sujet.
+
+### 1. Défauts visibles
+
+- [x] Avalanche de bulles à l'ouverture de session : file d'attente, une bulle à la fois (quatre en attente au plus).
+- [x] Channel Pork : bandeau coupé (il se resserre puis défile), « CANAL 1 » en double (l'incrustation n'affiche plus que le numéro vert), afficheur qui répétait le titre (désormais « titre · À suivre : … »).
+- [x] Listes déroulantes, cases à cocher, boutons radio et curseurs du navigateur moderne : remplacés par des commandes d'époque dessinées maison (Nappe Vide, Réglages, PigNet).
+- [x] Documentation à jour (sons en échantillons, Pixel Operator 16 px, afficheur PorkTV).
+- [x] Aperçu du fond « Vert bouteille » resté blanc dans les Réglages (couleur manquante).
+
+### 2. Fonctions d'OS
+
+- [ ] PorkAmp : lecteur de musique façon Winamp avec égaliseur animé (morceaux de DJ Viteau déjà présents).
+- [ ] Télétexte sur PorkTV : touche TXT, page 100 en gros pixels (programmes, météo, résultats du Groinball) ; remplace le guide perdu.
+- [ ] Poubelle d'État fonctionnelle : glisser des fichiers dedans, la vider demande une autorisation préfectorale.
+- [ ] Calculatrice d'État (TVA sur la bière, arrondis au profit de l'État), PorkPaint à tampons officiels, Défragmenteur.
+- [ ] Ergonomie : raccourci maison pour changer de fenêtre, copier-coller, documents du Bloc-notes persistants, calendrier au clic sur l'horloge.
+
+### 3. Contenu (à faire valider : rien d'inventé n'est présenté comme canon)
+
+- [ ] Distinctions civiques : médailles pour les découvertes (BRUME jusqu'au bout, `format c:`, Niveau VII gagné…).
+- [ ] Courrier : plus de mails, qui arrivent au fil des sessions et réagissent à ce qu'on a fait.
+- [ ] PigNet : pages perso de citoyens (livre d'or, compteur, « en construction »), annuaire des sites, services de l'État.
+- [ ] Channel Pork : un jeu télévisé, d'autres pubs que la Douzi Ambrée.
+- [ ] Secrets : commandes cachées dans Exécuter, fichiers dissimulés dans Mes documents.
+
+### 4. Technique
+
+- [ ] 880 Ko de JavaScript au démarrage : charger chaque appli à son ouverture.
+- [ ] 18 Mo d'audio : réencoder les morceaux de 2,3 Mo en 64k mono (ils sont dégradés VHS de toute façon).
+- [ ] Image d'aperçu pour le partage (Open Graph), déjà notée plus haut.

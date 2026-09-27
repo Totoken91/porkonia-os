@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Groin } from "@/components/Icon";
 import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { chord, LEVELS, newGame, remaining, reveal, toggleAssiette, type Game } from "./logic";
+import { ListeDeroulante } from "@/components/ListeDeroulante";
 
 const CELL = 22;
 
@@ -61,13 +62,12 @@ export function NappeVide() {
   return (
     <div className="app-col nappe">
       <div className="pk-toolbar">
-        <select className="pk-select" value={levelId} onChange={(e) => setLevelId(e.target.value)} aria-label="Niveau">
-          {LEVELS.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.label} ({l.w}×{l.h})
-            </option>
-          ))}
-        </select>
+        <ListeDeroulante
+          value={levelId}
+          options={LEVELS.map((l) => ({ value: l.id, label: `${l.label} (${l.w}×${l.h})` }))}
+          onChange={setLevelId}
+          aria-label="Niveau"
+        />
         <label className="case-a-cocher">
           <input type="checkbox" checked={modeAssiette} onChange={(e) => setModeAssiette(e.target.checked)} />
           {str("nappe.modeAssiette")}

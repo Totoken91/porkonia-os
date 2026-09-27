@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
 import { DELAIS_ECONOMISEUR, type Fond } from "@/os/settings";
+import { ListeDeroulante } from "@/components/ListeDeroulante";
 
 const TABS = ["Affichage", "Son", "Citoyenneté", "Système"] as const;
 type Tab = (typeof TABS)[number];
@@ -61,13 +62,12 @@ export function Config() {
               <legend>{str("config.economiseur")}</legend>
               <div className="ligne">
                 <span>{str("economiseur.nom")}</span>
-                <select className="pk-select" value={settings.economiseur} onChange={(e) => setSettings({ economiseur: Number(e.target.value) })} aria-label={str("config.economiseur")}>
-                  {DELAIS_ECONOMISEUR.map((d) => (
-                    <option key={d} value={d}>
-                      {d === 0 ? str("config.economiseur.jamais") : `${d / 60} min`}
-                    </option>
-                  ))}
-                </select>
+                <ListeDeroulante
+                  value={settings.economiseur}
+                  options={DELAIS_ECONOMISEUR.map((d) => ({ value: d, label: d === 0 ? str("config.economiseur.jamais") : `${d / 60} min` }))}
+                  onChange={(economiseur) => setSettings({ economiseur })}
+                  aria-label={str("config.economiseur")}
+                />
                 <button className="pk-btn" onClick={showScreensaver} data-testid="config-apercu">
                   {str("config.economiseur.apercu")}
                 </button>
@@ -142,12 +142,15 @@ export function Config() {
             )}
             <fieldset className="pk-fieldset">
               <legend>{str("config.langue")}</legend>
-              <select className="pk-select" defaultValue="fr" aria-label={str("config.langue")}>
-                <option value="fr">{str("config.langue.fr")}</option>
-                <option value="groinique" disabled>
-                  {str("config.langue.groinique")}
-                </option>
-              </select>
+              <ListeDeroulante
+                value={"fr" as string}
+                options={[
+                  { value: "fr", label: str("config.langue.fr") },
+                  { value: "groinique", label: str("config.langue.groinique"), disabled: true },
+                ]}
+                onChange={() => {}}
+                aria-label={str("config.langue")}
+              />
             </fieldset>
             <fieldset className="pk-fieldset">
               <legend>Confidentialité</legend>

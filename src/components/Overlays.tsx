@@ -9,7 +9,7 @@ export interface LiveToast extends Toast {
   key: number;
 }
 
-/** Bulles de notification, au-dessus de la zone de notification. */
+/** Bulle de notification, au-dessus de la zone de notification (une à la fois, la file est tenue par Session). */
 export function Toasts({ toasts, onClose }: { toasts: LiveToast[]; onClose(key: number): void }) {
   return (
     <div className="bulles" aria-live="polite">
@@ -22,7 +22,7 @@ export function Toasts({ toasts, onClose }: { toasts: LiveToast[]; onClose(key: 
 
 function ToastBox({ t, onClose }: { t: LiveToast; onClose(key: number): void }) {
   useEffect(() => {
-    const id = setTimeout(() => onClose(t.key), 9000);
+    const id = setTimeout(() => onClose(t.key), 7000);
     return () => clearTimeout(id);
   }, [t.key, onClose]);
   return (

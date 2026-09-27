@@ -15,7 +15,7 @@ src/
     fs.ts                 chemins du système de fichiers du pack
     settings.ts           réglages (localStorage, assainis)
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
-    sons.ts               sons système synthétisés (WebAudio, aucun fichier)
+    sons.ts               sons système (WebAudio) : carillons synthétisés, machine en échantillons (public/audio/pc/, scripts/sons-pc.py)
     mailbox.ts            boîte aux lettres (livraison, lecture, corbeille sans destruction, brouillons, envoi, réponses)
     menus.ts              lettres d'accès et raccourcis des barres de menus
     context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis
@@ -46,6 +46,6 @@ src/
 
 Un poste administratif qui aurait pu sortir en 1998, sans copier aucun système existant : écran 4:3 de 800×600 dans un moniteur
 beige (plaque PORKONIA, voyant vert), léger balayage cathodique réglable. Châssis des fenêtres repris de l'atelier : parchemin biseauté,
-titre lie-de-vin liseré d'or, titres à empattements, Tahoma 11 px. Bureau uni (vert bouteille par défaut ; lie-de-vin, portrait du Fondateur
+titre lie-de-vin liseré d'or, titres à empattements, Pixel Operator 16 px (sa taille native). Bureau uni (vert bouteille par défaut ; lie-de-vin, portrait du Fondateur
 centré ou mosaïque d'emblèmes), icônes 32 px, barre des tâches en relief, menu PorkOS à bandeau vertical et sous-menus, bulles de notification.
 BIOS en VT323. Pictogrammes SVG maison, pas d'emoji. `prefers-reduced-motion` respecté.

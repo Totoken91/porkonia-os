@@ -175,9 +175,16 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     playSound("ding");
   };
 
+  /**
+   * File des bulles : une seule à l'écran, les suivantes attendent qu'elle se referme. Au-delà de quatre,
+   * les plus anciennes en attente sont oubliées (un rappel civique de retard n'a plus d'intérêt).
+   */
   const pushToast = useCallback((title: string, body: string) => {
     const key = ++counter.current;
-    setToasts((ts) => [...ts.slice(-2), { key, title, body }]);
+    setToasts((ts) => {
+      const file = [...ts, { key, title, body }];
+      return file.length > 4 ? [file[0]!, ...file.slice(-3)] : file;
+    });
   }, []);
 
   const runAction = useCallback(
@@ -427,7 +434,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           <ZoomRect key={z.key} from={z.from} to={z.to} onDone={() => setZooms((all) => all.filter((x) => x.key !== z.key))} />
         ))}
 
-        <Toasts toasts={toasts} onClose={closeToast} />
+        <Toasts toasts={toasts.slice(0, 1)} onClose={closeToast} />
         <Taskbar
           windows={wins.windows}
           focusedId={wins.focusedId}

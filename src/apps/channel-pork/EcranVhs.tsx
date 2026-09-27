@@ -134,7 +134,7 @@ export function EcranVhs(props: EcranVhsProps) {
     };
 
     /** Habillage d'antenne : dessiné dans l'image, il subit donc toute la dégradation de la cassette. */
-    const habillage = (p: EcranVhsProps) => {
+    const habillage = (p: EcranVhsProps, t: number) => {
       b.textBaseline = "top";
       // logo de chaîne
       b.font = `bold 17px ${affichage}`;
@@ -188,9 +188,24 @@ export function EcranVhs(props: EcranVhsProps) {
         b.fillStyle = "#fff";
         b.fillText(etq, 8, y + 4);
         b.fillStyle = "#15110d";
-        let texte = p.bandeau.texte.toUpperCase();
-        while (b.measureText(texte).width > W - le - 16 && texte.length > 4) texte = `${texte.slice(0, -2)}…`;
-        b.fillText(texte, le + 8, y + 4);
+        // Titre trop long : on resserre un peu, puis il défile comme un vrai bandeau d'info.
+        const texte = p.bandeau.texte.toUpperCase();
+        const place = W - le - 16;
+        let taille = 15;
+        while (taille > 12 && b.measureText(texte).width > place) b.font = `bold ${--taille}px ${affichage}`;
+        const tw = b.measureText(texte).width;
+        if (tw <= place) b.fillText(texte, le + 8, y + 4 + (15 - taille) / 2);
+        else {
+          const boucle = tw + 60;
+          const x = le + 8 - ((t * 45) % boucle);
+          b.save();
+          b.beginPath();
+          b.rect(le + 2, y, W - le - 2, 22);
+          b.clip();
+          b.fillText(`${texte}   ·`, x, y + 5);
+          b.fillText(`${texte}   ·`, x + boucle, y + 5);
+          b.restore();
+        }
       }
       if (p.soustitre) {
         // Sous-titres télétexte : caractères jaunes sur pavés noirs.
@@ -315,7 +330,7 @@ export function EcranVhs(props: EcranVhsProps) {
           // Pas de signal : neige
           b.drawImage(bruits[n % 4]!, 0, 0);
         }
-        habillage(p);
+        habillage(p, t);
       }
 
       // 2. Luminance nette, chrominance étalée et décalée, écho du signal
@@ -428,8 +443,6 @@ export function EcranVhs(props: EcranVhsProps) {
         o.fillText(String(p.numero).padStart(2, "0"), 17, 13);
         o.fillStyle = "#5dff72";
         o.fillText(String(p.numero).padStart(2, "0"), 16, 12);
-        o.font = `20px ${police}`;
-        osd(p.chaine.toUpperCase(), 56, 18);
       }
       if (p.osdVolume !== null && p.osdVolume !== undefined) {
         // Barre de volume du téléviseur : pavés verts, nette, par-dessus l'image.

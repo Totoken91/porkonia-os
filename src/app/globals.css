@@ -222,6 +222,7 @@
 
   /* ============================== Fonds d'écran ============================== */
   .fond { position: absolute; inset: 0; display: grid; place-items: center; background: #2f5b4c; }
+  .fond-bouteille { background: #2f5b4c; }
   .fond-lie { background: #6b1c22; }
   .fond-fondateur { background: #2f5b4c; }
   .fond-fondateur img { width: 360px; height: 270px; object-fit: cover; border: 3px solid var(--color-creme); box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35); margin-bottom: 28px; }
@@ -343,6 +344,33 @@
   .pk-btn.small:active:not(:disabled) { padding: 1px 5px 0 7px; }
   .pk-input, .pk-select { font: inherit; background: #fffdf7; border: none; box-shadow: var(--sunken); padding: 3px 4px; color: #000; border-radius: 0; }
   .pk-input:focus, .pk-select:focus { outline: none; }
+
+  /* Liste déroulante d'époque (ListeDeroulante.tsx) : champ creusé, flèche en relief, liste à bord noir. */
+  .pk-liste { position: relative; display: inline-block; min-width: 150px; }
+  .pk-liste-champ { display: flex; align-items: stretch; width: 100%; height: 22px; padding: 2px; border: none; background: #fffdf7; box-shadow: var(--sunken); color: #000; text-align: left; cursor: var(--c-main); }
+  .pk-liste-valeur { flex: 1; padding: 1px 4px 0; white-space: nowrap; overflow: hidden; }
+  .pk-liste-champ:focus-visible .pk-liste-valeur { background: var(--color-rouge-sombre); color: #fff; outline: 1px dotted #fff; outline-offset: -1px; }
+  .pk-liste-champ:focus { outline: none; }
+  .pk-liste-fleche { width: 16px; display: grid; place-items: center; background: var(--face); box-shadow: var(--raised); color: #000; }
+  .pk-liste.ouverte .pk-liste-fleche { box-shadow: var(--pressed); padding: 1px 0 0 1px; }
+  .pk-liste-options { position: absolute; left: 0; right: 0; top: 100%; z-index: 45; margin: 0; padding: 0; list-style: none; background: #fffdf7; border: 1px solid #000; max-height: 160px; overflow-y: auto; }
+  .pk-liste-options li { padding: 1px 4px; white-space: nowrap; cursor: var(--c-main); }
+  .pk-liste-options li.survol { background: var(--color-rouge-sombre); color: #fff; }
+  .pk-liste-options li[aria-disabled] { color: #9b8f78; }
+
+  /* Cases à cocher, boutons radio et curseurs d'époque (plus les commandes modernes du navigateur). */
+  .ecran input[type="checkbox"], .ecran input[type="radio"] { appearance: none; -webkit-appearance: none; flex: none; width: 13px; height: 13px; margin: 0 2px 0 0; background: #fffdf7; box-shadow: var(--sunken); vertical-align: -2px; cursor: var(--c-main); }
+  .ecran input[type="checkbox"]:checked { background: #fffdf7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M6 0h1v2H6v1H5v1H4v1H3v1H2V5H1V4H0V2h1v1h1v1h1V3h1V2h1V1h1z' fill='%23000'/%3E%3C/svg%3E") no-repeat 3px 3px; }
+  .ecran input[type="radio"] { border-radius: 50%; box-shadow: inset 1px 1px 0 var(--lo), inset -1px -1px 0 var(--hi), inset 2px 2px 0 var(--dk); }
+  .ecran input[type="radio"]:checked { background: radial-gradient(circle, #000 0 2px, #fffdf7 2.5px); }
+  .ecran input[type="checkbox"]:disabled, .ecran input[type="radio"]:disabled { background-color: var(--face); filter: grayscale(1) opacity(0.7); }
+  .ecran input[type="checkbox"]:focus-visible, .ecran input[type="radio"]:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+  .ecran input[type="range"] { appearance: none; -webkit-appearance: none; height: 22px; background: transparent; cursor: var(--c-main); }
+  .ecran input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: #fffdf7; box-shadow: var(--sunken); }
+  .ecran input[type="range"]::-moz-range-track { height: 4px; background: #fffdf7; box-shadow: var(--sunken); }
+  .ecran input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 11px; height: 21px; margin-top: -9px; border: none; border-radius: 0; background: var(--face); box-shadow: var(--raised); }
+  .ecran input[type="range"]::-moz-range-thumb { width: 11px; height: 21px; border: none; border-radius: 0; background: var(--face); box-shadow: var(--raised); }
+  .ecran input[type="range"]:focus { outline: none; }
   .pk-fieldset { border: 2px groove #fffaf0; padding: 4px 8px 8px; margin: 0 0 8px; min-width: 0; }
   .pk-fieldset > legend { padding: 0 3px; color: var(--color-rouge-sombre); }
   .pk-sunken { background: #fffdf7; box-shadow: var(--sunken); padding: 2px; }
@@ -399,7 +427,6 @@
   .note { color: #6d5f45; margin: 3px 0; }
   .lien { background: none; border: none; padding: 0; color: #1d3f8f; cursor: inherit; text-decoration: underline; font: inherit; }
   .case-a-cocher { display: flex; align-items: center; gap: 5px; margin: 2px 0; }
-  .case-a-cocher input { accent-color: var(--color-rouge-sombre); }
   .bienvenue-tete { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: linear-gradient(90deg, #7a1016, #3a0a0d); color: #fff; }
   .bienvenue-tete b { display: block; font: bold 20px var(--font-serif); color: #f3d58f; }
   .bienvenue-tete span { font: italic 12px var(--font-serif); }

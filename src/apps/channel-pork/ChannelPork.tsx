@@ -161,7 +161,8 @@ export function ChannelPork() {
             <span className="tuner-lcd-chaine">{ch.name.toUpperCase()}</span>
           </div>
           <div className="tuner-lcd-defile" aria-label={p.title}>
-            <span>{`${p.title}  ·  ${p.title}  ·  `}</span>
+            {/* Deux fois la même boucle : le défilement de -50 % retombe exactement sur ses pieds. */}
+            <span>{`${p.title}  ·  ${str("tv.aSuivre")} : ${direct.suivant.title}  ·  `.repeat(2)}</span>
           </div>
           <div className="tuner-lcd-ligne">
             <span>{str("tv.volume")}</span>
