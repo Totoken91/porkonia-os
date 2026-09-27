@@ -287,6 +287,15 @@ try {
     await closeTop();
     step(`${tag} : Courrier d'État (lecture, réponse, envoi)`);
 
+    // Mes décorations : la connexion et le courrier envoyé ont été décorés, et le restent
+    await page.getByTestId("icon-d-decorations").dblclick();
+    await page.getByTestId("window-distinctions").waitFor();
+    for (const id of ["connexion", "courrier"]) await page.locator(`[data-testid=decor-${id}].obtenue`).waitFor({ timeout: 8000 });
+    if ((await page.locator("[data-testid=decor-liste] li.obtenue").count()) < 2) throw new Error("distinctions non décernées");
+    if (tag === "bureau") await shot(page, `${tag}-19-decorations`);
+    await closeTop();
+    step(`${tag} : Mes décorations (connexion, courrier)`);
+
     if (tag === "bureau") {
       // Arrêt brutal (rechargement) : ScanDisque au démarrage suivant
       await page.reload();

@@ -42,10 +42,13 @@ export function NappeVide() {
   useEffect(() => {
     if (prev.current !== game.state) {
       if (game.state === "incident") signal("nappe:incident");
-      if (game.state === "conforme") signal("nappe:conforme");
+      if (game.state === "conforme") {
+        signal("nappe:conforme");
+        signal(`nappe:conforme:${levelId}`);
+      }
       prev.current = game.state;
     }
-  }, [game.state, signal]);
+  }, [game.state, signal, levelId]);
 
   const play = (i: number, assiette: boolean) => {
     setGame((g) => {

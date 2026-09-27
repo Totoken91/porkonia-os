@@ -52,6 +52,26 @@ describe("pack PorkOS", () => {
     const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser", "courrier:relever"];
     for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect(emitted).toContain(r.trigger.name);
   });
+  it("décerne des distinctions atteignables", () => {
+    // Signaux émis par le système ; `executer:<alias>` et `tv:integral:<émission>` sont vérifiés contre le pack.
+    const emis = ["session:ouverte", "session:perdue", "systeme:fatal", "courrier:envoye", "economiseur:vu", "nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer"];
+    const d = porkosPack.distinctions;
+    expect(new Set(d.map((x) => x.id)).size).toBe(d.length);
+    for (const x of d) {
+      const t = x.trigger;
+      if (t.type === "app-open") expect(porkosPack.apps.map((a) => a.id)).toContain(t.app);
+      if (t.type !== "signal") continue;
+      const n = t.name.replace(/\*$/, "");
+      if (n.startsWith("executer:")) expect(Object.keys(porkosPack.run.aliases)).toContain(n.slice(9));
+      else if (n.startsWith("nappe:conforme:")) expect(["petit", "grand", "vii"]).toContain(n.slice(15));
+      else if (n.startsWith("tv:integral:")) expect(porkosPack.programs.some((p) => p.id.startsWith(n.slice(12)))).toBe(true);
+      else expect(emis).toContain(n);
+    }
+    const seuils = porkosPack.rangs.map((r) => r.seuil);
+    expect(seuils[0]).toBe(0);
+    expect([...seuils].sort((a, b) => a - b)).toEqual(seuils);
+    expect(Math.max(...seuils)).toBeLessThanOrEqual(d.length);
+  });
   it("ne référence que des images d'origine (aucune copie locale hors emblème)", () => {
     const json = JSON.stringify(porkosPack);
     for (const m of json.matchAll(/"(https?:\/\/[^"]+\.(?:jpe?g|png|webp))"/g)) expect(m[1]).toMatch(/^https:\/\/porkopedia\.totoken\.chatgpt\.site\/assets\//);

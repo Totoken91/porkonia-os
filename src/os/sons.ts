@@ -4,7 +4,7 @@
  * échantillons pré-calculés (`public/audio/pc/`), avec la synthèse en secours s'ils ne chargent pas. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
  * avant cela, les appels sont silencieusement ignorés.
  */
-export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque" | "neige" | "demarrage-pc" | "disquette";
+export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque" | "neige" | "demarrage-pc" | "disquette" | "medaille";
 
 let ctx: AudioContext | null = null;
 
@@ -313,6 +313,19 @@ export function jouer(son: Son, volume = 0.7) {
           { f: 130.8, t: 0, d: 2.6, g: 0.05, type: "sine" },
         ],
         volume,
+      );
+    case "medaille":
+      // Petite fanfare de remise de décoration : quarte, quinte, octave, et un trille de cuivre pour la forme.
+      return jouerNotes(
+        [
+          { f: 392, t: 0, d: 0.16, g: 0.08, type: "square" },
+          { f: 523.3, t: 0.14, d: 0.16, g: 0.08, type: "square" },
+          { f: 659.3, t: 0.28, d: 0.16, g: 0.08, type: "square" },
+          { f: 784, t: 0.42, d: 0.55, g: 0.09, type: "square" },
+          { f: 1046.5, t: 0.42, d: 0.55, g: 0.04, type: "triangle" },
+          { f: 196, t: 0.42, d: 0.6, g: 0.06, type: "triangle" },
+        ],
+        volume * 0.8,
       );
     case "ding":
       return jouerNotes([{ f: 880, t: 0, d: 0.5, g: 0.1, type: "sine" }, { f: 1318.5, t: 0.08, d: 0.45, g: 0.05, type: "sine" }], volume);

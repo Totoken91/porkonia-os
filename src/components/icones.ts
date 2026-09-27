@@ -518,6 +518,26 @@ export const DESSINS: Record<Nom, Dessin> = {
     t.line(24, 17, 28, 21, "V");
     t.hline(18, 24, 5, "G");
   },
+  /** Mes décorations : médaille d'or frappée d'un groin, sur son ruban lie-de-vin à liseré d'or. */
+  medaille: (t) => {
+    t.rect(10, 1, 12, 11, "r");
+    t.vline(10, 1, 11, "R");
+    t.vline(21, 1, 11, "m");
+    t.dither(18, 2, 3, 9, "m", 1);
+    t.vline(15, 1, 11, "y");
+    t.vline(16, 1, 11, "Y");
+    t.rect(9, 11, 14, 2, "o");
+    t.hline(9, 11, 14, "y");
+    t.disc(16, 21, 9, "O");
+    t.disc(16, 21, 8, "o");
+    t.disc(16, 21, 7, "y");
+    t.dither(18, 22, 6, 6, "o", 1);
+    t.pts([[11, 18], [12, 17], [13, 16], [11, 19], [12, 16], [14, 15]], "Y");
+    // groin en relief
+    t.ellipse(16, 21, 4, 3, "o", true);
+    t.pts([[15, 21], [17, 21], [15, 22], [17, 22]], "O");
+    t.pts([[13, 19], [14, 18]], "Y");
+  },
 };
 
 /* ================================ 16 × 16 ================================ */
@@ -741,5 +761,17 @@ export const DESSINS16: Record<Nom, Dessin> = {
       ],
       "v",
     );
+  },
+  medaille: (t) => {
+    t.rect(5, 0, 6, 6, "r");
+    t.vline(5, 0, 6, "R");
+    t.vline(10, 0, 6, "m");
+    t.vline(7, 0, 6, "y");
+    t.vline(8, 0, 6, "Y");
+    t.hline(4, 5, 8, "o");
+    t.disc(8, 11, 4.5, "o");
+    t.disc(8, 11, 3.5, "y");
+    t.pts([[5, 9], [6, 8], [5, 10]], "Y");
+    t.pts([[7, 11], [9, 11]], "O");
   },
 };

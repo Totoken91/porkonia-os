@@ -222,6 +222,11 @@ const MENUS: Record<string, MenuSpec[]> = {
     aide("Bloc-notes d'État"),
   ],
 
+  distinctions: [
+    { label: "&Fichier", items: [{ label: "&Imprimer le diplôme…", action: toast("Impression", "Le diplôme sera imprimé à la préfecture et encadré à vos frais.") }, SEP, { label: "&Fermer", command: "fenetre.fermer" }] },
+    { label: "&Affichage", items: [{ label: "&Toutes les distinctions", command: "decor.filtre", arg: "toutes", radio: true }, { label: "&Obtenues seulement", command: "decor.filtre", arg: "obtenues", radio: true }, { label: "À &obtenir", command: "decor.filtre", arg: "manquantes", radio: true }] },
+    aide("Mes décorations"),
+  ],
   visionneuse: [
     { label: "&Fichier", items: [IMPRIMER, SEP, { label: "&Fermer", command: "fenetre.fermer" }] },
     {
@@ -247,6 +252,7 @@ const ABOUT: Record<string, string> = {
   fichiers: "Mes documents 12.12\nVos papiers, en ordre. L'ordre a été choisi pour vous.",
   texte: "Bloc-notes d'État 12.12\nÉcrire est un droit. Enregistrer est une autre affaire.",
   visionneuse: "Visionneuse 12.12\nLes images sont conformes. Leurs sujets, presque tous.",
+  distinctions: "Mes décorations 12.12\nLe mérite, dûment constaté.\n\nToute distinction est définitive, sauf décision contraire.",
 };
 
 export const porkosPack: ContentPack = {
@@ -275,6 +281,7 @@ export const porkosPack: ContentPack = {
     { id: "texte", kind: "texte", title: "Bloc-notes d'État", icon: "texte", size: { w: 460, h: 380 }, menu: "accessoires", blurb: "Écrire, sous réserve" },
     { id: "visionneuse", kind: "visionneuse", title: "Visionneuse", icon: "image", size: { w: 520, h: 420 } },
     { id: "executer", kind: "executer", title: "Exécuter", icon: "executer", size: { w: 380, h: 170 }, single: true },
+    { id: "distinctions", kind: "distinctions", title: "Mes décorations", icon: "medaille", size: { w: 470, h: 420 }, single: true, menu: "accessoires", blurb: "Le mérite, dûment constaté" },
     { id: "config", kind: "config", title: "Panneau de configuration", icon: "config", size: { w: 480, h: 470 }, single: true, menu: "systeme", blurb: "Réglez, nous ajusterons" },
   ],
 
@@ -286,6 +293,7 @@ export const porkosPack: ContentPack = {
     { id: "d-nappe", label: "Nappe Vide", icon: "nappe", open: { app: "nappe-vide" } },
     { id: "d-docs", label: "Mes documents", icon: "dossier", open: { app: "fichiers" } },
     { id: "d-config", label: "Réglages d'État", icon: "config", open: { app: "config" } },
+    { id: "d-decorations", label: "Mes décorations", icon: "medaille", open: { app: "distinctions" } },
     { id: "d-poubelle", label: "Poubelle d'État", icon: "poubelle", open: { action: { type: "dialog-ref", id: "poubelle" } } },
   ],
 
@@ -574,6 +582,9 @@ export const porkosPack: ContentPack = {
       mail: { app: "mail" },
       courrier: { app: "mail" },
       outlook: { app: "mail" },
+      decorations: { app: "distinctions" },
+      medailles: { app: "distinctions" },
+      distinctions: { app: "distinctions" },
       "format c:": { action: { type: "fatal" } },
       "rm -rf /": { action: { type: "fatal" } },
       "deltree c:": { action: { type: "fatal" } },
@@ -1311,7 +1322,48 @@ export const porkosPack: ContentPack = {
     { id: "actualiser", trigger: { type: "signal", name: "nav:actualiser" }, action: { type: "toast-pool", pool: "actualiser" } },
   ],
 
+  // Distinctions civiques : succès du poste. Motifs et médailles inventés pour PorkOS, sans prétention de canon.
+  distinctions: [
+    { id: "connexion", titre: "Médaille de la Présence", metal: "bronze", trigger: { type: "signal", name: "session:ouverte" }, indice: "Ouvrir une session.", motif: "Pour s'être identifié. La République vous reconnaissait déjà, mais le geste compte." },
+    { id: "impatience", titre: "Médaille du Tempérament", metal: "bronze", trigger: { type: "signal", name: "boot:impatience" }, indice: "Ne pas attendre.", motif: "Pour avoir interrompu la séquence de démarrage. Votre dossier a été complété en conséquence." },
+    { id: "zappeur", titre: "Croix du Zappeur", metal: "bronze", trigger: { type: "signal", name: "tv:tour" }, indice: "Faire le tour des chaînes de Channel Pork.", motif: "Pour avoir parcouru les cinq chaînes. Toutes Canal 1, et vous avez vérifié." },
+    { id: "telespectateur", titre: "Médaille du Téléspectateur modèle", metal: "argent", trigger: { type: "signal", name: "tv:integral:*" }, indice: "Regarder une émission en entier, sans zapper.", motif: "Pour avoir regardé une émission du début à la fin. La redevance vous remercie personnellement." },
+    { id: "brume", titre: "Insigne du Témoin", metal: "or", trigger: { type: "signal", name: "tv:integral:brume-*" }, indice: "Regarder un dossier B.R.U.M.E. jusqu'au bout.", motif: "Pour avoir regardé un dossier B.R.U.M.E. jusqu'au bout. Vous n'avez rien vu. Merci de continuer." },
+    { id: "pub-integrale", titre: "Médaille de la Réclame", metal: "argent", trigger: { type: "signal", name: "tv:integral:pub-ambree" }, indice: "Regarder une publicité jusqu'au bout.", motif: "Pour avoir regardé une publicité en entier, volontairement. Les Brasseries ont été prévenues." },
+    { id: "consommateur", titre: "Ordre du Consommateur", metal: "bronze", trigger: { type: "signal", name: "pub:cta" }, indice: "Répondre à une publicité.", motif: "Pour avoir cliqué sur une réclame. L'économie nationale a frémi." },
+    { id: "nappe", titre: "Médaille de la Nappe", metal: "bronze", trigger: { type: "signal", name: "nappe:conforme" }, indice: "Dresser une table conforme à Nappe Vide.", motif: "Pour une table dressée sans nappe vide. Le protocole est satisfait, pour cette fois." },
+    { id: "nappe-vii", titre: "Grand Cordon du Banquet", metal: "or", trigger: { type: "signal", name: "nappe:conforme:vii" }, indice: "Réussir Nappe Vide au Niveau VII.", motif: "Pour une table conforme au Niveau VII. Quatre-vingt-dix-neuf nappes vides évitées. Personne n'a mangé." },
+    { id: "nappe-echecs", titre: "Mérite de la Persévérance", metal: "bronze", trigger: { type: "signal", name: "nappe:incident", fois: 5 }, indice: "Constater cinq nappes vides.", motif: "Pour cinq nappes vides constatées. L'échec répété est une forme de loyauté." },
+    { id: "rappels", titre: "Médaille de l'Indépendance", metal: "argent", trigger: { type: "signal", name: "config:rappels-off" }, indice: "Se passer des rappels civiques.", motif: "Pour avoir désactivé les rappels civiques. C'est noté. Tout est noté." },
+    { id: "actualiser", titre: "Palme de l'Actualisation", metal: "bronze", trigger: { type: "signal", name: "nav:actualiser", fois: 10 }, indice: "Actualiser PigNet dix fois.", motif: "Pour avoir actualisé PigNet dix fois. Le monde n'a pas changé. Il est homologué." },
+    { id: "courrier", titre: "Médaille du Correspondant", metal: "bronze", trigger: { type: "signal", name: "courrier:envoye" }, indice: "Écrire à l'administration.", motif: "Pour avoir écrit à l'administration. Elle vous avait déjà lu avant l'envoi." },
+    { id: "enregistrer", titre: "Médaille de l'Archiviste", metal: "bronze", trigger: { type: "signal", name: "texte:enregistrer" }, indice: "Tenter d'enregistrer un document.", motif: "Pour avoir tenté d'enregistrer un document. L'intention a été archivée." },
+    { id: "veille", titre: "Médaille du Veilleur", metal: "bronze", trigger: { type: "signal", name: "economiseur:vu" }, indice: "Laisser le poste se reposer.", motif: "Pour avoir laissé l'écran de veille veiller à votre place. Il n'a rien raté." },
+    { id: "supprimer", titre: "Médaille de la Main lourde", metal: "bronze", trigger: { type: "signal", name: "bureau:supprimer" }, motif: "Pour avoir tenté de supprimer une icône d'État. Elle est toujours là. Vous aussi, pour l'instant." },
+    { id: "sudo", titre: "Brevet d'Aspirant administrateur", metal: "argent", trigger: { type: "signal", name: "executer:sudo" }, motif: "Pour avoir demandé les pleins pouvoirs. Demande reçue, classée, encadrée." },
+    { id: "fatal", titre: "Croix du Démolisseur", metal: "argent", trigger: { type: "signal", name: "systeme:fatal" }, motif: "Pour avoir tenté d'effacer le poste de l'État. Le poste s'en souvient. Il a une excellente mémoire." },
+    { id: "arret-brutal", titre: "Médaille de l'Arrêt brutal", metal: "argent", trigger: { type: "signal", name: "session:perdue" }, motif: "Pour avoir éteint sans prévenir. ScanDisque vous a pardonné. Nous, nous avons un dossier." },
+    { id: "explorateur", titre: "Ordre de l'Explorateur du poste", metal: "or", trigger: { type: "toutes-applis" }, indice: "Ouvrir chacun des programmes du poste.", motif: "Pour avoir ouvert chaque programme du poste. Il n'y en a pas d'autres. Ne cherchez pas." },
+    { id: "complet", titre: "Médaille de la Complétude", metal: "or", trigger: { type: "toutes-distinctions" }, indice: "Obtenir toutes les autres distinctions.", motif: "Pour avoir obtenu toutes les distinctions. Il n'y a plus rien à obtenir. Continuez quand même." },
+  ],
+  rangs: [
+    { seuil: 0, titre: "Citoyen ordinaire" },
+    { seuil: 3, titre: "Citoyen remarqué" },
+    { seuil: 7, titre: "Citoyen décoré" },
+    { seuil: 12, titre: "Citoyen d'honneur" },
+    { seuil: 18, titre: "Citoyen exemplaire" },
+    { seuil: 21, titre: "Citoyen intégral" },
+  ],
+
   strings: {
+    "distinctions.decernee": "Distinction civique décernée",
+    "distinctions.bulle": "{titre}. {motif}",
+    "distinctions.compte": "{n} distinction(s) sur {total}",
+    "distinctions.rang": "Rang : {rang}",
+    "distinctions.le": "Décernée le {date}",
+    "distinctions.secret": "Distinction secrète",
+    "distinctions.aucune": "Aucune distinction pour le moment. L'État observe, avec bienveillance, et patience.",
+    "distinctions.cliquer": "Cliquer pour voir vos décorations.",
     "nav.accueil.titre": "PigNet — Portail officiel",
     "nav.accueil.sousTitre": "L'internet national. Tout ce qui existe, et rien de ce qui n'existe pas.",
     "nav.etranger": "L'internet étranger est accessible le 12 de chaque mois, de 12 h 00 à 12 h 12, sur présentation d'une Pork ID de niveau VII.",

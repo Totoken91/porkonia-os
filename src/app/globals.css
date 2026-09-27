@@ -567,6 +567,25 @@
   .tuner-bouton:active { background: #2a2623; box-shadow: inset 1px 1px 0 #111; color: #ffd27a; }
   @media (prefers-reduced-motion: reduce) { .tuner-lcd-defile span { animation: none; } }
 
+  /* ============================== Mes décorations ============================== */
+  .decor { background: var(--face); }
+  .decor-tete { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--lo); }
+  .decor-tete b, .decor-tete span { display: block; }
+  .decor-tete b { color: var(--color-rouge-sombre); }
+  .decor-jauge { display: flex; gap: 2px; margin-top: 4px; padding: 3px; background: #fffdf7; box-shadow: var(--sunken); width: max-content; }
+  .decor-jauge i { width: 9px; height: 10px; }
+  .decor-jauge i.plein { background: var(--color-rouge-sombre); }
+  .decor-liste { flex: 1; min-height: 0; overflow-y: auto; margin: 6px; padding: 2px; list-style: none; background: #fffdf7; box-shadow: var(--sunken); }
+  .decor-liste li { display: flex; gap: 8px; align-items: flex-start; padding: 5px 6px; border-bottom: 1px dotted var(--lo); }
+  .decor-liste li > svg { flex: none; }
+  .decor-liste li b { display: block; }
+  .decor-liste li p { margin: 1px 0 0; }
+  .decor-liste li small { display: block; margin-top: 1px; color: #7a6a4c; font-size: inherit; }
+  .decor-liste li.manquante { color: #8f836a; }
+  .decor-liste li.obtenue b { color: var(--color-rouge-sombre); }
+  .decor-vide { color: #6d5f45; }
+  .bulle.cliquable { cursor: var(--c-main); }
+
   /* ============================== Nappe Vide ============================== */
   .nappe-corps { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--face); }
   .nappe-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; max-width: 100%; padding: 5px 6px; background: var(--face); }

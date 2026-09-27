@@ -52,6 +52,16 @@ export function ChannelPork() {
     volume: volume / 10,
   });
 
+  // Émission regardée en entier : prise dans ses premières secondes et quittée par sa fin, pas par un zapping.
+  const suivi = useRef<{ cle: string; ci: number; id: string; depuis: number } | null>(null);
+  useEffect(() => {
+    const avant = suivi.current;
+    if (avant?.cle === cleProgramme) return;
+    if (avant && avant.ci === ci && avant.depuis <= 8) signal(`tv:integral:${avant.id}`);
+    suivi.current = { cle: cleProgramme, ci, id: p.id, depuis: t };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cleProgramme]);
+
   const zap = (d: number) => {
     const n = chaines.length;
     setCi((i) => (i + d + n) % n);

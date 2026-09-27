@@ -9,6 +9,7 @@ import { APPS } from "@/apps/registry";
 import { OsContext, makeStr, type MailApi, type OsApi } from "@/os/context";
 import { makeRng, pick } from "@/os/rng";
 import { emptyRuleState, schedule, type SchedulerInput } from "@/os/scheduler";
+import { etatVide, observer, sanitizeDistinctions, type EtatDistinctions } from "@/os/distinctions";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
@@ -88,6 +89,19 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     }
   }, [cleCourrier, pack.mails]);
 
+  // Distinctions civiques, retenues dans le navigateur pour chaque citoyen du poste.
+  const cleDecor = `porkos.distinctions.${pack.id}.${user.id}`;
+  const [decor, setDecor] = useState<EtatDistinctions>(() => {
+    try {
+      return sanitizeDistinctions(JSON.parse(window.localStorage.getItem(cleDecor) ?? "null"), pack.distinctions);
+    } catch {
+      return etatVide();
+    }
+  });
+  const decorRef = useRef(decor);
+  const applisDuPoste = useMemo(() => pack.apps.filter((a) => a.menu).map((a) => a.id), [pack.apps]);
+  const decerneRef = useRef<(d: import("@/content/types").Distinction) => void>(() => {});
+
   const rng = useMemo(() => makeRng(Date.now() & 0xffffffff), []);
   const str = useMemo(() => makeStr(pack), [pack]);
   const loginAt = useRef(0);
@@ -137,8 +151,19 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       const r = schedule(pack.rules, rules.current, { ...input, elapsed } as SchedulerInput, rng, live.current.settings as unknown as Record<string, unknown>);
       rules.current = r.state;
       for (const { action } of r.actions) runRef.current(action);
+      if (input.kind === "tick") return;
+      const d = observer(pack.distinctions, decorRef.current, input, applisDuPoste, new Date().toISOString());
+      if (JSON.stringify(d.etat) === JSON.stringify(decorRef.current)) return;
+      decorRef.current = d.etat;
+      setDecor(d.etat);
+      try {
+        window.localStorage.setItem(cleDecor, JSON.stringify(d.etat));
+      } catch {
+        /* distinctions non retenues */
+      }
+      d.nouvelles.forEach((x, i) => setTimeout(() => decerneRef.current(x), 600 + i * 400));
     },
-    [pack.rules, rng],
+    [pack.rules, pack.distinctions, rng, applisDuPoste, cleDecor],
   );
 
   /** Ouverture d'un programme : sablier, chargement « du disque », puis zoom vers la fenêtre. */
@@ -179,10 +204,10 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
    * File des bulles : une seule à l'écran, les suivantes attendent qu'elle se referme. Au-delà de quatre,
    * les plus anciennes en attente sont oubliées (un rappel civique de retard n'a plus d'intérêt).
    */
-  const pushToast = useCallback((title: string, body: string) => {
+  const pushToast = useCallback((title: string, body: string, action?: ActionRef) => {
     const key = ++counter.current;
     setToasts((ts) => {
-      const file = [...ts, { key, title, body }];
+      const file = [...ts, { key, title, body, action }];
       return file.length > 4 ? [file[0]!, ...file.slice(-3)] : file;
     });
   }, []);
@@ -239,6 +264,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           return;
         }
         case "fatal":
+          feed({ kind: "signal", name: "systeme:fatal" });
           setFatal(true);
           playSound("erreur");
           return;
@@ -256,11 +282,17 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [pack, rng, pushToast, openApp, onSleep, onLock, onShutdown, onRestart, feed],
   );
   runRef.current = runAction;
+  decerneRef.current = (d) => {
+    pushToast(str("distinctions.decernee"), str("distinctions.bulle", { titre: d.titre, motif: d.motif }), { type: "open", app: "distinctions" });
+    playSound("medaille");
+  };
 
   // Horloge des règles : une vérification par seconde depuis l'ouverture de session.
   useEffect(() => {
     loginAt.current = Date.now();
     playSound("demarrage");
+    setTimeout(() => feed({ kind: "signal", name: "session:ouverte" }), 6000);
+    if (!restaurer) setTimeout(() => feed({ kind: "signal", name: "session:perdue" }), 7000);
     if (impatient) setTimeout(() => runRef.current({ type: "signal", name: "boot:impatience" }), 4000);
     const id = setInterval(() => {
       feed({ kind: "tick" });
@@ -302,6 +334,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       },
       envoyer: (d: Brouillon, draftId?: string) => {
         setBoite((b) => send(b, d, pack.mailbox.address, maintenant(), draftId)[0]);
+        feed({ kind: "signal", name: "courrier:envoye" });
         // L'administration répond toujours, et vite : c'est même la seule chose qu'elle fait vite.
         const r = pick(rng, pack.mailbox.autoReplies);
         const id = `auto-${Date.now()}`;
@@ -330,6 +363,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       playSound,
       showScreensaver: () => setSaver(true),
       mail,
+      distinctions: decor,
       showMenu: (at, items: MenuItem[]) => {
         const ecran = document.querySelector<HTMLElement>(".ecran");
         if (!ecran) return;
@@ -338,7 +372,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         setCtxMenu({ x: (at.clientX - r.left) * k, y: (at.clientY - r.top) * k, items });
       },
     }),
-    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail],
+    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail, decor],
   );
 
   // Session : on retrouve ses fenêtres, sauf après un arrêt brutal.
@@ -400,7 +434,8 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const exitSaver = useCallback(() => {
     lastActivity.current = Date.now();
     setSaver(false);
-  }, []);
+    feed({ kind: "signal", name: "economiseur:vu" });
+  }, [feed]);
 
   return (
     <OsContext.Provider value={api}>
@@ -434,7 +469,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           <ZoomRect key={z.key} from={z.from} to={z.to} onDone={() => setZooms((all) => all.filter((x) => x.key !== z.key))} />
         ))}
 
-        <Toasts toasts={toasts.slice(0, 1)} onClose={closeToast} />
+        <Toasts toasts={toasts.slice(0, 1)} onClose={closeToast} onAction={runAction} />
         <Taskbar
           windows={wins.windows}
           focusedId={wins.focusedId}

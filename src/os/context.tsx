@@ -7,6 +7,7 @@ import type { Son } from "./sons";
 import type { Boite, Brouillon, Dossier } from "./mailbox";
 import type { MenuItem } from "@/components/Menu";
 import type { Settings } from "./settings";
+import type { EtatDistinctions } from "./distinctions";
 import type { Win } from "./windows";
 
 export interface OsApi {
@@ -26,6 +27,8 @@ export interface OsApi {
   showScreensaver(): void;
   /** Messagerie du poste (état partagé : appli Courrier, zone de notification, règles). */
   mail: MailApi;
+  /** Distinctions civiques obtenues par le citoyen (appli Mes décorations). */
+  distinctions: EtatDistinctions;
   /** Menu contextuel à l'endroit d'un clic (coordonnées du navigateur converties en coordonnées d'écran). */
   showMenu(at: { clientX: number; clientY: number }, items: MenuItem[]): void;
 }

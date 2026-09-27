@@ -16,6 +16,7 @@ src/
     settings.ts           réglages (localStorage, assainis)
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
     sons.ts               sons système (WebAudio) : carillons synthétisés, machine en échantillons (public/audio/pc/, scripts/sons-pc.py)
+    distinctions.ts       distinctions civiques (succès) : signaux et ouvertures d'applis → médailles, rang, état conservé
     mailbox.ts            boîte aux lettres (livraison, lecture, corbeille sans destruction, brouillons, envoi, réponses)
     menus.ts              lettres d'accès et raccourcis des barres de menus
     context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis

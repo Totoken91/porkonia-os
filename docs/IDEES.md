@@ -69,7 +69,7 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 
 ### 3. Contenu (à faire valider : rien d'inventé n'est présenté comme canon)
 
-- [ ] Distinctions civiques : médailles pour les découvertes (BRUME jusqu'au bout, `format c:`, Niveau VII gagné…).
+- [x] Distinctions civiques : 21 médailles (bronze, argent, or) dans « Mes décorations », rangs de « Citoyen ordinaire » à « Citoyen intégral », fanfare et bulle cliquable à la remise, retenues dans le navigateur.
 - [ ] Courrier : plus de mails, qui arrivent au fil des sessions et réagissent à ce qu'on a fait.
 - [ ] PigNet : pages perso de citoyens (livre d'or, compteur, « en construction »), annuaire des sites, services de l'État.
 - [ ] Channel Pork : un jeu télévisé, d'autres pubs que la Douzi Ambrée.

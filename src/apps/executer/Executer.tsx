@@ -18,13 +18,14 @@ export function resolveCommand(cmd: string, aliases: Record<string, Cible>, apps
 }
 
 export function Executer() {
-  const { pack, str, openApp, runAction } = useOs();
+  const { pack, str, openApp, runAction, signal } = useOs();
   const { close } = useWin();
   const [cmd, setCmd] = useState("");
   const ok = () => {
     const hit = resolveCommand(cmd, pack.run.aliases, pack.apps);
     if (hit) {
       close();
+      signal(`executer:${cmd.trim().toLowerCase()}`);
       if ("action" in hit) runAction(hit.action);
       else openApp(hit.app, hit.args);
     } else if (cmd.trim())

@@ -35,6 +35,7 @@ npm run build && npm run test:e2e   # parcours complet (bureau + mobile), captur
 | PigNet Navigateur | Portail officiel d'époque (une du jour, rubriques, services de l'État, télé en direct, sondage, bourse du jambon, météo de la mousse, petites annonces, compteur de visites ; contenu dans `portal` du pack), adresses `porko://…`, Porkopédia hors ligne (12 notices intégrées, index de 470 titres), recherche, internet étranger refusé, erreur 412. |
 | Channel Pork | Cinq chaînes en direct (toutes « Canal 1 », dont Canal 1 Météo et sa carte redessinée façon bulletin des années 90, et Canal 1 Zouk, chaîne de clips de DJ Viteau) calées sur l'horloge : on arrive en cours d'émission, on regarde ou on zappe. Rendu VHS 4:3, voix off et musique (`public/audio/channel-pork/`), bandeaux défilants, sous-titres, afficheur « en cours / à suivre » du logiciel PorkTV (vidéo réelle possible via `videoSrc`). |
 | Nappe Vide | Démineur du protocole des banquets : zones de nappe vide, assiettes, Petit banquet → Niveau VII. |
+| Mes décorations | Distinctions civiques (succès) : 21 médailles décernées par ce qu'on fait sur le poste (regarder un dossier B.R.U.M.E. jusqu'au bout, réussir le Niveau VII, tenter `format c:`…), dont des secrètes, et un rang ; contenu dans `distinctions` et `rangs` du pack. |
 | Panneau de configuration | Réglages qui agissent vraiment (signal CRT, fond d'écran, rappels, hymne) et d'autres qui refusent poliment. |
 | Mes documents | Système de fichiers du pack, Bloc-notes d'État, Visionneuse. |
 

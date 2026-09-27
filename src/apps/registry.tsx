@@ -9,6 +9,7 @@ import { Config } from "./config/Config";
 import { Fichiers, Texte, Visionneuse } from "./fichiers/Fichiers";
 import { Navigateur } from "./navigateur/Navigateur";
 import { NappeVide } from "./nappe-vide/NappeVide";
+import { Distinctions } from "./distinctions/Distinctions";
 
 export const APPS: Record<AppKind, ComponentType> = {
   bienvenue: Bienvenue,
@@ -21,4 +22,5 @@ export const APPS: Record<AppKind, ComponentType> = {
   fichiers: Fichiers,
   visionneuse: Visionneuse,
   texte: Texte,
+  distinctions: Distinctions,
 };

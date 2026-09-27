@@ -7,30 +7,47 @@ import { DialogIcon } from "./Icon";
 
 export interface LiveToast extends Toast {
   key: number;
+  /** Ce que fait un clic sur la bulle (sinon elle se ferme simplement). */
+  action?: ActionRef;
 }
 
 /** Bulle de notification, au-dessus de la zone de notification (une à la fois, la file est tenue par Session). */
-export function Toasts({ toasts, onClose }: { toasts: LiveToast[]; onClose(key: number): void }) {
+export function Toasts({ toasts, onClose, onAction }: { toasts: LiveToast[]; onClose(key: number): void; onAction(a: ActionRef): void }) {
   return (
     <div className="bulles" aria-live="polite">
       {toasts.map((t) => (
-        <ToastBox key={t.key} t={t} onClose={onClose} />
+        <ToastBox key={t.key} t={t} onClose={onClose} onAction={onAction} />
       ))}
     </div>
   );
 }
 
-function ToastBox({ t, onClose }: { t: LiveToast; onClose(key: number): void }) {
+function ToastBox({ t, onClose, onAction }: { t: LiveToast; onClose(key: number): void; onAction(a: ActionRef): void }) {
   useEffect(() => {
     const id = setTimeout(() => onClose(t.key), 7000);
     return () => clearTimeout(id);
   }, [t.key, onClose]);
   return (
-    <div className="bulle" role="status" data-testid="toast" onClick={() => onClose(t.key)}>
+    <div
+      className={`bulle${t.action ? " cliquable" : ""}`}
+      role="status"
+      data-testid="toast"
+      onClick={() => {
+        if (t.action) onAction(t.action);
+        onClose(t.key);
+      }}
+    >
       <header>
         <DialogIcon kind="info" small />
         <b>{t.title}</b>
-        <button className="pk-ctl" aria-label="Fermer" onClick={() => onClose(t.key)}>
+        <button
+          className="pk-ctl"
+          aria-label="Fermer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose(t.key);
+          }}
+        >
           <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
         </button>
       </header>

@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions";
 
-export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -253,6 +253,29 @@ export interface EventRule {
   unlessSetting?: string;
 }
 
+/* ------------------------------ Distinctions ------------------------------ */
+
+/**
+ * Ce qui décerne une distinction : un signal du système (`nom*` = tout signal qui commence par `nom`),
+ * éventuellement répété `fois` fois, l'ouverture d'une appli, toutes les applis du poste, ou toutes les autres distinctions.
+ */
+export type DistinctionTrigger =
+  | { type: "signal"; name: string; fois?: number }
+  | { type: "app-open"; app: string }
+  | { type: "toutes-applis" }
+  | { type: "toutes-distinctions" };
+
+export interface Distinction {
+  id: string;
+  titre: string;
+  /** Motif officiel, lu une fois la distinction obtenue. */
+  motif: string;
+  /** Ce qu'on lit avant de l'obtenir ; absent pour une distinction secrète (« ??? »). */
+  indice?: string;
+  metal: "bronze" | "argent" | "or";
+  trigger: DistinctionTrigger;
+}
+
 /* ---------------------------------- Pack ---------------------------------- */
 
 export interface ContentPack {
@@ -294,6 +317,9 @@ export interface ContentPack {
   /** Carte météo stylisée et position des lieux (0–1). */
   carteMeteo: { image: string; lieux: Record<string, [number, number]> };
   rules: EventRule[];
+  /** Distinctions civiques (succès) et rangs atteints selon leur nombre (seuils croissants, le premier à 0). */
+  distinctions: Distinction[];
+  rangs: { seuil: number; titre: string }[];
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;
 }
