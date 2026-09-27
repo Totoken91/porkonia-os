@@ -12,6 +12,8 @@ import { InfoBulles } from "./InfoBulles";
 
 export const SCREEN = { w: 800, h: 600 };
 const COQUE = { x: 58, top: 52, bottom: 82 };
+/** Démarrage et ambiance sont calés au même niveau : la boucle prolonge le régime établi du démarrage. */
+const VOLUME_MACHINE = 0.6;
 
 type Tube = "allumage" | "allume" | "extinction" | "eteint";
 
@@ -33,6 +35,7 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   // Tant qu'on n'a jamais allumé, une invitation clignote à côté du bouton d'alimentation.
   const [jamaisAllume, setJamaisAllume] = useState(!power);
   const premier = useRef(true);
+  const allumeA = useRef(0);
   const [degauss, setDegauss] = useState(false);
 
   useEffect(() => {
@@ -50,9 +53,10 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
       setJamaisAllume(false);
       setTube("allumage");
       if (sons) {
-        jouer("allumage", 0.6);
-        jouer("demarrage-pc", 0.7);
+        jouer("allumage", 0.4);
+        jouer("demarrage-pc", VOLUME_MACHINE);
       }
+      allumeA.current = performance.now();
       const t = setTimeout(() => setTube("allume"), 1100);
       return () => clearTimeout(t);
     }
@@ -64,7 +68,9 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
 
   // Ronronnement de la machine allumée (ventilateur, secteur, sifflement du tube).
   useEffect(() => {
-    ambiance(power && sons, 0.55);
+    // Juste après l'allumage, la boucle prend le relais à la fin du démarrage (fondu de 6,5 s à 7,5 s).
+    const ecoule = (performance.now() - allumeA.current) / 1000;
+    ambiance(power && sons, VOLUME_MACHINE, allumeA.current ? Math.max(0, 6.5 - ecoule) : 0);
     return () => ambiance(false);
   }, [power, sons]);
 

@@ -165,9 +165,10 @@ let ambianceEnCours: { arreter(): void } | null = null;
 /**
  * Ambiance de fond tant que la machine est allumée : boucle enregistrée (ventilateur, ronflement du secteur,
  * sifflement du transformateur du tube) et, de temps en temps, le disque dur qui s'active tout seul comme il
- * le faisait toujours, sans raison connue. `volume` 0 ou machine éteinte : on arrête.
+ * le faisait toujours, sans raison connue. `volume` 0 ou machine éteinte : on arrête. `delai` (s) : juste après
+ * l'allumage, la boucle attend la fin du démarrage et prend le relais pendant son fondu, au même niveau.
  */
-export function ambiance(allumee: boolean, volume = 0.5) {
+export function ambiance(allumee: boolean, volume = 0.5, delai = 0) {
   if (!allumee || volume <= 0) {
     ambianceEnCours?.arreter();
     ambianceEnCours = null;
@@ -176,10 +177,11 @@ export function ambiance(allumee: boolean, volume = 0.5) {
   if (ambianceEnCours) return;
   const a = audio();
   if (!a) return;
-  const t0 = a.currentTime + 0.05;
+  const t0 = a.currentTime + 0.05 + delai;
   const sortie = a.createGain();
-  sortie.gain.setValueAtTime(0.0001, t0);
-  sortie.gain.exponentialRampToValueAtTime(volume, t0 + 2.5);
+  sortie.gain.setValueAtTime(0, a.currentTime);
+  sortie.gain.setValueAtTime(0, t0);
+  sortie.gain.linearRampToValueAtTime(volume, t0 + (delai ? 1 : 2.5));
   sortie.connect(a.destination);
   let arrete = false;
   let boucle: AudioBufferSourceNode | null = null;
@@ -191,7 +193,7 @@ export function ambiance(allumee: boolean, volume = 0.5) {
       rafaleDisque(0.5, sortie);
       if (Math.random() < 0.35) setTimeout(() => !arrete && rafaleDisque(0.4, sortie), 600 + Math.random() * 500);
       grattement();
-    }, 6000 + Math.random() * 16000);
+    }, (delai + 6 + Math.random() * 16) * 1000);
   };
   void lire("ambiance.wav", 1, () => {
     if (!arrete) secours = ambianceSynth(a, sortie);
@@ -206,8 +208,8 @@ export function ambiance(allumee: boolean, volume = 0.5) {
       clearTimeout(minuterie);
       const t = a.currentTime;
       sortie.gain.cancelScheduledValues(t);
-      sortie.gain.setValueAtTime(Math.max(0.0001, sortie.gain.value), t);
-      sortie.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+      sortie.gain.setValueAtTime(sortie.gain.value, t);
+      sortie.gain.linearRampToValueAtTime(0, t + 0.8);
       boucle?.stop(t + 0.9);
       secours?.arreter();
     },

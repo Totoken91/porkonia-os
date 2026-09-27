@@ -1,5 +1,3 @@
-# Génère les échantillons de la machine (public/audio/pc/) : python3 scripts/sons-pc.py dans un dossier de travail,
-# puis encodage mp3 64k des sons ponctuels (ambiance.wav reste en WAV pour boucler sans blanc).
 import numpy as np, wave
 from scipy import signal
 SR = 44100
@@ -136,8 +134,8 @@ def demarrage_pc(duree=7.5):
     place(out, clic(0.5, 1500, 3200, 200, 0.06), 4.8)
     place(out, rafale_disque(1.2, 25, 0.5), 5.0)
     place(out, rafale_disque(0.5, 45, 0.45), 6.5)
-    # queue : fondu pour enchaîner avec l'ambiance
-    fin = int(0.6 * SR); out[-fin:] *= np.linspace(1, 0, fin)
+    # queue : fondu d'une seconde, pendant lequel la boucle d'ambiance prend le relais au même niveau
+    fin = int(1.0 * SR); out[-fin:] *= np.linspace(1, 0, fin)
     return out
 
 def ambiance(duree=10.0):
@@ -154,13 +152,18 @@ def ambiance(duree=10.0):
     y[:c] = x[n:n + c] * (1 - fondu) + x[:c] * fondu
     return y
 
-def ecrire(nom, x, crete=0.89, rms=None, sr=SR, fondu=True):
+def ecrire(nom, x, crete=0.89, rms=None, sr=SR, fondu=True, queue=None):
     x = x - x.mean()
+    if queue:  # le régime établi (4,5 s → 6,4 s) doit valoir `queue` en RMS, pour se fondre dans l'ambiance
+        r = x[int(4.5 * SR):int(6.4 * SR)]
+        x = x * (queue / np.sqrt((r ** 2).mean()))
+        rms = None; crete = None
     if fondu:
         a, b = int(0.004 * SR), int(0.12 * SR)
         x[:a] *= np.linspace(0, 1, a); x[-b:] *= np.linspace(1, 0, b) ** 2
     if rms: x = x * (rms / np.sqrt((x ** 2).mean()))
-    else: x = x * (crete / np.abs(x).max())
+    elif crete: x = x * (crete / np.abs(x).max())
+    print(nom, 'crête %.2f' % np.abs(x).max())
     x = np.clip(x, -1, 1)
     if sr != SR: x = signal.resample_poly(x, sr, SR)
     with wave.open(nom, 'wb') as w:
@@ -168,7 +171,7 @@ def ecrire(nom, x, crete=0.89, rms=None, sr=SR, fondu=True):
         w.writeframes((x * 32767).astype('<i2').tobytes())
     print(nom, round(len(x) / sr, 2), 's')
 
-ecrire('demarrage-pc.wav', piece(demarrage_pc()), 0.85)
+ecrire('demarrage-pc.wav', piece(demarrage_pc()), queue=0.05)
 ecrire('ecran-allumage.wav', piece(allumage_ecran()), 0.8)
 ecrire('bip-post.wav', piece(bip_post(), 0.1), 0.7)
 ecrire('disquette.wav', piece(disquette()), 0.7)
