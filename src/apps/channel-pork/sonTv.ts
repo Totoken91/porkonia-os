@@ -2,14 +2,27 @@
 /**
  * Bande son de Channel Pork : musique de fond bouclée (déjà dégradée « VHS » dans le fichier),
  * voix off calée sur le programme, musique baissée sous la voix. Muet si les sons sont coupés.
+ * Les voix de l'émission en cours et de la suivante sont préchargées : une réplique qui commence
+ * part du début, tout de suite ; seule une réplique prise en cours (arrivée sur la chaîne) est reprise au milieu.
  */
 import { useEffect, useRef } from "react";
 
 const MUSIQUE = 0.55;
 const MUSIQUE_SOUS_VOIX = 0.22;
 
-export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string; voix: { cle: string; src: string; offset: number } | null }) {
+export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string; voix: { cle: string; src: string; offset: number } | null; precharge: string[] }) {
   const musique = useRef<HTMLAudioElement | null>(null);
+  const cache = useRef(new Map<string, HTMLAudioElement>());
+  const element = (src: string) => {
+    let a = cache.current.get(src);
+    if (!a) {
+      a = new Audio();
+      a.preload = "auto";
+      a.src = src;
+      cache.current.set(src, a);
+    }
+    return a;
+  };
   const voix = useRef<HTMLAudioElement | null>(null);
   const cleVoix = useRef<string | null>(null);
   const joue = o.actif && o.lecture;
@@ -35,7 +48,21 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
     else a.pause();
   }, [joue, o.musique]);
 
-  // Voix : nouvelle réplique → on charge et on lit depuis la bonne position.
+  // Préchargement : voix de l'émission en cours et de la suivante ; le reste est libéré.
+  const liste = o.precharge.join("|");
+  useEffect(() => {
+    if (!o.actif) return;
+    const voulues = new Set(liste.split("|").filter(Boolean));
+    for (const src of voulues) element(src);
+    for (const [src, a] of cache.current)
+      if (!voulues.has(src) && a !== voix.current) {
+        a.pause();
+        cache.current.delete(src);
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liste, o.actif]);
+
+  // Voix : nouvelle réplique → lecture depuis le début (ou depuis où en est le direct si on arrive en cours).
   const cle = o.voix?.cle ?? null;
   useEffect(() => {
     const v = voixDemandee.current;
@@ -46,13 +73,25 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
     }
     let a = voix.current;
     if (!a || cleVoix.current !== v.cle) {
-      a?.pause();
-      a = new Audio(v.src);
+      const suivante = element(v.src);
+      if (a && a !== suivante) a.pause();
+      a = suivante;
       voix.current = a;
       cleVoix.current = v.cle;
-      if (v.offset > 0.3) a.currentTime = v.offset;
+      const depuis = performance.now();
+      const enCours = v.offset > 0.4;
+      const caler = () => {
+        try {
+          a!.currentTime = enCours ? v.offset + (performance.now() - depuis) / 1000 : 0;
+        } catch {
+          /* position refusée tant que le fichier n'est pas prêt */
+        }
+      };
+      if (a.readyState >= 1) caler();
+      else a.addEventListener("loadedmetadata", caler, { once: true });
     }
     void a.play().catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [joue, cle]);
 
   // Ducking : la musique baisse tant que la voix parle.
@@ -71,7 +110,7 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
   useEffect(
     () => () => {
       musique.current?.pause();
-      voix.current?.pause();
+      for (const a of cache.current.values()) a.pause();
     },
     [],
   );

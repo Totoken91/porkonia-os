@@ -5,7 +5,7 @@ import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { APPS } from "@/apps/registry";
 import { parseUrl, search } from "@/apps/navigateur/url";
 import { compteur, cours, duJour, jour, meteo } from "@/apps/navigateur/portail";
-import { at, gridOf, live, loopLength, programLength, voiceAt } from "@/apps/channel-pork/timeline";
+import { at, decouper, gridOf, live, loopLength, programLength, sousTitre, voiceAt } from "@/apps/channel-pork/timeline";
 import { existsSync } from "node:fs";
 import { checkPassword } from "@/components/Login";
 import { makeRng } from "@/os/rng";
@@ -215,5 +215,25 @@ describe("portail PigNet", () => {
   it("oriente la recherche et les rubriques vers les bonnes pages", () => {
     expect(parseUrl("porko://porkopedia?rubrique=Villes%20de%20Porkonia")).toEqual({ kind: "index", section: "Villes de Porkonia" });
     for (const s of porkosPack.portal.services) if (s.url) expect(["index", "etranger", "article", "accueil"]).toContain(parseUrl(s.url).kind);
+  });
+});
+
+describe("sous-titres de Channel Pork", () => {
+  const long = "Après quatre heures de débat, les élus ont tranché, comme le veut la tradition municipale de Douzi City. Les séances dureront désormais quatre heures. Personne n'a protesté.";
+  it("découpe une réplique longue sans rien perdre", () => {
+    const b = decouper(long);
+    expect(b.join(" ")).toBe(long);
+    for (const x of b) expect(x.length).toBeLessThanOrEqual(76);
+    expect(b.length).toBeGreaterThan(1);
+    expect(decouper("Court.")).toEqual(["Court."]);
+  });
+  it("fait défiler les morceaux au rythme de la voix et se tait entre deux répliques", () => {
+    const p = { ...porkosPack.programs[0]!, subtitles: [{ at: 1, text: long, dur: 12 }, { at: 20, text: "Suite.", dur: 1 }] };
+    const vus = new Set<string>();
+    for (let t = 1; t < 13; t += 0.25) vus.add(sousTitre(p, t)!);
+    expect([...vus]).toEqual(decouper(long));
+    expect(sousTitre(p, 0.5)).toBeNull();
+    expect(sousTitre(p, 16)).toBeNull();
+    expect(sousTitre(p, 20.2)).toBe("Suite.");
   });
 });

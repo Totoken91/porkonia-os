@@ -150,9 +150,24 @@ export interface Program {
    * `focus` : point à garder dans le cadre 4:3 (0–1 en largeur et en hauteur ; défaut 0,5 et 0,35).
    * `fixe` : pas de zoom lent (cartes). `meteo` : bulletin dessiné sur la carte (lieux de `carteMeteo`).
    */
-  slides: { image: string; seconds: number; caption?: string; chyron?: string; focus?: [number, number]; fixe?: boolean; meteo?: BulletinMeteo }[];
-  /** Sous-titres, synchronisés sur le temps total du programme ; `voice` : voix off enregistrée de la réplique. */
-  subtitles: { at: number; text: string; voice?: string }[];
+  slides: {
+    image: string;
+    seconds: number;
+    caption?: string;
+    chyron?: string;
+    focus?: [number, number];
+    fixe?: boolean;
+    meteo?: BulletinMeteo;
+    /** Zoom de départ (1 = cadre entier) : pour un détail de l'image. */
+    zoom?: number;
+    /** Image entière posée sur un fond uni (logos sombres sur fond transparent). */
+    fond?: string;
+  }[];
+  /**
+   * Sous-titres, synchronisés sur le temps total du programme ; `voice` : voix off enregistrée de la réplique,
+   * `dur` : sa durée (s), qui sert à faire défiler les sous-titres longs au rythme de la voix.
+   */
+  subtitles: { at: number; text: string; voice?: string; dur?: number }[];
   /** Musique de fond (bouclée, baissée sous la voix). */
   music?: string;
 }

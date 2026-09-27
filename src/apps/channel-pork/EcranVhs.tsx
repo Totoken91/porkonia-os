@@ -24,6 +24,10 @@ export interface EcranVhsProps {
   cadrage?: [number, number];
   /** Image fixe, sans zoom lent (cartes météo). */
   fixe?: boolean;
+  /** Zoom de départ (détail de l'image). */
+  zoom?: number;
+  /** Fond uni : l'image est posée entière dessus (logo). */
+  fond?: string;
   /** Bulletin météo dessiné sur la carte. */
   bulletin?: Bulletin | null;
   bandeau: { etiquette: string; texte: string } | null;
@@ -251,10 +255,22 @@ export function EcranVhs(props: EcranVhsProps) {
             sh = img.naturalHeight;
           }
         }
-        if (src && !glitch) {
+        if (src && !glitch && p.fond) {
+          // Générique : fond uni voilé, image entière au centre, légère respiration.
+          b.fillStyle = p.fond;
+          b.fillRect(0, 0, W, H);
+          // Logo réduit et remonté : le bandeau du bas reste lisible.
+          const k = Math.min(W / sw, (H * 0.66) / sh) * (1 + 0.05 * (reduit ? 0 : p.progression));
+          b.drawImage(src, (W - sw * k) / 2, H * 0.36 - (sh * k) / 2, sw * k, sh * k);
+          const v = b.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
+          v.addColorStop(0, "rgba(0,0,0,0)");
+          v.addColorStop(1, "rgba(0,0,0,0.5)");
+          b.fillStyle = v;
+          b.fillRect(0, 0, W, H);
+        } else if (src && !glitch) {
           // Recadrage 4:3 et zoom lent (Ken Burns)
           const lent = !reduit && !p.fixe;
-          const zoom = p.fixe ? 1 : 1.04 + 0.09 * (lent ? p.progression : 0);
+          const zoom = (p.zoom ?? 1) * (p.fixe ? 1 : 1.04 + 0.09 * (lent ? p.progression : 0));
           const cible = W / H;
           let cw = sw;
           let ch = sw / cible;

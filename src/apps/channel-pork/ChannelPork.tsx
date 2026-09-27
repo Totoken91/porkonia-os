@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
 import { useSonTv } from "./sonTv";
-import { DECALAGE, at, live, voiceAt } from "./timeline";
+import { DECALAGE, at, live, sousTitre, voiceAt } from "./timeline";
 
 export function ChannelPork() {
   const { pack, str, signal, settings, playSound } = useOs();
@@ -28,7 +28,8 @@ export function ChannelPork() {
   const direct = live(ch, pack.programs, maintenant, ci * DECALAGE);
   const p = direct.program;
   const t = direct.t;
-  const { slide, subtitle } = at(p, t);
+  const { slide } = at(p, t);
+  const subtitle = sousTitre(p, t);
   const s = p.slides[slide]!;
   const debut = p.slides.slice(0, slide).reduce((acc, x) => acc + x.seconds, 0);
   const cleProgramme = `${ci}-${direct.slot}-${Math.round(maintenant + ci * DECALAGE - t)}`;
@@ -39,6 +40,7 @@ export function ChannelPork() {
     lecture: true,
     musique: p.music,
     voix: voix ? { cle: `${cleProgramme}-${voix.index}`, src: voix.src, offset: voix.offset } : null,
+    precharge: [...p.subtitles, ...direct.suivant.subtitles].flatMap((x) => (x.voice ? [x.voice] : [])),
   });
 
   const zap = (d: number) => {
@@ -82,6 +84,8 @@ export function ChannelPork() {
         video={p.videoSrc}
         cadrage={s.focus}
         fixe={s.fixe}
+        zoom={s.zoom}
+        fond={s.fond}
         bulletin={
           s.meteo
             ? {
@@ -101,7 +105,7 @@ export function ChannelPork() {
         numero={ci + 1}
         bandeau={bandeau && s.chyron ? { etiquette, texte: s.chyron } : null}
         mention={s.caption}
-        soustitre={soustitres && !s.meteo ? subtitle : null}
+        soustitre={soustitres && !s.meteo && !s.fond ? subtitle : null}
       />
       <div className="pk-toolbar tv-commandes">
         <button className="pk-btn small" onClick={() => zap(-1)} data-testid="tv-precedente">◂ Chaîne</button>

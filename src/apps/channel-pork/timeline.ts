@@ -18,6 +18,55 @@ export function at(p: Program, t: number): { slide: number; subtitle: string | n
   return { slide, subtitle };
 }
 
+/**
+ * Découpe une réplique en sous-titres d'au plus `max` caractères, sans couper une phrase si possible :
+ * par phrases, puis par virgules ou deux-points, puis par mots.
+ */
+export function decouper(texte: string, max = 76): string[] {
+  const morceaux: string[] = [];
+  const pousser = (bout: string) => {
+    if (bout.length <= max) return morceaux.push(bout);
+    const coupe = bout.slice(0, max).search(/[,;:](?=\s)[^,;:]*$/);
+    const i = coupe > max * 0.35 ? coupe + 1 : bout.lastIndexOf(" ", max);
+    if (i <= 0) return morceaux.push(bout);
+    pousser(bout.slice(0, i).trim());
+    pousser(bout.slice(i).trim());
+  };
+  let courant = "";
+  for (const phrase of texte.split(/(?<=[.!?…])\s+(?![»])/)) {
+    const essai = courant ? `${courant} ${phrase}` : phrase;
+    if (essai.length <= max) courant = essai;
+    else {
+      if (courant) pousser(courant);
+      courant = "";
+      if (phrase.length <= max) courant = phrase;
+      else pousser(phrase);
+    }
+  }
+  if (courant) pousser(courant);
+  return morceaux;
+}
+
+/**
+ * Sous-titre affiché au temps t : la réplique en cours, découpée et répartie sur sa durée
+ * (proportionnellement à la longueur de chaque morceau). Rien entre deux répliques.
+ */
+export function sousTitre(p: Program, t: number): string | null {
+  let s: Program["subtitles"][number] | null = null;
+  for (const x of p.subtitles) if (x.at <= t) s = x;
+  if (!s) return null;
+  if (!s.dur) return s.text;
+  if (t > s.at + s.dur + 0.8) return null;
+  const bouts = decouper(s.text);
+  const total = bouts.reduce((n, b) => n + b.length, 0);
+  let fin = s.at;
+  for (const b of bouts) {
+    fin += (b.length / total) * s.dur;
+    if (t < fin) return b;
+  }
+  return bouts[bouts.length - 1]!;
+}
+
 /** Réplique enregistrée en cours au temps t : son fichier et la position de lecture (s). Pur. */
 export function voiceAt(p: Program, t: number): { index: number; src: string; offset: number } | null {
   let found: { index: number; src: string; offset: number } | null = null;
