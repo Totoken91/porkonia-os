@@ -48,6 +48,10 @@ spin-off d'enquête) réutilise les mêmes applis avec d'autres données.
 
 Voir `docs/ARCHITECTURE.md`.
 
+## Police
+
+L'interface utilise **Pixel Operator** (Jayvee Enaguas, licence CC0, `src/app/fonts/`), police bitmap nette à 16 px, identique sur tous les systèmes. Les grands titres « imprimés » restent à empattements ; les pages web de PigNet gardent une police de navigateur.
+
 ## Images
 
 Les images viennent de Porkopédia et restent hébergées là-bas (liens directs, aucune copie).

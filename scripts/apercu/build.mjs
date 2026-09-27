@@ -13,7 +13,9 @@ const cssFiles = readdirSync("out/_next/static").flatMap((d) => {
   const p = `out/_next/static/${d}`;
   return statSync(p).isDirectory() ? readdirSync(p).filter((f) => f.endsWith(".css")).map((f) => `${p}/${f}`) : [];
 });
-let css = cssFiles.map((f) => readFileSync(f, "utf8")).join("\n").replace(/@font-face\{[^}]*\}/g, "");
+let css = cssFiles.map((f) => readFileSync(f, "utf8")).join("\n");
+// Polices auto-hébergées (Pixel Operator, VT323) intégrées en data: URI.
+css = css.replace(/url\((?:\.\.\/media|\/_next\/static\/media)\/([^)]+?\.woff2)\)/g, (_, f) => `url(data:font/woff2;base64,${readFileSync(`out/_next/static/media/${f}`).toString("base64")})`);
 let js = readFileSync("apercu/app.js", "utf8");
 for (const n of [64, 128, 256]) {
   const uri = `data:image/png;base64,${readFileSync(`public/brand/embleme-${n}.png`).toString("base64")}`;
@@ -24,9 +26,8 @@ js = js.replace(/<\/script/gi, "<\\/script");
 writeFileSync(
   "apercu/porkos-98.html",
   `<title>PorkOS 98</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
 <style>
-:root{--font-terminal:"VT323";color-scheme:dark}
+:root{color-scheme:dark}
 html,body{background:#14110e}
 ${css}
 </style>

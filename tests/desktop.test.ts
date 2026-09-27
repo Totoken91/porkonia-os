@@ -40,3 +40,15 @@ describe("grille du bureau", () => {
     expect(neighbor(l, "a", "haut")).toBe("a");
   });
 });
+
+describe("échelle du moniteur", async () => {
+  const { echelle } = await import("@/os/echelle");
+  it("arrondit à un nombre entier de pixels physiques quand la perte est faible", () => {
+    expect(echelle(1.04, 1, false)).toBe(1);
+    expect(echelle(2.1, 1, false)).toBe(2);
+    expect(echelle(1.4, 1, false)).toBe(1.4);
+    expect(echelle(1.4, 1, true)).toBe(1);
+    expect(echelle(1.1, 2, false)).toBe(1); // 2,2 px physiques → 2
+    expect(echelle(0.6, 1, true)).toBe(0.6);
+  });
+});

@@ -5,6 +5,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { ScaleContext } from "@/os/context";
+import { echelle } from "@/os/echelle";
 import { jouer } from "@/os/sons";
 import { cursorCss } from "./pixel";
 
@@ -19,17 +20,19 @@ interface Props {
   power: boolean;
   onPower(): void;
   sons: boolean;
+  /** Pixels nets : échelle entière imposée, quitte à afficher un écran plus petit. */
+  nette: boolean;
   str(key: string): string;
 }
 
-export function Monitor({ children, crt, power, onPower, sons, str }: Props) {
-  const [box, setBox] = useState<{ vw: number; vh: number } | null>(null);
+export function Monitor({ children, crt, power, onPower, sons, nette, str }: Props) {
+  const [box, setBox] = useState<{ vw: number; vh: number; dpr: number } | null>(null);
   const [ignore, setIgnore] = useState(false);
   const [tube, setTube] = useState<Tube>("allumage");
   const [degauss, setDegauss] = useState(false);
 
   useEffect(() => {
-    const on = () => setBox({ vw: window.innerWidth, vh: window.innerHeight });
+    const on = () => setBox({ vw: window.innerWidth, vh: window.innerHeight, dpr: window.devicePixelRatio || 1 });
     on();
     window.addEventListener("resize", on);
     return () => window.removeEventListener("resize", on);
@@ -51,7 +54,8 @@ export function Monitor({ children, crt, power, onPower, sons, str }: Props) {
   const bezel = !!box && box.vw >= 720 && box.vh >= 520;
   const W = SCREEN.w + (bezel ? COQUE.x * 2 : 0);
   const H = SCREEN.h + (bezel ? COQUE.top + COQUE.bottom : 0);
-  const scale = box ? Math.min((box.vw * (bezel ? 0.98 : 1)) / W, (box.vh * (bezel ? 0.98 : 1)) / H) : 1;
+  const fit = box ? Math.min((box.vw * (bezel ? 0.98 : 1)) / W, (box.vh * (bezel ? 0.98 : 1)) / H) : 1;
+  const scale = box ? echelle(fit, box.dpr, nette) : 1;
   const zoom = Math.max(1, Math.round(scale));
   const curseurs = useMemo(
     () =>

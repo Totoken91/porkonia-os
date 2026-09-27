@@ -72,6 +72,10 @@ export function Config() {
                 <input type="checkbox" checked={settings.contenuFenetres} onChange={(e) => setSettings({ contenuFenetres: e.target.checked })} />
                 {str("config.contenu")}
               </label>
+              <label className="case-a-cocher">
+                <input type="checkbox" checked={settings.pixelsNets} onChange={(e) => setSettings({ pixelsNets: e.target.checked })} />
+                {str("config.nette")}
+              </label>
             </fieldset>
             <fieldset className="pk-fieldset">
               <legend>{str("config.fond")}</legend>

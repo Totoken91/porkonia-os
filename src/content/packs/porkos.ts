@@ -24,7 +24,7 @@ export const porkosPack: ContentPack = {
   ],
 
   apps: [
-    { id: "bienvenue", kind: "bienvenue", title: "Bienvenue dans PorkOS", icon: "embleme", size: { w: 500, h: 340 }, single: true, menu: "accessoires", blurb: "Revoir l'écran de bienvenue" },
+    { id: "bienvenue", kind: "bienvenue", title: "Bienvenue dans PorkOS", icon: "embleme", size: { w: 560, h: 350 }, single: true, menu: "accessoires", blurb: "Revoir l'écran de bienvenue" },
     { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 620, h: 450 }, menu: "programmes", blurb: "Le monde, tel qu'homologué" },
     { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 540, h: 430 }, single: true, menu: "programmes", blurb: "Canal 1, le seul" },
     { id: "nappe-vide", kind: "nappe-vide", title: "Nappe Vide", icon: "nappe", size: { w: 260, h: 330 }, single: true, menu: "programmes", blurb: "Jeu de protocole pour toute la famille" },
@@ -506,6 +506,7 @@ export const porkosPack: ContentPack = {
     "config.economiseur.jamais": "Aucun (déconseillé par le Ministère)",
     "config.economiseur.apercu": "Aperçu",
     "config.contenu": "Afficher le contenu des fenêtres pendant leur déplacement",
+    "config.nette": "Pixels nets (échelle entière, l'écran peut rétrécir)",
     "config.sons": "Sons système",
     "config.sons.tester": "Tester",
     "barre.sons": "Sons système : cliquez pour couper (le Ministère entendra quand même)",

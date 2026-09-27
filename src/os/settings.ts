@@ -15,11 +15,13 @@ export interface Settings {
   economiseur: number;
   /** Déplacer les fenêtres « en plein » (true) ou par leur seul contour (false). */
   contenuFenetres: boolean;
+  /** Échelle entière imposée (pixels parfaitement nets, écran parfois plus petit). */
+  pixelsNets: boolean;
 }
 
 export const DELAIS_ECONOMISEUR = [0, 60, 120, 300];
 
-export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true };
+export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true, pixelsNets: false };
 
 const KEY = "porkos.reglages";
 
@@ -55,5 +57,6 @@ export function sanitizeSettings(v: unknown): Settings {
     sons: typeof o.sons === "boolean" ? o.sons : d.sons,
     economiseur: DELAIS_ECONOMISEUR.includes(o.economiseur as number) ? (o.economiseur as number) : d.economiseur,
     contenuFenetres: typeof o.contenuFenetres === "boolean" ? o.contenuFenetres : d.contenuFenetres,
+    pixelsNets: typeof o.pixelsNets === "boolean" ? o.pixelsNets : d.pixelsNets,
   };
 }
