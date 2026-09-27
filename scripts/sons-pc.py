@@ -1,5 +1,7 @@
 import numpy as np, wave
 from scipy import signal
+import numpy as np, wave
+from scipy import signal
 SR = 44100
 rng = np.random.default_rng(12)
 
@@ -28,17 +30,18 @@ def piece(x, wet=0.16):
     w = signal.fftconvolve(x, ir)[:len(x)]
     return x + wet * w * (np.sqrt((x ** 2).mean()) / max(1e-9, np.sqrt((w ** 2).mean())))
 
-def clic(amp=1.0, f1=2600, f2=4800, grave=180, d=0.06):
-    """Impact mécanique court : impulsion + résonances + petit choc grave."""
+def clic(amp=1.0, f1=2600, f2=4800, grave=180, d=0.03):
+    """Impact mécanique court et sec, sans hauteur : bruit large bande très bref + corps de bruit grave.
+    (Pas de résonance étroite ni de sinus : ils donnent un « ploc » de bulle qui éclate.)"""
     n = int(d * SR)
-    imp = bruit(n) * env_exp(n, 0.0008)
-    x = reso(imp, f1, 12) * 0.7 + reso(imp, f2, 18) * 0.5 + hp(imp, 6000) * 0.15
-    x += np.sin(2 * np.pi * grave * t_(d)) * env_exp(n, 0.008) * 0.6
+    imp = bruit(n) * env_exp(n, 0.0005)
+    x = bp(imp, f1 * 0.5, min(f2 * 1.4, 16000)) * 0.8 + hp(imp, 7000) * 0.25
+    x += lp(bruit(n), grave * 2.5) * env_exp(n, 0.0025) * 0.35
     return x * amp
 
 def recherche_tete(amp=1.0):
     """Déplacement de la tête du disque dur : « tac » sec de la bobine + frottement bref."""
-    x = clic(amp, rng.uniform(2800, 4200), rng.uniform(5000, 7000), rng.uniform(350, 700), 0.04)
+    x = clic(amp, rng.uniform(2800, 4200), rng.uniform(5000, 7000), rng.uniform(350, 700), 0.025)
     n = int(0.012 * SR)
     x[:n] += bp(bruit(n), 1500, 6000) * np.hanning(n) * 0.25 * amp
     return x
