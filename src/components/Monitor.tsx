@@ -13,7 +13,7 @@ import { InfoBulles } from "./InfoBulles";
 export const SCREEN = { w: 800, h: 600 };
 const COQUE = { x: 58, top: 52, bottom: 82 };
 /** Démarrage et ambiance sont calés au même niveau : la boucle prolonge le régime établi du démarrage. */
-const VOLUME_MACHINE = 0.6;
+const VOLUME_MACHINE = 0.3;
 
 type Tube = "allumage" | "allume" | "extinction" | "eteint";
 
@@ -53,7 +53,7 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
       setJamaisAllume(false);
       setTube("allumage");
       if (sons) {
-        jouer("allumage", 0.4);
+        jouer("allumage", 0.2);
         jouer("demarrage-pc", VOLUME_MACHINE);
       }
       allumeA.current = performance.now();

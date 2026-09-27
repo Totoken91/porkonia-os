@@ -46,15 +46,15 @@ export function Boot({ pack, brutal, sons, onDone }: { pack: ContentPack; brutal
   // Bip du POST et lecteur de disquette au début du BIOS, disque dur qui gratte pendant le chargement, pilotes qui défilent.
   useEffect(() => {
     if (stage === "bios" && sons) {
-      jouer("bip", 0.5);
-      const t = setTimeout(() => jouer("disquette", 0.6), 700);
+      jouer("bip", 0.25);
+      const t = setTimeout(() => jouer("disquette", 0.3), 700);
       return () => clearTimeout(t);
     }
     if (stage !== "chargement") return;
     const total = pack.boot.drivers.length;
     const id = setInterval(() => {
       setPilote((n) => Math.min(total, n + 1));
-      if (sons && Math.random() < 0.7) jouer("disque", 0.6);
+      if (sons && Math.random() < 0.7) jouer("disque", 0.3);
     }, Math.max(120, Math.floor(2800 / Math.max(1, total))));
     return () => clearInterval(id);
   }, [stage, sons, pack.boot.drivers.length]);
