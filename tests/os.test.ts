@@ -97,3 +97,18 @@ describe("Nappe Vide (démineur)", () => {
     expect(around.every((n) => next.cells[n]!.open || next.cells[n]!.assiette)).toBe(true);
   });
 });
+
+describe("icônes pixel", async () => {
+  const { iconGrid, gridPaths } = await import("@/components/pixel");
+  const noms = ["dossier", "texte", "image", "mail", "carte", "cadenas", "poubelle", "tele", "navigateur", "nappe", "config"] as const;
+  it("dessine chaque icône en 32×32 et 16×16, avec un contour noir", () => {
+    for (const n of noms) {
+      const g = iconGrid(n);
+      expect(g).toHaveLength(1024);
+      expect(g.filter(Boolean).length).toBeGreaterThan(150);
+      expect(g).toContain("k");
+      expect(iconGrid(n, 16)).toHaveLength(256);
+      expect(gridPaths(g).length).toBeGreaterThan(2);
+    }
+  });
+});

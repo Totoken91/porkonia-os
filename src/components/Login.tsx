@@ -61,7 +61,7 @@ export function Login({ pack, fond, onLogin }: { pack: ContentPack; fond: Fond; 
           <div className="connexion-profils">
             {citizens.map((u) => (
               <button type="button" key={u.id} className="user-tile" aria-pressed={u.id === userId} onClick={() => { setUserId(u.id); setMsg(null); }}>
-                <Icon name="carte" size={28} />
+                <Icon name="carte" size={32} />
                 <span>
                   <b>{u.displayName}</b>
                   <br />

@@ -57,7 +57,7 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
   const Flyout = ({ id, apps }: { id: Exclude<Sub, null>; apps: AppManifest[] }) => (
     <li className="menu-parent" onPointerEnter={() => setSub(id)}>
       <button aria-expanded={sub === id} onClick={() => setSub(sub === id ? null : id)} data-testid={`menu-${id}`}>
-        <Icon name="dossier" size={24} />
+        <Icon name="dossier" size={32} />
         <span>{str(`menu.${id}`)}</span>
         <i className="fleche" />
       </button>
@@ -88,14 +88,14 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
             <Flyout id="accessoires" apps={group("accessoires")} />
             <li onPointerEnter={() => setSub(null)}>
               <button onClick={go(() => openApp("fichiers", { path: "Documents officiels" }))}>
-                <Icon name="texte" size={24} />
+                <Icon name="texte" size={32} />
                 <span>{str("menu.documents")}</span>
               </button>
             </li>
             {config && (
               <li onPointerEnter={() => setSub(null)}>
                 <button onClick={go(() => openApp(config.id))}>
-                  <Icon name={config.icon} size={24} />
+                  <Icon name={config.icon} size={32} />
                   <span>{str("menu.systeme")}</span>
                 </button>
               </li>
@@ -103,13 +103,13 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
             <li className="separateur" />
             <li onPointerEnter={() => setSub(null)}>
               <button onClick={go(() => runAction({ type: "lock" }))}>
-                <Icon name="cadenas" size={24} />
+                <Icon name="cadenas" size={32} />
                 <span>{str("menu.verrouiller")}</span>
               </button>
             </li>
             <li onPointerEnter={() => setSub(null)}>
               <button onClick={go(() => runAction({ type: "dialog-ref", id: "arret" }))}>
-                <Icon name="embleme" size={24} />
+                <Icon name="embleme" size={32} />
                 <span>{str("menu.arreter")}</span>
               </button>
             </li>

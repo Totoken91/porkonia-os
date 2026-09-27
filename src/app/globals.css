@@ -145,7 +145,7 @@
   .menu-bandeau span { writing-mode: vertical-rl; transform: rotate(180deg); font: bold 14px var(--font-serif); color: #f3d58f; letter-spacing: 0.04em; white-space: nowrap; }
   .menu-porkos > ul { min-width: 176px; }
   .menu-porkos li { position: relative; }
-  .menu-porkos li > button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 4px; border: none; background: none; cursor: default; text-align: left; min-height: 30px; }
+  .menu-porkos li > button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 3px 8px 3px 4px; border: none; background: none; cursor: default; text-align: left; min-height: 36px; }
   .menu-porkos li > button:hover, .menu-porkos li > button[aria-expanded="true"] { background: var(--color-rouge-sombre); color: #fff; }
   .menu-porkos .fleche { margin-left: auto; border: 4px solid transparent; border-left-color: currentColor; border-right: none; }
   .menu-porkos .separateur { height: 2px; margin: 3px 2px; box-shadow: inset 0 1px 0 var(--lo), inset 0 -1px 0 var(--hi); }

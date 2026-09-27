@@ -43,7 +43,7 @@ export function Fichiers() {
         {folder && folder.children.length === 0 && <p className="note">{str("fichiers.vide")}</p>}
         {folder?.children.map((n) => (
           <button key={n.name} className="fichier" aria-selected={sel === n.name} onClick={(e) => { setSel(n.name); if ((e.nativeEvent as PointerEvent).pointerType === "touch") open(n); }} onDoubleClick={() => open(n)} onKeyDown={(e) => e.key === "Enter" && open(n)} data-testid={`fichier-${n.name}`}>
-            <Icon name={iconOf(n)} size={36} />
+            <Icon name={iconOf(n)} size={32} />
             <span>{n.name}</span>
           </button>
         ))}
