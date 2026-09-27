@@ -6,7 +6,7 @@
  * affichage du magnétoscope (net, par-dessus). Aucune lecture de pixels : les images d'origine restent des liens.
  */
 import { useEffect, useRef } from "react";
-import { VHS, lineOffset, timecode, wrapText } from "./vhs";
+import { VHS, lineOffset, wrapText } from "./vhs";
 
 export interface EcranVhsProps {
   image: string | null;
@@ -15,9 +15,12 @@ export interface EcranVhsProps {
   progression: number;
   cle: string;
   programme: string;
-  temps: number;
   lecture: boolean;
   chaine: string;
+  /** Numéro de la chaîne, affiché par le téléviseur quand on zappe. */
+  numero: number;
+  /** Point de l'image à garder dans le cadre 4:3 (0–1). */
+  cadrage?: [number, number];
   bandeau: { etiquette: string; texte: string } | null;
   mention?: string;
   soustitre: string | null;
@@ -95,6 +98,7 @@ export function EcranVhs(props: EcranVhsProps) {
     let n = 0;
     let cle = "";
     let programme = "";
+    let numero = -1;
     let glitchJusqua = 0;
     let osdJusqua = 0;
     let tracking: { debut: number; duree: number; force: number } | null = null;
@@ -122,7 +126,10 @@ export function EcranVhs(props: EcranVhsProps) {
       b.font = `bold 17px ${affichage}`;
       b.fillStyle = "rgba(255,255,255,0.82)";
       b.textAlign = "right";
-      b.fillText(p.chaine.toUpperCase(), W - 14, 12);
+      const logo = p.chaine.toUpperCase();
+      const lw = b.measureText(logo).width;
+      if (lw > 120) b.font = `bold ${Math.max(10, Math.floor((17 * 120) / lw))}px ${affichage}`;
+      b.fillText(logo, W - 14, 12);
       b.fillStyle = "#c01018";
       b.fillRect(W - 58, 31, 44, 11);
       b.font = `bold 9px ${affichage}`;
@@ -180,6 +187,16 @@ export function EcranVhs(props: EcranVhsProps) {
       if (p.cle !== cle) {
         if (cle) glitchJusqua = ts + 260;
         cle = p.cle;
+      }
+      if (p.numero !== numero) {
+        // Changement de chaîne : neige franche, puis l'image s'accroche.
+        if (numero !== -1) {
+          glitchJusqua = ts + 480;
+          tracking = { debut: ts + 480, duree: 1100, force: 1 };
+        }
+        osdJusqua = ts + 3200;
+        numero = p.numero;
+        programme = p.programme;
       }
       if (p.programme !== programme) {
         if (programme) {
@@ -241,8 +258,10 @@ export function EcranVhs(props: EcranVhsProps) {
           }
           cw /= zoom;
           ch /= zoom;
-          const sx = (sw - cw) * (0.5 + 0.12 * (reduit ? 0 : p.progression - 0.5));
-          const sy = (sh - ch) * 0.35;
+          const [fx, fy] = p.cadrage ?? [0.5, 0.35];
+          const borne = (x: number) => Math.max(0, Math.min(1, x));
+          const sx = (sw - cw) * borne(fx + 0.12 * (reduit ? 0 : p.progression - 0.5));
+          const sy = (sh - ch) * borne(fy);
           b.filter = "saturate(1.3) contrast(1.06) sepia(0.14)";
           b.drawImage(src, sx, sy, cw, ch, 0, 0, W, H);
           b.filter = "none";
@@ -362,8 +381,17 @@ export function EcranVhs(props: EcranVhsProps) {
       };
       if (pause) {
         if (Math.floor(t * 2) % 2 === 0) osd("PAUSE ▮▮", 16, 14);
-      } else if (ts < osdJusqua) osd("LECTURE ▶", 16, 14);
-      osd(`SP  ${timecode(p.temps)}`, W - 16, H - 36, "right");
+      } else if (ts < osdJusqua) {
+        // Numéro de chaîne du téléviseur, vert, comme sur les vieux postes.
+        o.font = `28px ${police}`;
+        o.textAlign = "left";
+        o.fillStyle = "rgba(0,0,0,0.6)";
+        o.fillText(String(p.numero).padStart(2, "0"), 17, 13);
+        o.fillStyle = "#5dff72";
+        o.fillText(String(p.numero).padStart(2, "0"), 16, 12);
+        o.font = `20px ${police}`;
+        osd(p.chaine.toUpperCase(), 56, 18);
+      }
       o.textAlign = "left";
     };
     raf = requestAnimationFrame(dessiner);

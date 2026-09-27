@@ -120,11 +120,18 @@ try {
     // Channel Pork
     await page.getByTestId("icon-d-tv").dblclick();
     await page.getByTestId("tv-screen").waitFor();
-    await page.waitForTimeout(1500);
-    const lectures = await page.evaluate(() => window.__lectures.join(" "));
-    if (!/quiet-morning-vhs\.mp3/.test(lectures) || !/journal-1\.mp3/.test(lectures)) throw new Error(`Channel Pork muet : ${lectures}`);
+    // Direct : on tombe en cours d'émission ; musique tout de suite, une voix off dans les secondes qui suivent.
+    await page.waitForFunction(() => /(quiet-morning-vhs|brume-nappe)\.mp3/.test(window.__lectures.join(" ")) && /channel-pork\/[a-z-]+-\d\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 12000 }).catch(async () => {
+      throw new Error(`Channel Pork muet : ${await page.evaluate(() => window.__lectures.join(" "))}`);
+    });
+    await page.waitForTimeout(600);
     await shot(page, `${tag}-06-channel-pork`);
-    step(`${tag} : Channel Pork (musique et voix off)`);
+    await page.getByTestId("tv-zapper").click();
+    await page.locator(".tv-numero", { hasText: "02" }).waitFor();
+    // Attente image par image : le navigateur sans écran ne produit sinon pas toujours de nouvelles images.
+    await page.waitForFunction((t0) => performance.now() - t0 > 1500, await page.evaluate(() => performance.now()), { polling: "raf" });
+    await shot(page, `${tag}-06b-channel-pork-zap`);
+    step(`${tag} : Channel Pork (direct, musique, voix off, zapping)`);
     await closeTop();
 
     // Nappe Vide : premier service toujours sûr
@@ -211,8 +218,11 @@ try {
     await page.getByTestId("executer-champ").press("Enter");
     await page.getByTestId("fatal").waitFor();
     if (tag === "bureau") await shot(page, `${tag}-17-fatal`);
-    await page.waitForTimeout(600);
-    await page.keyboard.press("Space");
+    // L'écran ignore les touches pendant sa première demi-seconde : on insiste tant qu'il est là.
+    for (let k = 0; k < 10 && (await page.getByTestId("fatal").count()); k++) {
+      await page.waitForTimeout(600);
+      await page.keyboard.press("Space");
+    }
     await page.getByTestId("fatal").waitFor({ state: "detached" });
     step(`${tag} : exception fatale`);
 

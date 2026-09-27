@@ -4,7 +4,7 @@ import { porkosPack } from "@/content/packs/porkos";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { APPS } from "@/apps/registry";
 import { parseUrl, search } from "@/apps/navigateur/url";
-import { at, programLength, voiceAt } from "@/apps/channel-pork/timeline";
+import { at, gridOf, live, loopLength, programLength, voiceAt } from "@/apps/channel-pork/timeline";
 import { existsSync } from "node:fs";
 import { checkPassword } from "@/components/Login";
 import { makeRng } from "@/os/rng";
@@ -48,7 +48,7 @@ function problems(pack: ContentPack): string[] {
 describe("pack PorkOS", () => {
   it("est cohérent", () => expect(problems(porkosPack)).toEqual([]));
   it("déclenche des signaux que le système émet vraiment", () => {
-    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:zapper", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser", "courrier:relever"];
+    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser", "courrier:relever"];
     for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect(emitted).toContain(r.trigger.name);
   });
   it("ne référence que des images d'origine (aucune copie locale hors emblème)", () => {
@@ -96,6 +96,31 @@ describe("Channel Pork", () => {
     expect(voiceAt(p, s1.at + 1.5)).toEqual({ index: 1, src: s1.voice, offset: 1.5 });
     const muet = { ...p, subtitles: [{ at: 0, text: "a", voice: "/a.mp3" }, { at: 2, text: "(silence)" }] };
     expect(voiceAt(muet, 3)).toBeNull();
+  });
+
+  it("diffuse en continu : chaque chaîne tourne sur l'horloge et enchaîne ses programmes", () => {
+    for (const c of porkosPack.channels) {
+      expect(gridOf(c, porkosPack.programs).length, c.id).toBe(c.grid.length);
+      const total = loopLength(c, porkosPack.programs);
+      const debut = live(c, porkosPack.programs, 0);
+      expect(debut).toMatchObject({ slot: 0, t: 0 });
+      // un tour plus tard, on retombe au même endroit ; juste avant la fin d'un programme, le suivant arrive
+      expect(live(c, porkosPack.programs, total + 12.5)).toEqual(live(c, porkosPack.programs, 12.5));
+      const len = programLength(debut.program);
+      expect(live(c, porkosPack.programs, len - 0.1).slot).toBe(0);
+      expect(live(c, porkosPack.programs, len + 0.1)).toMatchObject({ slot: 1 % c.grid.length, program: debut.suivant });
+    }
+    const c = porkosPack.channels[0]!;
+    expect(live(c, porkosPack.programs, 1000, 97)).toEqual(live(c, porkosPack.programs, 1097));
+  });
+
+  it("donne une voix et une image à chaque réplique de chaque émission", () => {
+    for (const p of porkosPack.programs) {
+      expect(p.subtitles.every((s) => s.voice), p.id).toBe(true);
+      expect(p.slides.every((s) => !s.focus || s.focus.every((v) => v >= 0 && v <= 1)), p.id).toBe(true);
+      const at0 = p.subtitles.map((s) => s.at);
+      expect([...at0].sort((a, b) => a - b), p.id).toEqual(at0);
+    }
   });
 
   it("fournit les fichiers audio et garde les répliques dans le programme", () => {

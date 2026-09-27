@@ -1,9 +1,9 @@
 /**
  * Sons système synthétisés (aucun fichier audio) : carillon de démarrage, alertes, arrêt,
- * claquement du tube et démagnétisation. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
+ * claquement du tube, démagnétisation et neige du téléviseur entre deux chaînes. Le navigateur n'autorise le son qu'après un geste de l'utilisateur ;
  * avant cela, les appels sont silencieusement ignorés.
  */
-export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque";
+export type Son = "demarrage" | "ding" | "erreur" | "arret" | "allumage" | "demagnetiser" | "hymne" | "bip" | "disque" | "neige";
 
 let ctx: AudioContext | null = null;
 
@@ -112,6 +112,9 @@ export function jouer(son: Son, volume = 0.7) {
       // Tête de lecture qui cherche : quelques clics secs filtrés.
       for (let i = 0; i < 3; i++) setTimeout(() => bruit(0.018, volume * 0.9, 2600), i * (40 + Math.random() * 60));
       return;
+    case "neige":
+      // Souffle blanc entre deux chaînes, à peine filtré.
+      return bruit(0.32, volume * 0.7, 5200);
     case "demagnetiser":
       bruit(0.5, volume * 0.6, 300);
       return jouerNotes([{ f: 50, t: 0, d: 0.9, g: 0.25, type: "sawtooth", glisse: 40 }], volume);

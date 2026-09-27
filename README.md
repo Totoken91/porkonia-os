@@ -33,7 +33,7 @@ npm run build && npm run test:e2e   # parcours complet (bureau + mobile), captur
 | --- | --- |
 | Bienvenue dans PorkOS | Écran d'accueil à la connexion : raccourcis et « Le saviez-vous ? ». |
 | PigNet Navigateur | Adresses `porko://…`, Porkopédia hors ligne (12 notices intégrées, index de 470 titres), recherche, internet étranger refusé, erreur 412. |
-| Channel Pork | Canal 1 : diaporamas d'archives, bandeaux, sous-titres, guide des programmes (vidéo réelle possible via `videoSrc`). |
+| Channel Pork | Trois chaînes en direct (toutes « Canal 1 ») calées sur l'horloge : on arrive en cours d'émission, on regarde ou on zappe. Rendu VHS 4:3, voix off et musique (`public/audio/channel-pork/`), bandeaux, sous-titres, guide des programmes (vidéo réelle possible via `videoSrc`). |
 | Nappe Vide | Démineur du protocole des banquets : zones de nappe vide, assiettes, Petit banquet → Niveau VII. |
 | Panneau de configuration | Réglages qui agissent vraiment (signal CRT, fond d'écran, rappels, hymne) et d'autres qui refusent poliment. |
 | Mes documents | Système de fichiers du pack, Bloc-notes d'État, Visionneuse. |

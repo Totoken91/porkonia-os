@@ -141,15 +141,25 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
-  channel: string;
-  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire";
+  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport";
+  /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
+  etiquette?: string;
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */
   videoSrc?: string;
-  slides: { image: string; seconds: number; caption?: string; chyron?: string }[];
+  /** `focus` : point à garder dans le cadre 4:3 (0–1 en largeur et en hauteur ; défaut 0,5 et 0,35). */
+  slides: { image: string; seconds: number; caption?: string; chyron?: string; focus?: [number, number] }[];
   /** Sous-titres, synchronisés sur le temps total du programme ; `voice` : voix off enregistrée de la réplique. */
   subtitles: { at: number; text: string; voice?: string }[];
   /** Musique de fond (bouclée, baissée sous la voix). */
   music?: string;
+}
+
+/** Chaîne en direct : sa grille tourne en boucle sur l'horloge réelle (on arrive en cours d'émission). */
+export interface Channel {
+  id: string;
+  name: string;
+  /** Identifiants des programmes, dans l'ordre de diffusion (un programme peut revenir, les pubs surtout). */
+  grid: string[];
 }
 
 /* ---------------------------- Actions & règles ---------------------------- */
@@ -229,6 +239,7 @@ export interface ContentPack {
   ads: Ad[];
   updates: ForcedUpdate[];
   programs: Program[];
+  channels: Channel[];
   rules: EventRule[];
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;

@@ -35,8 +35,8 @@ Cocher au fur et à mesure.
 ## Contenu et lore
 
 - [ ] Exploiter les archives de l'atelier (dépôt privé porkonia-archives) : « Fichier national des citoyens » avec les 17 fiches validées, vrais portraits de la Bible dans la visionneuse.
-- [ ] Programmes Channel Pork tirés de vrais articles Porkopédia ; vraies vidéos via le skill Channel Pork (champ `videoSrc`).
-- [ ] Voix off (Speko, ElevenLabs) sur les autres programmes : essai fait sur le Journal du Groin (`subtitles[].voice`, musique « Quiet Morning » dégradée VHS dans `public/audio/channel-pork/`).
+- [x] Programmes Channel Pork tirés de vrais articles Porkopédia (Groinball, bestiaire, DJ Viteau, B.R.U.M.E., Pork ID), avec voix off (Speko : ElevenLabs et gpt-4o-mini-tts) et musique dégradée VHS ; trois chaînes en direct sur l'horloge.
+- [ ] Vraies vidéos via le skill Channel Pork (champ `videoSrc`) ; plus d'émissions et de pubs pour allonger les grilles.
 - [ ] Plus de variété dans les notifications et pubs, liées à l'heure réelle (« Il est 12 h 12. Pensez-y. »).
 - [ ] Aide de PorkOS : fichier d'aide à l'ancienne (sommaire, index), terrain idéal pour l'humour.
 
