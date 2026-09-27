@@ -4,7 +4,8 @@ import { porkosPack } from "@/content/packs/porkos";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { APPS } from "@/apps/registry";
 import { parseUrl, search } from "@/apps/navigateur/url";
-import { at, programLength } from "@/apps/channel-pork/timeline";
+import { at, programLength, voiceAt } from "@/apps/channel-pork/timeline";
+import { existsSync } from "node:fs";
 import { checkPassword } from "@/components/Login";
 import { makeRng } from "@/os/rng";
 import { resolve, childPath, parentPath } from "@/os/fs";
@@ -83,9 +84,25 @@ describe("PigNet", () => {
 describe("Channel Pork", () => {
   it("suit diapositives et sous-titres", () => {
     const p = porkosPack.programs[0]!;
-    expect(at(p, 0)).toEqual({ slide: 0, subtitle: p.subtitles[0]!.text });
+    expect(at(p, p.subtitles[0]!.at)).toEqual({ slide: 0, subtitle: p.subtitles[0]!.text });
     expect(at(p, p.slides[0]!.seconds).slide).toBe(1);
     expect(at(p, programLength(p) + 5).slide).toBe(p.slides.length - 1);
+  });
+
+  it("cale la voix off sur les répliques enregistrées", () => {
+    const p = porkosPack.programs[0]!;
+    const s1 = p.subtitles[1]!;
+    expect(voiceAt(p, 0)).toBeNull();
+    expect(voiceAt(p, s1.at + 1.5)).toEqual({ index: 1, src: s1.voice, offset: 1.5 });
+    const muet = { ...p, subtitles: [{ at: 0, text: "a", voice: "/a.mp3" }, { at: 2, text: "(silence)" }] };
+    expect(voiceAt(muet, 3)).toBeNull();
+  });
+
+  it("fournit les fichiers audio et garde les répliques dans le programme", () => {
+    for (const p of porkosPack.programs) {
+      for (const f of [p.music, ...p.subtitles.map((s) => s.voice)].filter(Boolean)) expect(existsSync(`public${f}`), f).toBe(true);
+      for (const s of p.subtitles) expect(s.at).toBeLessThan(programLength(p));
+    }
   });
 });
 

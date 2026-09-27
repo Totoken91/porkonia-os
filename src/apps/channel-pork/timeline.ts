@@ -17,3 +17,13 @@ export function at(p: Program, t: number): { slide: number; subtitle: string | n
   for (const s of p.subtitles) if (s.at <= t) subtitle = s.text;
   return { slide, subtitle };
 }
+
+/** Réplique enregistrée en cours au temps t : son fichier et la position de lecture (s). Pur. */
+export function voiceAt(p: Program, t: number): { index: number; src: string; offset: number } | null {
+  let found: { index: number; src: string; offset: number } | null = null;
+  p.subtitles.forEach((s, index) => {
+    if (s.at <= t && s.voice) found = { index, src: s.voice, offset: t - s.at };
+    else if (s.at <= t) found = null;
+  });
+  return found;
+}

@@ -146,8 +146,10 @@ export interface Program {
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */
   videoSrc?: string;
   slides: { image: string; seconds: number; caption?: string; chyron?: string }[];
-  /** Sous-titres, synchronisés sur le temps total du programme. */
-  subtitles: { at: number; text: string }[];
+  /** Sous-titres, synchronisés sur le temps total du programme ; `voice` : voix off enregistrée de la réplique. */
+  subtitles: { at: number; text: string; voice?: string }[];
+  /** Musique de fond (bouclée, baissée sous la voix). */
+  music?: string;
 }
 
 /* ---------------------------- Actions & règles ---------------------------- */

@@ -10,7 +10,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
 
 const server = createServer(async (req, res) => {
   let p = join(ROOT, decodeURIComponent(new URL(req.url, "http://x").pathname));
@@ -49,6 +49,15 @@ try {
         const body = await relay(route.request().url());
         return body ? route.fulfill({ body, contentType: /\.png$/i.test(route.request().url()) ? "image/png" : "image/jpeg" }) : route.abort();
       });
+    // Journal des lectures audio (la voix off et la musique de Channel Pork doivent vraiment partir).
+    await ctx.addInitScript(() => {
+      window.__lectures = [];
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        window.__lectures.push(this.src);
+        return play.call(this).catch(() => undefined);
+      };
+    });
     const page = await ctx.newPage();
     page.on("pageerror", (e) => errors.push(`${tag}: ${e.message}`));
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && errors.push(`${tag}: ${m.text()}`));
@@ -112,8 +121,10 @@ try {
     await page.getByTestId("icon-d-tv").dblclick();
     await page.getByTestId("tv-screen").waitFor();
     await page.waitForTimeout(1500);
+    const lectures = await page.evaluate(() => window.__lectures.join(" "));
+    if (!/quiet-morning-vhs\.mp3/.test(lectures) || !/journal-1\.mp3/.test(lectures)) throw new Error(`Channel Pork muet : ${lectures}`);
     await shot(page, `${tag}-06-channel-pork`);
-    step(`${tag} : Channel Pork`);
+    step(`${tag} : Channel Pork (musique et voix off)`);
     await closeTop();
 
     // Nappe Vide : premier service toujours sûr

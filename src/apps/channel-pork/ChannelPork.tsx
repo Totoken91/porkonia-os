@@ -3,16 +3,18 @@
 import { useEffect, useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
-import { at, programLength } from "./timeline";
+import { useSonTv } from "./sonTv";
+import { at, programLength, voiceAt } from "./timeline";
 
 export function ChannelPork() {
-  const { pack, str, signal } = useOs();
+  const { pack, str, signal, settings } = useOs();
   const programs = pack.programs;
   const [idx, setIdx] = useState(0);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [soustitres, setSoustitres] = useState(true);
   const [bandeau, setBandeau] = useState(true);
+  const [son, setSon] = useState(true);
   const p = programs[idx]!;
   const len = programLength(p);
 
@@ -29,6 +31,13 @@ export function ChannelPork() {
   }, [t, len, programs.length]);
 
   const { slide, subtitle } = at(p, t);
+  const voix = voiceAt(p, t);
+  useSonTv({
+    actif: son && settings.sons,
+    lecture: playing,
+    musique: p.music,
+    voix: voix ? { cle: `${idx}-${voix.index}`, src: voix.src, offset: voix.offset } : null,
+  });
   const s = p.slides[slide]!;
   const debut = p.slides.slice(0, slide).reduce((acc, x) => acc + x.seconds, 0);
   const zap = (d: number) => {
@@ -43,8 +52,9 @@ export function ChannelPork() {
       "tv.zapper": () => signal("tv:zapper"),
       "tv.soustitres": () => setSoustitres((x) => !x),
       "tv.bandeau": () => setBandeau((x) => !x),
+      "tv.son": () => setSon((x) => !x),
     },
-    { "tv.soustitres": { checked: soustitres }, "tv.bandeau": { checked: bandeau } },
+    { "tv.soustitres": { checked: soustitres }, "tv.bandeau": { checked: bandeau }, "tv.son": { checked: son && settings.sons, disabled: !settings.sons } },
   );
 
   return (
@@ -67,6 +77,9 @@ export function ChannelPork() {
         <button className="pk-btn small" onClick={() => setPlaying((x) => !x)}>{playing ? "Pause" : "Lecture"}</button>
         <button className="pk-btn small" onClick={() => zap(1)}>Programme suivant ▸</button>
         <button className="pk-btn small" onClick={() => signal("tv:zapper")} data-testid="tv-zapper">Zapper</button>
+        <button className="pk-btn small" aria-pressed={son && settings.sons} disabled={!settings.sons} onClick={() => setSon((x) => !x)} data-testid="tv-son">
+          {son && settings.sons ? "Son" : "Muet"}
+        </button>
         <div className="tv-progression pk-sunken" aria-hidden="true">
           <i style={{ width: `${Math.min(100, (t / len) * 100)}%` }} />
         </div>

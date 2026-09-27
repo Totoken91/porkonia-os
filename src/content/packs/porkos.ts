@@ -6,6 +6,9 @@
 import type { ActionRef, ContentPack, MenuEntry, MenuSpec } from "../types";
 
 const P = "https://porkopedia.totoken.chatgpt.site/assets/";
+/** Voix off et musique de Channel Pork (fichiers du dépôt, public/audio). */
+const V = "/audio/channel-pork/";
+const MUSIQUE = `${V}quiet-morning-vhs.mp3`;
 
 /* ------------------------------ Barres de menus ------------------------------ */
 
@@ -133,6 +136,7 @@ const MENUS: Record<string, MenuSpec[]> = {
         { label: "&Sous-titres", command: "tv.soustitres" },
         { label: "&Bandeau d'information", command: "tv.bandeau" },
         SEP,
+        { label: "S&on", command: "tv.son" },
         { label: "&Volume (fixé par décret)", disabled: true },
       ],
     },
@@ -766,21 +770,22 @@ export const porkosPack: ContentPack = {
       title: "Le Journal du Groin",
       channel: "Canal 1",
       kind: "journal",
+      music: MUSIQUE,
       slides: [
-        { image: `${P}douzi-archives/fondation-table.jpg`, seconds: 7, chyron: "DOUZI CITY — Séance du Conseil" },
-        { image: `${P}douzi-archives/onze-centimetres.jpg`, seconds: 7, chyron: "AFFAIRE DE LA NAPPE — La commission rend son rapport" },
-        { image: `${P}douzi-archives/nuit-louche-vide.jpg`, seconds: 7, chyron: "LOGISTIQUE — Itinéraires redessinés avant le repas" },
-        { image: `${P}home-archives/home-network.jpg`, seconds: 6, chyron: "PIGNET — Débit porté à « suffisant »" },
-        { image: `${P}editorial-batch-03/grand-banquet-rue.jpg`, seconds: 7, chyron: "MÉTÉO — Mousse stable sur tout le territoire" },
+        { image: `${P}douzi-archives/fondation-table.jpg`, seconds: 11.3, chyron: "DOUZI CITY — Séance du Conseil" },
+        { image: `${P}douzi-archives/onze-centimetres.jpg`, seconds: 7.2, chyron: "AFFAIRE DE LA NAPPE — La commission rend son rapport" },
+        { image: `${P}douzi-archives/nuit-louche-vide.jpg`, seconds: 7.2, chyron: "LOGISTIQUE — Itinéraires redessinés avant le repas" },
+        { image: `${P}home-archives/home-network.jpg`, seconds: 7.6, chyron: "PIGNET — Débit porté à « suffisant »" },
+        { image: `${P}editorial-batch-03/grand-banquet-rue.jpg`, seconds: 12.1, chyron: "MÉTÉO — Mousse stable sur tout le territoire" },
       ],
       subtitles: [
-        { at: 0, text: "Bonsoir. Voici les nouvelles, dans l'ordre où le Fondateur les a approuvées." },
-        { at: 3.5, text: "À Douzi City, le Conseil a siégé quatre heures pour fixer la durée des séances. Elle sera de quatre heures." },
-        { at: 7.5, text: "Affaire de la nappe : la commission des Onze Centimètres a rendu son rapport. Il fait onze centimètres." },
-        { at: 14.5, text: "Logistique : les itinéraires de livraison ont été redessinés avant le repas, comme le veut la tradition de la Nuit de la Louche Vide." },
-        { at: 21.5, text: "PigNet : le débit national a été porté à « suffisant ». Les citoyens qui le trouvent insuffisant sont priés de revoir leur définition." },
-        { at: 27.5, text: "Météo : ciel couvert, mousse stable. Risque d'averses de confettis sur les banquets du soir." },
-        { at: 31, text: "C'était le Journal du Groin. Restez sur Canal 1 : de toute façon, c'est le seul." },
+        { at: 0.6, voice: `${V}journal-1.mp3`, text: "Bonsoir. Voici les nouvelles, dans l'ordre où le Fondateur les a approuvées." },
+        { at: 5.3, voice: `${V}journal-2.mp3`, text: "À Douzi City, le Conseil a siégé quatre heures pour fixer la durée des séances. Elle sera de quatre heures." },
+        { at: 11.6, voice: `${V}journal-3.mp3`, text: "Affaire de la nappe : la commission des Onze Centimètres a rendu son rapport. Il fait onze centimètres." },
+        { at: 18.8, voice: `${V}journal-4.mp3`, text: "Logistique : les itinéraires de livraison ont été redessinés avant le repas, comme le veut la tradition de la Nuit de la Louche Vide." },
+        { at: 26.0, voice: `${V}journal-5.mp3`, text: "PigNet : le débit national a été porté à « suffisant ». Les citoyens qui le trouvent insuffisant sont priés de revoir leur définition." },
+        { at: 33.6, voice: `${V}journal-6.mp3`, text: "Météo : ciel couvert, mousse stable. Risque d'averses de confettis sur les banquets du soir." },
+        { at: 39.9, voice: `${V}journal-7.mp3`, text: "C'était le Journal du Groin. Restez sur Canal 1 : de toute façon, c'est le seul." },
       ],
     },
     {
@@ -788,6 +793,7 @@ export const porkosPack: ContentPack = {
       title: "Pause publicitaire — Douzi Ambrée",
       channel: "Canal 1",
       kind: "publicite",
+      music: MUSIQUE,
       slides: [
         { image: `${P}article-auto-la-douzi-ambree.jpg`, seconds: 6, chyron: "PUBLICITÉ" },
         { image: `${P}home-archives/home-bottomless-mug.jpg`, seconds: 6, chyron: "PUBLICITÉ" },
@@ -805,6 +811,7 @@ export const porkosPack: ContentPack = {
       title: "Ma Pork ID et moi",
       channel: "Canal 1",
       kind: "education",
+      music: MUSIQUE,
       slides: [
         { image: `${P}pork-id.png`, seconds: 7, chyron: "ÉDUCATION CIVIQUE — Leçon n° 12" },
         { image: `${P}article-pork-id.jpg`, seconds: 7 },
@@ -824,6 +831,7 @@ export const porkosPack: ContentPack = {
       title: "DJ Viteau — Le Grand Zouk de la République",
       channel: "Canal 1",
       kind: "divertissement",
+      music: MUSIQUE,
       slides: [
         { image: `${P}dj-viteau-grand-zouk.jpg`, seconds: 6, chyron: "EN DIRECT DU GRAND ZOUK" },
         { image: `${P}dj-viteau-studio.jpg`, seconds: 6 },
