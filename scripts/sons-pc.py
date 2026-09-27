@@ -1,5 +1,5 @@
-import numpy as np, wave
-from scipy import signal
+# Génère les échantillons de la machine (public/audio/pc/) : python3 scripts/sons-pc.py dans un dossier de travail,
+# puis encodage mp3 64k des sons ponctuels (ambiance.wav reste en WAV pour boucler sans blanc).
 import numpy as np, wave
 from scipy import signal
 SR = 44100
