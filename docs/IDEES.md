@@ -43,7 +43,7 @@ Cocher au fur et à mesure.
 ## Finitions techniques
 
 - [ ] Vercel : régler la branche de production sur `porkos` (Settings → Environments → Production → Branch Tracking) pour que chaque push déploie.
-- [ ] Carte de partage (Open Graph) : image du moniteur allumé, titre et description soignés.
+- [x] Carte de partage (Open Graph) : image du moniteur allumé (`public/og.jpg`, régénérable par `scripts/capture-og.mjs`), titre et description.
 - [ ] Charger les notices Porkopédia (130 Ko) seulement à l'ouverture de PigNet.
 - [ ] Accessibilité et clavier : Tab dans les fenêtres, Alt+F4, Alt+Tab.
 
@@ -79,4 +79,4 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 
 - [ ] 880 Ko de JavaScript au démarrage : charger chaque appli à son ouverture.
 - [ ] 18 Mo d'audio : réencoder les morceaux de 2,3 Mo en 64k mono (ils sont dégradés VHS de toute façon).
-- [ ] Image d'aperçu pour le partage (Open Graph), déjà notée plus haut.
+- [x] Image d'aperçu pour le partage (Open Graph).

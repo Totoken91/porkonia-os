@@ -16,10 +16,24 @@ const pixel = localFont({
 const pixelMono = localFont({ src: "./fonts/PixelOperatorMono.woff2", variable: "--font-pixel-mono", display: "block", adjustFontFallback: false });
 const terminal = VT323({ subsets: ["latin"], weight: "400", variable: "--font-terminal", display: "swap" });
 
+const TITRE = "PorkOS — Édition Citoyenne";
+const DESCRIPTION = "Le système d'exploitation officiel de la République de Porkonia. Le porc, la bière, toujours plus.";
+
 export const metadata: Metadata = {
-  title: "PorkOS — Édition Citoyenne",
-  description: "Le système d'exploitation officiel de la République de Porkonia. Le porc, la bière, toujours plus.",
+  metadataBase: new URL("https://porkos.vercel.app"),
+  title: TITRE,
+  description: DESCRIPTION,
   icons: { icon: "/brand/embleme-64.png" },
+  // Carte de partage : le poste allumé (télétexte et PorkAmp, aucune image de Porkopédia).
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "PorkOS",
+    title: TITRE,
+    description: DESCRIPTION,
+    images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "Le moniteur d'État allumé : PorkTV sur le télétexte et PorkAmp" }],
+  },
+  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION, images: ["/og.jpg"] },
 };
 
 export const viewport: Viewport = { themeColor: "#15110d" };
