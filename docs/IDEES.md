@@ -6,7 +6,7 @@ Cocher au fur et à mesure.
 ## Les plus rentables
 
 - [x] **Vraie police d'époque** : police bitmap pixel (Pixel Operator, CC0) pour toute l'interface, identique sur tous les systèmes (plus de repli vers une police moderne lisse sur Linux/Android), avec option de mise à l'échelle entière pour des pixels nets.
-- [ ] **Barres de menus dans les fenêtres** (Fichier, Édition, Affichage, ?) : menus déroulants par appli, entrées fonctionnelles et entrées absurdes (« Édition › Annuler la dernière pensée »), boîte « À propos de… » par appli.
+- [x] **Barres de menus dans les fenêtres** (Fichier, Édition, Affichage, ?) : menus déroulants par appli, entrées fonctionnelles et entrées absurdes (« Édition › Annuler la dernière pensée »), boîte « À propos de… » par appli.
 - [ ] **Appli Mail** : les mails existent déjà dans le pack ; client d'époque (dossiers, liste, aperçu). Brique centrale du futur spin-off d'enquête.
 - [ ] **Mode mobile soigné** : baisser automatiquement l'effet tube en petite taille (rayures), mode « écran seul » sans moniteur, zoom au double-tap.
 

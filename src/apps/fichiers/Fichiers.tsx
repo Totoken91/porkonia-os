@@ -1,9 +1,9 @@
 "use client";
 /** Mes documents : explorateur du système de fichiers du pack, et ses visionneuses. */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FsNode, IconKey } from "@/content/types";
 import { Icon } from "@/components/Icon";
-import { useOs, useWin } from "@/os/context";
+import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { childPath, parentPath, resolve, splitPath } from "@/os/fs";
 
 const iconOf = (n: FsNode): IconKey => (n.type === "dossier" ? (n.locked ? "cadenas" : "dossier") : n.type === "texte" ? "texte" : n.type === "image" ? "image" : "navigateur");
@@ -31,6 +31,50 @@ export function Fichiers() {
     else openApp(n.app, n.args);
   };
 
+  const [clignote, setClignote] = useState(false);
+  const choisi = folder?.children.find((c) => c.name === sel) ?? null;
+  const TYPES = { dossier: "fichiers.type.dossier", texte: "fichiers.type.texte", image: "fichiers.type.image", lien: "fichiers.type.lien" } as const;
+  useMenuCommands(
+    {
+      "fichiers.ouvrir": () => choisi && open(choisi),
+      "fichiers.parent": () => {
+        setPath(parentPath(path));
+        setSel(null);
+      },
+      "fichiers.actualiser": () => {
+        setClignote(true);
+        setTimeout(() => setClignote(false), 150);
+      },
+      "fichiers.aller": (p) => {
+        if (p === undefined) return;
+        const n = resolve(pack.filesystem, p);
+        if (n?.type === "dossier" && !n.locked) {
+          setPath(p);
+          setSel(null);
+        }
+      },
+      "fichiers.proprietes": () => {
+        const n = choisi ?? node;
+        if (!n) return;
+        runAction({
+          type: "dialog",
+          dialog: {
+            title: str("prop.titre", { nom: n.name }),
+            icon: "info",
+            body: str("fichiers.prop", {
+              nom: n.name,
+              type: str(TYPES[n.type]),
+              lieu: [pack.filesystem.name, ...splitPath(choisi ? path : parentPath(path))].join(" › "),
+              date: ("date" in n && n.date) || "12/12/2012",
+            }),
+            buttons: [{ label: "OK" }],
+          },
+        });
+      },
+    },
+    { "fichiers.ouvrir": { disabled: !choisi }, "fichiers.parent": { disabled: !path } },
+  );
+
   return (
     <div className="app-col">
       <div className="pk-toolbar">
@@ -41,7 +85,7 @@ export function Fichiers() {
       </div>
       <div className="pk-body fichiers-liste" onClick={(e) => e.target === e.currentTarget && setSel(null)}>
         {folder && folder.children.length === 0 && <p className="note">{str("fichiers.vide")}</p>}
-        {folder?.children.map((n) => (
+        {!clignote && folder?.children.map((n) => (
           <button key={n.name} className="fichier" aria-selected={sel === n.name} onClick={(e) => { setSel(n.name); if ((e.nativeEvent as PointerEvent).pointerType === "touch") open(n); }} onDoubleClick={() => open(n)} onKeyDown={(e) => e.key === "Enter" && open(n)} data-testid={`fichier-${n.name}`}>
             <Icon name={iconOf(n)} size={32} />
             <span>{n.name}</span>
@@ -61,14 +105,36 @@ export function Texte() {
   const { win, setTitle } = useWin();
   const node = resolve(pack.filesystem, win.args.path ?? "");
   const [text, setText] = useState(node?.type === "texte" ? node.content : "");
-  useEffect(() => setTitle(`${node?.name ?? "Sans titre"} — Bloc-notes d'État`), [node?.name, setTitle]);
+  const [nom, setNom] = useState(node?.name ?? "Sans titre");
+  const [retour, setRetour] = useState(true);
+  const zone = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => setTitle(`${nom} — Bloc-notes d'État`), [nom, setTitle]);
+  useMenuCommands(
+    {
+      "texte.nouveau": () => {
+        setText("");
+        setNom("Sans titre");
+      },
+      "texte.tout": () => zone.current?.select(),
+      "texte.date": () => {
+        const el = zone.current;
+        const stamp = new Date().toLocaleString("fr-FR", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
+        const at = el ? el.selectionStart : text.length;
+        const end = el ? el.selectionEnd : text.length;
+        setText(text.slice(0, at) + stamp + text.slice(end));
+        requestAnimationFrame(() => el?.setSelectionRange(at + stamp.length, at + stamp.length));
+      },
+      "texte.retour": () => setRetour((r) => !r),
+    },
+    { "texte.retour": { checked: retour } },
+  );
   return (
     <div className="app-col">
       <div className="pk-toolbar">
         <button className="pk-btn small" onClick={() => signal("texte:enregistrer")}>Enregistrer</button>
         {node?.type === "texte" && node.date && <span className="note">Document du {node.date}</span>}
       </div>
-      <textarea className="bloc-notes pk-body" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
+      <textarea ref={zone} className={`bloc-notes pk-body${retour ? "" : " sans-retour"}`} wrap={retour ? "soft" : "off"} value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
       <div className="pk-statusbar">
         <span style={{ flex: 1 }}>{str("texte.lectureSeule")}</span>
         <span>{text.split("\n").length} lignes</span>
@@ -90,6 +156,10 @@ export function Visionneuse() {
     const n = siblings[(i + d + siblings.length) % siblings.length];
     if (n) setPath(childPath(parentPath(path), n.name));
   };
+  useMenuCommands(
+    { "vis.precedente": () => step(-1), "vis.suivante": () => step(1) },
+    { "vis.precedente": { disabled: siblings.length < 2 }, "vis.suivante": { disabled: siblings.length < 2 } },
+  );
   return (
     <div className="app-col">
       <div className="pk-toolbar">

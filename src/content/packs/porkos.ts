@@ -3,9 +3,239 @@
  * Tout le texte, les fichiers, les mails, les programmes et les événements vivent ici.
  * Les images renvoient à Porkopédia (hébergement d'origine), rien n'est copié.
  */
-import type { ContentPack } from "../types";
+import type { ActionRef, ContentPack, MenuEntry, MenuSpec } from "../types";
 
 const P = "https://porkopedia.totoken.chatgpt.site/assets/";
+
+/* ------------------------------ Barres de menus ------------------------------ */
+
+const SEP: MenuEntry = { separator: true };
+const toast = (title: string, body: string): ActionRef => ({ type: "toast", toast: { title, body } });
+const refus = (title: string, body: string): ActionRef => ({ type: "dialog", dialog: { title, icon: "attention", body, buttons: [{ label: "Je m'incline" }] } });
+const IMPRIMER: MenuEntry = { label: "&Imprimer…", shortcut: "Ctrl+P", action: refus("Imprimer", "Aucune imprimante homologuée n'a été trouvée.\n\nL'imprimante nationale est actuellement occupée à imprimer le portrait du Fondateur, en 12 000 exemplaires.") };
+const EDITION_COMMUNE: MenuEntry[] = [
+  { label: "&Annuler la dernière pensée", shortcut: "Ctrl+Z", disabled: true },
+  SEP,
+  { label: "Co&uper", disabled: true },
+  { label: "&Copier", disabled: true },
+  { label: "C&oller", disabled: true },
+];
+const aide = (app: string): MenuSpec => ({
+  label: "&?",
+  items: [
+    { label: "&Aide de PorkOS", shortcut: "F1", action: { type: "dialog", dialog: { title: "Aide de PorkOS", icon: "info", body: "L'aide de PorkOS est en cours de rédaction depuis le 12/12/2012.\n\nEn attendant, la réponse à votre question est : oui, mais pas maintenant.", buttons: [{ label: "Merci quand même" }] } } },
+    { label: "&Signaler un problème…", action: toast("Signalement", "Le problème a été signalé. Vous aussi.") },
+    SEP,
+    { label: `À &propos de ${app}`, command: "aide.apropos" },
+  ],
+});
+
+const MENUS: Record<string, MenuSpec[]> = {
+  navigateur: [
+    {
+      label: "&Fichier",
+      items: [
+        { label: "&Nouvelle fenêtre", shortcut: "Ctrl+M", command: "nav.nouvelle" },
+        { label: "&Ouvrir une adresse…", shortcut: "Ctrl+O", command: "nav.ouvrir" },
+        SEP,
+        { label: "&Enregistrer sous…", shortcut: "Ctrl+S", action: toast("Enregistrement refusé", "Cette page appartient déjà à la République. Vous pouvez la regarder, avec gratitude.") },
+        IMPRIMER,
+        SEP,
+        { label: "&Travailler hors connexion", disabled: true },
+        { label: "&Fermer", command: "fenetre.fermer" },
+      ],
+    },
+    { label: "É&dition", items: [...EDITION_COMMUNE, SEP, { label: "&Rechercher dans la page…", shortcut: "Ctrl+F", disabled: true }] },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "&Précédent", shortcut: "Alt+←", command: "nav.precedent" },
+        { label: "&Suivant", shortcut: "Alt+→", command: "nav.suivant" },
+        { label: "&Actualiser", shortcut: "F5", command: "nav.actualiser" },
+        SEP,
+        { label: "&Source de la page", action: refus("Source de la page", "La source de cette page est confidentielle.\n\nElle a été vérifiée par nos services, qui ne vous la montreront pas pour ne pas vous ennuyer.") },
+        { label: "Mode sans &publicité (niveau VII)", disabled: true },
+      ],
+    },
+    {
+      label: "Fa&voris",
+      items: [
+        { label: "Portail &PigNet", command: "nav.aller", arg: "porko://accueil" },
+        { label: "Porkopédia — &index", command: "nav.aller", arg: "porko://porkopedia" },
+        SEP,
+        { label: "&Sofiane Douzi", command: "nav.aller", arg: "porko://porkopedia/douzi" },
+        { label: "&La Pork ID", command: "nav.aller", arg: "porko://porkopedia/la-pork-id" },
+        { label: "Le &Grand Banquet", command: "nav.aller", arg: "porko://porkopedia/le-grand-banquet" },
+        SEP,
+        { label: "&Ajouter aux favoris…", action: toast("Favoris", "Page ajoutée aux favoris du Ministère. Les vôtres sont en cours d'examen.") },
+      ],
+    },
+    aide("PigNet Navigateur"),
+  ],
+
+  "channel-pork": [
+    {
+      label: "&Fichier",
+      items: [
+        { label: "&Enregistrer l'émission", shortcut: "Ctrl+S", action: refus("Magnétoscope d'État", "L'enregistrement des programmes est inutile : ils sont rediffusés en permanence.") },
+        SEP,
+        { label: "&Fermer", command: "fenetre.fermer" },
+      ],
+    },
+    {
+      label: "&Programme",
+      items: [
+        { label: "&Lecture / Pause", shortcut: "Espace", command: "tv.pause" },
+        { label: "Programme &précédent", shortcut: "Ctrl+←", command: "tv.precedent" },
+        { label: "Programme &suivant", shortcut: "Ctrl+→", command: "tv.suivant" },
+        SEP,
+        { label: "&Zapper", shortcut: "Ctrl+Z", command: "tv.zapper" },
+        { label: "&Chaîne 2", disabled: true },
+      ],
+    },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "&Sous-titres", command: "tv.soustitres" },
+        { label: "&Bandeau d'information", command: "tv.bandeau" },
+        SEP,
+        { label: "&Volume (fixé par décret)", disabled: true },
+      ],
+    },
+    aide("Channel Pork"),
+  ],
+
+  "nappe-vide": [
+    {
+      label: "&Partie",
+      items: [
+        { label: "&Nouveau banquet", shortcut: "F2", command: "nappe.nouveau" },
+        SEP,
+        { label: "&Petit banquet", command: "nappe.niveau", arg: "petit", radio: true },
+        { label: "&Grand Banquet", command: "nappe.niveau", arg: "grand", radio: true },
+        { label: "Niveau &VII", command: "nappe.niveau", arg: "vii", radio: true },
+        SEP,
+        { label: "&Mode assiette", shortcut: "F3", command: "nappe.assiette" },
+        { label: "Meilleurs &temps…", action: { type: "dialog", dialog: { title: "Meilleurs temps", icon: "sceau", body: "Petit banquet — Sofiane Douzi : 0 s (n'a pas joué, a gagné).\nGrand Banquet — Sofiane Douzi : 0 s.\nNiveau VII — Sofiane Douzi : la nappe s'est mise toute seule.\n\nVotre temps sera ajouté après vérification de votre niveau de banquet.", buttons: [{ label: "C'est juste" }] } } },
+        SEP,
+        { label: "&Quitter", command: "fenetre.fermer" },
+      ],
+    },
+    {
+      label: "&?",
+      items: [
+        { label: "&Règles du protocole", shortcut: "F1", action: { type: "dialog", dialog: { title: "Règles du protocole", icon: "info", body: "Découvrez toute la table sans révéler de zone de nappe vide.\n\nUn chiffre indique combien de zones vides touchent la case. Clic droit (ou appui long) : poser une assiette. Cliquer sur un chiffre entouré du bon nombre d'assiettes sert toutes ses voisines.\n\nOnze centimètres de nappe visible sont tolérés. Douze, c'est un incident.", buttons: [{ label: "Compris" }] } } },
+        SEP,
+        { label: "À &propos de Nappe Vide", command: "aide.apropos" },
+      ],
+    },
+  ],
+
+  config: [
+    { label: "&Fichier", items: [{ label: "&Rétablir les valeurs recommandées", action: { type: "update", id: "maj-manuelle" } }, SEP, { label: "&Fermer", command: "fenetre.fermer" }] },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "&Affichage", command: "config.onglet", arg: "Affichage", radio: true },
+        { label: "&Son", command: "config.onglet", arg: "Son", radio: true },
+        { label: "&Citoyenneté", command: "config.onglet", arg: "Citoyenneté", radio: true },
+        { label: "S&ystème", command: "config.onglet", arg: "Système", radio: true },
+        SEP,
+        { label: "&Réglages avancés (niveau VII)", disabled: true },
+      ],
+    },
+    aide("Panneau de configuration"),
+  ],
+
+  fichiers: [
+    {
+      label: "&Fichier",
+      items: [
+        { label: "&Ouvrir", shortcut: "Entrée", command: "fichiers.ouvrir" },
+        SEP,
+        { label: "&Nouveau dossier (demande en cours)", disabled: true },
+        { label: "&Supprimer", shortcut: "Suppr", action: { type: "signal", name: "bureau:supprimer" } },
+        { label: "&Renommer", disabled: true },
+        { label: "&Propriétés", command: "fichiers.proprietes" },
+        SEP,
+        { label: "&Fermer", command: "fenetre.fermer" },
+      ],
+    },
+    { label: "É&dition", items: [...EDITION_COMMUNE, SEP, { label: "&Tout sélectionner", disabled: true }] },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "Dossier &parent", shortcut: "Retour", command: "fichiers.parent" },
+        { label: "&Actualiser", shortcut: "F5", command: "fichiers.actualiser" },
+        SEP,
+        { label: "&Documents officiels", command: "fichiers.aller", arg: "Documents officiels" },
+        { label: "&Mes photos", command: "fichiers.aller", arg: "Mes photos" },
+        { label: "&Raccourcis", command: "fichiers.aller", arg: "Raccourcis" },
+        SEP,
+        { label: "Afficher les fichiers &cachés", action: refus("Fichiers cachés", "Il n'existe aucun fichier caché sur ce poste.\n\nS'il en existait, vous ne seriez pas censé le savoir.") },
+      ],
+    },
+    aide("Mes documents"),
+  ],
+
+  texte: [
+    {
+      label: "&Fichier",
+      items: [
+        { label: "&Nouveau", command: "texte.nouveau" },
+        { label: "&Ouvrir…", shortcut: "Ctrl+O", action: { type: "open", app: "fichiers", args: { path: "Documents officiels" } } },
+        { label: "&Enregistrer", shortcut: "Ctrl+S", action: { type: "signal", name: "texte:enregistrer" } },
+        { label: "Enregistrer &sous…", action: { type: "signal", name: "texte:enregistrer" } },
+        SEP,
+        IMPRIMER,
+        SEP,
+        { label: "&Quitter", command: "fenetre.fermer" },
+      ],
+    },
+    {
+      label: "É&dition",
+      items: [
+        ...EDITION_COMMUNE,
+        SEP,
+        { label: "&Tout sélectionner", shortcut: "Ctrl+A", command: "texte.tout" },
+        { label: "&Heure/Date", shortcut: "F5", command: "texte.date" },
+      ],
+    },
+    {
+      label: "F&ormat",
+      items: [
+        { label: "&Retour automatique à la ligne", command: "texte.retour" },
+        { label: "&Police…", action: refus("Police", "La police est déjà nationale.\n\nToute autre police serait étrangère, ou pire, créative.") },
+      ],
+    },
+    aide("Bloc-notes d'État"),
+  ],
+
+  visionneuse: [
+    { label: "&Fichier", items: [IMPRIMER, SEP, { label: "&Fermer", command: "fenetre.fermer" }] },
+    {
+      label: "&Affichage",
+      items: [
+        { label: "Image &précédente", shortcut: "←", command: "vis.precedente" },
+        { label: "Image &suivante", shortcut: "→", command: "vis.suivante" },
+        SEP,
+        { label: "&Zoom (interdit sur le Fondateur)", disabled: true },
+        { label: "&Diaporama", action: toast("Diaporama", "Le diaporama national est diffusé sur Canal 1, en permanence.") },
+      ],
+    },
+    aide("Visionneuse"),
+  ],
+};
+
+const ABOUT: Record<string, string> = {
+  navigateur: "PigNet Navigateur 12.12\nLe monde, tel qu'homologué.\n\nCe logiciel ne collecte aucune donnée : il les reçoit.",
+  "channel-pork": "Channel Pork 12.12\nLecteur officiel de Canal 1, le seul.\n\nLa télécommande est fournie séparément, puis confisquée.",
+  "nappe-vide": "Nappe Vide 12.12\nJeu éducatif du protocole des banquets.\n\nApprouvé par la Commission des Onze Centimètres.",
+  config: "Panneau de configuration 12.12\nTout se règle. Ensuite, nous ajustons.",
+  fichiers: "Mes documents 12.12\nVos papiers, en ordre. L'ordre a été choisi pour vous.",
+  texte: "Bloc-notes d'État 12.12\nÉcrire est un droit. Enregistrer est une autre affaire.",
+  visionneuse: "Visionneuse 12.12\nLes images sont conformes. Leurs sujets, presque tous.",
+};
 
 export const porkosPack: ContentPack = {
   id: "porkos-citoyen",
@@ -506,6 +736,8 @@ export const porkosPack: ContentPack = {
     "config.economiseur.jamais": "Aucun (déconseillé par le Ministère)",
     "config.economiseur.apercu": "Aperçu",
     "config.contenu": "Afficher le contenu des fenêtres pendant leur déplacement",
+    "apropos.titre": "À propos de {app}",
+    "apropos.corps": "{texte}\n\n{os} {version} · {edition}\n© {vendor}",
     "config.nette": "Pixels nets (échelle entière, l'écran peut rétrécir)",
     "config.sons": "Sons système",
     "config.sons.tester": "Tester",
@@ -522,13 +754,17 @@ export const porkosPack: ContentPack = {
     "fichiers.verrouille": "Dossier verrouillé",
     "fichiers.verrouille.ok": "Je ne voulais pas vraiment l'ouvrir",
     "fichiers.vide": "Ce dossier est vide. Il a été vidé pour votre sécurité.",
+    "fichiers.prop": "{nom}\n\nType : {type}\nEmplacement : {lieu}\nDate : {date}\nAttributs : [x] Lecture seule   [x] Archivé par l'État",
+    "fichiers.type.dossier": "Dossier de fichiers",
+    "fichiers.type.texte": "Document texte",
+    "fichiers.type.image": "Image homologuée",
+    "fichiers.type.lien": "Raccourci",
     "texte.lectureSeule": "Lecture seule — document officiel",
     "nav.recherche": "Rechercher sur PigNet",
     "nav.resultats": "Résultats homologués",
     "nav.aucun": "Aucun résultat. La chose que vous cherchez n'existe pas, ce qui devrait vous rassurer.",
     "nav.index": "Index complet de Porkopédia",
     "nav.hors-ligne.titre": "Notice non synchronisée",
-    "nappe.regles": "Découvrez la table sans révéler de zone de nappe vide. Clic droit (ou appui long) : poser une assiette. Un chiffre indique combien de zones vides touchent la case.",
     "nappe.incident": "INCIDENT PROTOCOLAIRE",
     "nappe.conforme": "BANQUET CONFORME",
     "nappe.modeAssiette": "Mode assiette",
@@ -549,3 +785,8 @@ export const porkosPack: ContentPack = {
     "config.apropos": "PorkOS 12.12, Édition Citoyenne. Licence d'État non cessible, non refusable, non résiliable. Aucun composant de ce système n'a été conçu à l'étranger, y compris les parties conçues à l'étranger.",
   },
 };
+
+for (const app of porkosPack.apps) {
+  app.menus = MENUS[app.id];
+  app.about = ABOUT[app.id];
+}

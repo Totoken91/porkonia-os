@@ -1,7 +1,7 @@
 "use client";
 /** Channel Pork : Canal 1, le seul. Diaporama d'archives + sous-titres + bandeau (ou vraie vidéo si fournie). */
 import { useEffect, useState } from "react";
-import { useOs } from "@/os/context";
+import { useMenuCommands, useOs } from "@/os/context";
 import { at, programLength } from "./timeline";
 
 export function ChannelPork() {
@@ -10,6 +10,8 @@ export function ChannelPork() {
   const [idx, setIdx] = useState(0);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(true);
+  const [soustitres, setSoustitres] = useState(true);
+  const [bandeau, setBandeau] = useState(true);
   const p = programs[idx]!;
   const len = programLength(p);
 
@@ -31,6 +33,17 @@ export function ChannelPork() {
     setIdx((i) => (i + d + programs.length) % programs.length);
     setT(0);
   };
+  useMenuCommands(
+    {
+      "tv.pause": () => setPlaying((x) => !x),
+      "tv.precedent": () => zap(-1),
+      "tv.suivant": () => zap(1),
+      "tv.zapper": () => signal("tv:zapper"),
+      "tv.soustitres": () => setSoustitres((x) => !x),
+      "tv.bandeau": () => setBandeau((x) => !x),
+    },
+    { "tv.soustitres": { checked: soustitres }, "tv.bandeau": { checked: bandeau } },
+  );
 
   return (
     <div className="app-col tv">
@@ -44,14 +57,14 @@ export function ChannelPork() {
           <span>{p.channel}</span>
           <i>Direct</i>
         </div>
-        {s.chyron && (
+        {bandeau && s.chyron && (
           <div className="tv-chyron">
             <b>{p.kind === "publicite" ? "Pub" : "Info"}</b>
             <span>{s.chyron}</span>
           </div>
         )}
         {s.caption && <div className="tv-mention">{s.caption}</div>}
-        {subtitle && <p className="tv-soustitre">{subtitle}</p>}
+        {soustitres && subtitle && <p className="tv-soustitre">{subtitle}</p>}
         {!playing && <div className="tv-pause">Pause</div>}
       </div>
       <div className="pk-toolbar tv-commandes">

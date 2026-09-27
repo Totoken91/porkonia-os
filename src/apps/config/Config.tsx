@@ -1,7 +1,7 @@
 "use client";
 /** Panneau de configuration : tout se règle, puis s'ajuste. Les réglages agissent vraiment sur le système. */
 import { useState } from "react";
-import { useOs } from "@/os/context";
+import { useMenuCommands, useOs } from "@/os/context";
 import { DELAIS_ECONOMISEUR, type Fond } from "@/os/settings";
 
 const TABS = ["Affichage", "Son", "Citoyenneté", "Système"] as const;
@@ -10,6 +10,10 @@ type Tab = (typeof TABS)[number];
 export function Config() {
   const { settings, setSettings, str, runAction, signal, user, pack, playSound, showScreensaver } = useOs();
   const [tab, setTab] = useState<Tab>("Affichage");
+  useMenuCommands(
+    { "config.onglet": (t) => TABS.includes(t as Tab) && setTab(t as Tab) },
+    Object.fromEntries(TABS.map((t) => [`config.onglet:${t}`, { checked: t === tab }])),
+  );
 
   const fonds: { v: Fond | "aucun"; label: string }[] = [
     { v: "bouteille", label: str("config.fond.bouteille") },

@@ -2,7 +2,7 @@
 /** Nappe Vide : découvrir la table sans révéler de nappe vide. Le résultat est signalé au système. */
 import { useEffect, useRef, useState } from "react";
 import { Groin } from "@/components/Icon";
-import { useOs, useWin } from "@/os/context";
+import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { chord, LEVELS, newGame, remaining, reveal, toggleAssiette, type Game } from "./logic";
 
 const CELL = 22;
@@ -15,11 +15,19 @@ export function NappeVide() {
   const [game, setGame] = useState<Game>(() => newGame(level));
   const [modeAssiette, setModeAssiette] = useState(false);
   const [now, setNow] = useState(0);
+  useMenuCommands(
+    {
+      "nappe.nouveau": () => setGame(newGame(level)),
+      "nappe.niveau": (id) => id && setLevelId(id),
+      "nappe.assiette": () => setModeAssiette((x) => !x),
+    },
+    { ...Object.fromEntries(LEVELS.map((l) => [`nappe.niveau:${l.id}`, { checked: l.id === levelId }])), "nappe.assiette": { checked: modeAssiette } },
+  );
   const press = useRef<{ i: number; t: ReturnType<typeof setTimeout>; long: boolean } | null>(null);
 
   useEffect(() => {
     setGame(newGame(level));
-    resize(Math.max(360, level.w * CELL + 40), level.h * CELL + 190);
+    resize(Math.max(360, level.w * CELL + 40), level.h * CELL + 172);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [levelId]);
 
@@ -116,7 +124,6 @@ export function NappeVide() {
             </button>
           ))}
         </div>
-        <p className="nappe-regles">{str("nappe.regles")}</p>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 /** PigNet Navigateur : l'internet national. Porkopédia y est consultable hors ligne (notices intégrées au build). */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
-import { useOs, useWin } from "@/os/context";
+import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { HOME, articleUrl, parseUrl, search, searchUrl } from "./url";
 
 interface Article {
@@ -19,8 +19,9 @@ const CATALOG = porkopedia.catalog as { id: string; title: string; section: stri
 const byId = new Map(ARTICLES.map((a) => [a.id, a]));
 
 export function Navigateur() {
-  const { str, signal } = useOs();
+  const { str, signal, openApp } = useOs();
   const { win, setTitle } = useWin();
+  const adresse = useRef<HTMLInputElement>(null);
   const [hist, setHist] = useState<{ list: string[]; i: number }>({ list: [win.args.url ?? HOME], i: 0 });
   const url = hist.list[hist.i]!;
   const [bar, setBar] = useState(url);
@@ -37,6 +38,20 @@ export function Navigateur() {
   const pageTitle = route.kind === "article" ? (byId.get(route.id)?.title ?? CATALOG.find((c) => c.id === route.id)?.title ?? "412") : route.kind === "accueil" ? "PigNet" : route.kind === "index" ? "Porkopédia" : route.kind === "recherche" ? route.q : "PigNet";
   useEffect(() => setTitle(`${pageTitle} — PigNet Navigateur`), [pageTitle, setTitle]);
 
+  const precedent = () => setHist((h) => ({ ...h, i: Math.max(0, h.i - 1) }));
+  const suivant = () => setHist((h) => ({ ...h, i: Math.min(h.list.length - 1, h.i + 1) }));
+  useMenuCommands(
+    {
+      "nav.nouvelle": () => openApp("navigateur"),
+      "nav.ouvrir": () => adresse.current?.select(),
+      "nav.precedent": precedent,
+      "nav.suivant": suivant,
+      "nav.actualiser": () => signal("nav:actualiser"),
+      "nav.aller": (u) => u && go(u),
+    },
+    { "nav.precedent": { disabled: hist.i === 0 }, "nav.suivant": { disabled: hist.i >= hist.list.length - 1 } },
+  );
+
   const onLink = (e: React.MouseEvent) => {
     const a = (e.target as HTMLElement).closest("a[data-article]");
     if (!a) return;
@@ -47,8 +62,8 @@ export function Navigateur() {
   return (
     <div className="app-col">
       <div className="pk-toolbar">
-        <button className="pk-btn small" disabled={hist.i === 0} onClick={() => setHist((h) => ({ ...h, i: h.i - 1 }))}>◂ Précédent</button>
-        <button className="pk-btn small" disabled={hist.i >= hist.list.length - 1} onClick={() => setHist((h) => ({ ...h, i: h.i + 1 }))}>Suivant ▸</button>
+        <button className="pk-btn small" disabled={hist.i === 0} onClick={precedent}>◂ Précédent</button>
+        <button className="pk-btn small" disabled={hist.i >= hist.list.length - 1} onClick={suivant}>Suivant ▸</button>
         <button className="pk-btn small" onClick={() => signal("nav:actualiser")}>Actualiser</button>
         <button className="pk-btn small" onClick={() => go(HOME)}>Accueil</button>
         <form
@@ -59,7 +74,7 @@ export function Navigateur() {
           }}
         >
           <label>Adresse</label>
-          <input className="pk-input" value={bar} onChange={(e) => setBar(e.target.value)} spellCheck={false} data-testid="nav-url" />
+          <input ref={adresse} className="pk-input" value={bar} onChange={(e) => setBar(e.target.value)} spellCheck={false} data-testid="nav-url" />
           <button className="pk-btn small">Aller</button>
         </form>
       </div>

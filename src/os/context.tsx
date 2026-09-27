@@ -1,6 +1,6 @@
 "use client";
 /** Contextes partagés : l'OS (pack, réglages, actions) et la fenêtre courante (pour les applis). */
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import type { ActionRef, ContentPack, UserProfile } from "@/content/types";
 import type { Rng } from "./rng";
 import type { Son } from "./sons";
@@ -24,9 +24,15 @@ export interface OsApi {
   showScreensaver(): void;
 }
 
+export type MenuHandlers = Record<string, (arg?: string) => void>;
+/** État des entrées de menu (coche, grisé), indexé par `commande` ou `commande:argument`. */
+export type MenuState = Record<string, { checked?: boolean; disabled?: boolean }>;
+
 export interface WinApi {
   win: Win;
   focused: boolean;
+  /** Branche les commandes de menu de l'appli (voir useMenuCommands). */
+  registerMenu(handlers: { current: MenuHandlers }, state: MenuState): void;
   setTitle(title: string): void;
   resize(w: number, h: number): void;
   close(): void;
@@ -58,3 +64,15 @@ export function makeStr(pack: ContentPack) {
 /** Facteur d'échelle de l'écran 4:3 (les déplacements à la souris sont divisés par ce facteur). */
 export const ScaleContext = createContext(1);
 export const useScale = () => useContext(ScaleContext);
+
+/**
+ * Déclare les commandes de menu d'une appli. Les libellés viennent du pack ; l'appli ne fournit que le comportement
+ * et l'état (coché, grisé) de ses commandes.
+ */
+export function useMenuCommands(handlers: MenuHandlers, state: MenuState = {}) {
+  const { registerMenu } = useWin();
+  const ref = useRef(handlers);
+  ref.current = handlers;
+  const key = JSON.stringify(state);
+  useEffect(() => registerMenu(ref, JSON.parse(key) as MenuState), [key, registerMenu]);
+}

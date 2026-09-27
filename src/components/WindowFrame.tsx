@@ -1,8 +1,10 @@
 "use client";
 /** Fenêtre : châssis de l'atelier, déplaçable par la barre de titre, redimensionnable par le coin. */
-import { useMemo, useRef, useState } from "react";
-import type { AppManifest } from "@/content/types";
-import { WinContext, useScale, type WinApi } from "@/os/context";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { AppManifest, MenuEntry } from "@/content/types";
+import { WinContext, useOs, useScale, type MenuHandlers, type MenuState, type WinApi } from "@/os/context";
+import { findShortcut, isPlainShortcut, menuForKey } from "@/os/menus";
+import { MenuBar } from "./MenuBar";
 import type { Viewport, Win, WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
 
@@ -21,6 +23,71 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, chi
   const scale = useScale();
   const [ghost, setGhost] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const final = useRef<WinAction | null>(null);
+  const { runAction, str, pack } = useOs();
+
+  /* ------------------------------ Barre de menus ------------------------------ */
+  const handlers = useRef<{ current: MenuHandlers }>({ current: {} });
+  const [menuState, setMenuState] = useState<MenuState>({});
+  const [menuOpen, setMenuOpen] = useState<number | null>(null);
+  const registerMenu = useCallback((h: { current: MenuHandlers }, st: MenuState) => {
+    handlers.current = h;
+    setMenuState(st);
+  }, []);
+  const builtin: MenuHandlers = {
+    "fenetre.fermer": () => dispatch({ type: "close", id: win.id }),
+    "fenetre.reduire": () => dispatch({ type: "minimize", id: win.id }),
+    "fenetre.agrandir": () => dispatch({ type: "toggleMaximize", id: win.id }),
+    "aide.apropos": () =>
+      runAction({
+        type: "dialog",
+        dialog: {
+          title: str("apropos.titre", { app: manifest.title }),
+          icon: "sceau",
+          body: str("apropos.corps", { texte: manifest.about ?? manifest.title, os: pack.os.name, version: pack.os.version, edition: pack.os.edition, vendor: pack.os.vendor }),
+          buttons: [{ label: "OK" }],
+        },
+      }),
+  };
+  type Entree = Extract<MenuEntry, { label: string }>;
+  const cle = (it: Entree) => (it.arg ? `${it.command}:${it.arg}` : (it.command ?? ""));
+  const enabled = (it: Entree) => {
+    if (it.disabled || menuState[cle(it)]?.disabled || (it.command && menuState[it.command]?.disabled)) return false;
+    if (it.action) return true;
+    return !!it.command && !!(builtin[it.command] ?? handlers.current.current[it.command]);
+  };
+  const checked = (it: Entree) => !!menuState[cle(it)]?.checked;
+  const run = (it: Entree) => {
+    if (!enabled(it)) return;
+    if (it.action) return runAction(it.action);
+    if (it.command) (builtin[it.command] ?? handlers.current.current[it.command])?.(it.arg);
+  };
+  const runRef = useRef({ run, enabled });
+  runRef.current = { run, enabled };
+
+  // Raccourcis clavier et Alt+lettre, pour la fenêtre au premier plan seulement.
+  useEffect(() => {
+    const menus = manifest.menus;
+    if (!focused || !menus || win.minimized) return;
+    const key = (e: KeyboardEvent) => {
+      if (menuOpen !== null || document.querySelector(".dialog-layer")) return;
+      if (e.altKey && !e.ctrlKey && e.key.length === 1) {
+        const i = menuForKey(menus, e.key);
+        if (i >= 0) {
+          e.preventDefault();
+          setMenuOpen(i);
+        }
+        return;
+      }
+      const it = findShortcut(menus, e);
+      if (!it || !runRef.current.enabled(it)) return;
+      const t = e.target as HTMLElement | null;
+      if (isPlainShortcut(it.shortcut!) && t?.closest?.("input, textarea, select")) return;
+      e.preventDefault();
+      runRef.current.run(it);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [focused, manifest.menus, menuOpen, win.minimized]);
   const drag = useRef<{ kind: "move" | "resize"; sx: number; sy: number; ox: number; oy: number } | null>(null);
   const api = useMemo<WinApi>(
     () => ({
@@ -29,8 +96,9 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, chi
       setTitle: (title) => dispatch({ type: "retitle", id: win.id, title }),
       resize: (w, h) => dispatch({ type: "resize", id: win.id, w, h, vp }),
       close: () => dispatch({ type: "close", id: win.id }),
+      registerMenu,
     }),
-    [win, focused, dispatch, vp],
+    [win, focused, dispatch, vp, registerMenu],
   );
 
   const rect = win.maximized ? { x: 0, y: 0, w: vp.w, h: vp.h - vp.bottom } : win.rect;
@@ -88,6 +156,7 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, chi
           </button>
         </div>
       </header>
+      {manifest.menus && <MenuBar menus={manifest.menus} open={menuOpen} setOpen={setMenuOpen} run={run} enabled={enabled} checked={checked} />}
       <WinContext.Provider value={api}>{children}</WinContext.Provider>
       {!win.maximized && <div className="pk-resize" onPointerDown={start("resize")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />}
     </section>

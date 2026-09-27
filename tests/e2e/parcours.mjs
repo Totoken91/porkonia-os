@@ -93,7 +93,19 @@ try {
     await page.getByTestId("nav-url").fill("https://google.com");
     await page.getByTestId("nav-url").press("Enter");
     await page.getByRole("heading", { name: "Internet étranger" }).waitFor();
-    step(`${tag} : PigNet (notice, internet étranger)`);
+    // Barre de menus : Favoris › Le Grand Banquet, puis ? › À propos
+    await page.locator("[data-testid=window-navigateur] [data-testid=menubar-v]").click();
+    if (tag === "bureau") await shot(page, `${tag}-05b-menus`);
+    await page.getByRole("menuitem", { name: "Le Grand Banquet" }).click();
+    await page.locator(".notice h1", { hasText: "Le Grand Banquet" }).waitFor();
+    await page.locator("[data-testid=window-navigateur] [data-testid='menubar-?']").click();
+    await page.getByRole("menuitem", { name: /propos de PigNet/ }).click();
+    await page.getByTestId("dialog").waitFor();
+    await page.locator("[data-testid=dialog] .pk-btn").first().click();
+    // Raccourci clavier : Alt+← revient à la page précédente
+    await page.keyboard.press("Alt+ArrowLeft");
+    await page.getByRole("heading", { name: "Internet étranger" }).waitFor();
+    step(`${tag} : PigNet (notice, internet étranger, menus, raccourcis)`);
     await closeTop();
 
     // Channel Pork

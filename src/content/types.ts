@@ -10,6 +10,22 @@ export type AppKind = "bienvenue" | "executer" | "navigateur" | "channel-pork" |
 
 export type IconKey = "embleme" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
 
+/**
+ * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
+ * - `command` : commande de l'appli (ou de la fenêtre : fenetre.fermer, fenetre.reduire, fenetre.agrandir, aide.apropos),
+ *   avec `arg` facultatif ; une commande que l'appli ne gère pas apparaît grisée.
+ * - `action` : action système (dialogue, notification, ouvrir une appli…).
+ * - `radio` : puce au lieu de coche quand l'entrée est active.
+ */
+export type MenuEntry =
+  | { separator: true }
+  | { label: string; shortcut?: string; disabled?: boolean; command?: string; arg?: string; action?: ActionRef; radio?: boolean };
+
+export interface MenuSpec {
+  label: string;
+  items: MenuEntry[];
+}
+
 export interface AppManifest {
   id: string;
   kind: AppKind;
@@ -23,6 +39,10 @@ export interface AppManifest {
   menu?: "programmes" | "accessoires" | "systeme";
   /** Info-bulle du menu. */
   blurb?: string;
+  /** Barre de menus de la fenêtre. */
+  menus?: MenuSpec[];
+  /** Texte de la boîte « À propos de… ». */
+  about?: string;
 }
 
 export interface DesktopIcon {
