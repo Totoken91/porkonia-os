@@ -253,12 +253,17 @@
   .desk-icon { position: absolute; width: 74px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0; background: none; border: none; color: #fff; touch-action: none; }
   .desk-icon span {
     max-width: 74px; line-height: 16px; text-align: center; padding: 0 2px 1px; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.65);
-    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: normal;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere;
   }
-  .desk-icon[aria-selected="true"] span { background: var(--color-rouge-sombre); text-shadow: none; }
+  /* Comme sur les postes d'époque : le nom complet ne s'affiche qu'une fois l'icône sélectionnée. */
+  .desk-icon[aria-selected="true"] { z-index: 2; }
+  .desk-icon[aria-selected="true"] span { background: var(--color-rouge-sombre); text-shadow: none; -webkit-line-clamp: 5; }
   .bureau-zone:focus .desk-icon.focus span { outline: 1px dotted #f3d58f; }
   .desk-icon .embleme-selection { filter: sepia(1) hue-rotate(-40deg) saturate(3) brightness(0.8); }
   .desk-icon.fantome { opacity: 0.55; pointer-events: none; z-index: 10; }
+  .desk-icon.coupe > svg, .desk-icon.coupe > img { opacity: 0.45; }
+  .desk-icon.depot-survol { outline: 1px dotted #fff; outline-offset: -2px; background: rgba(255, 255, 255, 0.12); }
+  .desk-icon .renommage { width: 72px; }
   .lasso { position: absolute; z-index: 15; pointer-events: none; border: 1px dotted #fff; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25); }
   .menu-contexte { position: absolute; z-index: 6200; min-width: 180px; display: flex; flex-direction: column; padding: 3px; background: var(--face); box-shadow: var(--raised), 2px 2px 0 rgba(0, 0, 0, 0.3); }
   .menu-contexte button { text-align: left; padding: 3px 20px; min-height: 20px; border: none; background: none; white-space: nowrap; }
@@ -680,6 +685,14 @@
   .fichiers-liste { background: #fffdf7; padding: 8px; display: grid; grid-template-columns: repeat(auto-fill, 86px); grid-auto-rows: min-content; gap: 6px; align-content: start; }
   .fichier { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 3px; border: 1px dotted transparent; background: none; cursor: inherit; text-align: center; line-height: 16px; overflow-wrap: anywhere; }
   .fichier[aria-selected="true"] { background: #f3dcd4; border-color: var(--color-rouge-sombre); }
+  .fichier.coupe > svg, .fichier.coupe > img, .fichier.coupe > span:first-child { opacity: 0.45; }
+  .fichiers-liste:focus { outline: none; }
+  .fichiers-liste.depot-survol, .fichier.depot-survol { outline: 1px dotted var(--color-rouge-sombre); outline-offset: -3px; background-color: #f7ead9; }
+  .renommage { width: 80px; font: inherit; text-align: center; padding: 0 2px; border: 1px solid #000; background: #fffdf7; color: #000; }
+  .renommage:focus { outline: none; }
+  .enregistrer-sous { gap: 6px; flex-wrap: wrap; }
+  .enregistrer-sous .pk-input { width: 150px; }
+  .enregistrer-sous .pk-liste { min-width: 170px; }
   .bloc-notes.sans-retour { white-space: pre; overflow-x: auto; }
   .bloc-notes { resize: none; border: none; outline: none; padding: 10px 12px; font: 16px/16px var(--font-mono); background: #fffdf7; color: #1c1712; white-space: pre-wrap; }
   .visionneuse { background: #2b241d; display: grid; place-items: center; padding: 12px; }

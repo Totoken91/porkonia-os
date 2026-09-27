@@ -74,8 +74,20 @@ try {
     page.on("console", (m) => m.type() === "error" && !/Failed to load resource/.test(m.text()) && errors.push(`${tag}: ${m.text()}`));
 
     // Les pubs de PorkOS arrivent à heure aléatoire : hors de l'étape qui les teste, on les ferme dès qu'elles gênent.
-    const fermerPubs = () => page.addLocatorHandler(page.getByTestId("ad"), () => page.getByTestId("ad-close").click({ timeout: 15000 }));
-    if (tag === "mobile") await fermerPubs();
+    // La première est examinée au passage (croix d'abord inactive, capture) pour l'étape « pause publicitaire ».
+    let pubVue = null;
+    await page.addLocatorHandler(page.getByTestId("ad"), async () => {
+      if (!pubVue) {
+        pubVue = { fermableTout2Suite: !(await page.getByTestId("ad-close").isDisabled()) };
+        await page.waitForTimeout(1200);
+        await shot(page, `${tag}-11-pub`);
+      }
+      await page.getByTestId("ad-close").click({ timeout: 15000 });
+    });
+    // Idem pour les bulles de notification (distinctions, rappels) qui recouvrent le coin de l'écran.
+    await page.addLocatorHandler(page.getByTestId("toast"), async () => {
+      for (const b of await page.locator("[data-testid=toast] .pk-ctl").all()) await b.click({ timeout: 2000 }).catch(() => {});
+    });
     await page.goto(base);
     // La machine attend qu'on l'allume (ce clic libère aussi le son).
     await page.waitForTimeout(400);
@@ -232,14 +244,14 @@ try {
 
     if (tag === "bureau") {
       // La pause publicitaire arrive d'elle-même (~30 s après la connexion) ; sa croix se mérite.
-      await page.getByTestId("ad").waitFor({ timeout: 90000 });
-      if (!(await page.getByTestId("ad-close").isDisabled())) throw new Error("pub fermable immédiatement");
-      await page.waitForTimeout(1200);
-      await shot(page, `${tag}-11-pub`);
-      await page.getByTestId("ad-close").click({ timeout: 10000 });
+      for (let t = 0; !pubVue; t += 500) {
+        if (t > 160000) throw new Error("aucune pause publicitaire");
+        await page.waitForTimeout(500);
+        if (await page.getByTestId("ad").count()) await page.getByTestId("start").hover().catch(() => {});
+      }
+      if (pubVue.fermableTout2Suite) throw new Error("pub fermable immédiatement");
       await page.getByTestId("ad").waitFor({ state: "detached" });
       step(`${tag} : pause publicitaire`);
-      await fermerPubs();
     }
 
     // Icônes : glisser vers une autre case de la grille, menu contextuel du bureau
@@ -340,6 +352,65 @@ try {
       step(`${tag} : ScanDisque après arrêt brutal`);
     }
 
+    if (tag === "bureau") {
+      // Fichiers : nouveau dossier renommé, glisser vers le bureau, puis vers la Poubelle, restaurer, modifier, enregistrer
+      const fermer = (app) => page.locator(`[data-testid=window-${app}]:visible [data-testid=window-close]`).first().click();
+      // L'écran de bienvenue s'ouvre peu après la connexion : on l'attend et on le ferme, il couvrirait la Poubelle.
+      await page.getByTestId("window-bienvenue").waitFor({ timeout: 5000 }).then(() => fermer("bienvenue"), () => {});
+      await page.getByTestId("afficher-bureau").click();
+      await page.getByTestId("icon-d-docs").dblclick();
+      await page.getByTestId("window-fichiers").waitFor();
+      await page.getByTestId("fichier-Documents officiels").dblclick();
+      await page.getByTestId("fichier-Lettre de bienvenue.txt").waitFor();
+      await page.getByTestId("fichiers-nouveau-dossier").click();
+      await page.getByTestId("renommage").fill("Jambons");
+      await page.keyboard.press("Enter");
+      await page.getByTestId("fichier-Jambons").waitFor();
+      const fenetre = await page.getByTestId("window-fichiers").boundingBox();
+      const bureau = await page.getByTestId("bureau").boundingBox();
+      // Point du bureau le plus éloigné de la fenêtre (coin bas-droit ou haut-droit, loin des icônes).
+      const coins = [{ x: bureau.width - 50, y: bureau.height - 50 }, { x: bureau.width - 50, y: 50 }, { x: bureau.width / 2, y: bureau.height - 50 }];
+      const dedans = (c) => bureau.x + c.x >= fenetre.x && bureau.x + c.x <= fenetre.x + fenetre.width && bureau.y + c.y >= fenetre.y && bureau.y + c.y <= fenetre.y + fenetre.height;
+      await page.getByTestId("fichier-Lettre de bienvenue.txt").dragTo(page.getByTestId("bureau"), { targetPosition: coins.find((c) => !dedans(c)) ?? coins[0] });
+      const icone = page.getByTestId("icon-f:Lettre de bienvenue.txt");
+      await icone.waitFor();
+      if (await page.getByTestId("fichier-Lettre de bienvenue.txt").count()) throw new Error("fichier resté dans Documents officiels");
+      await shot(page, `${tag}-21-fichiers`);
+      await fermer("fichiers");
+      // Icône du bureau lâchée sur la Poubelle d'État
+      // Geste repris si une pub ou une bulle surgit pendant le glisser (elle recouvre alors la Poubelle).
+      for (let essai = 0; ; essai++) {
+        const a = await icone.boundingBox();
+        const b = await page.getByTestId("icon-d-poubelle").boundingBox();
+        await page.mouse.move(a.x + a.width / 2, a.y + 16);
+        await page.mouse.down();
+        await page.mouse.move(b.x + b.width / 2, b.y + 20, { steps: 12 });
+        await page.mouse.up();
+        try {
+          await icone.waitFor({ state: "detached", timeout: 4000 });
+          break;
+        } catch (e) {
+          if (essai >= 2) throw e;
+        }
+      }
+      await page.getByTestId("icon-d-poubelle").dblclick();
+      await page.getByTestId("jete-Lettre de bienvenue.txt").click();
+      await page.getByTestId("poubelle-restaurer").click();
+      await icone.waitFor();
+      await fermer("fichiers");
+      // Le document restauré s'ouvre, se modifie et s'enregistre vraiment
+      await icone.dblclick();
+      await page.getByTestId("texte-zone").waitFor();
+      await page.getByTestId("texte-zone").fill("Citoyen, tout va bien.");
+      await page.getByTestId("texte-enregistrer").click();
+      await page.getByText("Enregistré dans", { exact: false }).waitFor();
+      await fermer("texte");
+      await icone.dblclick();
+      if ((await page.getByTestId("texte-zone").inputValue()) !== "Citoyen, tout va bien.") throw new Error("document non enregistré");
+      await fermer("texte");
+      step(`${tag} : fichiers (dossier, glisser vers le bureau, Poubelle, restaurer, enregistrer)`);
+    }
+
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche
     await page.getByTestId("icon-d-docs").dblclick();
     await page.getByTestId("window-fichiers").waitFor();
@@ -392,6 +463,10 @@ try {
   }
   if (errors.length) throw new Error("Erreurs navigateur :\n" + errors.join("\n"));
   console.log("Parcours complet : OK");
+} catch (e) {
+  // Affichée avant la fermeture du navigateur, qui ferait échouer bruyamment les gestionnaires de pubs en cours.
+  console.error("ÉCHEC :", e);
+  process.exitCode = 1;
 } finally {
   await browser.close();
   server.close();

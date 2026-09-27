@@ -24,6 +24,7 @@ export const cellPos = (cell: Cell) => ({ x: GRID.x0 + cell.c * GRID.cw, y: GRID
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
 const key = (cell: Cell) => `${cell.c}:${cell.r}`;
+export const cellKey = key;
 
 /** Case la plus proche d'un point (coin haut-gauche d'une icône). */
 export function cellAt(x: number, y: number, d: Dims): Cell {
@@ -37,7 +38,7 @@ export function defaultLayout(ids: string[], d: Dims): Layout {
 }
 
 /** Case libre la plus proche de `want` (distance de Chebyshev croissante, puis ordre de lecture). */
-function nearestFree(want: Cell, taken: Set<string>, d: Dims): Cell {
+export function nearestFree(want: Cell, taken: Set<string>, d: Dims): Cell {
   for (let dist = 0; dist < d.cols + d.rows; dist++) {
     const ring: Cell[] = [];
     for (let c = want.c - dist; c <= want.c + dist; c++)

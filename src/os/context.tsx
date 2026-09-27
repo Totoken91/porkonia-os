@@ -8,6 +8,7 @@ import type { Boite, Brouillon, Dossier } from "./mailbox";
 import type { MenuItem } from "@/components/Menu";
 import type { Settings } from "./settings";
 import type { EtatDistinctions } from "./distinctions";
+import type { Disque, Resultat } from "./vfs";
 import type { Win } from "./windows";
 
 export interface OsApi {
@@ -27,6 +28,8 @@ export interface OsApi {
   showScreensaver(): void;
   /** Messagerie du poste (état partagé : appli Courrier, zone de notification, règles). */
   mail: MailApi;
+  /** Disque du poste : fichiers modifiables, Poubelle d'État, presse-papiers. */
+  fs: FsApi;
   /** Distinctions civiques obtenues par le citoyen (appli Mes décorations). */
   distinctions: EtatDistinctions;
   /** Menu contextuel à l'endroit d'un clic (coordonnées du navigateur converties en coordonnées d'écran). */
@@ -40,6 +43,18 @@ export interface MailApi {
   envoyer(d: Brouillon, draftId?: string): void;
   brouillon(d: Brouillon, id?: string): string;
   relever(): void;
+}
+
+export interface FsApi {
+  disque: Disque;
+  /** Applique une opération du disque ; un refus s'affiche en boîte d'erreur. Rend les chemins produits, ou null. */
+  appliquer(op: (d: Disque) => Resultat): string[] | null;
+  /** Dépose des éléments dans un dossier, ou sur la Poubelle d'État (POUBELLE). */
+  deposer(chemins: string[], depot: string, copie?: boolean): string[] | null;
+  /** Ouvre un élément selon son type (dossier, document, image, raccourci). */
+  ouvrir(chemin: string): void;
+  pressePapiers: { chemins: string[]; couper: boolean } | null;
+  setPressePapiers(p: { chemins: string[]; couper: boolean } | null): void;
 }
 
 export type MenuHandlers = Record<string, (arg?: string) => void>;

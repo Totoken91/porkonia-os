@@ -71,11 +71,13 @@ export interface UserProfile {
 
 /* --------------------------- Système de fichiers --------------------------- */
 
-export type FsNode =
+/** `protege` : message opposé à qui veut supprimer, renommer, déplacer ou modifier l'élément. */
+export type FsNode = (
   | { type: "dossier"; name: string; children: FsNode[]; locked?: string }
   | { type: "texte"; name: string; content: string; date?: string }
   | { type: "image"; name: string; src: string; caption?: string; date?: string }
-  | { type: "lien"; name: string; app: string; args?: Record<string, string> };
+  | { type: "lien"; name: string; app: string; args?: Record<string, string> }
+) & { protege?: string };
 
 /* ---------------------------------- Mail ---------------------------------- */
 

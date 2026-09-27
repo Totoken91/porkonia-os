@@ -10,6 +10,8 @@ import { OsContext, makeStr, type MailApi, type OsApi } from "@/os/context";
 import { makeRng, pick } from "@/os/rng";
 import { emptyRuleState, schedule, type SchedulerInput } from "@/os/scheduler";
 import { etatVide, observer, sanitizeDistinctions, type EtatDistinctions } from "@/os/distinctions";
+import { POUBELLE, deplacer, sanitizeDisque, supprimer, type Disque, type Resultat } from "@/os/vfs";
+import { resolve as resoudre } from "@/os/fs";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
@@ -101,6 +103,20 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const decorRef = useRef(decor);
   const applisDuPoste = useMemo(() => pack.apps.filter((a) => a.menu).map((a) => a.id), [pack.apps]);
   const decerneRef = useRef<(d: import("@/content/types").Distinction) => void>(() => {});
+
+  // Disque du poste, retenu dans le navigateur pour chaque citoyen.
+  const cleDisque = `porkos.disque.${pack.id}.${user.id}`;
+  const [disque, setDisqueState] = useState<Disque>(() => {
+    let brut: unknown = null;
+    try {
+      brut = JSON.parse(window.localStorage.getItem(cleDisque) ?? "null");
+    } catch {
+      /* disque neuf */
+    }
+    return sanitizeDisque(brut, pack.filesystem);
+  });
+  const disqueRef = useRef(disque);
+  const [pressePapiers, setPressePapiers] = useState<{ chemins: string[]; couper: boolean } | null>(null);
 
   const rng = useMemo(() => makeRng(Date.now() & 0xffffffff), []);
   const str = useMemo(() => makeStr(pack), [pack]);
@@ -349,6 +365,54 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [boite, setBoite, pack, rng, feed],
   );
 
+  const fs = useMemo<import("@/os/context").FsApi>(() => {
+    const dateDuJour = () => new Date().toLocaleDateString("fr-FR");
+    const refuser = (erreur: string, vars?: Record<string, string>) =>
+      runAction({ type: "dialog", dialog: { title: str("fichiers.titre"), icon: "erreur", body: pack.strings[erreur] ? str(erreur, vars) : erreur, buttons: [{ label: "OK" }] } });
+    const appliquer = (op: (d: Disque) => Resultat) => {
+      const r = op(disqueRef.current);
+      if (!r.ok) {
+        refuser(r.erreur, r.vars);
+        return null;
+      }
+      disqueRef.current = r.disque;
+      setDisqueState(r.disque);
+      try {
+        window.localStorage.setItem(cleDisque, JSON.stringify(r.disque));
+      } catch {
+        /* disque non retenu : trop plein, ou navigation privée */
+      }
+      return r.chemins;
+    };
+    return {
+      disque,
+      appliquer,
+      deposer: (chemins, depot, copie = false) => {
+        if (!chemins.length) return [];
+        if (depot === POUBELLE) {
+          const r = appliquer((d) => supprimer(d, chemins, dateDuJour()));
+          if (r) playSound("ding");
+          return r;
+        }
+        return appliquer((d) => deplacer(d, chemins, depot, copie));
+      },
+      ouvrir: (chemin) => {
+        if (chemin === POUBELLE) return openApp("fichiers", { path: POUBELLE });
+        const n = resoudre(disqueRef.current.racine, chemin);
+        if (!n) return refuser("fichiers.err.introuvable", { nom: chemin });
+        if (n.type === "dossier") {
+          if (n.locked) runAction({ type: "dialog", dialog: { title: str("fichiers.verrouille"), icon: "erreur", body: n.locked, buttons: [{ label: str("fichiers.verrouille.ok") }] } });
+          else openApp("fichiers", { path: chemin });
+        } else if (n.type === "texte") openApp("texte", { path: chemin });
+        else if (n.type === "image") openApp("visionneuse", { path: chemin });
+        else openApp(n.app, n.args);
+      },
+      pressePapiers,
+      setPressePapiers,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [disque, pressePapiers, pack, str, runAction, openApp, cleDisque]);
+
   const api = useMemo<OsApi>(
     () => ({
       pack,
@@ -364,6 +428,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       showScreensaver: () => setSaver(true),
       mail,
       distinctions: decor,
+      fs,
       showMenu: (at, items: MenuItem[]) => {
         const ecran = document.querySelector<HTMLElement>(".ecran");
         if (!ecran) return;
@@ -372,7 +437,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         setCtxMenu({ x: (at.clientX - r.left) * k, y: (at.clientY - r.top) * k, items });
       },
     }),
-    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail, decor],
+    [pack, user, settings, setSettings, openApp, runAction, feed, str, rng, playSound, mail, decor, fs],
   );
 
   // Session : on retrouve ses fenêtres, sauf après un arrêt brutal.
