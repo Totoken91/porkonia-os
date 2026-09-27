@@ -35,7 +35,7 @@ export function ChannelPork() {
   const cleProgramme = `${ci}-${direct.slot}-${Math.round(maintenant + ci * DECALAGE - t)}`;
   const voix = voiceAt(p, t);
 
-  useSonTv({
+  const son_ = useSonTv({
     actif: son && settings.sons,
     lecture: true,
     musique: p.music,
@@ -78,7 +78,7 @@ export function ChannelPork() {
   }, [aPrecharger]);
 
   return (
-    <div className="app-col tv">
+    <div className="app-col tv" onPointerDown={() => son_.bloque && son_.debloquer()}>
       <EcranVhs
         image={p.videoSrc ? null : s.image}
         video={p.videoSrc}
@@ -107,6 +107,11 @@ export function ChannelPork() {
         mention={s.caption}
         soustitre={soustitres && !s.meteo && !s.fond ? subtitle : null}
       />
+      {son_.bloque && (
+        <button className="pk-btn tv-activer-son" onClick={son_.debloquer} data-testid="tv-activer-son">
+          {str("tv.activerSon")}
+        </button>
+      )}
       <div className="pk-toolbar tv-commandes">
         <button className="pk-btn small" onClick={() => zap(-1)} data-testid="tv-precedente">◂ Chaîne</button>
         <span className="tv-numero pk-sunken" aria-live="polite">

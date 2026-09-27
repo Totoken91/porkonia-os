@@ -2,32 +2,36 @@
 /**
  * Bande son de Channel Pork : musique de fond bouclée (déjà dégradée « VHS » dans le fichier),
  * voix off calée sur le programme, musique baissée sous la voix. Muet si les sons sont coupés.
- * Les voix de l'émission en cours et de la suivante sont préchargées : une réplique qui commence
- * part du début, tout de suite ; seule une réplique prise en cours (arrivée sur la chaîne) est reprise au milieu.
+ * Chaque réplique a son propre lecteur, lancé aussitôt ; les fichiers de l'émission en cours et de la
+ * suivante sont déjà dans le cache du navigateur, pour qu'elle parte sans délai. Une réplique qui commence
+ * part du début ; seule une réplique prise en cours (arrivée sur la chaîne) reprend au milieu.
+ * Si le navigateur refuse le son (aucun clic sur la page), `bloque` passe à vrai : `debloquer` est à
+ * appeler depuis un clic.
  */
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MUSIQUE = 0.55;
 const MUSIQUE_SOUS_VOIX = 0.22;
 
+const dejaCharges = new Set<string>();
+
 export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string; voix: { cle: string; src: string; offset: number } | null; precharge: string[] }) {
   const musique = useRef<HTMLAudioElement | null>(null);
-  const cache = useRef(new Map<string, HTMLAudioElement>());
-  const element = (src: string) => {
-    let a = cache.current.get(src);
-    if (!a) {
-      a = new Audio();
-      a.preload = "auto";
-      a.src = src;
-      cache.current.set(src, a);
-    }
-    return a;
-  };
   const voix = useRef<HTMLAudioElement | null>(null);
   const cleVoix = useRef<string | null>(null);
+  const [bloque, setBloque] = useState(false);
   const joue = o.actif && o.lecture;
   const voixDemandee = useRef(o.voix);
   voixDemandee.current = o.voix;
+
+  const lancer = useCallback((a: HTMLAudioElement) => {
+    void a.play().then(
+      () => setBloque(false),
+      (e: unknown) => {
+        if (e instanceof DOMException && e.name === "NotAllowedError") setBloque(true);
+      },
+    );
+  }, []);
 
   // Musique : continue d'un programme à l'autre si c'est la même piste.
   useEffect(() => {
@@ -44,25 +48,22 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
   useEffect(() => {
     const a = musique.current;
     if (!a) return;
-    if (joue) void a.play().catch(() => undefined);
+    if (joue) lancer(a);
     else a.pause();
-  }, [joue, o.musique]);
+  }, [joue, o.musique, lancer]);
 
-  // Préchargement : voix de l'émission en cours et de la suivante ; le reste est libéré.
+  // Préchargement dans le cache HTTP (sans lecteur) : voix de l'émission en cours et de la suivante.
   const liste = o.precharge.join("|");
   useEffect(() => {
     if (!o.actif) return;
-    const voulues = new Set(liste.split("|").filter(Boolean));
-    for (const src of voulues) element(src);
-    for (const [src, a] of cache.current)
-      if (!voulues.has(src) && a !== voix.current) {
-        a.pause();
-        cache.current.delete(src);
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    for (const src of liste.split("|").filter(Boolean)) {
+      if (dejaCharges.has(src)) continue;
+      dejaCharges.add(src);
+      void fetch(src).then((r) => r.blob()).catch(() => dejaCharges.delete(src));
+    }
   }, [liste, o.actif]);
 
-  // Voix : nouvelle réplique → lecture depuis le début (ou depuis où en est le direct si on arrive en cours).
+  // Voix : nouvelle réplique → nouveau lecteur, lancé tout de suite.
   const cle = o.voix?.cle ?? null;
   useEffect(() => {
     const v = voixDemandee.current;
@@ -73,26 +74,28 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
     }
     let a = voix.current;
     if (!a || cleVoix.current !== v.cle) {
-      const suivante = element(v.src);
-      if (a && a !== suivante) a.pause();
-      a = suivante;
+      a?.pause();
+      a = new Audio(v.src);
       voix.current = a;
       cleVoix.current = v.cle;
-      const depuis = performance.now();
-      const enCours = v.offset > 0.4;
-      const caler = () => {
-        try {
-          a!.currentTime = enCours ? v.offset + (performance.now() - depuis) / 1000 : 0;
-        } catch {
-          /* position refusée tant que le fichier n'est pas prêt */
-        }
-      };
-      if (a.readyState >= 1) caler();
-      else a.addEventListener("loadedmetadata", caler, { once: true });
+      if (v.offset > 0.4) {
+        // Arrivée en cours de réplique : on la reprend où en est le direct, une fois le fichier prêt.
+        const depuis = performance.now();
+        const lu = a;
+        const offset = v.offset;
+        lu.addEventListener(
+          "loadedmetadata",
+          () => {
+            const t = offset + (performance.now() - depuis) / 1000;
+            if (t < lu.duration - 0.2) lu.currentTime = t;
+          },
+          { once: true },
+        );
+      }
     }
-    void a.play().catch(() => undefined);
+    lancer(a);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [joue, cle]);
+  }, [joue, cle, lancer]);
 
   // Ducking : la musique baisse tant que la voix parle.
   useEffect(() => {
@@ -110,8 +113,16 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
   useEffect(
     () => () => {
       musique.current?.pause();
-      for (const a of cache.current.values()) a.pause();
+      voix.current?.pause();
     },
     [],
   );
+
+  /** À appeler depuis un clic : relance la musique et la réplique en cours. */
+  const debloquer = useCallback(() => {
+    if (musique.current) lancer(musique.current);
+    if (voix.current && !voix.current.ended) lancer(voix.current);
+  }, [lancer]);
+
+  return { bloque: bloque && joue, debloquer };
 }

@@ -505,6 +505,8 @@
   .tv-commandes { background: var(--face); }
   .tv-progression { flex: 1; min-width: 80px; height: 10px; padding: 0; }
   .tv-progression i { display: block; height: 100%; background: var(--color-rouge); }
+  .tv { position: relative; }
+  .tv-activer-son { position: absolute; left: 50%; top: 40%; transform: translateX(-50%); z-index: 2; max-width: 80%; }
   .tv-numero { padding: 1px 8px; white-space: nowrap; background: #10150f; color: #5dff72; }
   .tv-guide { display: flex; flex-direction: column; gap: 2px; padding: 4px 6px 6px; background: var(--color-noir); color: var(--color-creme); }
   .tv-guide b { font-weight: bold; white-space: nowrap; color: #f3d58f; }

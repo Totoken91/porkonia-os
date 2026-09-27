@@ -133,8 +133,13 @@ try {
     });
     await page.waitForTimeout(600);
     await shot(page, `${tag}-06-channel-pork`);
+    const avantZap = await page.evaluate(() => window.__lectures.length);
     await page.getByTestId("tv-zapper").click();
     await page.locator(".tv-numero", { hasText: "02" }).waitFor();
+    // Après le zapping, une voix de la nouvelle chaîne doit partir (régression : seules celles de Canal 1 jouaient).
+    await page.waitForFunction((n) => window.__lectures.slice(n).some((s) => /channel-pork\/(?!quiet|brume-nappe)[a-z0-9-]+\.mp3/.test(s)), avantZap, { timeout: 15000 }).catch(async () => {
+      throw new Error(`Aucune voix après le zapping : ${await page.evaluate((n) => window.__lectures.slice(n).join(" "), avantZap)}`);
+    });
     // Attente image par image : le navigateur sans écran ne produit sinon pas toujours de nouvelles images.
     await page.waitForFunction((t0) => performance.now() - t0 > 1500, await page.evaluate(() => performance.now()), { polling: "raf" });
     await shot(page, `${tag}-06b-channel-pork-zap`);

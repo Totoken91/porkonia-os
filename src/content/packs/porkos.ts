@@ -10,6 +10,7 @@ const P = "https://porkopedia.totoken.chatgpt.site/assets/";
 const V = "/audio/channel-pork/";
 const MUSIQUE = `${V}quiet-morning-vhs.mp3`;
 const NAPPE_BRUME = `${V}brume-nappe.mp3`;
+const MUSIQUE_METEO = `${V}meteo-musique-vhs.mp3`;
 /** Images de la pub Douzi Ambrée (fournies pour PorkOS, hébergées ici). */
 const T = "/tv/";
 
@@ -864,7 +865,7 @@ export const porkosPack: ContentPack = {
         { image: `${P}bestiaire-poule-wifi.jpg`, seconds: 13.68, chyron: "PETITES BÊTES DE LA RÉPUBLIQUE", focus: [0.3, 0.6] },
         { image: `${P}bestiaire-poule-wifi.jpg`, seconds: 17.1, chyron: "POULE WI-FI — Lardombre", zoom: 1.4, focus: [0.35, 0.7] },
         { image: `${P}bestiaire-canard-autotune.jpg`, seconds: 16.69, chyron: "CANARD AUTO-TUNE — Truffe-sur-Neige", zoom: 1.3, focus: [0.55, 0.75] },
-        { image: `${P}bestiaire-herisson-usb.jpg`, seconds: 13.26, chyron: "HÉRISSON USB — Grottes Obscures", zoom: 1.2, focus: [0.6, 0.45] },
+        { image: `${P}bestiaire-herisson-usb.jpg`, seconds: 13.26, chyron: "HÉRISSON USB — Grottes Obscures", zoom: 1.3, focus: [0.65, 0.55] },
         { image: `${P}bestiaire-ours-veille-prolongee.jpg`, seconds: 15.13, chyron: "OURS EN VEILLE PROLONGÉE — Cap Goustru", focus: [0.4, 0.6] },
         { image: `${P}bestiaire-raton-laveur-root.jpg`, seconds: 13.5, chyron: "RATON LAVEUR ROOT", zoom: 1.3, focus: [0.35, 0.6] },
         { image: `${P}bestiaire-chat-du-mode-avion.jpg`, seconds: 19.84, chyron: "CHAT DU MODE AVION — Douzi City", zoom: 1.3, focus: [0.55, 0.7] },
@@ -908,16 +909,16 @@ export const porkosPack: ContentPack = {
         { image: `${P}dj-viteau-grand-zouk.jpg`, seconds: 13.58, chyron: "LE GRAND ZOUK — Grande Halle des Brasseurs", focus: [0.5, 0.3] },
         { image: `${P}dj-viteau-grand-zoukeur.jpg`, seconds: 16.35, chyron: "DJ VITEAU — Grand Zoukeur de la République", focus: [0.6, 0.3] },
         { image: `${P}dj-viteau-studio.jpg`, seconds: 15.08, chyron: "LE CODE VITEAU — 1 doigt : les basses", focus: [0.4, 0.3] },
-        { image: `${P}dj-viteau-decale-quach.jpg`, seconds: 14.74, chyron: "DÉCALÉ QUACH — Le 4e pas tombe hors du rythme", focus: [0.55, 0.3] },
+        { image: `${P}dj-viteau-decale-quach.jpg`, seconds: 14.0, chyron: "DÉCALÉ QUACH — Le 4e pas tombe hors du rythme", focus: [0.55, 0.3] },
         { image: `${P}dj-viteau-grand-zouk.jpg`, seconds: 24.93, chyron: "GRAND ZOUK DU DEUXIÈME SERVICE", zoom: 1.3, focus: [0.5, 0.3] },
       ],
       subtitles: [
         { at: 0.6, dur: 12.58, voice: `${V}zouk-0.mp3`, text: "Mesdames et messieurs, bonsoir, et bienvenue au Grand Zouk de la République ! Ce soir, en direct de la Grande Halle des Brasseurs, l'homme qui fait danser les banquets : DJ Viteau !" },
         { at: 13.88, dur: 15.65, voice: `${V}zouk-1.mp3`, text: "DJ Viteau, c'est le plus grand musicien du pays. Sa spécialité : faire danser toute une salle sans jamais interrompre le service du repas. Il a même installé ses platines entre le buffet de porc et le bar à bière. Pour ne vexer personne." },
         { at: 30.23, dur: 14.38, voice: `${V}zouk-2.mp3`, text: "Sur scène, il ne parle pas. Il fait des signes. Un doigt levé : on monte les basses. Deux doigts : on apporte le plat suivant. Et la main entière : un gobelin a encore débranché la sono." },
-        { at: 45.31, dur: 14.04, voice: `${V}zouk-3.mp3`, text: "Et voici son tube le plus célèbre : Décalé Quach ! Une danse de groupe où le quatrième pas tombe volontairement à côté du rythme. Si vous le faites en rythme, vous êtes raccompagné au buffet." },
-        { at: 60.05, dur: 13.03, voice: `${V}zouk-4.mp3`, text: "Petit souvenir pour finir : l'an dernier, ce Grand Zouk devait durer deux heures. Il s'est terminé le lendemain matin, quand le petit déjeuner a remplacé le buffet de nuit. Personne n'était parti." },
-        { at: 73.78, dur: 9.1, voice: `${V}zouk-5.mp3`, text: "Nombre de chopes servies ce soir-là : inconnu. Le compteur s'est remis à zéro tout seul. Par pudeur. Bonne nuit, la République !" },
+        { at: 45.31, dur: 13.3, voice: `${V}zouk-3b.mp3`, text: "Et voici son tube le plus célèbre : Décalé Quach ! Une danse de groupe où le quatrième pas tombe volontairement à côté du rythme. Si vous le faites en rythme, vous êtes raccompagné au buffet." },
+        { at: 59.31, dur: 13.03, voice: `${V}zouk-4.mp3`, text: "Petit souvenir pour finir : l'an dernier, ce Grand Zouk devait durer deux heures. Il s'est terminé le lendemain matin, quand le petit déjeuner a remplacé le buffet de nuit. Personne n'était parti." },
+        { at: 73.04, dur: 9.1, voice: `${V}zouk-5.mp3`, text: "Nombre de chopes servies ce soir-là : inconnu. Le compteur s'est remis à zéro tout seul. Par pudeur. Bonne nuit, la République !" },
       ],
     },
     {
@@ -1003,7 +1004,7 @@ export const porkosPack: ContentPack = {
       id: "meteo",
       title: "La Météo de la Mousse",
       kind: "meteo",
-      music: MUSIQUE,
+      music: MUSIQUE_METEO,
       slides: [
         { image: `${T}meteo-carte.jpg`, seconds: 8.48, fixe: true, meteo: { titre: "La Météo de la Mousse", points: [{lieu: "Nouvelle Groin"}, {lieu: "Biereval"}, {lieu: "Port-Cochon"}, {lieu: "Lardonville"}, {lieu: "Truffe-sur-Neige"}, {lieu: "Hamelot"}, {lieu: "Saucissonnia"}, {lieu: "Porcinia"}, {lieu: "Douzi City"}, {lieu: "Belle-Côte"}, {lieu: "Grasset"}, {lieu: "Porcalis"}] } },
         { image: `${T}meteo-carte.jpg`, seconds: 19.07, fixe: true, meteo: { titre: "Demain matin", points: [{lieu: "Truffe-sur-Neige", icone: "neige"}, {lieu: "Hamelot", icone: "brouillard"}, {lieu: "Nouvelle Groin", icone: "nuages"}, {lieu: "Port-Cochon", icone: "pluie"}, {lieu: "Lardonville", icone: "pluie"}, {lieu: "Douzi City", icone: "nuages"}, {lieu: "Saucissonnia", icone: "eclaircies"}, {lieu: "Porcinia", icone: "soleil"}, {lieu: "Belle-Côte", icone: "soleil"}, {lieu: "Grasset", icone: "eclaircies"}, {lieu: "Porcalis", icone: "soleil"}] } },
@@ -1151,6 +1152,7 @@ export const porkosPack: ContentPack = {
     "nav.statut": "Connexion PigNet : sécurisée par la bienveillance.",
     "tv.canal": "Guide des programmes",
     "tv.enCours": "En ce moment",
+    "tv.activerSon": "Le son a été retenu par votre navigateur. Cliquer pour l'activer",
     "tv.aSuivre": "À suivre",
     "tv.etiquette.journal": "Info",
     "tv.etiquette.publicite": "Pub",
