@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
+export type AppKind = "bienvenue" | "executer" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte";
 
-export type IconKey = "embleme" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
+export type IconKey = "embleme" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas";
 
 export interface AppManifest {
   id: string;
@@ -132,6 +132,8 @@ export type ActionRef =
   | { type: "update"; id: string }
   | { type: "open"; app: string; args?: Record<string, string> }
   | { type: "sleep" }
+  | { type: "shutdown" }
+  | { type: "restart" }
   | { type: "lock" }
   | { type: "signal"; name: string };
 
@@ -166,7 +168,17 @@ export interface ContentPack {
   welcome: { title: string; intro: string; tips: string[]; links: { label: string; action: ActionRef }[] };
   filesystem: FsNode;
   mails: Mail[];
-  boot: { bios: string[]; splash: { title: string; slogan: string }; skipHint: string };
+  boot: {
+    bios: string[];
+    splash: { title: string; slogan: string };
+    skipHint: string;
+    /** Contrôle affiché au démarrage suivant un arrêt brutal (courant coupé, onglet fermé). */
+    scandisk: { title: string; lines: string[]; outro: string };
+  };
+  /** Fermeture propre du système. */
+  shutdown: { closing: string; safe: string; restarting: string };
+  /** Boîte « Exécuter… » : commandes reconnues. */
+  run: { prompt: string; aliases: Record<string, { app: string; args?: Record<string, string> }>; notFound: string };
   login: { prompt: string; emptyPassword: string; acceptedAny: string[]; patriotic: string; wrongPassword: string; guestNotice: string };
   /** Dépêches de l'agence de presse nationale (portail PigNet). */
   news: string[];

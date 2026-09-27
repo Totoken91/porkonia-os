@@ -13,7 +13,11 @@ function Clock() {
     const id = setInterval(() => setNow(new Date()), 5000);
     return () => clearInterval(id);
   }, []);
-  return <span className="heure">{now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "12:12"}</span>;
+  return (
+    <span className="heure" title={now ? now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : undefined}>
+      {now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "12:12"}
+    </span>
+  );
 }
 
 interface Props {
@@ -25,7 +29,7 @@ interface Props {
 type Sub = "programmes" | "accessoires" | null;
 
 export function Taskbar({ windows, focusedId, onTask }: Props) {
-  const { pack, str, openApp, runAction } = useOs();
+  const { pack, str, openApp, runAction, settings, setSettings } = useOs();
   const [open, setOpen] = useState(false);
   const [sub, setSub] = useState<Sub>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -100,6 +104,12 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
                 </button>
               </li>
             )}
+            <li onPointerEnter={() => setSub(null)}>
+              <button onClick={go(() => openApp("executer"))} data-testid="menu-executer">
+                <Icon name="executer" size={32} />
+                <span>{str("menu.executer")}</span>
+              </button>
+            </li>
             <li className="separateur" />
             <li onPointerEnter={() => setSub(null)}>
               <button onClick={go(() => runAction({ type: "lock" }))}>
@@ -126,7 +136,7 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
           {windows.map((w) => {
             const m = pack.apps.find((a) => a.id === w.appId);
             return (
-              <button key={w.id} className="tb-task pk-btn" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)} title={w.title}>
+              <button key={w.id} data-task={w.id} className="tb-task pk-btn" aria-pressed={w.id === focusedId && !w.minimized} onClick={() => onTask(w)} title={w.title}>
                 {m && <Icon name={m.icon} size={16} />}
                 <span>{w.title}</span>
               </button>
@@ -134,6 +144,12 @@ export function Taskbar({ windows, focusedId, onTask }: Props) {
           })}
         </div>
         <div className="tb-tray">
+          <button className="tb-son" onClick={() => setSettings({ sons: !settings.sons })} title={str("barre.sons")} aria-pressed={settings.sons} aria-label={str("config.sons")}>
+            <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
+              <path d="M2 6h3l4-3v10l-4-3H2z" fill="#e8e0cc" stroke="#000" />
+              {settings.sons ? <path d="M11 5c1 1 1 5 0 6M13 3c2 2 2 8 0 10" fill="none" stroke="#000" /> : <path d="M11 5l4 6M15 5l-4 6" stroke="#b3121b" strokeWidth="1.5" />}
+            </svg>
+          </button>
           <span title="Douzi Ambrée : niveau de mousse conforme">
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M3 5h8v9H3z" fill="#e0a526" stroke="#2a2118" />

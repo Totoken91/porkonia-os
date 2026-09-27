@@ -270,6 +270,38 @@ const DESSINS: Record<Exclude<IconKey, "embleme">, Dessin> = {
     t.hline(13, 7, 4, "N");
     t.set(20, 8, "W");
   },
+  ordinateur: (t) => {
+    t.rect(6, 2, 21, 17, "E");
+    t.hline(6, 2, 21, "W");
+    t.vline(6, 2, 17, "W");
+    t.vline(26, 3, 16, "d");
+    t.rect(8, 4, 16, 11, "b");
+    t.rect(9, 5, 14, 9, "C");
+    t.rect(9, 5, 14, 2, "m");
+    t.hline(10, 9, 8, "W");
+    t.hline(10, 11, 5, "W");
+    t.set(22, 17, "v");
+    t.rect(13, 19, 7, 2, "g");
+    t.rect(3, 21, 27, 8, "E");
+    t.hline(3, 21, 27, "W");
+    t.hline(4, 28, 26, "d");
+    t.rect(6, 24, 9, 2, "d");
+    t.rect(19, 24, 7, 1, "k");
+    t.set(27, 24, "v");
+  },
+  executer: (t) => {
+    t.rect(3, 5, 26, 21, "g");
+    t.hline(3, 5, 26, "W");
+    t.vline(3, 5, 21, "W");
+    t.rect(4, 6, 24, 3, "m");
+    t.rect(24, 6, 3, 3, "g");
+    t.rect(5, 11, 22, 13, "k");
+    t.hline(7, 13, 3, "y");
+    t.set(10, 14, "y");
+    t.hline(7, 15, 3, "y");
+    t.rect(12, 17, 4, 2, "W");
+    t.hline(7, 21, 8, "y");
+  },
   config: (t) => {
     t.rect(3, 4, 26, 24, "g");
     t.hline(3, 4, 26, "W");
@@ -285,33 +317,125 @@ const DESSINS: Record<Exclude<IconKey, "embleme">, Dessin> = {
 
 const cache = new Map<string, Grid>();
 
-/** Grille 32×32 (ou 16×16 dérivée) d'une icône. */
+/** Grille 32×32, ou 16×16 redessinée (couleurs réduites puis contour refait à la petite taille). */
 export function iconGrid(name: Exclude<IconKey, "embleme">, n: 32 | 16 = 32): Grid {
   const key = `${name}:${n}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const t = new Toile(32);
   DESSINS[name](t);
-  let g = t.outline();
-  if (n === 16) g = reduire(g);
+  let g: Grid;
+  if (n === 32) g = t.outline();
+  else {
+    const petit = new Toile(16);
+    petit.px = reduire(t.px);
+    g = petit.outline();
+  }
   cache.set(key, g);
   return g;
 }
 
-/** 32 → 16 : chaque bloc 2×2 prend sa couleur la plus fréquente (le vide perd les égalités). */
+/** 32 → 16 : un bloc 2×2 garde la couleur dominante s'il contient au moins deux pixels peints. */
 function reduire(g: Grid): Grid {
   const out: Grid = [];
   for (let y = 0; y < 16; y++)
     for (let x = 0; x < 16; x++) {
-      const bloc = [g[2 * y * 32 + 2 * x], g[2 * y * 32 + 2 * x + 1], g[(2 * y + 1) * 32 + 2 * x], g[(2 * y + 1) * 32 + 2 * x + 1]];
-      const count = new Map<string | null, number>();
-      for (const c of bloc) count.set(c ?? null, (count.get(c ?? null) ?? 0) + 1);
-      let best: string | null = null;
-      let bestN = 0;
-      for (const [c, k] of count) if (k > bestN || (k === bestN && best === null)) [best, bestN] = [c, k];
-      out.push(best);
+      const bloc = [g[2 * y * 32 + 2 * x], g[2 * y * 32 + 2 * x + 1], g[(2 * y + 1) * 32 + 2 * x], g[(2 * y + 1) * 32 + 2 * x + 1]].filter(Boolean) as string[];
+      if (bloc.length < 2) {
+        out.push(null);
+        continue;
+      }
+      const count = new Map<string, number>();
+      for (const c of bloc) count.set(c, (count.get(c) ?? 0) + (c === "k" ? 0.9 : 1));
+      out.push([...count].sort((a, b) => b[1] - a[1])[0]![0]);
     }
   return out;
+}
+
+/* ------------------------------- Curseurs ------------------------------- */
+
+const CURSEURS: Record<"fleche" | "sablier" | "main", { rows: string[]; hot: [number, number] }> = {
+  fleche: {
+    hot: [0, 0],
+    rows: [
+      "X...........",
+      "XX..........",
+      "XWX.........",
+      "XWWX........",
+      "XWWWX.......",
+      "XWWWWX......",
+      "XWWWWWX.....",
+      "XWWWWWWX....",
+      "XWWWWWWWX...",
+      "XWWWWWWWWX..",
+      "XWWWWWWWWWX.",
+      "XWWWWWWXXXXX",
+      "XWWWXWWX....",
+      "XWWX.XWWX...",
+      "XWX..XWWX...",
+      "XX....XWWX..",
+      "X.....XWWX..",
+      ".......XWWX.",
+      ".......XWWX.",
+      "........XX..",
+    ],
+  },
+  sablier: {
+    hot: [6, 8],
+    rows: [
+      "XXXXXXXXXXXXX",
+      "XWWWWWWWWWWWX",
+      "XXXXXXXXXXXXX",
+      ".XWWWWWWWWWX.",
+      ".XWYYYYYYYWX.",
+      ".XWWYYYYYWWX.",
+      "..XWWYYYWWX..",
+      "...XWWYWWX...",
+      "....XWYWX....",
+      "...XWWYWWX...",
+      "..XWWWYWWWX..",
+      ".XWWWWYWWWWX.",
+      ".XWWWYYYWWWX.",
+      ".XWYYYYYYYWX.",
+      "XXXXXXXXXXXXX",
+      "XWWWWWWWWWWWX",
+      "XXXXXXXXXXXXX",
+    ],
+  },
+  main: {
+    hot: [5, 0],
+    rows: [
+      ".....XX.........",
+      "....XWWX........",
+      "....XWWX........",
+      "....XWWX........",
+      "....XWWXXX......",
+      "....XWWXWWXXX...",
+      "....XWWXWWXWWXX.",
+      ".XX.XWWXWWXWWXWX",
+      "XWWXXWWWWWWWWXWX",
+      "XWWWXWWWWWWWWWWX",
+      ".XWWWWWWWWWWWWWX",
+      "..XWWWWWWWWWWWWX",
+      "..XWWWWWWWWWWWX.",
+      "...XWWWWWWWWWWX.",
+      "...XWWWWWWWWWX..",
+      "....XWWWWWWWWX..",
+      "....XXXXXXXXXX..",
+    ],
+  },
+};
+
+/** Valeur CSS `cursor` d'un curseur pixel, agrandi d'un facteur entier. */
+export function cursorCss(nom: keyof typeof CURSEURS, zoom = 1, repli = "default"): string {
+  const { rows, hot } = CURSEURS[nom];
+  const couleurs: Record<string, string> = { X: "#000", W: "#fff", Y: "#e0a526" };
+  let rects = "";
+  rows.forEach((row, y) => [...row].forEach((ch, x) => ch !== "." && (rects += `<rect x='${x}' y='${y}' width='1.02' height='1.02' fill='${couleurs[ch]}'/>`)));
+  const w = rows[0]!.length;
+  const h = rows.length;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${w * zoom}' height='${h * zoom}' viewBox='0 0 ${w} ${h}' shape-rendering='crispEdges'>${rects}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hot[0] * zoom} ${hot[1] * zoom}, ${repli}`;
 }
 
 /** Une traînée SVG par couleur, pixels regroupés en segments horizontaux. */

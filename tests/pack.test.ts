@@ -46,7 +46,7 @@ function problems(pack: ContentPack): string[] {
 describe("pack PorkOS", () => {
   it("est cohérent", () => expect(problems(porkosPack)).toEqual([]));
   it("déclenche des signaux que le système émet vraiment", () => {
-    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:zapper", "texte:enregistrer", "pub:cta", "nav:actualiser"];
+    const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:zapper", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser"];
     for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect(emitted).toContain(r.trigger.name);
   });
   it("ne référence que des images d'origine (aucune copie locale hors emblème)", () => {
@@ -116,5 +116,16 @@ describe("système de fichiers et réglages", () => {
   it("ramène tout réglage fantaisiste à la valeur recommandée", () => {
     expect(sanitizeSettings(null)).toEqual(DEFAULT_SETTINGS);
     expect(sanitizeSettings({ crt: 3, hymne: 500, fond: "rien", rappels: "oui" })).toEqual({ ...DEFAULT_SETTINGS, crt: 12, hymne: 100 });
+  });
+});
+
+describe("Exécuter", async () => {
+  const { resolveCommand } = await import("@/apps/executer/Executer");
+  it("reconnaît les alias, les noms de programme et refuse le reste", () => {
+    expect(resolveCommand("  NAPPE ", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "nappe-vide" });
+    expect(resolveCommand("notepad.exe", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "texte" });
+    expect(resolveCommand("Channel Pork", porkosPack.run.aliases, porkosPack.apps)).toEqual({ app: "channel-pork" });
+    expect(resolveCommand("format c:", porkosPack.run.aliases, porkosPack.apps)).toBeNull();
+    for (const a of Object.values(porkosPack.run.aliases)) expect(porkosPack.apps.some((x) => x.id === a.app)).toBe(true);
   });
 });

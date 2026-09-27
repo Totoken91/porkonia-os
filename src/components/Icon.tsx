@@ -3,6 +3,7 @@
  * Aucun emoji, aucune image externe.
  */
 import type { DialogSpec, IconKey } from "@/content/types";
+import { useId } from "react";
 import { gridPaths, iconGrid } from "./pixel";
 
 const R = "#b3121b";
@@ -10,8 +11,9 @@ const N = "#15110d";
 const C = "#efe3c6";
 
 /** Icône pixel : grille 16×16 pour les petites tailles, 32×32 au-delà (voir pixel.ts). */
-export function Icon({ name, size = 32 }: { name: IconKey; size?: number }) {
-  if (name === "embleme") return <img src="/brand/embleme-64.png" alt="" width={size} height={size} />;
+export function Icon({ name, size = 32, selected }: { name: IconKey; size?: number; selected?: boolean }) {
+  const trame = useId();
+  if (name === "embleme") return <img src="/brand/embleme-64.png" alt="" width={size} height={size} className={selected ? "embleme-selection" : undefined} />;
   const n = size <= 20 ? 16 : 32;
   const paths = gridPaths(iconGrid(name, n));
   return (
@@ -19,6 +21,18 @@ export function Icon({ name, size = 32 }: { name: IconKey; size?: number }) {
       {paths.map((p) => (
         <path key={p.color} d={p.d} fill={p.color} />
       ))}
+      {selected && (
+        <>
+          {/* Sélection d'époque : l'icône est tramée d'un pixel sur deux à la couleur de sélection. */}
+          <defs>
+            <pattern id={trame} width="2" height="2" patternUnits="userSpaceOnUse">
+              <rect width="1" height="1" fill="#7a1016" />
+              <rect x="1" y="1" width="1" height="1" fill="#7a1016" />
+            </pattern>
+          </defs>
+          <path d={paths.map((p) => p.d).join("")} fill={`url(#${trame})`} />
+        </>
+      )}
     </svg>
   );
 }

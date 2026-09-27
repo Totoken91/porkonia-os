@@ -2,37 +2,13 @@
 /** Panneau de configuration : tout se règle, puis s'ajuste. Les réglages agissent vraiment sur le système. */
 import { useState } from "react";
 import { useOs } from "@/os/context";
-import type { Fond } from "@/os/settings";
+import { DELAIS_ECONOMISEUR, type Fond } from "@/os/settings";
 
 const TABS = ["Affichage", "Son", "Citoyenneté", "Système"] as const;
 type Tab = (typeof TABS)[number];
 
-/** Hymne national (extrait réglementaire de douze notes), joué au synthétiseur d'État. */
-function playHymne(volume: number) {
-  const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!Ctx) return;
-  const ctx = new Ctx();
-  const notes = [392, 392, 523, 523, 587, 523, 494, 440, 392, 440, 494, 523];
-  const dur = [0.3, 0.15, 0.45, 0.3, 0.3, 0.3, 0.3, 0.3, 0.45, 0.15, 0.3, 0.9];
-  let t = ctx.currentTime + 0.05;
-  notes.forEach((f, i) => {
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = "square";
-    o.frequency.value = f;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(0.12 * (volume / 100), t + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur[i]! * 0.95);
-    o.connect(g).connect(ctx.destination);
-    o.start(t);
-    o.stop(t + dur[i]!);
-    t += dur[i]!;
-  });
-  setTimeout(() => void ctx.close(), (t - ctx.currentTime + 0.3) * 1000);
-}
-
 export function Config() {
-  const { settings, setSettings, str, runAction, signal, user, pack } = useOs();
+  const { settings, setSettings, str, runAction, signal, user, pack, playSound, showScreensaver } = useOs();
   const [tab, setTab] = useState<Tab>("Affichage");
 
   const fonds: { v: Fond | "aucun"; label: string }[] = [
@@ -78,6 +54,26 @@ export function Config() {
               <p className="note">{str("config.crt.note")}</p>
             </fieldset>
             <fieldset className="pk-fieldset">
+              <legend>{str("config.economiseur")}</legend>
+              <div className="ligne">
+                <span>{str("economiseur.nom")}</span>
+                <select className="pk-select" value={settings.economiseur} onChange={(e) => setSettings({ economiseur: Number(e.target.value) })} aria-label={str("config.economiseur")}>
+                  {DELAIS_ECONOMISEUR.map((d) => (
+                    <option key={d} value={d}>
+                      {d === 0 ? str("config.economiseur.jamais") : `${d / 60} min`}
+                    </option>
+                  ))}
+                </select>
+                <button className="pk-btn" onClick={showScreensaver} data-testid="config-apercu">
+                  {str("config.economiseur.apercu")}
+                </button>
+              </div>
+              <label className="case-a-cocher">
+                <input type="checkbox" checked={settings.contenuFenetres} onChange={(e) => setSettings({ contenuFenetres: e.target.checked })} />
+                {str("config.contenu")}
+              </label>
+            </fieldset>
+            <fieldset className="pk-fieldset">
               <legend>{str("config.fond")}</legend>
               <div className={`apercu fond-${settings.fond}`} aria-hidden="true" />
               {fonds.map((f) => (
@@ -95,8 +91,20 @@ export function Config() {
             <input type="range" min={12} max={100} value={settings.hymne} onChange={(e) => setSettings({ hymne: Number(e.target.value) })} aria-label={str("config.hymne")} />
             <span className="valeur">{settings.hymne} %</span>
             <p className="note">{str("config.hymne.note")}</p>
-            <button className="pk-btn" onClick={() => playHymne(settings.hymne)}>
+            <button className="pk-btn" onClick={() => playSound("hymne")}>
               {str("config.hymne.ecouter")}
+            </button>
+          </fieldset>
+        )}
+        {tab === "Son" && (
+          <fieldset className="pk-fieldset">
+            <legend>{str("config.sons")}</legend>
+            <label className="case-a-cocher">
+              <input type="checkbox" checked={settings.sons} onChange={(e) => setSettings({ sons: e.target.checked })} />
+              {str("config.sons")}
+            </label>
+            <button className="pk-btn" disabled={!settings.sons} onClick={() => playSound("demarrage")}>
+              {str("config.sons.tester")}
             </button>
           </fieldset>
         )}

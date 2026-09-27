@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import type { ActionRef, ContentPack, UserProfile } from "@/content/types";
 import type { Rng } from "./rng";
+import type { Son } from "./sons";
 import type { Settings } from "./settings";
 import type { Win } from "./windows";
 
@@ -17,6 +18,10 @@ export interface OsApi {
   /** Texte du pack (clé de `strings`), avec remplacement de {variables}. */
   str(key: string, vars?: Record<string, string | number>): string;
   rng: Rng;
+  /** Son système (ignoré si les sons sont coupés). */
+  playSound(son: Son): void;
+  /** Lance l'écran de veille (aperçu). */
+  showScreensaver(): void;
 }
 
 export interface WinApi {

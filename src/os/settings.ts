@@ -9,9 +9,17 @@ export interface Settings {
   hymne: number;
   fond: Fond;
   rappels: boolean;
+  /** Sons système (démarrage, alertes, arrêt). */
+  sons: boolean;
+  /** Délai avant l'écran de veille, en secondes (0 = jamais). */
+  economiseur: number;
+  /** Déplacer les fenêtres « en plein » (true) ou par leur seul contour (false). */
+  contenuFenetres: boolean;
 }
 
-export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true };
+export const DELAIS_ECONOMISEUR = [0, 60, 120, 300];
+
+export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true };
 
 const KEY = "porkos.reglages";
 
@@ -44,5 +52,8 @@ export function sanitizeSettings(v: unknown): Settings {
     hymne: clampPct(o.hymne, d.hymne),
     fond: FONDS.includes(o.fond as Fond) ? (o.fond as Fond) : d.fond,
     rappels: typeof o.rappels === "boolean" ? o.rappels : d.rappels,
+    sons: typeof o.sons === "boolean" ? o.sons : d.sons,
+    economiseur: DELAIS_ECONOMISEUR.includes(o.economiseur as number) ? (o.economiseur as number) : d.economiseur,
+    contenuFenetres: typeof o.contenuFenetres === "boolean" ? o.contenuFenetres : d.contenuFenetres,
   };
 }

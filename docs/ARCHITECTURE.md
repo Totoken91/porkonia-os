@@ -14,15 +14,18 @@ src/
     rng.ts                aléatoire rejouable (mulberry32)
     fs.ts                 chemins du système de fichiers du pack
     settings.ts           réglages (localStorage, assainis)
+    desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
+    sons.ts               sons système synthétisés (WebAudio, aucun fichier)
     context.tsx           OsApi (useOs) et WinApi (useWin) pour les applis
-  components/             coque : Monitor (écran 4:3), Boot, Login, Session (bureau), Wallpaper, WindowFrame, Taskbar, Overlays, Icon
+  components/             coque : Monitor (tube, alimentation), Boot (ScanDisque, BIOS), Login, Session, Desktop, Menu, Economiseur,
+                          Wallpaper, WindowFrame, Taskbar, Overlays, Icon + pixel.ts (icônes et curseurs en pixel art)
   apps/                   une appli = un composant + sa logique pure ; registry.tsx fait le lien kind → composant
   app/                    layout (police du BIOS), page, globals.css (direction « PorkOS 98 »)
 ```
 
 ## Flux
 
-1. `PorkOS` enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle) : PorkBIOS → chargement → connexion → session (→ veille).
+1. `PorkOS` gère l'alimentation (bouton du moniteur) et enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle) : (ScanDisque si le poste n'a pas été arrêté proprement) → PorkBIOS → chargement → connexion → session → fermeture → « vous pouvez éteindre ». Un marqueur en localStorage détecte les arrêts brutaux, y compris un onglet fermé.
 2. `Session` tient les fenêtres (`winReducer`), la file de dialogues, les flash infos, la pub et la mise à jour en cours.
 3. Toutes les secondes, `schedule()` reçoit un `tick` ; ouvrir une appli envoie `app-open` ; une appli peut émettre un `signal` (`nappe:incident`, `tv:zapper`…). Les règles du pack décident de ce qui en découle.
 4. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou une bulle, lancer une pub, une mise à jour, la veille ou le verrouillage.
