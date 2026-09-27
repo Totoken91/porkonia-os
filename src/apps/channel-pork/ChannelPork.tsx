@@ -1,9 +1,10 @@
 "use client";
 /**
- * Channel Pork : un vrai téléviseur. Cinq chaînes en direct (toutes « Canal 1 »), chacune calée sur l'horloge
- * réelle : on arrive en cours d'émission, on regarde ou on zappe. En façade : chaîne ▲▼, volume − +,
- * afficheur du numéro de chaîne et bouton de marche (qui ferme la fenêtre). On déplace le poste par sa coque.
- * Clavier (fenêtre au premier plan) : flèches haut/bas pour les chaînes, + et − pour le volume.
+ * Channel Pork, vu par PorkTV, le logiciel de la carte tuner d'État : cinq chaînes en direct (toutes
+ * « Canal 1 »), chacune calée sur l'horloge réelle : on arrive en cours d'émission, on regarde ou on zappe.
+ * Habillage façon logiciel des années 90 : barre de titre dessinée, image plate, afficheur à cristaux
+ * liquides (chaîne, émission qui défile, volume), boutons CH − + et VOL − +. On déplace la fenêtre par
+ * son panneau. Clavier (fenêtre au premier plan) : flèches haut/bas pour les chaînes, + et − pour le volume.
  */
 import { useEffect, useRef, useState } from "react";
 import { useOs, useWin } from "@/os/context";
@@ -15,7 +16,7 @@ const VOLUME_DEFAUT = 7;
 
 export function ChannelPork() {
   const { pack, str, signal, settings, playSound } = useOs();
-  const { focused, close } = useWin();
+  const { focused, close, minimize } = useWin();
   const chaines = pack.channels;
   const [ci, setCi] = useState(0);
   const [maintenant, setMaintenant] = useState(() => Date.now() / 1000);
@@ -103,8 +104,18 @@ export function ChannelPork() {
   }, [aPrecharger]);
 
   return (
-    <div className="tele" data-poignee onPointerDown={() => son.bloque && son.debloquer()}>
-      <div className="tele-tube" data-poignee>
+    <div className="tuner" onPointerDown={() => son.bloque && son.debloquer()}>
+      <div className="tuner-titre" data-poignee>
+        <b className="tuner-logo">{str("tv.logiciel")}</b>
+        <span className="tuner-sous">{str("tv.logiciel.sous")}</span>
+        <button className="tuner-mini" aria-label={str("tv.reduire")} onClick={minimize}>
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 7h7" stroke="currentColor" strokeWidth="2" /></svg>
+        </button>
+        <button className="tuner-mini" aria-label={str("tv.fermer")} onClick={close} data-testid="window-close">
+          <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
+        </button>
+      </div>
+      <div className="tuner-image">
         <EcranVhs
           image={p.videoSrc ? null : s.image}
           video={p.videoSrc}
@@ -141,35 +152,42 @@ export function ChannelPork() {
           </button>
         )}
       </div>
-      <div className="tele-facade" data-poignee>
-        <div className="tele-marque" data-poignee>
-          <b>{str("tv.marque")}</b>
-          <span>{str("tv.modele")}</span>
+      <div className="tuner-pupitre" data-poignee>
+        <div className="tuner-lcd" aria-live="polite">
+          <div className="tuner-lcd-ligne">
+            <span className="tv-numero">
+              {str("tv.chaine")} {String(ci + 1).padStart(2, "0")}
+            </span>
+            <span className="tuner-lcd-chaine">{ch.name.toUpperCase()}</span>
+          </div>
+          <div className="tuner-lcd-defile" aria-label={p.title}>
+            <span>{`${p.title}  ·  ${p.title}  ·  `}</span>
+          </div>
+          <div className="tuner-lcd-ligne">
+            <span>{str("tv.volume")}</span>
+            <span className="tuner-vu" aria-label={`${volume}/10`}>
+              {Array.from({ length: 10 }, (_, i) => (
+                <i key={i} className={i < volume ? "plein" : undefined} />
+              ))}
+            </span>
+          </div>
         </div>
-        <span className="tele-afficheur tv-numero" aria-live="polite" title={ch.name}>
-          {String(ci + 1).padStart(2, "0")}
-        </span>
-        <div className="tele-groupe">
-          <span className="tele-legende">{str("tv.chaine")}</span>
-          <button className="tele-bouton" aria-label={str("tv.chaineMoins")} onClick={() => zap(-1)} data-testid="tv-precedente">
-            ▼
-          </button>
-          <button className="tele-bouton" aria-label={str("tv.chainePlus")} onClick={() => zap(1)} data-testid="tv-zapper">
-            ▲
-          </button>
-        </div>
-        <div className="tele-groupe">
-          <span className="tele-legende">{str("tv.volume")}</span>
-          <button className="tele-bouton" aria-label={str("tv.volumeMoins")} onClick={() => regler(-1)} data-testid="tv-volume-moins">
+        <div className="tuner-commandes">
+          <span className="tuner-legende">{str("tv.chaine")}</span>
+          <button className="tuner-bouton" aria-label={str("tv.chaineMoins")} onClick={() => zap(-1)} data-testid="tv-precedente">
             −
           </button>
-          <button className="tele-bouton" aria-label={str("tv.volumePlus")} onClick={() => regler(1)} data-testid="tv-volume-plus">
+          <button className="tuner-bouton" aria-label={str("tv.chainePlus")} onClick={() => zap(1)} data-testid="tv-zapper">
+            +
+          </button>
+          <span className="tuner-legende">{str("tv.volume")}</span>
+          <button className="tuner-bouton" aria-label={str("tv.volumeMoins")} onClick={() => regler(-1)} data-testid="tv-volume-moins">
+            −
+          </button>
+          <button className="tuner-bouton" aria-label={str("tv.volumePlus")} onClick={() => regler(1)} data-testid="tv-volume-plus">
             +
           </button>
         </div>
-        <button className="tele-marche" aria-label={str("tv.eteindre")} onClick={close} data-testid="window-close">
-          <i className="tele-voyant" />
-        </button>
       </div>
     </div>
   );

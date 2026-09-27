@@ -1,6 +1,7 @@
 "use client";
 /**
- * Écran VHS de Channel Pork : rendu canvas 4:3 d'une cassette usée.
+ * Écran VHS de Channel Pork : rendu canvas 4:3 d'une cassette usée, vue par une carte tuner (image plate :
+ * le tube, c'est le moniteur de PorkOS qui le simule).
  * Chaîne de dégradation : image (Ken Burns) + habillage d'antenne → luminance nette, chrominance étalée et décalée,
  * écho du signal → ondulation des lignes, tracking, commutation des têtes, drop-outs, grain, noirs délavés →
  * affichage du magnétoscope (net, par-dessus). Aucune lecture de pixels : les images d'origine restent des liens.
@@ -399,20 +400,13 @@ export function EcranVhs(props: EcranVhsProps) {
       o.globalCompositeOperation = "overlay";
       o.globalAlpha = 0.26;
       o.drawImage(bruits[n % 4]!, reduit ? 0 : -Math.floor(Math.random() * 20), reduit ? 0 : -Math.floor(Math.random() * 20));
-      // noirs délavés, légèrement violacés ; lignes de la trame
+      // noirs délavés, légèrement violacés
       o.globalAlpha = 1;
       o.globalCompositeOperation = "screen";
       o.fillStyle = "rgba(34, 20, 46, 0.14)";
       o.fillRect(0, 0, W, H);
+      // Pas de lignes de balayage ni de bombé : c'est l'écran du moniteur qui fait le tube.
       o.globalCompositeOperation = "source-over";
-      o.fillStyle = "rgba(0,0,0,0.16)";
-      for (let y = 1; y < H; y += 2) o.fillRect(0, y, W, 1);
-      // bombé du tube de télévision
-      const v = o.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.85);
-      v.addColorStop(0, "rgba(0,0,0,0)");
-      v.addColorStop(1, "rgba(0,0,0,0.55)");
-      o.fillStyle = v;
-      o.fillRect(0, 0, W, H);
 
       // 5. Affichage du magnétoscope (net, par-dessus la cassette)
       o.font = `20px ${police}`;

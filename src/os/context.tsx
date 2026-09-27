@@ -51,6 +51,8 @@ export interface WinApi {
   setTitle(title: string): void;
   resize(w: number, h: number): void;
   close(): void;
+  /** Réduire dans la barre des tâches (fenêtres habillées, qui dessinent leurs propres boutons). */
+  minimize(): void;
 }
 
 export const OsContext = createContext<OsApi | null>(null);

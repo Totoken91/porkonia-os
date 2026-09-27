@@ -112,6 +112,7 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
       setTitle: (title) => dispatch({ type: "retitle", id: win.id, title }),
       resize: (w, h) => dispatch({ type: "resize", id: win.id, w, h, vp }),
       close: () => dispatch({ type: "close", id: win.id }),
+      minimize: () => dispatch({ type: "minimize", id: win.id }),
       registerMenu,
     }),
     [win, focused, dispatch, vp, registerMenu],

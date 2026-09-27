@@ -44,7 +44,7 @@ export interface AppManifest {
   /** Texte de la boîte « À propos de… ». */
   about?: string;
   /** Fenêtre habillée : pas de barre de titre ni de menus, l'appli dessine son propre boîtier. */
-  habillage?: "tele";
+  habillage?: "tuner";
 }
 
 export interface DesktopIcon {
