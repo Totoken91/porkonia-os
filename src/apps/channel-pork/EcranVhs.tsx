@@ -28,6 +28,8 @@ export interface EcranVhsProps {
   zoom?: number;
   /** Fond uni : l'image est posée entière dessus (logo). */
   fond?: string;
+  /** Incrustation de clip musical (artiste, titre), en bas à gauche. */
+  clip?: { artiste: string; titre: string; mention?: string } | null;
   /** Bulletin météo dessiné sur la carte. */
   bulletin?: Bulletin | null;
   bandeau: { etiquette: string; texte: string } | null;
@@ -152,6 +154,24 @@ export function EcranVhs(props: EcranVhsProps) {
         b.fillRect(10, 10, 208, lignes.length * 12 + 6);
         b.fillStyle = "#efe3c6";
         lignes.forEach((ln, i) => b.fillText(ln, 14, 13 + i * 12));
+      }
+      if (p.clip) {
+        // Incrustation de clip, façon chaîne musicale : texte blanc ombré, sans cadre.
+        const lignes: [string, string][] = [
+          [`bold 17px ${affichage}`, p.clip.artiste.toUpperCase()],
+          [`italic 15px ${affichage}`, `« ${p.clip.titre} »`],
+          ...(p.clip.mention ? ([[`10px ${affichage}`, p.clip.mention]] as [string, string][]) : []),
+        ];
+        let y = H - 34 - lignes.length * 17;
+        b.textAlign = "left";
+        for (const [font, texte] of lignes) {
+          b.font = font;
+          b.fillStyle = "rgba(0,0,0,0.75)";
+          b.fillText(texte, 19, y + 1);
+          b.fillStyle = "#fff";
+          b.fillText(texte, 18, y);
+          y += 18;
+        }
       }
       if (p.bandeau) {
         const y = Math.round(H * 0.7);

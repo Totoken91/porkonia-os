@@ -16,8 +16,19 @@ const server = createServer(async (req, res) => {
   let p = join(ROOT, decodeURIComponent(new URL(req.url, "http://x").pathname));
   try {
     if ((await stat(p)).isDirectory()) p = join(p, "index.html");
-    res.writeHead(200, { "content-type": TYPES[extname(p)] ?? "application/octet-stream" });
-    res.end(await readFile(p));
+    // Requêtes partielles, comme sur l'hébergement réel : sans elles, un lecteur audio ne peut pas se positionner.
+    const buf = await readFile(p);
+    const type = TYPES[extname(p)] ?? "application/octet-stream";
+    const r = /bytes=(\d*)-(\d*)/.exec(req.headers.range || "");
+    if (r) {
+      const a = r[1] ? Number(r[1]) : 0;
+      const b = r[2] ? Number(r[2]) : buf.length - 1;
+      res.writeHead(206, { "content-type": type, "accept-ranges": "bytes", "content-range": `bytes ${a}-${b}/${buf.length}` });
+      res.end(buf.subarray(a, b + 1));
+    } else {
+      res.writeHead(200, { "content-type": type, "accept-ranges": "bytes" });
+      res.end(buf);
+    }
   } catch {
     res.writeHead(404).end();
   }

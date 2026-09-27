@@ -141,7 +141,7 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
-  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo";
+  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip";
   /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
   etiquette?: string;
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */
@@ -170,6 +170,8 @@ export interface Program {
   subtitles: { at: number; text: string; voice?: string; dur?: number }[];
   /** Musique de fond (bouclée, baissée sous la voix). */
   music?: string;
+  /** Clip musical : `music` est le morceau lui-même, calé sur le direct ; incrustation artiste et titre. */
+  clip?: { artiste: string; titre: string; mention?: string };
 }
 
 export type IconeMeteo = "soleil" | "eclaircies" | "nuages" | "pluie" | "neige" | "brouillard" | "confettis" | "mousse" | "vent";

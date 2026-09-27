@@ -12,10 +12,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const MUSIQUE = 0.55;
 const MUSIQUE_SOUS_VOIX = 0.22;
+const CLIP = 0.9;
 
 const dejaCharges = new Set<string>();
 
-export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string; voix: { cle: string; src: string; offset: number } | null; precharge: string[] }) {
+export function useSonTv(o: {
+  actif: boolean;
+  lecture: boolean;
+  musique?: string;
+  /** Clip : la musique est le morceau de l'émission, repris à `t` (secondes) dans cette diffusion `cle`. */
+  calage?: { cle: string; t: number };
+  voix: { cle: string; src: string; offset: number } | null;
+  precharge: string[];
+}) {
   const musique = useRef<HTMLAudioElement | null>(null);
   const voix = useRef<HTMLAudioElement | null>(null);
   const cleVoix = useRef<string | null>(null);
@@ -23,6 +32,9 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
   const joue = o.actif && o.lecture;
   const voixDemandee = useRef(o.voix);
   voixDemandee.current = o.voix;
+  const calage = useRef(o.calage);
+  calage.current = o.calage;
+  const cleCalage = o.calage?.cle ?? null;
 
   const lancer = useCallback((a: HTMLAudioElement) => {
     void a.play().then(
@@ -33,24 +45,38 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
     );
   }, []);
 
-  // Musique : continue d'un programme à l'autre si c'est la même piste.
+  // Musique : continue d'un programme à l'autre si c'est la même piste ;
+  // un clip, lui, a son propre lecteur par diffusion, repris où en est le direct.
   useEffect(() => {
     if (!o.musique || !o.actif) return;
-    const a = musique.current?.src.endsWith(o.musique) ? musique.current : new Audio(o.musique);
-    a.loop = true;
-    if (a !== musique.current) a.volume = MUSIQUE;
+    const c = calage.current;
+    const meme = !c && musique.current?.src.endsWith(o.musique) && musique.current.loop;
+    const a = meme ? musique.current! : new Audio(o.musique);
+    a.loop = !c;
+    if (!meme) a.volume = c ? CLIP : MUSIQUE;
+    if (c && c.t > 0.5) {
+      const depuis = performance.now();
+      a.addEventListener(
+        "loadedmetadata",
+        () => {
+          const t = c.t + (performance.now() - depuis) / 1000;
+          if (t < a.duration - 0.5) a.currentTime = t;
+        },
+        { once: true },
+      );
+    }
     musique.current = a;
     return () => {
       a.pause();
     };
-  }, [o.musique, o.actif]);
+  }, [o.musique, o.actif, cleCalage]);
 
   useEffect(() => {
     const a = musique.current;
     if (!a) return;
     if (joue) lancer(a);
     else a.pause();
-  }, [joue, o.musique, lancer]);
+  }, [joue, o.musique, cleCalage, lancer]);
 
   // Préchargement dans le cache HTTP (sans lecteur) : voix de l'émission en cours et de la suivante.
   const liste = o.precharge.join("|");
@@ -104,7 +130,7 @@ export function useSonTv(o: { actif: boolean; lecture: boolean; musique?: string
       const m = musique.current;
       if (!m) return;
       const parle = !!voix.current && !voix.current.paused && !voix.current.ended;
-      const cible = parle ? MUSIQUE_SOUS_VOIX : MUSIQUE;
+      const cible = calage.current ? CLIP : parle ? MUSIQUE_SOUS_VOIX : MUSIQUE;
       m.volume = Math.max(0, Math.min(1, m.volume + (cible - m.volume) * 0.35));
     }, 60);
     return () => clearInterval(id);

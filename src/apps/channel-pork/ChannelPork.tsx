@@ -39,6 +39,7 @@ export function ChannelPork() {
     actif: son && settings.sons,
     lecture: true,
     musique: p.music,
+    calage: p.clip ? { cle: cleProgramme, t } : undefined,
     voix: voix ? { cle: `${cleProgramme}-${voix.index}`, src: voix.src, offset: voix.offset } : null,
     precharge: [...p.subtitles, ...direct.suivant.subtitles].flatMap((x) => (x.voice ? [x.voice] : [])),
   });
@@ -84,6 +85,7 @@ export function ChannelPork() {
         video={p.videoSrc}
         cadrage={s.focus}
         fixe={s.fixe}
+        clip={p.clip && (t < 9 || t > p.slides.reduce((a, x) => a + x.seconds, 0) - 9) ? p.clip : null}
         zoom={s.zoom}
         fond={s.fond}
         bulletin={
