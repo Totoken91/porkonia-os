@@ -4,7 +4,7 @@ Le système d'exploitation officiel de la République de Porkonia, jouable dans 
 façon poste administratif de 1998 : écran 4:3 (800×600) dans son moniteur beige, PorkBIOS,
 écran de chargement, ouverture de session, bureau, fenêtres, menu PorkOS, bulles de notification,
 publicités de la Douzi Ambrée et mises à jour obligatoires. Le moniteur s'allume et s'éteint vraiment,
-les icônes se rangent sur une grille, le clic droit, « Exécuter… », les sons système et l'écran de veille répondent.
+les icônes se rangent sur une grille, le clic droit, « Exécuter… », les sons système et l'écran de veille répondent. Alt+² fait défiler les fenêtres ouvertes (Alt+Tab appartient au vrai ordinateur) ; un clic sur l'heure ouvre le calendrier.
 
 > Le porc. La bière. Toujours plus.
 

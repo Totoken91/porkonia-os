@@ -80,6 +80,15 @@ function topVisible(ws: Win[]): string | null {
   return v[0]?.id ?? null;
 }
 
+/**
+ * Ordre du commutateur de tâches : la fenêtre au premier plan, puis les autres de la plus récente à la plus
+ * ancienne (les réduites comprises, en dernier). On part de la deuxième : c'est vers elle qu'on bascule.
+ */
+export function ordreRecents(ws: Win[], focusedId: string | null): string[] {
+  const rang = (w: Win) => (w.id === focusedId ? 2 : w.minimized ? 0 : 1);
+  return [...ws].sort((a, b) => rang(b) - rang(a) || b.z - a.z).map((w) => w.id);
+}
+
 export function winReducer(s: WinState, a: WinAction): WinState {
   switch (a.type) {
     case "open": {

@@ -624,6 +624,31 @@
   .ttx-w { color: #fff; } .ttx-y { color: #ffe74a; } .ttx-c { color: #5dd6ff; } .ttx-g { color: #5dff72; }
   .ttx-r { color: #ff4a4a; } .ttx-m { color: #ff5ae8; } .ttx-b { color: #5a7cff; }
 
+  /* ============================== Date et heure, commutateur ============================== */
+  .tb-tray [data-testid="horloge"] { padding: 0 2px; cursor: var(--c-main); }
+  .tb-tray [data-testid="horloge"].active { box-shadow: var(--pressed); }
+  .calendrier { position: absolute; right: 2px; bottom: 30px; width: 330px; z-index: 10; }
+  .calendrier-corps { display: flex; gap: 10px; padding: 8px; background: var(--face); }
+  .calendrier-mois { flex: 1; }
+  .calendrier-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .calendrier-nav b { text-transform: capitalize; }
+  .calendrier-nav .pk-btn { min-width: 0; padding: 0 5px; }
+  .calendrier table { width: 100%; border-collapse: collapse; background: #fffdf7; text-align: center; }
+  .calendrier th { color: var(--color-rouge-sombre); font-weight: normal; padding: 1px 0; border-bottom: 1px solid var(--lo); }
+  .calendrier td { padding: 1px 0; }
+  .calendrier td.douze { color: #8a5a0a; text-decoration: underline dotted; }
+  .calendrier td.aujourdhui { background: var(--color-rouge-sombre); color: #fff; }
+  .calendrier-horloge { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .calendrier-heure { font-family: var(--font-pixel-mono); }
+  .calendrier-pied { display: flex; justify-content: flex-end; gap: 6px; padding: 0 8px 8px; background: var(--face); }
+  .commutateur, .calendrier { animation: none; }
+  .commutateur-couche { position: absolute; inset: 0; z-index: 9000; display: grid; place-items: center; pointer-events: none; }
+  .commutateur { pointer-events: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--face); box-shadow: var(--raised), 3px 3px 0 rgba(0, 0, 0, 0.35); }
+  .commutateur-icones { display: flex; gap: 6px; justify-content: center; max-width: 520px; flex-wrap: wrap; }
+  .commutateur-icones span { padding: 5px; border: 1px solid transparent; }
+  .commutateur-icones span.choisie { border: 1px dotted #000; box-shadow: var(--sunken); background: #fffdf7; }
+  .commutateur-titre { min-width: 280px; padding: 3px 6px; background: #fffdf7; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
   /* ============================== Calculatrice d'État ============================== */
   .calc { padding: 8px; gap: 6px; background: var(--face); }
   .calc-ecran { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 8px; background: #b9c9a6; color: #1d2a14; }

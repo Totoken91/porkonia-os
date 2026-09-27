@@ -390,6 +390,8 @@ try {
           await icone.waitFor({ state: "detached", timeout: 4000 });
           break;
         } catch (e) {
+          // Une pub fermée entre-temps a pu consommer l'attente alors que le dépôt avait réussi.
+          if (!(await icone.count())) break;
           if (essai >= 2) throw e;
         }
       }
@@ -409,6 +411,32 @@ try {
       if ((await page.getByTestId("texte-zone").inputValue()) !== "Citoyen, tout va bien.") throw new Error("document non enregistré");
       await fermer("texte");
       step(`${tag} : fichiers (dossier, glisser vers le bureau, Poubelle, restaurer, enregistrer)`);
+
+      // Commutateur de tâches (Alt+²) : deux fenêtres, on bascule vers la précédente
+      await page.getByTestId("icon-d-docs").dblclick();
+      await page.getByTestId("window-fichiers").waitFor();
+      await page.getByTestId("icon-d-mail").dblclick();
+      await page.getByTestId("window-mail").waitFor();
+      await page.keyboard.down("Alt");
+      await page.keyboard.press("Backquote");
+      await page.getByTestId("commutateur").waitFor();
+      if (!/Mes documents/.test(await page.getByTestId("commutateur-titre").textContent())) throw new Error("le commutateur ne propose pas la fenêtre précédente");
+      await shot(page, `${tag}-22-commutateur`);
+      await page.keyboard.up("Alt");
+      await page.getByTestId("commutateur").waitFor({ state: "detached" });
+      await page.locator(".pk-window.focused[data-testid=window-fichiers]").waitFor();
+      await fermer("fichiers");
+      await fermer("mail");
+      // Date et heure : calendrier et horloge à aiguilles au clic sur l'heure
+      await page.getByTestId("horloge").click();
+      await page.getByTestId("calendrier").waitFor();
+      const mois = await page.getByTestId("calendrier-mois").textContent();
+      await page.getByRole("button", { name: "Mois suivant" }).click();
+      if ((await page.getByTestId("calendrier-mois").textContent()) === mois) throw new Error("le calendrier ne change pas de mois");
+      await shot(page, `${tag}-23-calendrier`);
+      await page.keyboard.press("Escape");
+      await page.getByTestId("calendrier").waitFor({ state: "detached" });
+      step(`${tag} : commutateur de tâches et calendrier`);
     }
 
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche

@@ -22,6 +22,7 @@ import { Economiseur } from "./Economiseur";
 import { SCREEN } from "./Monitor";
 import { AdBox, DialogBox, Toasts, UpdateScreen, type LiveToast } from "./Overlays";
 import { Taskbar } from "./Taskbar";
+import { Commutateur } from "./Commutateur";
 import { Wallpaper } from "./Wallpaper";
 import { WindowFrame } from "./WindowFrame";
 
@@ -543,6 +544,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           onLayout={layout}
           busy={busy > 0}
         />
+        <Commutateur windows={wins.windows} focusedId={wins.focusedId} apps={pack.apps} onChoisir={(id) => dispatch({ type: "focus", id })} />
         {dialogs[0] && (
           <DialogBox
             dialog={dialogs[0]}

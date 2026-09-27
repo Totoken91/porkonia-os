@@ -23,7 +23,7 @@ Cocher au fur et à mesure.
 
 - [x] Gestion des fenêtres d'époque : menu système sur l'icône de titre (double-clic = fermer), clic droit sur les boutons de tâche, Cascade / Mosaïque / Réduire toutes les fenêtres, lancement rapide avec « Afficher le bureau ».
 - [x] Écran d'exception fatale (commandes secrètes `format c:`, `rm -rf /`, `deltree c:`).
-- [ ] Alt+Tab / Alt+F4 : interceptés par le système hôte, impossibles à simuler dans un navigateur ; à remplacer par un raccourci maison si besoin.
+- [x] Alt+Tab / Alt+F4 : interceptés par le système hôte ; remplacés par le commutateur Alt+² (Alt+F4 reste au navigateur).
 
 - [x] Glisser-déposer entre fenêtres et vers le bureau, la Poubelle et les dossiers.
 - [ ] Explorateur plus complet : affichage liste/icônes, barre d'adresse, raccourcis clavier (Ctrl+C refusé « pour votre sécurité »).
@@ -65,7 +65,7 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 - [x] Télétexte sur PorkTV (PorkTexte) : touche TXT, sommaire 100, programmes des cinq chaînes en direct (101), météo de la mousse, bourse du jambon, dépêches, petites annonces, sous-pages tournantes, compteur de recherche, page 999 secrète ; remplace le guide perdu.
 - [x] Gestion de fichiers d'OS : disque modifiable (créer, renommer, couper, copier, coller), glisser-déposer entre fenêtres, vers le bureau, dans un dossier ; Poubelle d'État fonctionnelle (jeter, restaurer, vider) ; Bloc-notes qui enregistre vraiment.
 - [x] Calculatrice d'État (douze chiffres, touche ×12, division par zéro = table vide), Défragmenteur (disque qui se range, blocs système immobiles), PorkPaint (crayon, pinceau, gomme, pot, tampons chope/jambon/saucisse/groin, dessins enregistrés sur le disque).
-- [ ] Ergonomie : raccourci maison pour changer de fenêtre, calendrier au clic sur l'horloge. (Copier-coller de fichiers et documents persistants : faits.)
+- [x] Ergonomie : commutateur de tâches Alt+² (Alt+` en QWERTY ; Alt+Tab reste au vrai ordinateur), Date et heure au clic sur l'horloge (calendrier feuilletable, horloge à aiguilles), copier-coller de fichiers, documents persistants.
 
 ### 3. Contenu (à faire valider : rien d'inventé n'est présenté comme canon)
 

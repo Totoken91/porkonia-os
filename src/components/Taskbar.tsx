@@ -1,38 +1,36 @@
 "use client";
 /** Barre des tâches, menu PorkOS (avec sous-menus) et zone de notification. */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
 import type { Win, WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
+import { Calendrier } from "./Calendrier";
 
+/** Horloge : un clic ouvre Date et heure (calendrier et horloge à aiguilles). */
 function Clock() {
-  const { str, runAction } = useOs();
   const [now, setNow] = useState<Date | null>(null);
+  const [ouvert, setOuvert] = useState(false);
   useEffect(() => {
     setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 5000);
     return () => clearInterval(id);
   }, []);
+  const fermer = useCallback(() => setOuvert(false), []);
   return (
-    <span
-      className="heure"
-      onDoubleClick={() => {
-        const d = new Date();
-        runAction({
-          type: "dialog",
-          dialog: {
-            title: str("barre.dateheure.titre"),
-            icon: "info",
-            body: str("barre.dateheure", { date: d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }), heure: d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) }),
-            buttons: [{ label: "OK" }],
-          },
-        });
-      }}
-      data-testid="horloge"
-      title={now ? now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : undefined}>
-      {now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "12:12"}
-    </span>
+    <>
+      <span
+        className={`heure${ouvert ? " active" : ""}`}
+        role="button"
+        tabIndex={-1}
+        onClick={() => setOuvert((o) => !o)}
+        data-testid="horloge"
+        title={now ? now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : undefined}
+      >
+        {now ? now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : "12:12"}
+      </span>
+      {ouvert && <Calendrier onClose={fermer} />}
+    </>
   );
 }
 
