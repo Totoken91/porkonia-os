@@ -11,6 +11,7 @@ const V = "/audio/channel-pork/";
 const MUSIQUE = `${V}quiet-morning-vhs.mp3`;
 const NAPPE_BRUME = `${V}brume-nappe.mp3`;
 const MUSIQUE_METEO = `${V}meteo-musique-vhs.mp3`;
+const MUSIQUE_DOCU = `${V}docu-musique-vhs.mp3`;
 /** Images de la pub Douzi Ambrée (fournies pour PorkOS, hébergées ici). */
 const T = "/tv/";
 
@@ -860,7 +861,7 @@ export const porkosPack: ContentPack = {
       id: "petites-betes",
       title: "Petites Bêtes de la République",
       kind: "documentaire",
-      music: MUSIQUE,
+      music: MUSIQUE_DOCU,
       slides: [
         { image: `${P}bestiaire-poule-wifi.jpg`, seconds: 13.68, chyron: "PETITES BÊTES DE LA RÉPUBLIQUE", focus: [0.3, 0.6] },
         { image: `${P}bestiaire-poule-wifi.jpg`, seconds: 17.1, chyron: "POULE WI-FI — Lardombre", zoom: 1.4, focus: [0.35, 0.7] },
@@ -884,7 +885,7 @@ export const porkosPack: ContentPack = {
       id: "bestiaire",
       title: "Bêtes de la République",
       kind: "documentaire",
-      music: MUSIQUE,
+      music: MUSIQUE_DOCU,
       slides: [
         { image: `${P}fresh-beast-cochon-de-mer.jpg`, seconds: 10.46, chyron: "BÊTES DE LA RÉPUBLIQUE", focus: [0.35, 0.5] },
         { image: `${P}fresh-beast-cochon-de-mer.jpg`, seconds: 26.78, chyron: "COCHON DE MER — Porcocetus douzii", zoom: 1.35, focus: [0.35, 0.55] },
