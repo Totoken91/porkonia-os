@@ -156,3 +156,19 @@ describe("rendu VHS", async () => {
     expect(lineOffset(286, 288, { ...d, tracking: null })).toBeGreaterThan(4);
   });
 });
+
+describe("ordonnanceur : préfixes et sessions", () => {
+  const regles = [
+    { id: "brume", trigger: { type: "signal" as const, name: "tv:integral:brume-*" }, action: { type: "toast-pool" as const, pool: "x" }, max: 1 },
+    { id: "retour", trigger: { type: "login" as const, delay: 0 }, action: { type: "toast-pool" as const, pool: "y" }, apresSessions: 2 },
+  ];
+  it("accepte un signal par préfixe", () => {
+    const r = schedule(regles, emptyRuleState(), { kind: "signal", name: "tv:integral:brume-046", elapsed: 0 }, makeRng(1));
+    expect(r.actions.map((a) => a.rule)).toEqual(["brume"]);
+    expect(schedule(regles, emptyRuleState(), { kind: "signal", name: "tv:integral:journal", elapsed: 0 }, makeRng(1)).actions).toEqual([]);
+  });
+  it("attend la bonne session", () => {
+    expect(schedule(regles, emptyRuleState(), { kind: "tick", elapsed: 10 }, makeRng(1), {}, 1).actions).toEqual([]);
+    expect(schedule(regles, emptyRuleState(), { kind: "tick", elapsed: 10 }, makeRng(1), {}, 2).actions.map((a) => a.rule)).toEqual(["retour"]);
+  });
+});

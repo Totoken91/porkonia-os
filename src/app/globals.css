@@ -649,6 +649,53 @@
   .commutateur-icones span.choisie { border: 1px dotted #000; box-shadow: var(--sunken); background: #fffdf7; }
   .commutateur-titre { min-width: 280px; padding: 3px 6px; background: #fffdf7; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+  /* ============================== Pages perso PigNet ============================== */
+  .site { min-height: 100%; padding: 14px 18px 24px; font: 13px/1.45 Verdana, Tahoma, "DejaVu Sans", sans-serif; }
+  .site-titre { margin: 4px 0 10px; font: bold italic 26px/1.1 "Times New Roman", Times, serif; text-align: center; letter-spacing: 1px; }
+  .site-texte { margin: 8px 0; }
+  .site-defile { overflow: hidden; white-space: nowrap; margin: 6px 0; padding: 2px 0; font-weight: bold; }
+  .site-defile span { display: inline-block; padding-left: 100%; animation: defile-site 16s linear infinite; }
+  @keyframes defile-site { to { transform: translateX(-100%); } }
+  .site-clignote { text-align: center; font-weight: bold; font-size: 16px; animation: clignote 1s steps(1) infinite; }
+  .site-liste { margin: 8px 0; padding-left: 22px; }
+  .site-liste li { margin: 3px 0; }
+  .site-image { margin: 10px auto; text-align: center; }
+  .site-image img { max-width: 320px; width: 100%; border: 4px ridge #c0c0c0; }
+  .site-image figcaption { font-style: italic; margin-top: 3px; }
+  .site-liens { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; margin: 10px 0; }
+  .site-lien { padding: 0; border: none; background: none; font: inherit; color: inherit; text-decoration: underline; cursor: var(--c-main); }
+  .site-construction { margin: 12px auto; max-width: 340px; padding: 6px; text-align: center; background: repeating-linear-gradient(45deg, #f5c542 0 12px, #1b1b1b 12px 24px); }
+  .site-construction span { display: inline-block; padding: 2px 8px; background: #f5c542; color: #1b1b1b; font-weight: bold; letter-spacing: 2px; }
+  .site-compteur { text-align: center; margin: 12px 0 6px; font-size: 11px; }
+  .site-compteur span { display: inline-flex; gap: 1px; vertical-align: middle; }
+  .site-compteur i { display: inline-block; width: 12px; padding: 1px 0; font: bold 13px/1 "Courier New", monospace; font-style: normal; text-align: center; background: #000; color: #5dff72; }
+  .site-anneau { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 14px auto 0; padding: 4px 8px; max-width: 460px; border: 2px outset #c0c0c0; background: #d6ccb4; color: #24201c; font-size: 11px; }
+  .site-livre { margin: 10px 0; }
+  .site-livre-message { margin: 6px 0; padding: 5px 8px; border: 1px dashed currentColor; }
+  .site-livre-message p { margin: 2px 0 0; }
+  .site-livre-form { display: grid; gap: 4px; max-width: 360px; margin-top: 10px; }
+  .site-livre-form input, .site-livre-form textarea { font: inherit; padding: 2px 4px; border: 2px inset #c0c0c0; background: #fff; color: #000; }
+  .site-livre-form button { justify-self: start; font: inherit; padding: 1px 10px; border: 2px outset #c0c0c0; background: #d6d0c4; color: #000; cursor: var(--c-main); }
+  .site-annuaire h2 { margin: 12px 0 4px; font: bold 15px Verdana, sans-serif; border-bottom: 1px solid currentColor; }
+  .site-annuaire p { margin: 3px 0; }
+  .site-pied { margin-top: 18px; text-align: center; font-size: 10px; opacity: 0.7; }
+  .site-bois { background: #6e4318 repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 3px, transparent 3px 22px); color: #fbe7c0; }
+  .site-bois .site-titre { color: #ffd23a; text-shadow: 2px 2px 0 #3a1d05; }
+  .site-bois .site-defile { background: #3a1d05; color: #ffd23a; }
+  .site-ciel { background: #9fd3ff radial-gradient(circle at 20px 20px, #fff 0 9px, transparent 10px) 0 0 / 70px 50px; color: #0b2a6f; }
+  .site-ciel .site-titre { color: #d01018; text-shadow: 2px 2px 0 #ffd23a; }
+  .site-ciel .site-clignote { color: #d01018; }
+  .site-nuit { background: #050814 radial-gradient(circle at 10px 12px, #fff 0 1px, transparent 1.5px) 0 0 / 43px 37px; color: #d8e4ff; }
+  .site-nuit .site-titre { color: #ffe74a; text-shadow: 0 0 8px #ff4a4a; }
+  .site-nuit .site-clignote { color: #ff4a4a; }
+  .site-papier { background: #fffdf2 repeating-linear-gradient(0deg, transparent 0 21px, #cfe0ff 21px 22px); color: #24201c; }
+  .site-papier .site-titre { color: #1e5e1a; }
+  .site-rouge { background: #140404; color: #ff9a9a; }
+  .site-rouge .site-titre { color: #ff2a2a; text-shadow: 3px 0 0 #500; }
+  .site-portail { background: #f8f4e9; color: #24201c; }
+  .site-portail .site-titre { font: bold 22px Verdana, sans-serif; color: var(--color-rouge-sombre); text-align: left; }
+  @media (prefers-reduced-motion: reduce) { .site-defile span, .site-clignote { animation: none; } }
+
   /* ============================== Calculatrice d'État ============================== */
   .calc { padding: 8px; gap: 6px; background: var(--face); }
   .calc-ecran { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 8px; background: #b9c9a6; color: #1d2a14; }
@@ -758,6 +805,7 @@
   .fichier[aria-selected="true"] { background: #f3dcd4; border-color: var(--color-rouge-sombre); }
   .fichier.coupe > svg, .fichier.coupe > img, .fichier.coupe > span:first-child { opacity: 0.45; }
   .fichiers-liste:focus { outline: none; }
+  .fichier.cache > svg, .fichier.cache > img, .desk-icon.cache > svg { opacity: 0.55; }
   .fichiers-liste.depot-survol, .fichier.depot-survol { outline: 1px dotted var(--color-rouge-sombre); outline-offset: -3px; background-color: #f7ead9; }
   .renommage { width: 80px; font: inherit; text-align: center; padding: 0 2px; border: 1px solid #000; background: #fffdf7; color: #000; }
   .renommage:focus { outline: none; }

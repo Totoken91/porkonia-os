@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FsNode } from "@/content/types";
 import { resolve } from "@/os/fs";
-import { BUREAU, creer, deplacer, disqueInitial, dossiersEcrivables, ecrire, nomLibre, nomValide, renommer, restaurer, sanitizeDisque, supprimer, vider, type Disque, type Resultat } from "@/os/vfs";
+import { BUREAU, chemins, fusionnerPack, creer, deplacer, disqueInitial, dossiersEcrivables, ecrire, nomLibre, nomValide, renommer, restaurer, sanitizeDisque, supprimer, vider, type Disque, type Resultat } from "@/os/vfs";
 
 const fs: FsNode = {
   type: "dossier",
@@ -91,7 +91,36 @@ describe("disque du poste", () => {
     expect(sanitizeDisque("n'importe quoi", fs)).toEqual(disqueInitial(fs));
     const sale = { racine: { type: "dossier", name: "Poste", children: [{ type: "image", name: "p.jpg", src: "javascript:alert(1)" }, { type: "texte", name: "ok.txt", content: "o" }] }, poubelle: [{ node: null }] };
     const s = sanitizeDisque(sale, fs);
-    expect(s.racine.children.map((c) => c.name)).toEqual([BUREAU, "ok.txt"]);
+    // Disque d'avant la fusion : il reçoit les dossiers du pack qui lui manquaient.
+    expect(s.racine.children.map((c) => c.name)).toEqual([BUREAU, "ok.txt", "Docs", "Coffre"]);
     expect(s.poubelle).toEqual([]);
+  });
+});
+
+describe("fusion des nouveautés du pack", () => {
+  const v2: FsNode = {
+    type: "dossier",
+    name: "Poste",
+    children: [
+      { type: "dossier", name: "Docs", children: [{ type: "texte", name: "a.txt", content: "A" }, { type: "texte", name: "neuf.txt", content: "N", cache: true }] },
+      { type: "dossier", name: "Coffre", locked: "Fermé.", children: [] },
+      { type: "dossier", name: "Nouveau", children: [{ type: "texte", name: "dedans.txt", content: "D" }] },
+    ],
+  };
+  it("livre les nouveaux fichiers et dossiers, une seule fois", () => {
+    let d = disqueInitial(fs);
+    d = ok(supprimer(d, ["Docs/a.txt"], J));
+    const f = fusionnerPack(d, v2);
+    expect(resolve(f.racine, "Docs/neuf.txt")).toMatchObject({ cache: true });
+    expect(resolve(f.racine, "Nouveau/dedans.txt")).not.toBeNull();
+    // Le fichier jeté par le citoyen ne revient pas.
+    expect(resolve(f.racine, "Docs/a.txt")).toBeNull();
+    expect(fusionnerPack(f, v2)).toEqual(f);
+    expect(chemins(v2)).toContain("Nouveau/dedans.txt");
+  });
+  it("garde la liste des chemins livrés au fil des opérations", () => {
+    const d = ok(supprimer(disqueInitial(fs), ["Docs/a.txt"], J));
+    expect(d.connus).toContain("Docs/a.txt");
+    expect(sanitizeDisque(JSON.parse(JSON.stringify(d)), fs)).toEqual(d);
   });
 });

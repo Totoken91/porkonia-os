@@ -71,13 +71,16 @@ export interface UserProfile {
 
 /* --------------------------- Système de fichiers --------------------------- */
 
-/** `protege` : message opposé à qui veut supprimer, renommer, déplacer ou modifier l'élément. */
+/**
+ * `protege` : message opposé à qui veut supprimer, renommer, déplacer ou modifier l'élément.
+ * `cache` : fichier caché, visible seulement avec « Afficher les fichiers cachés ».
+ */
 export type FsNode = (
   | { type: "dossier"; name: string; children: FsNode[]; locked?: string }
   | { type: "texte"; name: string; content: string; date?: string }
   | { type: "image"; name: string; src: string; caption?: string; date?: string }
   | { type: "lien"; name: string; app: string; args?: Record<string, string> }
-) & { protege?: string };
+) & { protege?: string; cache?: boolean };
 
 /* ---------------------------------- Mail ---------------------------------- */
 
@@ -195,6 +198,37 @@ export interface Channel {
 }
 
 /** Portail officiel PigNet (page d'accueil du navigateur). */
+/** Bloc d'une page perso de PigNet (pages de citoyens façon années 2000). */
+export type BlocSite =
+  | { t: "titre"; texte: string }
+  | { t: "texte"; texte: string }
+  | { t: "defile"; texte: string }
+  | { t: "clignote"; texte: string }
+  | { t: "liste"; items: string[] }
+  | { t: "image"; src: string; legende?: string }
+  | { t: "liens"; liens: { texte: string; url: string }[] }
+  | { t: "construction" }
+  | { t: "compteur"; base: number; parJour: number }
+  | { t: "livreDor" }
+  | { t: "anneau" }
+  | { t: "annuaire" };
+
+export interface SitePerso {
+  /** Adresse : porko://<hote>/<page>. */
+  hote: string;
+  titre: string;
+  /** Ligne de l'annuaire. */
+  description: string;
+  categorie: string;
+  theme: "bois" | "ciel" | "nuit" | "papier" | "rouge" | "portail";
+  /** Membre de l'Anneau des pages perso (liens précédent / suivant). */
+  anneau?: boolean;
+  /** Pages : "" est l'accueil. */
+  pages: Record<string, { titre?: string; blocs: BlocSite[] }>;
+  /** Messages déjà présents dans le livre d'or. */
+  livreDor?: { nom: string; date: string; message: string }[];
+}
+
 export interface Portal {
   /** Compteur de visites : valeur au 1er janvier 2000, puis tant de visites par jour. */
   compteur: { base: number; parJour: number };
@@ -253,6 +287,8 @@ export interface EventRule {
   max?: number;
   /** Ne se déclenche pas si un réglage le désactive (clé de réglage booléenne). */
   unlessSetting?: string;
+  /** Ne joue qu'à partir de la n-ième session du citoyen sur ce poste (courriers qui arrivent au fil du temps). */
+  apresSessions?: number;
 }
 
 /* ------------------------------- Télétexte -------------------------------- */
@@ -317,7 +353,8 @@ export interface ContentPack {
   /** Fermeture propre du système. */
   shutdown: { closing: string; safe: string; restarting: string };
   /** Boîte « Exécuter… » : commandes reconnues. */
-  run: { prompt: string; aliases: Record<string, { app: string; args?: Record<string, string> } | { action: ActionRef }>; notFound: string };
+  /** `secretes` : commandes absentes des suggestions (on les trouve en les tapant). */
+  run: { prompt: string; aliases: Record<string, { app: string; args?: Record<string, string> } | { action: ActionRef }>; secretes: string[]; notFound: string };
   login: { prompt: string; emptyPassword: string; acceptedAny: string[]; patriotic: string; wrongPassword: string; guestNotice: string };
   /** Dépêches de l'agence de presse nationale (portail PigNet). */
   news: string[];
@@ -328,6 +365,8 @@ export interface ContentPack {
   programs: Program[];
   channels: Channel[];
   portal: Portal;
+  /** Sites de PigNet hors Porkopédia : pages perso de citoyens et annuaire. */
+  sites: SitePerso[];
   /** Carte météo stylisée et position des lieux (0–1). */
   carteMeteo: { image: string; lieux: Record<string, [number, number]> };
   rules: EventRule[];

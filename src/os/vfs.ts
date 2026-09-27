@@ -20,6 +20,8 @@ export interface Jete {
 export interface Disque {
   racine: Extract<FsNode, { type: "dossier" }>;
   poubelle: Jete[];
+  /** Chemins du pack déjà livrés sur ce disque : les nouveautés du pack s'ajoutent, les éléments jetés ne reviennent pas. */
+  connus?: string[];
 }
 
 export type Resultat = { ok: true; disque: Disque; chemins: string[] } | { ok: false; erreur: string; vars?: Record<string, string> };
@@ -27,12 +29,42 @@ export type Resultat = { ok: true; disque: Disque; chemins: string[] } | { ok: f
 const echec = (erreur: string, vars?: Record<string, string>): Resultat => ({ ok: false, erreur, vars });
 type Dossier = Extract<FsNode, { type: "dossier" }>;
 
+/** Tous les chemins d'une arborescence (hors racine), parents avant enfants. */
+export function chemins(n: FsNode, base = ""): string[] {
+  if (n.type !== "dossier") return [];
+  return n.children.flatMap((c) => {
+    const p = childPath(base, c.name);
+    return [p, ...chemins(c, p)];
+  });
+}
+
 /** Disque neuf à partir du pack : on garantit un dossier Bureau, vide s'il n'existe pas. */
 export function disqueInitial(fs: FsNode): Disque {
   const racine = structuredClone(fs) as Dossier;
-  if (racine.type !== "dossier") return { racine: { type: "dossier", name: "Poste", children: [{ type: "dossier", name: BUREAU, children: [] }] }, poubelle: [] };
+  if (racine.type !== "dossier") return { racine: { type: "dossier", name: "Poste", children: [{ type: "dossier", name: BUREAU, children: [] }] }, poubelle: [], connus: [] };
   if (!racine.children.some((c) => c.name === BUREAU && c.type === "dossier")) racine.children.unshift({ type: "dossier", name: BUREAU, children: [], protege: "fichiers.err.systeme" });
-  return { racine, poubelle: [] };
+  return { racine, poubelle: [], connus: chemins(fs) };
+}
+
+/**
+ * Livre sur un disque déjà en service les éléments ajoutés au pack depuis : chaque chemin du pack encore
+ * inconnu est déposé dans son dossier s'il existe (un dossier neuf arrive avec son contenu), puis noté.
+ */
+export function fusionnerPack(d: Disque, fs: FsNode): Disque {
+  const connus = new Set(d.connus ?? []);
+  let racine = d.racine;
+  for (const p of chemins(fs)) {
+    if (connus.has(p)) continue;
+    connus.add(p);
+    const n = resolve(fs, p)!;
+    if (n.type === "dossier") for (const q of chemins(n, p)) connus.add(q);
+    const parent = parentPath(p);
+    const dossier = resolve(racine, parent);
+    if (resolve(racine, p) || dossier?.type !== "dossier") continue;
+    const copie = structuredClone(n);
+    racine = modifier(racine, parent, (e) => [...e, copie]);
+  }
+  return { ...d, racine, connus: [...connus] };
 }
 
 /** Recopie l'arborescence en remplaçant les enfants du dossier `chemin`. */
@@ -148,7 +180,7 @@ export function supprimer(d: Disque, chemins: string[], date: string): Resultat 
     const parent = parentPath(chemin);
     const p = verifierDossier(disque, parent);
     if (estResultat(p)) return p;
-    disque = { racine: modifier(disque.racine, parent, (e) => e.filter((c) => c !== n)), poubelle: [...disque.poubelle, { node: n, origine: parent, date }] };
+    disque = { ...disque, racine: modifier(disque.racine, parent, (e) => e.filter((c) => c !== n)), poubelle: [...disque.poubelle, { node: n, origine: parent, date }] };
   }
   return { ok: true, disque, chemins: [] };
 }
@@ -183,7 +215,7 @@ export function sanitizeDisque(v: unknown, fs: FsNode): Disque {
     if (!x || typeof x !== "object" || profondeur > 12) return null;
     const o = x as Record<string, unknown>;
     if (typeof o.name !== "string" || !nomValide(o.name)) return null;
-    const protege = typeof o.protege === "string" ? { protege: o.protege } : {};
+    const protege = { ...(typeof o.protege === "string" ? { protege: o.protege } : {}), ...(o.cache === true ? { cache: true } : {}) };
     switch (o.type) {
       case "dossier": {
         if (!Array.isArray(o.children)) return null;
@@ -215,6 +247,9 @@ export function sanitizeDisque(v: unknown, fs: FsNode): Disque {
         return n && typeof x.origine === "string" && typeof x.date === "string" ? [{ node: n, origine: x.origine, date: x.date }] : [];
       })
     : [];
-  return { racine, poubelle };
+  // Disques d'avant la fusion : ce qui est déjà là (ou à la Poubelle) compte comme livré.
+  const connus = Array.isArray(o.connus)
+    ? o.connus.filter((c): c is string => typeof c === "string")
+    : [...chemins(racine), ...poubelle.flatMap((j) => [childPath(j.origine, j.node.name), ...chemins(j.node, childPath(j.origine, j.node.name))])];
+  return fusionnerPack({ racine, poubelle, connus }, fs);
 }
-

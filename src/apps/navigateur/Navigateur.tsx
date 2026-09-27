@@ -6,6 +6,7 @@ import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { DECALAGE, live } from "@/apps/channel-pork/timeline";
 import { compteur, cours, duJour, jour, meteo } from "./portail";
 import { HOME, articleUrl, parseUrl, rubriqueUrl, search, searchUrl } from "./url";
+import { Site } from "./Site";
 
 interface Article {
   id: string;
@@ -21,13 +22,15 @@ const CATALOG = porkopedia.catalog as { id: string; title: string; section: stri
 const byId = new Map(ARTICLES.map((a) => [a.id, a]));
 
 export function Navigateur() {
-  const { str, signal, openApp } = useOs();
+  const { str, signal, openApp, pack } = useOs();
   const { win, setTitle } = useWin();
   const adresse = useRef<HTMLInputElement>(null);
   const [hist, setHist] = useState<{ list: string[]; i: number }>({ list: [win.args.url ?? HOME], i: 0 });
   const url = hist.list[hist.i]!;
   const [bar, setBar] = useState(url);
-  const route = useMemo(() => parseUrl(url), [url]);
+  const hotes = useMemo(() => pack.sites.map((x) => x.hote), [pack.sites]);
+  const route = useMemo(() => parseUrl(url, hotes), [url, hotes]);
+  const site = route.kind === "site" ? pack.sites.find((x) => x.hote === route.hote) : undefined;
 
   const go = (u: string) => setHist((h) => ({ list: [...h.list.slice(0, h.i + 1), u], i: h.i + 1 }));
   // Réouverture avec une autre adresse (raccourci) : on navigue.
@@ -37,7 +40,7 @@ export function Navigateur() {
   }, [win.args.url]);
   useEffect(() => setBar(url), [url]);
 
-  const pageTitle = route.kind === "article" ? (byId.get(route.id)?.title ?? CATALOG.find((c) => c.id === route.id)?.title ?? "412") : route.kind === "accueil" ? "PigNet" : route.kind === "index" ? "Porkopédia" : route.kind === "recherche" ? route.q : "PigNet";
+  const pageTitle = route.kind === "article" ? (byId.get(route.id)?.title ?? CATALOG.find((c) => c.id === route.id)?.title ?? "412") : route.kind === "accueil" ? "PigNet" : route.kind === "index" ? "Porkopédia" : route.kind === "recherche" ? route.q : site ? (site.pages[route.kind === "site" ? route.page : ""]?.titre ?? site.titre) : "PigNet";
   useEffect(() => setTitle(`${pageTitle} — PigNet Navigateur`), [pageTitle, setTitle]);
 
   const precedent = () => setHist((h) => ({ ...h, i: Math.max(0, h.i - 1) }));
@@ -87,6 +90,7 @@ export function Navigateur() {
         {route.kind === "article" && <Notice id={route.id} go={go} />}
         {route.kind === "etranger" && <Erreur titre="Internet étranger" texte={str("nav.etranger")} code="PK-012" />}
         {route.kind === "inconnu" && <Erreur titre="Adresse non homologuée" texte={str("nav.inconnu")} code="412" />}
+        {route.kind === "site" && site && <Site site={site} page={route.page} go={go} introuvable={<Erreur titre="Page introuvable" texte={str("nav.inconnu")} code="412" />} />}
       </div>
       <div className="pk-statusbar">
         <span style={{ flex: 1 }}>{str("nav.statut")}</span>

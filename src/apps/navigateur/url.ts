@@ -5,11 +5,13 @@ export type Route =
   | { kind: "article"; id: string }
   | { kind: "recherche"; q: string }
   | { kind: "etranger"; url: string }
+  | { kind: "site"; hote: string; page: string }
   | { kind: "inconnu"; url: string };
 
 export const HOME = "porko://accueil";
 
-export function parseUrl(raw: string): Route {
+/** `hotes` : sites de PigNet connus du pack (pages perso, annuaire) ; les autres adresses restent non homologuées. */
+export function parseUrl(raw: string, hotes: string[] = []): Route {
   const url = raw.trim();
   if (!url || /^porko:\/\/(accueil)?\/?$/i.test(url)) return { kind: "accueil" };
   if (/^(https?:\/\/|www\.)/i.test(url) || /^[a-z0-9-]+\.(com|net|org|fr|io|be|ch|de|uk)(\/|$)/i.test(url)) return { kind: "etranger", url };
@@ -22,6 +24,7 @@ export function parseUrl(raw: string): Route {
     return section ? { kind: "index", section } : { kind: "index" };
   }
   if (host === "recherche") return { kind: "recherche", q: new URLSearchParams(query).get("q") ?? "" };
+  if (hotes.includes(host.toLowerCase())) return { kind: "site", hote: host.toLowerCase(), page: decodeURIComponent(path).replace(/\/$/, "") };
   return { kind: "inconnu", url };
 }
 
@@ -35,4 +38,13 @@ export function search<T extends { title: string }>(items: T[], q: string): T[] 
   const words = fold(q).split(/\s+/).filter(Boolean);
   if (!words.length) return [];
   return items.filter((it) => words.every((w) => fold(it.title).includes(w)));
+}
+
+export const siteUrl = (hote: string, page = "") => `porko://${hote}${page ? `/${page}` : ""}`;
+
+/** Voisins dans l'Anneau des pages perso : précédent et suivant, en boucle ; null hors de l'anneau. */
+export function anneau(hotes: string[], hote: string): { precedent: string; suivant: string } | null {
+  const i = hotes.indexOf(hote);
+  if (i < 0 || hotes.length < 2) return null;
+  return { precedent: hotes[(i - 1 + hotes.length) % hotes.length]!, suivant: hotes[(i + 1) % hotes.length]! };
 }

@@ -119,6 +119,24 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const disqueRef = useRef(disque);
   const [pressePapiers, setPressePapiers] = useState<{ chemins: string[]; couper: boolean } | null>(null);
 
+  // Numéro de cette session pour ce citoyen : certains courriers attendent qu'on revienne.
+  const cleSessions = `porkos.sessions.${pack.id}.${user.id}`;
+  const [numeroSession] = useState(() => {
+    try {
+      const n = Number(window.localStorage.getItem(cleSessions));
+      return (Number.isInteger(n) && n > 0 ? n : 0) + 1;
+    } catch {
+      return 1;
+    }
+  });
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(cleSessions, String(numeroSession));
+    } catch {
+      /* compteur non retenu */
+    }
+  }, [cleSessions, numeroSession]);
+
   const rng = useMemo(() => makeRng(Date.now() & 0xffffffff), []);
   const str = useMemo(() => makeStr(pack), [pack]);
   const loginAt = useRef(0);
@@ -165,7 +183,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const feed = useCallback(
     (input: Input) => {
       const elapsed = Date.now() - loginAt.current;
-      const r = schedule(pack.rules, rules.current, { ...input, elapsed } as SchedulerInput, rng, live.current.settings as unknown as Record<string, unknown>);
+      const r = schedule(pack.rules, rules.current, { ...input, elapsed } as SchedulerInput, rng, live.current.settings as unknown as Record<string, unknown>, numeroSession);
       rules.current = r.state;
       for (const { action } of r.actions) runRef.current(action);
       if (input.kind === "tick") return;
@@ -180,7 +198,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       }
       d.nouvelles.forEach((x, i) => setTimeout(() => decerneRef.current(x), 600 + i * 400));
     },
-    [pack.rules, pack.distinctions, rng, applisDuPoste, cleDecor],
+    [pack.rules, pack.distinctions, rng, applisDuPoste, cleDecor, numeroSession],
   );
 
   /** Ouverture d'un programme : sablier, chargement « du disque », puis zoom vers la fenêtre. */

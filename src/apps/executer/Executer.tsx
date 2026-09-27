@@ -17,15 +17,35 @@ export function resolveCommand(cmd: string, aliases: Record<string, Cible>, apps
   return app ? { app: app.id } : null;
 }
 
+const CLE_HISTORIQUE = "porkos.executer.historique";
+
 export function Executer() {
   const { pack, str, openApp, runAction, signal } = useOs();
   const { close } = useWin();
   const [cmd, setCmd] = useState("");
+  // Historique des commandes tapées (comme la liste d'Exécuter d'époque) : c'est là que réapparaissent les secrets trouvés.
+  const [historique, setHistorique] = useState<string[]>(() => {
+    try {
+      const v = JSON.parse(window.localStorage.getItem(CLE_HISTORIQUE) ?? "[]");
+      return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, 12) : [];
+    } catch {
+      return [];
+    }
+  });
   const ok = () => {
     const hit = resolveCommand(cmd, pack.run.aliases, pack.apps);
     if (hit) {
       close();
-      signal(`executer:${cmd.trim().toLowerCase()}`);
+      const c = cmd.trim().toLowerCase();
+      const h = [c, ...historique.filter((x) => x !== c)].slice(0, 12);
+      setHistorique(h);
+      try {
+        window.localStorage.setItem(CLE_HISTORIQUE, JSON.stringify(h));
+      } catch {
+        /* historique non retenu */
+      }
+      signal(`executer:${c}`);
+      if (pack.run.secretes.includes(c)) signal("executer:secret");
       if ("action" in hit) runAction(hit.action);
       else openApp(hit.app, hit.args);
     } else if (cmd.trim())
@@ -47,7 +67,7 @@ export function Executer() {
         <span>{str("executer.ouvrir")}</span>
         <input className="pk-input" value={cmd} onChange={(e) => setCmd(e.target.value)} autoFocus list="executer-historique" data-testid="executer-champ" spellCheck={false} />
         <datalist id="executer-historique">
-          {Object.keys(pack.run.aliases).map((a) => (
+          {[...historique, ...Object.keys(pack.run.aliases).filter((a) => !pack.run.secretes.includes(a) && !historique.includes(a))].map((a) => (
             <option key={a} value={a} />
           ))}
         </datalist>

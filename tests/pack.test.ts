@@ -3,7 +3,7 @@ import type { ActionRef, ContentPack, FsNode } from "@/content/types";
 import { porkosPack } from "@/content/packs/porkos";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { APPS } from "@/apps/registry";
-import { parseUrl, search } from "@/apps/navigateur/url";
+import { anneau, parseUrl, search } from "@/apps/navigateur/url";
 import { compteur, cours, duJour, jour, meteo } from "@/apps/navigateur/portail";
 import { at, decouper, gridOf, live, loopLength, programLength, sousTitre, voiceAt } from "@/apps/channel-pork/timeline";
 import { existsSync } from "node:fs";
@@ -50,11 +50,12 @@ describe("pack PorkOS", () => {
   it("est cohérent", () => expect(problems(porkosPack)).toEqual([]));
   it("déclenche des signaux que le système émet vraiment", () => {
     const emitted = ["nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "bureau:actualiser", "courrier:relever"];
-    for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect(emitted).toContain(r.trigger.name);
+    const aussi = ["systeme:fatal", "session:perdue", "session:ouverte", "executer:sudo", "defrag:fin", "paint:enregistrer", "porkamp:fin", "nappe:conforme:vii", "tv:integral:brume-*", "courrier:envoye", "economiseur:vu", "pignet:livredor:tonton-marcel"];
+    for (const r of porkosPack.rules) if (r.trigger.type === "signal") expect([...emitted, ...aussi]).toContain(r.trigger.name);
   });
   it("décerne des distinctions atteignables", () => {
     // Signaux émis par le système ; `executer:<alias>` et `tv:integral:<émission>` sont vérifiés contre le pack.
-    const emis = ["session:ouverte", "session:perdue", "systeme:fatal", "courrier:envoye", "economiseur:vu", "porkamp:fin", "defrag:fin", "nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer"];
+    const emis = ["session:ouverte", "session:perdue", "systeme:fatal", "courrier:envoye", "economiseur:vu", "porkamp:fin", "defrag:fin", "fichiers:caches", "nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer"];
     const d = porkosPack.distinctions;
     expect(new Set(d.map((x) => x.id)).size).toBe(d.length);
     for (const x of d) {
@@ -62,7 +63,8 @@ describe("pack PorkOS", () => {
       if (t.type === "app-open") expect(porkosPack.apps.map((a) => a.id)).toContain(t.app);
       if (t.type !== "signal") continue;
       const n = t.name.replace(/\*$/, "");
-      if (n.startsWith("executer:")) expect(Object.keys(porkosPack.run.aliases)).toContain(n.slice(9));
+      if (n === "executer:secret") expect(porkosPack.run.secretes.every((c) => c in porkosPack.run.aliases)).toBe(true);
+      else if (n.startsWith("executer:")) expect(Object.keys(porkosPack.run.aliases)).toContain(n.slice(9));
       else if (n.startsWith("nappe:conforme:")) expect(["petit", "grand", "vii"]).toContain(n.slice(15));
       else if (n.startsWith("tv:txt:")) expect(porkosPack.teletexte.pages.map((p) => String(p.numero))).toContain(n.slice(7));
       else if (n.startsWith("tv:integral:")) expect(porkosPack.programs.some((p) => p.id.startsWith(n.slice(12)))).toBe(true);
@@ -95,6 +97,24 @@ describe("PigNet", () => {
     expect(parseUrl("https://google.com").kind).toBe("etranger");
     expect(parseUrl("wikipedia.org").kind).toBe("etranger");
     expect(parseUrl("porko://ministere/secret").kind).toBe("inconnu");
+    expect(parseUrl("porko://tonton-marcel/photos", ["tonton-marcel"])).toEqual({ kind: "site", hote: "tonton-marcel", page: "photos" });
+    expect(parseUrl("porko://Tonton-Marcel", ["tonton-marcel"])).toEqual({ kind: "site", hote: "tonton-marcel", page: "" });
+    expect(anneau(["a", "b", "c"], "a")).toEqual({ precedent: "c", suivant: "b" });
+    expect(anneau(["a", "b"], "z")).toBeNull();
+    // Sites du pack : liens internes valides, images d'origine seulement, anneau d'au moins trois membres.
+    const hotes = porkosPack.sites.map((x) => x.hote);
+    for (const site of porkosPack.sites)
+      for (const [nom, page] of Object.entries(site.pages))
+        for (const b of page.blocs) {
+          if (b.t === "liens") for (const l of b.liens) {
+            const r = parseUrl(l.url, hotes);
+            expect(r.kind, `${site.hote}/${nom} → ${l.url}`).not.toBe("inconnu");
+            if (r.kind === "site") expect(porkosPack.sites.find((x) => x.hote === r.hote)?.pages[r.page], l.url).toBeTruthy();
+          }
+          if (b.t === "image") expect(b.src).toMatch(/^https:\/\//);
+        }
+    expect(porkosPack.sites.filter((x) => x.anneau).length).toBeGreaterThanOrEqual(3);
+    for (const a of Object.values(porkosPack.run.aliases)) if ("args" in a && a.args?.url) expect(parseUrl(a.args.url, hotes).kind).not.toBe("inconnu");
     expect(parseUrl("douzi")).toEqual({ kind: "recherche", q: "douzi" });
   });
   it("recherche sans accents ni casse", () => {
@@ -235,7 +255,8 @@ describe("portail PigNet", () => {
   });
   it("oriente la recherche et les rubriques vers les bonnes pages", () => {
     expect(parseUrl("porko://porkopedia?rubrique=Villes%20de%20Porkonia")).toEqual({ kind: "index", section: "Villes de Porkonia" });
-    for (const s of porkosPack.portal.services) if (s.url) expect(["index", "etranger", "article", "accueil"]).toContain(parseUrl(s.url).kind);
+    const hotes = porkosPack.sites.map((x) => x.hote);
+    for (const s of porkosPack.portal.services) if (s.url) expect(["index", "etranger", "article", "accueil", "site"]).toContain(parseUrl(s.url, hotes).kind);
   });
 });
 

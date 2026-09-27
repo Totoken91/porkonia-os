@@ -45,7 +45,7 @@ const ICONE = { w: 74, h: 66 };
 const idFichier = (nom: string) => `f:${nom}`;
 
 export function Desktop({ area, onLaunch }: Props) {
-  const { pack, str, signal, openApp, runAction, fs } = useOs();
+  const { pack, str, signal, openApp, runAction, fs, settings } = useOs();
   const bureau = fs.disque.racine.children.find((c) => c.name === BUREAU && c.type === "dossier") as Extract<FsNode, { type: "dossier" }> | undefined;
   const elements = useMemo<Element[]>(
     () => [
@@ -56,7 +56,7 @@ export function Desktop({ area, onLaunch }: Props) {
         systeme: d,
         depot: "app" in d.open && d.open.app === "fichiers" && d.open.args?.path === POUBELLE ? POUBELLE : undefined,
       })),
-      ...(bureau?.children ?? []).map((n) => ({
+      ...(bureau?.children ?? []).filter((n) => settings.fichiersCaches || !n.cache).map((n) => ({
         id: idFichier(n.name),
         label: n.name,
         icon: iconOf(n, pack.apps),
@@ -65,7 +65,7 @@ export function Desktop({ area, onLaunch }: Props) {
         depot: n.type === "dossier" && !n.locked ? childPath(BUREAU, n.name) : undefined,
       })),
     ],
-    [pack.desktop, bureau],
+    [pack.desktop, bureau, settings.fichiersCaches],
   );
   const ids = useMemo(() => elements.map((d) => d.id), [elements]);
   const cleIds = ids.join("|");

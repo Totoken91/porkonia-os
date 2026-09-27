@@ -17,11 +17,13 @@ export interface Settings {
   contenuFenetres: boolean;
   /** Échelle entière imposée (pixels parfaitement nets, écran parfois plus petit). */
   pixelsNets: boolean;
+  /** Afficher les fichiers cachés dans Mes documents et sur le bureau. */
+  fichiersCaches: boolean;
 }
 
 export const DELAIS_ECONOMISEUR = [0, 60, 120, 300];
 
-export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true, pixelsNets: false };
+export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true, pixelsNets: false, fichiersCaches: false };
 
 const KEY = "porkos.reglages";
 
@@ -58,5 +60,6 @@ export function sanitizeSettings(v: unknown): Settings {
     economiseur: DELAIS_ECONOMISEUR.includes(o.economiseur as number) ? (o.economiseur as number) : d.economiseur,
     contenuFenetres: typeof o.contenuFenetres === "boolean" ? o.contenuFenetres : d.contenuFenetres,
     pixelsNets: typeof o.pixelsNets === "boolean" ? o.pixelsNets : d.pixelsNets,
+    fichiersCaches: typeof o.fichiersCaches === "boolean" ? o.fichiersCaches : d.fichiersCaches,
   };
 }

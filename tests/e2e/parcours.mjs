@@ -85,9 +85,13 @@ try {
       await page.getByTestId("ad-close").click({ timeout: 15000 });
     });
     // Idem pour les bulles de notification (distinctions, rappels) qui recouvrent le coin de l'écran.
-    await page.addLocatorHandler(page.getByTestId("toast"), async () => {
-      for (const b of await page.locator("[data-testid=toast] .pk-ctl").all()) await b.click({ timeout: 2000 }).catch(() => {});
-    });
+    // Les bulles se succèdent (courriers, distinctions, rappels) et recouvrent le coin de l'écran : dans ce parcours,
+    // elles laissent passer les clics (les fermer au passage refermerait aussi les menus ouverts).
+    await page.addInitScript(() => document.addEventListener("DOMContentLoaded", () => {
+      const st = document.createElement("style");
+      st.textContent = ".bulles, .bulles * { pointer-events: none !important; }";
+      document.head.appendChild(st);
+    }));
     await page.goto(base);
     // La machine attend qu'on l'allume (ce clic libère aussi le son).
     await page.waitForTimeout(400);
@@ -437,6 +441,26 @@ try {
       await page.keyboard.press("Escape");
       await page.getByTestId("calendrier").waitFor({ state: "detached" });
       step(`${tag} : commutateur de tâches et calendrier`);
+
+      // Commande secrète « douze », annuaire PigNet, page perso de Marcel et son livre d'or
+      await viaDemarrer(() => page.getByTestId("menu-executer"));
+      await page.getByTestId("executer-champ").fill("douze");
+      await page.getByTestId("executer-champ").press("Enter");
+      await page.getByTestId("site-douze-douze").waitFor();
+      await page.getByTestId("nav-url").fill("porko://annuaire");
+      await page.getByTestId("nav-url").press("Enter");
+      await page.getByTestId("annuaire-tonton-marcel").click();
+      await page.getByTestId("site-tonton-marcel").waitFor();
+      await page.getByTestId("site-anneau").waitFor();
+      await shot(page, `${tag}-24-page-perso`);
+      await page.getByTestId("nav-url").fill("porko://tonton-marcel/livre-d-or");
+      await page.getByTestId("nav-url").press("Enter");
+      const avant = await page.locator(".site-livre-message").count();
+      await page.getByTestId("site-livre-message").fill("C'est la perspective.");
+      await page.getByTestId("site-livre-signer").click();
+      await page.locator(".site-livre-message").nth(avant).waitFor();
+      await fermer("navigateur");
+      step(`${tag} : PigNet (commande secrète, annuaire, page perso, livre d'or)`);
     }
 
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche

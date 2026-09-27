@@ -15,7 +15,7 @@ import { lireFichiers, porteFichiers, porter } from "@/os/glisser";
 import { BUREAU, POUBELLE, creer, dossiersEcrivables, ecrire, renommer, restaurer, vider } from "@/os/vfs";
 
 export function Fichiers() {
-  const { pack, str, fs, showMenu, runAction } = useOs();
+  const { pack, str, fs, showMenu, runAction, settings, setSettings, signal } = useOs();
   const { win, setTitle } = useWin();
   const [path, setPath] = useState(win.args.path ?? "");
   const [sel, setSel] = useState<Set<string>>(new Set());
@@ -102,7 +102,16 @@ export function Fichiers() {
     });
   };
 
-  const choisi = folder?.children.find((c) => sel.has(c.name)) ?? null;
+  // Les fichiers cachés ne se montrent qu'à qui les demande (menu Affichage).
+  const enfants = (folder?.children ?? []).filter((c) => settings.fichiersCaches || !c.cache);
+  const choisi = enfants.find((c) => sel.has(c.name)) ?? null;
+  const basculerCaches = () => {
+    if (!settings.fichiersCaches) {
+      runAction({ type: "dialog", dialog: { title: str("fichiers.caches.titre"), icon: "info", body: str("fichiers.caches.corps"), buttons: [{ label: "OK" }] } });
+      signal("fichiers:caches");
+    }
+    setSettings({ fichiersCaches: !settings.fichiersCaches });
+  };
   useMenuCommands(
     {
       "fichiers.ouvrir": () => choisi && ouvrir(choisi),
@@ -125,7 +134,8 @@ export function Fichiers() {
       "fichiers.couper": () => sel.size && fs.setPressePapiers({ chemins: selection(), couper: true }),
       "fichiers.copier": () => sel.size && fs.setPressePapiers({ chemins: selection(), couper: false }),
       "fichiers.coller": coller,
-      "fichiers.tout": () => folder && setSel(new Set(folder.children.map((c) => c.name))),
+      "fichiers.tout": () => folder && setSel(new Set(enfants.map((c) => c.name))),
+      "fichiers.caches": basculerCaches,
     },
     {
       "fichiers.ouvrir": { disabled: !choisi },
@@ -137,6 +147,7 @@ export function Fichiers() {
       "fichiers.couper": { disabled: !sel.size || poubelle },
       "fichiers.copier": { disabled: !sel.size || poubelle },
       "fichiers.coller": { disabled: !fs.pressePapiers || !folder },
+      "fichiers.caches": { checked: settings.fichiersCaches },
     },
   );
 
@@ -147,7 +158,7 @@ export function Fichiers() {
     else if (e.key === "F2" && choisi) setRenomme(choisi.name);
     else if (e.key === "Enter" && choisi) ouvrir(choisi);
     else if (e.key === "Backspace" && path && !poubelle) aller(parentPath(path));
-    else if (e.ctrlKey && k === "a" && folder) setSel(new Set(folder.children.map((c) => c.name)));
+    else if (e.ctrlKey && k === "a" && folder) setSel(new Set(enfants.map((c) => c.name)));
     else if (e.ctrlKey && k === "c" && sel.size) fs.setPressePapiers({ chemins: selection(), couper: false });
     else if (e.ctrlKey && k === "x" && sel.size) fs.setPressePapiers({ chemins: selection(), couper: true });
     else if (e.ctrlKey && k === "v") coller();
@@ -230,9 +241,9 @@ export function Fichiers() {
         data-testid="fichiers-liste"
         {...depot(path)}
       >
-        {folder && folder.children.length === 0 && <p className="note">{str("fichiers.vide")}</p>}
+        {folder && enfants.length === 0 && <p className="note">{str("fichiers.vide")}</p>}
         {!clignote &&
-          folder?.children.map((n) => {
+          enfants.map((n) => {
             const p = childPath(path, n.name);
             const estDossier = n.type === "dossier" && !n.locked;
             return (
@@ -240,7 +251,7 @@ export function Fichiers() {
                 key={n.name}
                 role="button"
                 tabIndex={-1}
-                className={`fichier${coupes.has(p) ? " coupe" : ""}${survol === p ? " depot-survol" : ""}`}
+                className={`fichier${coupes.has(p) ? " coupe" : ""}${n.cache ? " cache" : ""}${survol === p ? " depot-survol" : ""}`}
                 aria-selected={sel.has(n.name)}
                 draggable={renomme !== n.name}
                 onDragStart={(e) => {
@@ -274,7 +285,7 @@ export function Fichiers() {
           })}
       </div>
       <div className="pk-statusbar">
-        <span style={{ flex: 1 }}>{folder ? str("fichiers.elements", { n: folder.children.length }) : ""}</span>
+        <span style={{ flex: 1 }}>{folder ? str("fichiers.elements", { n: enfants.length }) : ""}</span>
         <span>{sel.size ? str("fichiers.selection", { n: sel.size }) : "Poste homologué"}</span>
       </div>
     </div>
