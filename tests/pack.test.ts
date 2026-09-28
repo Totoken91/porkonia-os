@@ -169,7 +169,8 @@ describe("Channel Pork", () => {
 
   it("donne une voix et une image à chaque réplique de chaque émission", () => {
     for (const p of porkosPack.programs) {
-      expect(p.subtitles.every((s) => s.voice), p.id).toBe(true);
+      // Une bande complète (jeu télévisé) porte toutes les voix ; sinon chaque réplique a la sienne.
+      expect(!!p.bande || p.subtitles.every((s) => s.voice), p.id).toBe(true);
       expect(p.slides.every((s) => !s.focus || s.focus.every((v) => v >= 0 && v <= 1)), p.id).toBe(true);
       const at0 = p.subtitles.map((s) => s.at);
       expect([...at0].sort((a, b) => a - b), p.id).toEqual(at0);
@@ -178,8 +179,9 @@ describe("Channel Pork", () => {
 
   it("fournit les fichiers audio et garde les répliques dans le programme", () => {
     for (const p of porkosPack.programs) {
-      for (const f of [p.music, ...p.subtitles.map((s) => s.voice)].filter(Boolean)) expect(existsSync(`public${f}`), f).toBe(true);
+      for (const f of [p.music, p.bande, ...p.subtitles.map((s) => s.voice)].filter(Boolean)) expect(existsSync(`public${f}`), f).toBe(true);
       for (const s of p.subtitles) expect(s.at).toBeLessThan(programLength(p));
+      for (const s of p.slides) if (s.image.startsWith("/")) expect(existsSync(`public${s.image}`), s.image).toBe(true);
     }
   });
 });

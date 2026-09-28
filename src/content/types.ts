@@ -148,7 +148,7 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
-  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip";
+  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip" | "jeu";
   /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
   etiquette?: string;
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */
@@ -175,6 +175,11 @@ export interface Program {
    * `dur` : sa durée (s), qui sert à faire défiler les sous-titres longs au rythme de la voix.
    */
   subtitles: { at: number; text: string; voice?: string; dur?: number }[];
+  /**
+   * Bande son intégrale de l'émission (voix, bruitages, public déjà mixés), jouée calée sur le direct
+   * comme un clip : les sous-titres suivent la bande, sans voix séparées.
+   */
+  bande?: string;
   /** Musique de fond (bouclée, baissée sous la voix). */
   music?: string;
   /** Clip musical : `music` est le morceau lui-même, calé sur le direct ; incrustation artiste et titre. */

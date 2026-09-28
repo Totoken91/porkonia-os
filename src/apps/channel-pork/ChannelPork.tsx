@@ -47,8 +47,8 @@ export function ChannelPork() {
   const son = useSonTv({
     actif: settings.sons,
     lecture: true,
-    musique: p.music,
-    calage: p.clip ? { cle: cleProgramme, t } : undefined,
+    musique: p.bande ?? p.music,
+    calage: p.clip || p.bande ? { cle: cleProgramme, t } : undefined,
     voix: voix ? { cle: `${cleProgramme}-${voix.index}`, src: voix.src, offset: voix.offset } : null,
     precharge: [...p.subtitles, ...direct.suivant.subtitles].flatMap((x) => (x.voice ? [x.voice] : [])),
     volume: volume / 10,

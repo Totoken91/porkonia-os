@@ -72,7 +72,8 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 - [x] Distinctions civiques : 25 médailles (bronze, argent, or) dans « Mes décorations », rangs de « Citoyen ordinaire » à « Citoyen intégral », fanfare et bulle cliquable à la remise, retenues dans le navigateur.
 - [x] Courrier : 17 courriers tardifs qui réagissent à ce qu'on fait (format c:, arrêt brutal, Niveau VII, BRUME regardé jusqu'au bout, pub cliquée, dessin enregistré, livre d'or signé…) ou arrivent au fil des sessions (2e, 3e, 4e, 6e), avec suites des fils existants (Pork ID, Tonton Marcel, Gobelins).
 - [x] PigNet : pages perso de citoyens (Tonton Marcel, Chopes du Monde, Nappe Vide astuces, Le Site du Douze, un site B.R.U.M.E. retiré de l'annuaire), annuaire, livre d'or signable, compteurs, Anneau des pages perso.
-- [ ] **Étape suivante (avant la technique)** — Channel Pork : un jeu télévisé, d'autres pubs que la Douzi Ambrée.
+- [x] **Jeu télévisé** — « Ferme ta gueule et réponds », épisode 1 sur Canal 1 (plateau, portraits, jingle du logo, score au bandeau, applaudissements).
+- [ ] Épisodes 2 et 3 du jeu (questions 4 à 12, finale), d'autres pubs que la Douzi Ambrée.
 - [x] Secrets : commandes cachées dans Exécuter (absentes des suggestions, retenues dans l'historique une fois trouvées), fichiers cachés révélés par « Afficher les fichiers cachés » ; les nouveautés du pack arrivent aussi sur les disques déjà enregistrés.
 
 ### 4. Technique
