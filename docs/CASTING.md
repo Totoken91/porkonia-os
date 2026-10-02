@@ -34,6 +34,22 @@ Parodie d'animé de course des années 80, en images fixes : Tonio livre de la D
 | **John Pork** | Rival : cheveux noirs, t-shirt noir, très musclé, voiture de sport noire à phares escamotables. | Voix grave, divine, ultra sexy ; parle lentement, susurre ses défis, s'effondre avec sensualité quand il perd. | ElevenLabs v3, **Brian** |
 | Narrateur | Voix off d'animé. | Surexcité, crie chaque évidence comme une finale du monde. | ElevenLabs v3, **Patrick** |
 
+## Voix off des autres émissions
+
+Toutes doublées en ElevenLabs v3 avec des balises de jeu (ton vivant, pas de lecture plate). Prises dans `scripts/channel-pork/voix/<émission>/` avec `repliques.json` ; fichiers diffusés dans `public/audio/channel-pork/` sous leurs noms d'origine.
+
+| Émission | Voix off | Voix | Ton |
+|---|---|---|---|
+| Le Journal du Groin | Présentatrice | **Rachel** | Assurée, pince-sans-rire |
+| Pub Douzi Ambrée | Narrateur | **Adam** | Grave, intime, fier |
+| Ma Pork ID et moi | Institutrice | **Matilda** | Enjouée, un peu condescendante |
+| Groinball | Commentateur | **Antoni** | Commentateur sportif surexcité |
+| Petites Bêtes de la République | Narratrice | **Elli** | Documentaire animalier, amusée |
+| Bestiaire | Narrateur | **Thomas** | Documentaire sérieux, chuchote |
+| Grand Zouk (DJ Viteau) | Animateur | **Will** | Ambianceur qui crie à la foule |
+| Météo de la mousse | Présentatrice | **Freya** | Météo souriante, pince-sans-rire à la chute |
+| Brume (Nuit) | — | inchangée | **Garde son ton monotone d'origine : ne pas la revoicer.** |
+
 ## Images
 
 Les images de référence sont dans `public/tv/ftg/` (gros plans : `frederic`, `kevin`, `martin`, `tonio`, `animateur`, `animateur-crispe` ; décor : `plateau`, `public`, `vitrine`, `regie`, `buzzer`, `logo`) et `public/tv/brasswagen/`. Pour un nouveau plan, joindre ces images à ChatGPT pour garder les mêmes visages, et finir chaque prompt par :

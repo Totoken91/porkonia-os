@@ -1,188 +1,257 @@
 {
-  "_lisezmoi": "Réglages de voix des personnages de Channel Pork (Speko, outil audio.synthesize). Voir docs/CASTING.md. Corps de requête = base + champs du personnage ; le texte porte les balises de jeu entre crochets pour ElevenLabs v3.",
-  "base": {
-    "elevenlabs": {
-      "intent": {
-        "language": "fr-FR"
-      },
-      "model": "eleven_v3",
-      "constraints": {
-        "allowedProviders": {
-          "tts": [
-            "elevenlabs"
-          ]
-        }
-      }
-    },
-    "qwen": {
-      "intent": {
-        "language": "fr-FR"
-      },
-      "model": "qwen3-tts-instruct-flash",
-      "constraints": {
-        "allowedProviders": {
-          "tts": [
-            "alibaba"
-          ]
-        }
-      }
+ "_lisezmoi": "Réglages de voix des personnages de Channel Pork (Speko, outil audio.synthesize). Voir docs/CASTING.md. Corps de requête = base + champs du personnage ; le texte porte les balises de jeu entre crochets pour ElevenLabs v3.",
+ "base": {
+  "elevenlabs": {
+   "intent": {
+    "language": "fr-FR"
+   },
+   "model": "eleven_v3",
+   "constraints": {
+    "allowedProviders": {
+     "tts": [
+      "elevenlabs"
+     ]
     }
+   }
   },
-  "personnages": {
-    "jean-groin": {
-      "nom": "Jean-Groin Laverdure",
-      "role": "présentateur de « Ferme ta gueule et réponds »",
-      "moteur": "elevenlabs",
-      "voice": "VR6AewLTigWG4xSOukaG",
-      "voix_nom": "Arnold",
-      "balises": [
-        "overly excited, cheesy game show host",
-        "dramatic quiz host voice",
-        "big fake smile, sweetly mocking",
-        "forced smile, slowly, as if to a child",
-        "cold",
-        "calm, smiling, menacing"
-      ],
-      "plans": [
-        "animateur",
-        "crispe"
-      ]
-    },
-    "frederic": {
-      "nom": "Frédéric Legaigneur",
-      "role": "candidat, docteur en imprimantes, ancien négociateur",
-      "moteur": "elevenlabs",
-      "voice": "N2lVS1w4EtoT3dr4eOWO",
-      "voix_nom": "Callum",
-      "balises": [
-        "smug show-off, smooth talker, chuckles",
-        "bragging, leaning back",
-        "condescending",
-        "offended, shouting",
-        "slamming the desk, defiant, loud"
-      ],
-      "plans": [
-        "frederic"
-      ]
-    },
-    "kevin": {
-      "nom": "Kevin Ranga",
-      "role": "candidat, cuisine assistée par intelligence artificielle (RangaNet)",
-      "moteur": "elevenlabs",
-      "voice": "SOYHLrjzK2X1ezoPC6cr",
-      "voix_nom": "Harry",
-      "balises": [
-        "shy, nervous, stuttering, voice cracking",
-        "mumbling, clutching his phone",
-        "awkward pause"
-      ],
-      "plans": [
-        "kevin"
-      ]
-    },
-    "martin": {
-      "nom": "Martin Chou",
-      "role": "candidat, esthète des finitions et moulures, patriote chinois",
-      "moteur": "qwen",
-      "voice": "Ethan",
-      "instructions": "Homme chinois d'une quarantaine d'années, originaire de Pékin, qui parle français avec un fort accent mandarin. Patriote chinois fier et hautain, esthète méprisant, dégoûté par tout ce qui n'est pas chinois.",
-      "remarque": "Pas de balises entre crochets avec Qwen : tout le jeu passe par instructions. Pour un mot difficile, ajouter « Parle lentement et articule bien. »",
-      "plans": [
-        "martin"
-      ]
-    },
-    "tonio": {
-      "nom": "Tonio",
-      "role": "candidat de « Ferme ta gueule et réponds », témoin de la pub Brasswagen, héros d'« Initial P » (livreur de bière en Brasswagen Palou)",
-      "moteur": "elevenlabs",
-      "voice": "TxGEqnHWrfWFTfGW9XjX",
-      "voix_nom": "Josh",
-      "balises": [
-        "dopey, slow, proud of himself",
-        "dopey, proud",
-        "pause",
-        "pause, confused",
-        "pumped up, dopey",
-        "panicked, shouting"
-      ],
-      "plans": [
-        "tonio"
-      ]
-    },
-    "john-pork": {
-      "nom": "John Pork",
-      "role": "rival de Tonio dans « Initial P », pilote d'une voiture de sport noire",
-      "moteur": "elevenlabs",
-      "voice": "nPczCjzI2devNBz1zQrb",
-      "voix_nom": "Brian",
-      "balises": [
-        "deep, seductive, slow, sensual",
-        "deep, seductive, whispering",
-        "deep, shocked, breathless",
-        "deep, broken, sensual, slow",
-        "deep, seductive, warm"
-      ],
-      "plans": [
-        "rival",
-        "arrete",
-        "sommet"
-      ]
+  "qwen": {
+   "intent": {
+    "language": "fr-FR"
+   },
+   "model": "qwen3-tts-instruct-flash",
+   "constraints": {
+    "allowedProviders": {
+     "tts": [
+      "alibaba"
+     ]
     }
-  },
-  "secondaires": {
-    "chauffeur-de-salle": {
-      "moteur": "elevenlabs",
-      "voice": "JBFqnCBsd6RMkjVDRZzb",
-      "voix_nom": "George",
-      "balises": [
-        "shouting to the crowd, energetic warm-up guy"
-      ]
-    },
-    "homme-du-public": {
-      "moteur": "elevenlabs",
-      "voice": "yoZ06aMxZJJ28mfd3POQ",
-      "voix_nom": "Sam",
-      "balises": [
-        "heckling loudly from the audience, cheeky"
-      ]
-    },
-    "jury": {
-      "moteur": "elevenlabs",
-      "voice": "onwK4e9ZLuTAKqWW03F9",
-      "voix_nom": "Daniel",
-      "balises": [
-        "flat, bored"
-      ]
-    },
-    "narrateur-brasswagen": {
-      "moteur": "elevenlabs",
-      "voice": "pqHfZKP75CvOlQylNhV4",
-      "voix_nom": "Bill",
-      "balises": [
-        "deep, epic car commercial voice, slow",
-        "epic, proud",
-        "warm, epic",
-        "very fast, mumbled legal disclaimer"
-      ]
-    },
-    "narrateur-anime": {
-      "moteur": "elevenlabs",
-      "voice": "ODq5zmih8GrVes37Dizd",
-      "voix_nom": "Patrick",
-      "balises": [
-        "overexcited anime narrator, dramatic",
-        "overexcited anime narrator, shouting",
-        "overexcited anime narrator, screaming"
-      ]
-    }
-  },
-  "libres": {
-    "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
-    "Clyde": "2EiwWnXFnvU5JabPnv8n",
-    "Antoni": "ErXwobaYiN019PkySvjV",
-    "Will": "bIHbv24MWmeRgasZH58o",
-    "Thomas": "GBv7mTt0atIp3Br8iCZE",
-    "Fin": "D38z5RcWu1voky8WS1ja",
-    "Adam": "pNInz6obpgDQGcFmaJgB"
+   }
   }
+ },
+ "personnages": {
+  "jean-groin": {
+   "nom": "Jean-Groin Laverdure",
+   "role": "présentateur de « Ferme ta gueule et réponds »",
+   "moteur": "elevenlabs",
+   "voice": "VR6AewLTigWG4xSOukaG",
+   "voix_nom": "Arnold",
+   "balises": [
+    "overly excited, cheesy game show host",
+    "dramatic quiz host voice",
+    "big fake smile, sweetly mocking",
+    "forced smile, slowly, as if to a child",
+    "cold",
+    "calm, smiling, menacing"
+   ],
+   "plans": [
+    "animateur",
+    "crispe"
+   ]
+  },
+  "frederic": {
+   "nom": "Frédéric Legaigneur",
+   "role": "candidat, docteur en imprimantes, ancien négociateur",
+   "moteur": "elevenlabs",
+   "voice": "N2lVS1w4EtoT3dr4eOWO",
+   "voix_nom": "Callum",
+   "balises": [
+    "smug show-off, smooth talker, chuckles",
+    "bragging, leaning back",
+    "condescending",
+    "offended, shouting",
+    "slamming the desk, defiant, loud"
+   ],
+   "plans": [
+    "frederic"
+   ]
+  },
+  "kevin": {
+   "nom": "Kevin Ranga",
+   "role": "candidat, cuisine assistée par intelligence artificielle (RangaNet)",
+   "moteur": "elevenlabs",
+   "voice": "SOYHLrjzK2X1ezoPC6cr",
+   "voix_nom": "Harry",
+   "balises": [
+    "shy, nervous, stuttering, voice cracking",
+    "mumbling, clutching his phone",
+    "awkward pause"
+   ],
+   "plans": [
+    "kevin"
+   ]
+  },
+  "martin": {
+   "nom": "Martin Chou",
+   "role": "candidat, esthète des finitions et moulures, patriote chinois",
+   "moteur": "qwen",
+   "voice": "Ethan",
+   "instructions": "Homme chinois d'une quarantaine d'années, originaire de Pékin, qui parle français avec un fort accent mandarin. Patriote chinois fier et hautain, esthète méprisant, dégoûté par tout ce qui n'est pas chinois.",
+   "remarque": "Pas de balises entre crochets avec Qwen : tout le jeu passe par instructions. Pour un mot difficile, ajouter « Parle lentement et articule bien. »",
+   "plans": [
+    "martin"
+   ]
+  },
+  "tonio": {
+   "nom": "Tonio",
+   "role": "candidat de « Ferme ta gueule et réponds », témoin de la pub Brasswagen, héros d'« Initial P » (livreur de bière en Brasswagen Palou)",
+   "moteur": "elevenlabs",
+   "voice": "TxGEqnHWrfWFTfGW9XjX",
+   "voix_nom": "Josh",
+   "balises": [
+    "dopey, slow, proud of himself",
+    "dopey, proud",
+    "pause",
+    "pause, confused",
+    "pumped up, dopey",
+    "panicked, shouting"
+   ],
+   "plans": [
+    "tonio"
+   ]
+  },
+  "john-pork": {
+   "nom": "John Pork",
+   "role": "rival de Tonio dans « Initial P », pilote d'une voiture de sport noire",
+   "moteur": "elevenlabs",
+   "voice": "nPczCjzI2devNBz1zQrb",
+   "voix_nom": "Brian",
+   "balises": [
+    "deep, seductive, slow, sensual",
+    "deep, seductive, whispering",
+    "deep, shocked, breathless",
+    "deep, broken, sensual, slow",
+    "deep, seductive, warm"
+   ],
+   "plans": [
+    "rival",
+    "arrete",
+    "sommet"
+   ]
+  }
+ },
+ "secondaires": {
+  "chauffeur-de-salle": {
+   "moteur": "elevenlabs",
+   "voice": "JBFqnCBsd6RMkjVDRZzb",
+   "voix_nom": "George",
+   "balises": [
+    "shouting to the crowd, energetic warm-up guy"
+   ]
+  },
+  "homme-du-public": {
+   "moteur": "elevenlabs",
+   "voice": "yoZ06aMxZJJ28mfd3POQ",
+   "voix_nom": "Sam",
+   "balises": [
+    "heckling loudly from the audience, cheeky"
+   ]
+  },
+  "jury": {
+   "moteur": "elevenlabs",
+   "voice": "onwK4e9ZLuTAKqWW03F9",
+   "voix_nom": "Daniel",
+   "balises": [
+    "flat, bored"
+   ]
+  },
+  "narrateur-brasswagen": {
+   "moteur": "elevenlabs",
+   "voice": "pqHfZKP75CvOlQylNhV4",
+   "voix_nom": "Bill",
+   "balises": [
+    "deep, epic car commercial voice, slow",
+    "epic, proud",
+    "warm, epic",
+    "very fast, mumbled legal disclaimer"
+   ]
+  },
+  "narrateur-anime": {
+   "moteur": "elevenlabs",
+   "voice": "ODq5zmih8GrVes37Dizd",
+   "voix_nom": "Patrick",
+   "balises": [
+    "overexcited anime narrator, dramatic",
+    "overexcited anime narrator, shouting",
+    "overexcited anime narrator, screaming"
+   ]
+  },
+  "presentatrice-journal": {
+   "moteur": "elevenlabs",
+   "voice": "21m00Tcm4TlvDq8ikWAM",
+   "voix_nom": "Rachel",
+   "balises": [
+    "confident news anchor",
+    "dry, deadpan"
+   ]
+  },
+  "narrateur-douzi-ambree": {
+   "moteur": "elevenlabs",
+   "voice": "pNInz6obpgDQGcFmaJgB",
+   "voix_nom": "Adam",
+   "balises": [
+    "deep, intimate beer commercial voice",
+    "proud, warm"
+   ]
+  },
+  "institutrice-pork-id": {
+   "moteur": "elevenlabs",
+   "voice": "XrExE9yKIg1WjnnlVkGX",
+   "voix_nom": "Matilda",
+   "balises": [
+    "cheerful teacher",
+    "patient, slightly condescending"
+   ]
+  },
+  "commentateur-groinball": {
+   "moteur": "elevenlabs",
+   "voice": "ErXwobaYiN019PkySvjV",
+   "voix_nom": "Antoni",
+   "balises": [
+    "excited sports commentator",
+    "shouting"
+   ]
+  },
+  "narratrice-petites-betes": {
+   "moteur": "elevenlabs",
+   "voice": "MF3mGyEYCl7XYWbV9V6O",
+   "voix_nom": "Elli",
+   "balises": [
+    "gentle nature documentary narrator",
+    "amused"
+   ]
+  },
+  "narrateur-bestiaire": {
+   "moteur": "elevenlabs",
+   "voice": "GBv7mTt0atIp3Br8iCZE",
+   "voix_nom": "Thomas",
+   "balises": [
+    "serious wildlife documentary narrator",
+    "whispers"
+   ]
+  },
+  "animateur-grand-zouk": {
+   "moteur": "elevenlabs",
+   "voice": "bIHbv24MWmeRgasZH58o",
+   "voix_nom": "Will",
+   "balises": [
+    "hyped party MC, shouting to the crowd",
+    "whispers"
+   ]
+  },
+  "presentatrice-meteo": {
+   "moteur": "elevenlabs",
+   "voice": "jsCqWAovK2LkecY7zXl4",
+   "voix_nom": "Freya",
+   "balises": [
+    "bright TV weather presenter, smiling",
+    "deadpan"
+   ]
+  },
+  "_brume": "Brume (Nuit) garde ses voix monotones d'origine : ne pas la revoicer."
+ },
+ "libres": {
+  "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
+  "Clyde": "2EiwWnXFnvU5JabPnv8n",
+  "Fin": "D38z5RcWu1voky8WS1ja"
+ }
 }

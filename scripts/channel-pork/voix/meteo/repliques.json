@@ -1,0 +1,47 @@
+[
+ {
+  "fichier": "meteo-1.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Bonsoir à tous. Voici la météo de la mousse pour demain, validée ce matin par la Direction générale de la Mousse."
+ },
+ {
+  "fichier": "meteo-2b.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Demain matin, un épais brouillard recouvrira Hamelot, dans le nord du pays. Visibilité : douze mètres. Pensez à allumer vos phares, et à compter vos passagers."
+ },
+ {
+  "fichier": "meteo-3.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Neige sur les Monts du Porc et à Truffe-sur-Neige. Pluie sur la façade ouest, de Port-Cochon à Lardonville."
+ },
+ {
+  "fichier": "meteo-4.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "L'après-midi, averses de confettis sur Douzi City, à l'approche des banquets du soir. Soleil franc sur tout le sud, du Val Fumé à Porcalis."
+ },
+ {
+  "fichier": "meteo-5.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Côté températures : 12 degrés à Douzi City. 12 à Hamelot. 12 à Port-Cochon. 12 partout, en fait."
+ },
+ {
+  "fichier": "meteo-6.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Moins 12 à Truffe-sur-Neige, par respect pour le nombre sacré."
+ },
+ {
+  "fichier": "meteo-7.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "Indice de mousse : stable sur l'ensemble du territoire, ferme en montagne, légèrement débordante sur la Côte du Bacon. Pensez à pencher le verre."
+ },
+ {
+  "fichier": "meteo-8.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "En mer : avis de coup de vent sur la Mer des Glaces Porconiennes. Baie du Jambon agitée, mais comestible. Mer des Saveurs belle."
+ },
+ {
+  "fichier": "meteo-9.mp3",
+  "voix": "Freya (jsCqWAovK2LkecY7zXl4)",
+  "texte": "C'était la météo. Demain, il fera demain. Excellente soirée à tous."
+ }
+]
