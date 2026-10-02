@@ -75,9 +75,10 @@ describe("pack PorkOS", () => {
     expect([...seuils].sort((a, b) => a - b)).toEqual(seuils);
     expect(Math.max(...seuils)).toBeLessThanOrEqual(d.length);
   });
-  it("ne référence que des images d'origine (aucune copie locale hors emblème)", () => {
-    const json = JSON.stringify(porkosPack);
-    for (const m of json.matchAll(/"(https?:\/\/[^"]+\.(?:jpe?g|png|webp))"/g)) expect(m[1]).toMatch(/^https:\/\/porkopedia\.totoken\.chatgpt\.site\/assets\//);
+  it("sert les images de Porkopédia depuis la copie locale, et elles existent", () => {
+    const json = JSON.stringify(porkosPack) + JSON.stringify(porkopedia);
+    expect(json).not.toMatch(/porkopedia\.totoken\.chatgpt\.site\/assets\//);
+    for (const m of json.matchAll(/(\/porkopedia\/[^"\\ )]+\.(?:jpe?g|png|webp))/g)) expect(existsSync(`public${m[1]}`), m[1]).toBe(true);
   });
   it("les liens internes des notices pointent vers le catalogue", () => {
     const ids = new Set(porkopedia.catalog.map((c) => c.id));
@@ -111,7 +112,7 @@ describe("PigNet", () => {
             expect(r.kind, `${site.hote}/${nom} → ${l.url}`).not.toBe("inconnu");
             if (r.kind === "site") expect(porkosPack.sites.find((x) => x.hote === r.hote)?.pages[r.page], l.url).toBeTruthy();
           }
-          if (b.t === "image") expect(b.src).toMatch(/^https:\/\//);
+          if (b.t === "image") expect(existsSync(`public${b.src}`), b.src).toBe(true);
         }
     expect(porkosPack.sites.filter((x) => x.anneau).length).toBeGreaterThanOrEqual(3);
     for (const a of Object.values(porkosPack.run.aliases)) if ("args" in a && a.args?.url) expect(parseUrl(a.args.url, hotes).kind).not.toBe("inconnu");

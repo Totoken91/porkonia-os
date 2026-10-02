@@ -16,6 +16,8 @@ import rehypeStringify from "rehype-stringify";
 import type { Root, Element } from "hast";
 
 const SITE = "https://porkopedia.totoken.chatgpt.site/";
+/** Les images de Porkopédia sont servies depuis la copie locale public/porkopedia/ (site protégé par mot de passe). */
+const local = (u: string) => (u.startsWith(SITE + "assets/") ? "/porkopedia/" + u.slice(SITE.length + 7) : u);
 const SELECTION = [
   "douzi",
   "douzi-city",
@@ -48,7 +50,7 @@ function absolutize() {
     const walk = (n: Root | Element) => {
       for (const c of n.children) {
         if (c.type !== "element") continue;
-        if (c.tagName === "img" && typeof c.properties.src === "string" && !/^https?:/.test(c.properties.src)) c.properties.src = new URL(c.properties.src, SITE).toString();
+        if (c.tagName === "img" && typeof c.properties.src === "string" && !/^https?:/.test(c.properties.src)) c.properties.src = local(new URL(c.properties.src, SITE).toString());
         if (c.tagName === "a") delete c.properties.href;
         walk(c);
       }
@@ -62,7 +64,7 @@ const clean = (html: string) => String(unified().use(rehypeParse, { fragment: tr
 const articles = SELECTION.map((id) => {
   const a = ex.articles.find((x) => x.id === id);
   if (!a) throw new Error(`Article absent de l'extraction : ${id}`);
-  return { id: a.id, title: a.title, sub: a.sub, section: a.section, lead: a.lead, image: a.image ? new URL(a.image, SITE).toString() : null, html: clean(a.html) };
+  return { id: a.id, title: a.title, sub: a.sub, section: a.section, lead: a.lead, image: a.image ? local(new URL(a.image, SITE).toString()) : null, html: clean(a.html) };
 });
 const catalog = ex.articles.map((a) => ({ id: a.id, title: a.title, section: a.section })).sort((x, y) => x.title.localeCompare(y.title, "fr"));
 writeFileSync(

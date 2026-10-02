@@ -5,7 +5,8 @@
  */
 import type { ActionRef, ContentPack, MenuEntry, MenuSpec } from "../types";
 
-const P = "https://porkopedia.totoken.chatgpt.site/assets/";
+// Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
+const P = "/porkopedia/";
 /** Voix off et musique de Channel Pork (fichiers du dépôt, public/audio). */
 const V = "/audio/channel-pork/";
 const MUSIQUE = `${V}quiet-morning-vhs.mp3`;

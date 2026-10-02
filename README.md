@@ -57,7 +57,7 @@ L'interface utilise **Pixel Operator** (Jayvee Enaguas, licence CC0, `src/app/fo
 
 ## Images
 
-Les images viennent de Porkopédia et restent hébergées là-bas (liens directs, aucune copie).
+Les images viennent de Porkopédia. Le site étant protégé par mot de passe depuis octobre 2026, celles qu'utilise PorkOS sont copiées dans `public/porkopedia/`, avec l'accord de son auteur.
 Seul l'emblème (`public/brand/`) est local. Porkopédia n'est jamais modifiée depuis ce projet.
 
 Pour régénérer les notices intégrées à partir d'une extraction :
