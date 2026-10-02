@@ -1,0 +1,224 @@
+{
+ "_lisezmoi": "Épisode 1 de « Ferme ta gueule et réponds » : texte envoyé à la synthèse (tts, balises de jeu comprises) et sous-titre affiché. Voix des personnages : casting.json.",
+ "repliques": [
+  {
+   "id": "L01",
+   "perso": "chauffeur-de-salle",
+   "tts": "[shouting to the crowd, energetic warm-up guy] On garde les applaudissements pour Jean-Groin !",
+   "sous_titre": "On garde les applaudissements pour Jean-Groin !"
+  },
+  {
+   "id": "L02",
+   "perso": "homme-du-public",
+   "tts": "[heckling loudly from the audience, cheeky] Et le jambon, on le garde jusqu'à quand ?",
+   "sous_titre": "Et le jambon, on le garde jusqu'à quand ?"
+  },
+  {
+   "id": "L03",
+   "perso": "jean-groin",
+   "tts": "[overly excited, cheesy game show host] Bonsoir !!! [laughs] Quatre candidats... douze questions... UN AN de porc et de bière ! [shouting with joy] Bienvenue dans « FERME TA GUEULE ET RÉPONDS » !!!",
+   "sous_titre": "Bonsoir ! Quatre candidats, douze questions, un an de porc et de bière ! Bienvenue dans « Ferme ta gueule et réponds » !"
+  },
+  {
+   "id": "L04b",
+   "perso": "jean-groin",
+   "tts": "[cheerful, fast, explaining the rules with a big smile] Une bonne réponse, un point. Vous contestez avec « J'insiste » : vos points doublent si vous avez raison... [mock sad] ou retombent à zéro si vous avez tort ! [cheerful] Une seule fois chacun. Deux finalistes. C'est compris ?",
+   "sous_titre": "Une bonne réponse, un point. Vous contestez avec « J'insiste » : vos points doublent si vous avez raison, ou retombent à zéro si vous avez tort. Une seule fois chacun. Deux finalistes. C'est compris ?"
+  },
+  {
+   "id": "L05",
+   "perso": "frederic",
+   "tts": "[smug show-off, raising his hand] J'ai participé à la création du règlement, moi.",
+   "sous_titre": "J'ai participé à la création du règlement, moi."
+  },
+  {
+   "id": "L06",
+   "perso": "jean-groin",
+   "tts": "[big fake smile, sweetly mocking] Parfait. Vous expliquerez aux autres pourquoi vous perdez.",
+   "sous_titre": "Parfait. Vous expliquerez aux autres pourquoi vous perdez."
+  },
+  {
+   "id": "L07",
+   "perso": "frederic",
+   "tts": "[smug, bragging, chuckles] Frédéric. Docteur en imprimantes, s'il vous plaît.",
+   "sous_titre": "Frédéric. Docteur en imprimantes, s'il vous plaît."
+  },
+  {
+   "id": "L08",
+   "perso": "frederic",
+   "tts": "[bragging, leaning back, smooth talker] Et ancien négociateur, hein. J'ai inventé ce buzzer pendant une prise d'otages. [smug chuckle]",
+   "sous_titre": "Et ancien négociateur, hein. J'ai inventé ce buzzer pendant une prise d'otages."
+  },
+  {
+   "id": "L09",
+   "perso": "jean-groin",
+   "tts": "[still smiling, cutting him off] Ce soir, il servira juste à répondre.",
+   "sous_titre": "Ce soir, il servira juste à répondre."
+  },
+  {
+   "id": "L10",
+   "perso": "jean-groin",
+   "tts": "[cheerful host] Kevin, votre spécialité ?",
+   "sous_titre": "Kevin, votre spécialité ?"
+  },
+  {
+   "id": "L11",
+   "perso": "kevin",
+   "tts": "[shy, nervous, stuttering, voice cracking] La... la cu-cuisine assistée par in... intelligence artificielle. [mumbling, clutching his phone] RangaNet. C'est... c'est mon meilleur ami. [awkward pause] Mon seul ami.",
+   "sous_titre": "La… la cu-cuisine assistée par in… intelligence artificielle. RangaNet. C'est… c'est mon meilleur ami. Mon seul ami."
+  },
+  {
+   "id": "L12",
+   "perso": "jean-groin",
+   "tts": "[cheerful host] Martin ?",
+   "sous_titre": "Martin ?"
+  },
+  {
+   "id": "L13",
+   "perso": "martin",
+   "tts": "Qui a validé cette finition ? En Chine, à Jingdezhen, on renvoie l'artisan pour moins que ça.",
+   "sous_titre": "Qui a validé cette finition ? En Chine, à Jingdezhen, on renvoie l'artisan pour moins que ça."
+  },
+  {
+   "id": "L14b",
+   "perso": "jean-groin",
+   "tts": "[cheerful host] Et Tonio, propriétaire d'une Brasswagen Palou.",
+   "sous_titre": "Et Tonio, propriétaire d'une Brasswagen Palou."
+  },
+  {
+   "id": "L15",
+   "perso": "tonio",
+   "tts": "[calm, proud, deadpan] Un kilo de milliards de mètres. [pause, frowning] Euh... non. [correcting himself, very calm] Un milliard de kilomètres.",
+   "sous_titre": "Un kilo de milliards de mètres. Euh… non. Un milliard de kilomètres."
+  },
+  {
+   "id": "L16",
+   "perso": "jean-groin",
+   "tts": "[big smile, teasing] On va essayer de finir avant le deuxième.",
+   "sous_titre": "On va essayer de finir avant le deuxième."
+  },
+  {
+   "id": "L17",
+   "perso": "jean-groin",
+   "tts": "[dramatic quiz host voice] Question un ! Une imprimante refuse d'imprimer parce qu'une feuille bloque le mécanisme. C'est un... ?",
+   "sous_titre": "Question un ! Une imprimante refuse d'imprimer parce qu'une feuille bloque le mécanisme. C'est un… ?"
+  },
+  {
+   "id": "L18",
+   "perso": "frederic",
+   "tts": "[instantly, smug, too confident] Bourrage papier.",
+   "sous_titre": "Bourrage papier."
+  },
+  {
+   "id": "L19",
+   "perso": "frederic",
+   "tts": "[bragging, show-off war story] J'en ai débloqué une sous des tirs de kalachnikov, moi.",
+   "sous_titre": "J'en ai débloqué une sous des tirs de kalachnikov, moi."
+  },
+  {
+   "id": "L20",
+   "perso": "jean-groin",
+   "tts": "[dramatic quiz host voice] Question deux ! Quel matériau associe-t-on aux célèbres services de Limoges ?",
+   "sous_titre": "Question deux ! Quel matériau associe-t-on aux célèbres services de Limoges ?"
+  },
+  {
+   "id": "L21",
+   "perso": "martin",
+   "tts": "La porcelaine. Chinoise, évidemment. Comme toute porcelaine digne de ce nom.",
+   "sous_titre": "La porcelaine. Chinoise, évidemment. Comme toute porcelaine digne de ce nom.",
+   "instructions": "Homme chinois de Pékin qui parle français avec un accent mandarin. Fier et hautain. Parle lentement et articule bien."
+  },
+  {
+   "id": "L22",
+   "perso": "martin",
+   "tts": "Le cadre derrière vous... c'est un lot ?",
+   "sous_titre": "Le cadre derrière vous, c'est un lot ?",
+   "instructions": "Homme chinois d'une quarantaine d'années, originaire de Pékin, qui parle français avec un fort accent mandarin. Esthète hautain, soupçonneux et méprisant."
+  },
+  {
+   "id": "L23c",
+   "perso": "jean-groin",
+   "tts": "[cheerful, chirpy, instant] Ah non !",
+   "sous_titre": "Ah non !"
+  },
+  {
+   "id": "L24",
+   "perso": "martin",
+   "tts": "Pfff. C'est dommage. En Chine, il serait au musée. Ici... il sauverait le reste.",
+   "sous_titre": "Pfff. C'est dommage. En Chine, il serait au musée. Ici… il sauverait le reste.",
+   "instructions": "Homme chinois d'une quarantaine d'années, originaire de Pékin, qui parle français avec un fort accent mandarin. Patriote chinois hautain, soupire avec mépris, condescendant."
+  },
+  {
+   "id": "L25",
+   "perso": "jean-groin",
+   "tts": "[dramatic quiz host voice] Question trois ! Trois caisses de douze bouteilles. Combien de bouteilles ?",
+   "sous_titre": "Question trois ! Trois caisses de douze bouteilles. Combien de bouteilles ?"
+  },
+  {
+   "id": "L26",
+   "perso": "frederic",
+   "tts": "[instantly, smug, totally sure of himself] Quarante-deux.",
+   "sous_titre": "Quarante-deux."
+  },
+  {
+   "id": "L27c",
+   "perso": "jean-groin",
+   "tts": "[smiling, patient, slightly condescending] Trente-six bouteilles.",
+   "sous_titre": "Trente-six bouteilles."
+  },
+  {
+   "id": "L28",
+   "perso": "frederic",
+   "tts": "[smooth talker, explaining as if obvious] Oui, au départ. Mais six sont arrivées en renfort. [smug] Ça, vous l'aviez pas vu venir.",
+   "sous_titre": "Oui, au départ. Mais six sont arrivées en renfort. Ça, vous l'aviez pas vu venir."
+  },
+  {
+   "id": "L29",
+   "perso": "jean-groin",
+   "tts": "[forced smile, slowly, as if to a child] Ce sont des bouteilles, Frédéric.",
+   "sous_titre": "Ce sont des bouteilles, Frédéric."
+  },
+  {
+   "id": "L30b",
+   "perso": "frederic",
+   "tts": "[slamming the desk, defiant, loud] J'insiste !",
+   "sous_titre": "J'insiste !"
+  },
+  {
+   "id": "L31",
+   "perso": "jury",
+   "tts": "[flat, bored] Résultat : trente-six.",
+   "sous_titre": "Résultat : trente-six."
+  },
+  {
+   "id": "L32",
+   "perso": "frederic",
+   "tts": "[offended, condescending, smooth talker] Votre écran compte mal, mon vieux. Je connais cette police, moi.",
+   "sous_titre": "Votre écran compte mal, mon vieux. Je connais cette police, moi."
+  },
+  {
+   "id": "L33",
+   "perso": "jean-groin",
+   "tts": "[cold] Vous me prenez pour un con ?",
+   "sous_titre": "Vous me prenez pour un con ?"
+  },
+  {
+   "id": "L34",
+   "perso": "frederic",
+   "tts": "[outraged, shouting] Non, non, non ! C'est vous qui me prenez pour un con !",
+   "sous_titre": "Non, non, non ! C'est vous qui me prenez pour un con !"
+  },
+  {
+   "id": "L35",
+   "perso": "jean-groin",
+   "tts": "[calm, smiling, menacing] Je ne vous prends pour rien. [sweetly] On tourne depuis deux heures. J'ai des images.",
+   "sous_titre": "Je ne vous prends pour rien. On tourne depuis deux heures. J'ai des images."
+  },
+  {
+   "id": "L36",
+   "perso": "jean-groin",
+   "tts": "[overly excited, cheesy game show host, to the camera] Restez avec nous : après la pub, question quatre !",
+   "sous_titre": "Restez avec nous : après la pub, question quatre !"
+  }
+ ]
+}

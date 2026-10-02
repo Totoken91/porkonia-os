@@ -1,0 +1,45 @@
+{
+ "_lisezmoi": "Pub Brasswagen Palou : texte envoyé à la synthèse. Sous-titres dans pub-brasswagen.py.",
+ "repliques": [
+  {
+   "id": "N1",
+   "perso": "narrateur-brasswagen",
+   "tts": "[deep, epic car commercial voice, slow] Il y a des routes qui ne mènent nulle part."
+  },
+  {
+   "id": "N2",
+   "perso": "narrateur-brasswagen",
+   "tts": "[epic, proud] La Brasswagen Palou, elle, y va quand même."
+  },
+  {
+   "id": "N3",
+   "perso": "narrateur-brasswagen",
+   "tts": "[impressed, slow, epic] Un milliard de porkomètres au compteur. Moteur d'origine."
+  },
+  {
+   "id": "T1",
+   "perso": "tonio",
+   "tts": "[calm, proud, deadpan] Elle a jamais calé. Une fois, elle a calé... [pause] euh, non. J'ai calé. Elle, jamais."
+  },
+  {
+   "id": "T2",
+   "perso": "tonio",
+   "tts": "[calm, proud] Je l'ai achetée en deux mille douze. Elle m'a acheté en... [pause, confused] euh. Je l'ai achetée. Voilà."
+  },
+  {
+   "id": "N4",
+   "perso": "narrateur-brasswagen",
+   "tts": "[warm, epic] Brasswagen Palou. Elle ne s'arrête pas. [slower] Elle se repose en roulant."
+  },
+  {
+   "id": "N5",
+   "perso": "narrateur-brasswagen",
+   "tts": "[epic, final slogan] Brasswagen. Et toujours plus de route."
+  },
+  {
+   "id": "N6",
+   "perso": "narrateur-brasswagen",
+   "tts": "[very fast, mumbled legal disclaimer] Brasswagen, partenaire officiel de Ferme ta gueule et réponds. Kilométrage non contractuel. Route non fournie."
+  }
+ ]
+}

@@ -11,6 +11,7 @@ Démo jouable (export statique Next 16) de l'OS officiel de la République de Po
 - Ne jamais inventer de canon Porkonia présenté comme officiel ; les notices viennent d'une extraction.
 - Direction « PorkOS 98 » : écran 4:3 800×600 dans un moniteur, look carré et d'époque, châssis de fenêtres de l'atelier (parchemin, lie-de-vin, or). Police d'interface : Pixel Operator (CC0, `src/app/fonts/`) à 16 px uniquement (taille native, sinon floue). Pas une copie de Windows. Pas d'emoji, pas de dégradés violets, pas d'Inter.
 - Aucun secret côté client, aucune API payante, pas de Supabase.
+- Personnages et voix de Channel Pork (jeu télévisé, pubs) : suivre docs/CASTING.md et scripts/channel-pork/casting.json pour rester constant.
 - Next 16 : lire `node_modules/next/dist/docs/` avant d'utiliser une API.
 
 ## Commandes
