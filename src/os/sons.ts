@@ -164,6 +164,8 @@ function demarragePcSynth(volume: number) {
 }
 
 let ambianceEnCours: { arreter(): void } | null = null;
+/** Niveau de croisière de l'ambiance, relatif au niveau du démarrage. */
+const RONRON = 0.4;
 
 /**
  * Ambiance de fond tant que la machine est allumée : boucle enregistrée (ventilateur, ronflement du secteur,
@@ -185,6 +187,8 @@ export function ambiance(allumee: boolean, volume = 0.5, delai = 0) {
   sortie.gain.setValueAtTime(0, a.currentTime);
   sortie.gain.setValueAtTime(0, t0);
   sortie.gain.linearRampToValueAtTime(volume, t0 + (delai ? 1 : 2.5));
+  // Le ventilateur se fait oublier : il prend le relais au niveau du démarrage, puis s'efface doucement.
+  sortie.gain.linearRampToValueAtTime(volume * RONRON, t0 + (delai ? 1 : 2.5) + 6);
   sortie.connect(a.destination);
   let arrete = false;
   let boucle: AudioBufferSourceNode | null = null;
