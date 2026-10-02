@@ -99,6 +99,25 @@ export interface Mail {
   later?: boolean;
 }
 
+/**
+ * Personnalité à qui le citoyen peut écrire : sa réponse est rédigée en personnage par un modèle de langage, via le relais
+ * serveur `/api/courrier` (jamais depuis le navigateur). La fiche ne contient que des faits établis (notice Porkopédia
+ * extraite, ou personnage déjà présent dans PorkOS) et la manière d'écrire du personnage.
+ */
+export interface Correspondant {
+  id: string;
+  /** « Nom <adresse> », comme dans le Courrier. */
+  adresse: string;
+  /** Qui c'est, en une ligne (carnet d'adresses). */
+  qui: string;
+  /** Faits et manière d'écrire, transmis au modèle. Rester court : la limite gratuite compte les mots. */
+  fiche: string;
+  /** Provenance des faits. */
+  source: string;
+  /** Réponse de secours si le relais est indisponible (hors ligne, quota du jour épuisé). */
+  secours: string;
+}
+
 /** Messagerie : adresse du poste, réponses automatiques de l'administration, dossier surveillé. */
 export interface MailboxSpec {
   address: string;
@@ -366,6 +385,8 @@ export interface ContentPack {
   filesystem: FsNode;
   mails: Mail[];
   mailbox: MailboxSpec;
+  /** Personnalités qui répondent en personnage au Courrier d'État. */
+  correspondants: Correspondant[];
   boot: {
     bios: string[];
     splash: { title: string; slogan: string };

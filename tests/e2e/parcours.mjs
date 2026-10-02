@@ -366,8 +366,17 @@ try {
     await page.getByTestId("courrier-envoyer").click();
     await page.getByTestId("courrier-dossier-envoyes").waitFor();
     await page.locator("[data-testid=courrier-liste] tbody tr", { hasText: "RE: Pork ID" }).waitFor();
-    await closeTop();
     step(`${tag} : Courrier d'État (lecture, réponse, envoi)`);
+    // Écrire à une personnalité (carnet d'adresses) : elle répond en personnage ; sans relais (export statique), sa lettre de secours.
+    await page.getByTestId("courrier-nouveau").click();
+    await page.getByTestId("courrier-a").fill("marcel.cochonnet@pignet.pork");
+    await page.getByTestId("courrier-objet").fill("Une chaise");
+    await page.locator(".courrier-texte").fill("Tonton, faut-il apporter une chaise jeudi ?");
+    await page.getByTestId("courrier-envoyer").click();
+    await page.getByTestId("courrier-dossier-reception").click();
+    await page.locator("[data-testid=courrier-liste] tbody tr", { hasText: "RE: Une chaise" }).waitFor({ timeout: 15000 });
+    await closeTop();
+    step(`${tag} : courrier à une personnalité (réponse en personnage ou de secours)`);
 
     // PorkAmp : lecture d'un morceau, le temps avance, arrêt
     await open("d-porkamp");

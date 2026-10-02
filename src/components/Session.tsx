@@ -16,6 +16,7 @@ import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
 import { emptyWinState, saveWindows, winReducer, type SavedWin, type Viewport, type WinAction } from "@/os/windows";
+import { filAvec, texteDuCitoyen, trouverCorrespondant } from "@/os/correspondance";
 import { ContextMenu, type MenuItem, type MenuState } from "./Menu";
 import { Desktop, type Rect } from "./Desktop";
 import { Lanceur } from "./Lanceur";
@@ -397,13 +398,40 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         return nid;
       },
       envoyer: (d: Brouillon, draftId?: string) => {
+        const correspondant = trouverCorrespondant(d.to, pack.correspondants);
+        const fil = correspondant ? filAvec(boiteRef.current.messages, correspondant, pack.mailbox.signature) : [];
         setBoite((b) => send(b, d, pack.mailbox.address, maintenant(), draftId)[0]);
         feed({ kind: "signal", name: "courrier:envoye" });
+        const objetReponse = /^re\s*:/i.test(d.subject) ? d.subject : `RE: ${d.subject || "(sans objet)"}`;
+        if (correspondant) {
+          // Une personnalité répond en personnage (relais serveur vers le modèle) ; hors ligne, sa lettre de secours.
+          feed({ kind: "signal", name: `courrier:personnage:${correspondant.id}` });
+          const debut = Date.now();
+          void (async () => {
+            let corps = correspondant.secours;
+            try {
+              const r = await fetch("/api/courrier", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ correspondant: correspondant.id, objet: d.subject, corps: texteDuCitoyen(d.body, pack.mailbox.signature), fil }),
+                signal: AbortSignal.timeout(30_000),
+              });
+              const j = r.ok ? ((await r.json()) as { corps?: unknown }) : null;
+              if (typeof j?.corps === "string" && j.corps.trim()) corps = j.corps;
+            } catch {
+              /* relais absent ou injoignable : lettre de secours */
+            }
+            // Personne ne répond instantanément, même pas une personnalité.
+            const attente = Math.max(0, 3500 + Math.floor(rng() * 3000) - (Date.now() - debut));
+            setTimeout(() => arrive({ id: `rep-${correspondant.id}-${Date.now()}`, folder: "reception", from: correspondant.adresse, to: pack.mailbox.address, date: "", subject: objetReponse, body: corps }), attente);
+          })();
+          return;
+        }
         // L'administration répond toujours, et vite : c'est même la seule chose qu'elle fait vite.
         const r = pick(rng, pack.mailbox.autoReplies);
         const id = `auto-${Date.now()}`;
         setTimeout(
-          () => arrive({ id, folder: "reception", from: r.from, to: pack.mailbox.address, date: "", subject: /^re\s*:/i.test(d.subject) ? d.subject : `RE: ${d.subject || "(sans objet)"}`, body: r.body }),
+          () => arrive({ id, folder: "reception", from: r.from, to: pack.mailbox.address, date: "", subject: objetReponse, body: r.body }),
           8000 + Math.floor(rng() * 7000),
         );
       },

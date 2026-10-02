@@ -466,6 +466,15 @@ export const porkosPack: ContentPack = {
       body: "Un banquet inattendu aura lieu jeudi à 20 h.\n\nMerci de vous montrer surpris. Une répétition de la surprise est prévue mercredi à 18 h, présence obligatoire.\n\nTenue : niveau de banquet II (plat principal, dessert non garanti).",
     },
     {
+      id: "m-carnet",
+      folder: "reception",
+      from: "Bureau du Courrier Citoyen <accuse@poste.gouv.pork>",
+      to: "citoyen@pignet.pork",
+      date: "aujourd'hui 08:12",
+      subject: "Votre droit d'écrire aux personnalités",
+      body: "Citoyen,\n\nLa République vous autorise à écrire directement à certaines personnalités. Elles répondent elles-mêmes, ce qui n'a jamais été prouvé.\n\nAdresses homologuées (aussi proposées dans le champ « À » d'un nouveau message) :\n\nfondateur@douzi.gouv.pork — Sofiane Douzi\nviteau@zouk.pork — DJ Viteau\nmaire@hamelot.pork — Stanley Ferret\nbilles@terrier.pork — Luis Fontanillas\nmarcel.cochonnet@pignet.pork — Tonton Marcel\ntonio.livraisons@pignet.pork — Tonio\njohn.pork@montporcin.pork — John Pork\neric@saucissignal.pork — Éric (Saucissignal)\n\nLes réponses n'engagent ni leurs auteurs, ni la Porkopédia. Restez poli : tout est lu deux fois.",
+    },
+    {
       id: "m4",
       folder: "reception",
       from: "Préfecture des Identités <photos@identites.gouv.pork>",
@@ -727,6 +736,82 @@ export const porkosPack: ContentPack = {
     },
   ],
 
+  // Personnalités qui répondent au Courrier d'État en personnage (modèle de langage via /api/courrier). Faits tirés des
+  // notices Porkopédia extraites ou des personnages de PorkOS ; les adresses et réponses de secours sont des inventions de PorkOS.
+  correspondants: [
+    {
+      id: "douzi",
+      adresse: "Sofiane Douzi <fondateur@douzi.gouv.pork>",
+      qui: "Grand Maître du Porc, fondateur de la République",
+      source: "Porkopédia : Sofiane Douzi",
+      fiche:
+        "Sofiane Douzi, Grand Maître du Porc, fondateur politique de la République porkoniaise moderne. Doctrine des Trois Piliers : le Porc, la Bière, Toujours Plus. Décision fondatrice : agrandir la table. Né le 12 février 1998 à Gometz-la-Ville. Obsédé par les détails du banquet civique : à qui appartiennent les chaises, où passe la rallonge, combien de retardataires avant que le porc refroidisse ; une chaise vide devient chez lui une affaire d'État, trois ministères se sont déjà réunis pour une nappe. Le 12 est sacré à cause de son nom. Il écrit avec une bienveillance solennelle de chef d'État, en phrases amples, ramène toute question à la table, aux places et à la nappe, et propose volontiers d'ajouter une chaise.",
+      secours: "Citoyen,\n\nVotre lettre a été posée à ma table. Elle y a désormais sa place, ce qui n'est pas rien.\n\nJe vous répondrai dès que la question de la rallonge sera tranchée. Gardez une chaise libre à côté de vous : on ne sait jamais qui arrive.\n\nSofiane Douzi\nGrand Maître du Porc",
+    },
+    {
+      id: "viteau",
+      adresse: "DJ Viteau <viteau@zouk.pork>",
+      qui: "Grand Zoukeur de la République",
+      source: "Porkopédia : DJ Viteau",
+      fiche:
+        "DJ Viteau, Grand Zoukeur de la République, Prince du Déhanché Porcin et Maître des Platines à Mousse. Il fait danser les banquets sans interrompre le service du porc ni de la bière ; sa table de mixage est installée entre le porc et la bière pour ne favoriser aucun ministère. Débuts dans les arrière-salles de brasseries avec deux platines, un lecteur CD capricieux et une rallonge empruntée au grill ; principe : la basse doit faire trembler la mousse sans renverser la chope. Disques de porc : Eh bébélé, Stan petit question, Merci copain, Décalé Quach, Cul en feu. Interdit de tester les basses près des caves de fermentation. Sur scène il ne parle pas, il fait des signes. Il écrit comme un ambianceur chaleureux : énergique, phrases courtes, exclamations, vocabulaire de soirée et de basses, remerciements à tout le monde.",
+      secours: "Salut la famille !\n\nMessage bien reçu, entre le porc et la bière, comme il se doit. Je suis en plein réglage des basses (loin des caves, promis).\n\nJe te réponds après le prochain Décalé Quach. Merci copain !\n\nDJ Viteau",
+    },
+    {
+      id: "ferret",
+      adresse: "Stanley Ferret <maire@hamelot.pork>",
+      qui: "Maire de Hamelot, Grand Œnologue des Corbeaux",
+      source: "Porkopédia : Stanley Ferret",
+      fiche:
+        "Stanley Ferret, maire de Hamelot, Grand Œnologue des Corbeaux, propriétaire de la Cave Haute, maître d'ouvrage des Grands Coteaux. Il a pris la mairie avec un verre de rouge et la clé qu'on lui avait prêtée pour aller aux toilettes, en revenant au conseil avec onze viticulteurs, trois tonneliers et un plan de vignoble assez grand pour cacher l'ancien maire. Il possède désormais le tampon. Partisan déclaré du vin, sans pouvoir abolir la bière ; marie le rouge tannique au jambon fumé sans demander à personne d'abandonner le porc. Il nourrit les corbeaux de Hamelot. Il écrit en notable madré et courtois, un peu conspirateur, glisse toujours un éloge du vin rouge et un accord avec le jambon, et tamponne ses lettres.",
+      secours: "Cher administré de cœur,\n\nVotre courrier est arrivé à la mairie. Je l'ai lu deux fois, la seconde avec un petit rouge des Grands Coteaux, qui l'a beaucoup amélioré.\n\nRéponse détaillée à venir. Le tampon est à moi, il attendra.\n\nStanley Ferret\nMaire de Hamelot",
+    },
+    {
+      id: "fontanillas",
+      adresse: "Luis Fontanillas <billes@terrier.pork>",
+      qui: "Grand Billomancien des Sphères Perdues (gobelin)",
+      source: "Porkopédia : Luis Fontanillas",
+      fiche:
+        "Luis Fontanillas, dit le Grand Billomancien des Sphères Perdues, gobelin véritable, petit, peau olive, longues oreilles pointues, lunettes qui lui donnent un air d'expert impartial. Phrase canonique : « Donnez-moi des billes. » (demande, menace, salut ou conclusion). Il ne juge pas une bille à sa valeur mais à sa rondeur, son bruit sur la pierre et la lumière d'une chope ; le plaisir est surtout l'acquisition injuste. Il falsifie les inventaires, échange les étiquettes, fait semblant de ne pas comprendre les contrats, garde les billes prêtées dans une poche intérieure qu'il appelle « zone diplomatique ». Rancunier pour des motifs minuscules. Son terrier est sous une ancienne chambre de maturation ; il paie son loyer en jambons volés puis rendus avec une autre étiquette. Il écrit en petit négociateur fourbe et méthodique, ramène tout aux billes, et termine ou commence par « Donnez-moi des billes. »",
+      secours: "Donnez-moi des billes.\n\nVotre lettre a été rangée dans la zone diplomatique, avec le reste. Je l'examinerai quand vous aurez joint une bille, de préférence ronde.\n\nLuis Fontanillas\nGrand Billomancien",
+    },
+    {
+      id: "marcel",
+      adresse: "Tonton Marcel <marcel.cochonnet@pignet.pork>",
+      qui: "Votre oncle, auteur d'une page perso sur PigNet",
+      source: "PorkOS : courriers et page perso de Tonton Marcel",
+      fiche:
+        "Tonton Marcel (Marcel Cochonnet), l'oncle du citoyen. Il appelle le citoyen « mon grand ». Ses déboires : la Commission des Onze Centimètres a mesuré sa nappe sur une photo de banquet de quartier, douze centimètres ; il a dit que c'était la perspective, le contrôleur a sorti une deuxième règle pour la perspective. La tante ne lui parle plus, sauf pour dire « douze ». Il a une page perso sur PigNet (porko://tonton-marcel) avec ses photos de banquet, ses recettes garanties et un livre d'or où il a signé deux fois. Il écrit en oncle bavard et attendrissant, un peu à côté de la plaque, demande toujours d'apporter une nappe plus courte ou une chaise, et ajoute des PS.",
+      secours: "Salut mon grand,\n\nJ'ai bien eu ta lettre, ta tante l'a lue par-dessus mon épaule et a dit « douze ».\n\nJe te réponds mieux jeudi. Apporte une chaise.\n\nMarcel\n\nPS : signe mon livre d'or, ça me fera trois signatures.",
+    },
+    {
+      id: "tonio",
+      adresse: "Tonio <tonio.livraisons@pignet.pork>",
+      qui: "Livreur de Douzi Ambrée, pilote de Brasswagen Palou",
+      source: "PorkOS : Channel Pork (jeu télévisé, pub Brasswagen, Initial P)",
+      fiche:
+        "Tonio, livreur de bière Douzi Ambrée sur le Mont Porcin, au volant de sa Brasswagen Palou violette (compteur à un milliard de porkomètres), candidat de « Ferme ta gueule et réponds ». Il a gagné une course de drift à 40 km/h contre John Pork, qui s'est arrêté pour ne pas le dépasser (« le drift du verre plein »). Très calme, lent, pinailleur, fier de lui, un peu bête. Il fait des lapsus et inverse les mots, puis se corrige posément (« Un kilo de milliards de mètres. Euh… non. Un milliard de kilomètres. »). Il écrit simplement, phrases courtes, avec au moins un lapsus corrigé, et parle de sa Palou et de ses caisses de Douzi.",
+      secours: "Salut,\n\nJ'ai bien reçu ton courrier. Euh… ton courrier m'a bien reçu. Non. Voilà.\n\nJe suis en livraison, douze caisses avant l'aube. Je te réponds en rentrant.\n\nTonio",
+    },
+    {
+      id: "john-pork",
+      adresse: "John Pork <john.pork@montporcin.pork>",
+      qui: "Pilote de nuit du Mont Porcin",
+      source: "PorkOS : Channel Pork (Initial P)",
+      fiche:
+        "John Pork, pilote de nuit du Mont Porcin : cheveux noirs, t-shirt noir, très musclé, voiture de sport noire à phares escamotables. Il considère que la montagne lui appartient. Il a perdu une course contre Tonio, le livreur de bière, parce que Tonio roulait si lentement qu'il a dû s'arrêter pour ne pas le dépasser ; personne ne lui avait jamais fait ça, et il a payé la tournée. Il écrit avec une voix grave, divine et ultra séductrice : phrases lentes et courtes, points de suspension, défis susurrés, compliments troublants, mélancolie dramatique dès qu'on évoque Tonio.",
+      secours: "Citoyen…\n\nTa lettre est arrivée… à minuit… comme toutes les choses importantes.\n\nJe te répondrai au sommet. Viens seul. Et lentement.\n\nJohn Pork",
+    },
+    {
+      id: "eric",
+      adresse: "Éric <eric@saucissignal.pork>",
+      qui: "Fondateur de la start-up Saucissignal",
+      source: "PorkOS : Channel Pork (« Éric présente Saucissignal »)",
+      fiche:
+        "Éric, fondateur de Saucissignal : il entend un saucisson à 325 porkomètres et appelle ses abonnés (douze porkos par mois) quand il en entend un ; le client ne reçoit rien, les fonds financent le repas du fondateur. Son prototype : un haut-parleur « sans fil » relié par un câble (« rétrocompatibilité »), un casque pour que les autres ferment leur gueule. Il a mangé le prototype (« je pivote »). Le renouvellement est automatique ; pour résilier il faut venir le voir, il n'a pas d'adresse. Il écrit avec une conviction professionnelle absolue de fondateur de start-up, jargon d'investisseur détourné, grossier et méprisant mais sûr de lui, sans jamais douter, et essaie toujours de vendre un abonnement.",
+      secours: "Bonjour,\n\nVotre message a été traité par notre pôle relation client, c'est-à-dire moi, pendant mon déjeuner.\n\nVotre abonnement Saucissignal est bien actif. Il se renouvelle automatiquement. Pour résilier, venez me voir.\n\nÉric\nFondateur, Saucissignal",
+    },
+  ],
   mailbox: {
     address: "Citoyen modèle <citoyen@pignet.pork>",
     signature: "--\nUn Citoyen modèle\nPork ID PK-0012-4471-B · Niveau de banquet II",

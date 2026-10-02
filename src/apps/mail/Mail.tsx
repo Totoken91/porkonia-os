@@ -163,7 +163,15 @@ export function Mail() {
           >
             <label>
               <span>{str("courrier.a")} :</span>
-              <input className="pk-input" value={redac.to} onChange={(e) => setRedac({ ...redac, to: e.target.value })} autoFocus={!redac.to} data-testid="courrier-a" />
+              <input className="pk-input" list="carnet-adresses" value={redac.to} onChange={(e) => setRedac({ ...redac, to: e.target.value })} autoFocus={!redac.to} data-testid="courrier-a" />
+              {/* Carnet d'adresses : les personnalités qui répondent elles-mêmes. */}
+              <datalist id="carnet-adresses">
+                {pack.correspondants.map((c) => (
+                  <option key={c.id} value={c.adresse}>
+                    {c.qui}
+                  </option>
+                ))}
+              </datalist>
             </label>
             <label>
               <span>{str("courrier.objet")} :</span>

@@ -9,6 +9,9 @@ les icônes se rangent sur une grille, le clic droit, « Exécuter… », les so
 Sur téléphone, il devient le **PorkOS Poche** : écran à la taille de l'appareil, lanceur au doigt, barre de navigation, fenêtres et
 PorkTV en plein écran, installable sur l'écran d'accueil.
 
+Le **Courrier d'État** permet d'écrire aux personnalités de Porkonia (Sofiane Douzi, DJ Viteau, Stanley Ferret, Luis Fontanillas,
+Tonton Marcel, Tonio, John Pork, Éric de Saucissignal) : elles répondent en personnage, rédigées par un modèle ouvert hébergé par Groq.
+
 > Le porc. La bière. Toujours plus.
 
 L'ancien atelier éditorial (import Porkopédia, Bible, révisions…) est conservé sur la branche `archive/atelier`.
@@ -68,3 +71,14 @@ Pour régénérer les notices intégrées à partir d'une extraction :
 ```bash
 npm run content:porkopedia -- chemin/vers/extraction.json
 ```
+
+## Courrier aux personnalités (Groq)
+
+Les fiches des personnages sont dans le pack (`correspondants`) : faits tirés des notices Porkopédia extraites ou des personnages
+de PorkOS, et manière d'écrire. L'invite est construite côté serveur (`src/os/correspondance.ts`, testé) et envoyée à Groq
+(`openai/gpt-oss-120b`, offre gratuite : 30 requêtes/min, 1 000/jour) par `src/app/api/courrier/route.serveur.ts`, qui n'est
+compilé que sur Vercel (ou avec `PORKOS_SERVEUR=1`). Sans relais ou au-delà du quota, chaque personnalité envoie sa lettre de secours.
+
+Mise en service : créer une clé sur console.groq.com (gratuit, sans carte), puis l'ajouter dans Vercel › projet porkos ›
+Settings › Environment Variables sous le nom `GROQ_API_KEY` (Production), et redéployer. Jamais dans le dépôt ni dans le client.
+`GROQ_MODELE` permet de changer de modèle (par exemple `openai/gpt-oss-20b`).

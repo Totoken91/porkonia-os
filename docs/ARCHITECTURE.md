@@ -59,3 +59,11 @@ d'icônes au doigt à la place du bureau, barre de navigation en bas (menu PorkO
 programmes ouverts). Fenêtres en plein écran, cibles tactiles d'au moins 44 px, bulles en haut. PorkTV a son plein écran (API du
 navigateur et verrou paysage quand c'est permis, couche fixe sinon) avec une télécommande qui s'efface. Effets cathodiques allégés.
 Installable sur l'écran d'accueil (`app/manifest.ts`, plein écran). Le format se choisit dans Réglages d'État › Affichage (ou `?ecran=poche|moniteur`).
+
+## Courrier aux personnalités
+
+Seul point serveur de PorkOS. Le Courrier d'État reconnaît l'adresse d'un correspondant du pack (`trouverCorrespondant`), envoie à
+`/api/courrier` l'identifiant, l'objet, le texte du citoyen (sans citation ni signature) et les derniers échanges avec ce
+personnage. Le relais valide la demande, fixe lui-même l'invite (consignes communes + fiche), appelle Groq avec la clé du
+serveur, nettoie la réponse et la renvoie ; la session la livre quelques secondes plus tard comme un courrier ordinaire.
+Toute erreur (relais absent en export statique, quota, réseau) donne la lettre de secours du personnage.
