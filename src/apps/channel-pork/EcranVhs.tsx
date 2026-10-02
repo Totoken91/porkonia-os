@@ -6,6 +6,7 @@
  * écho du signal → ondulation des lignes, tracking, commutation des têtes, drop-outs, grain, noirs délavés →
  * affichage du magnétoscope (net, par-dessus). Aucune lecture de pixels : les images d'origine restent des liens.
  */
+import type { Habillage } from "@/content/types";
 import { useEffect, useRef } from "react";
 import { type Bulletin, dessinerBulletin } from "./meteoCanvas";
 import { VHS, lineOffset, wrapText } from "./vhs";
@@ -19,6 +20,8 @@ export interface EcranVhsProps {
   programme: string;
   lecture: boolean;
   chaine: string;
+  /** Habillage d'antenne de la chaîne ; null : aucun logo incrusté ni bandeau (dessin animé). */
+  habillage?: Habillage | null;
   /** Numéro de la chaîne, affiché par le téléviseur quand on zappe. */
   numero: number;
   /** Point de l'image à garder dans le cadre 4:3 (0–1). */
@@ -41,7 +44,9 @@ export interface EcranVhsProps {
 }
 
 const { w: W, h: H } = VHS;
-const CW = Math.round(W / 8);
+/** Habillage d'une chaîne qui n'en déclare pas : celui de Canal 1 (information, direct). */
+const HABILLAGE_DEFAUT = (nom: string): Habillage => ({ logo: nom, position: "haut-droite", direct: true, couleurs: { logo: "#ffffff", accent: "#c01018", barre: "#efe3c6", barreTexte: "#15110d" } });
+const CW = Math.round(W / 6);
 
 function toile(w: number, h: number) {
   const c = document.createElement("canvas");
@@ -136,19 +141,50 @@ export function EcranVhs(props: EcranVhsProps) {
     /** Habillage d'antenne : dessiné dans l'image, il subit donc toute la dégradation de la cassette. */
     const habillage = (p: EcranVhsProps, t: number) => {
       b.textBaseline = "top";
-      // logo de chaîne
-      b.font = `bold 17px ${affichage}`;
-      b.fillStyle = "rgba(255,255,255,0.82)";
-      b.textAlign = "right";
-      const logo = p.chaine.toUpperCase();
-      const lw = b.measureText(logo).width;
-      if (lw > 120) b.font = `bold ${Math.max(10, Math.floor((17 * 120) / lw))}px ${affichage}`;
-      b.fillText(logo, W - 14, 12);
-      b.fillStyle = "#c01018";
-      b.fillRect(W - 58, 31, 44, 11);
-      b.font = `bold 9px ${affichage}`;
-      b.fillStyle = "#fff";
-      b.fillText("DIRECT", W - 18, 32);
+      // Logo de la chaîne, selon son habillage (aucun sur un dessin animé).
+      const h: Habillage | null = p.habillage === undefined ? HABILLAGE_DEFAUT(p.chaine) : p.habillage;
+      if (h) {
+        const droite = h.position !== "haut-gauche";
+        const x = droite ? W - 14 : 14;
+        const y = h.position === "bas-droite" ? H - 62 : 12;
+        b.textAlign = droite ? "right" : "left";
+        b.globalAlpha = h.opacite ?? 0.85;
+        // Ombre portée : le logo reste lisible sur une image claire.
+        b.shadowColor = "rgba(0,0,0,0.75)";
+        b.shadowBlur = 3;
+        b.shadowOffsetX = 1;
+        b.shadowOffsetY = 1;
+        const style = h.italique ? "italic bold" : "bold";
+        b.font = `${style} 17px ${affichage}`;
+        const logo = h.logo.toUpperCase();
+        const lw = b.measureText(logo).width;
+        if (lw > 120) b.font = `${style} ${Math.max(10, Math.floor((17 * 120) / lw))}px ${affichage}`;
+        if (h.italique) {
+          b.fillStyle = h.couleurs.accent;
+          b.fillText(logo, x + 2, y + 2);
+        }
+        b.fillStyle = h.couleurs.logo;
+        b.fillText(logo, x, y);
+        let yy = y + 19;
+        if (h.sousLogo) {
+          b.font = `bold 9px ${affichage}`;
+          b.fillStyle = h.couleurs.accent;
+          b.fillText(h.sousLogo.toUpperCase(), x, yy);
+          yy += 12;
+        }
+        if (h.direct) {
+          b.fillStyle = h.couleurs.accent;
+          b.fillRect(droite ? x - 44 : x, yy, 44, 11);
+          b.font = `bold 9px ${affichage}`;
+          b.fillStyle = "#fff";
+          b.fillText("DIRECT", droite ? x - 4 : x + 4, yy + 1);
+        }
+        b.globalAlpha = 1;
+        b.shadowColor = "transparent";
+        b.shadowBlur = 0;
+        b.shadowOffsetX = 0;
+        b.shadowOffsetY = 0;
+      }
       b.textAlign = "left";
       if (p.mention) {
         b.font = `10px ${affichage}`;
@@ -176,18 +212,18 @@ export function EcranVhs(props: EcranVhsProps) {
           y += 18;
         }
       }
-      if (p.bandeau) {
+      if (p.bandeau && h) {
         const y = Math.round(H * 0.7);
         b.font = `bold 15px ${affichage}`;
         const etq = p.bandeau.etiquette.toUpperCase();
         const le = b.measureText(etq).width + 16;
-        b.fillStyle = "#c01018";
+        b.fillStyle = h.couleurs.accent;
         b.fillRect(0, y, le, 22);
-        b.fillStyle = "#efe3c6";
+        b.fillStyle = h.couleurs.barre;
         b.fillRect(le, y, W - le, 22);
         b.fillStyle = "#fff";
         b.fillText(etq, 8, y + 4);
-        b.fillStyle = "#15110d";
+        b.fillStyle = h.couleurs.barreTexte;
         // Titre trop long : on resserre un peu, puis il défile comme un vrai bandeau d'info.
         const texte = p.bandeau.texte.toUpperCase();
         const place = W - le - 16;
@@ -334,16 +370,16 @@ export function EcranVhs(props: EcranVhsProps) {
       }
 
       // 2. Luminance nette, chrominance étalée et décalée, écho du signal
-      l.filter = "grayscale(1) contrast(1.18) brightness(1.08) blur(0.75px)";
+      l.filter = "grayscale(1) contrast(1.16) brightness(1.06) blur(0.45px)";
       l.drawImage(base, 0, 0);
       l.filter = "none";
-      c.filter = "saturate(1.6) blur(0.8px)";
+      c.filter = "saturate(1.5) blur(0.6px)";
       c.drawImage(base, 0, 0, CW, H);
       c.filter = "none";
       f.globalCompositeOperation = "copy";
       f.drawImage(luma, 0, 0);
       f.globalCompositeOperation = "color";
-      f.drawImage(chroma, 0, 0, CW, H, 5, 0, W, H);
+      f.drawImage(chroma, 0, 0, CW, H, 4, 0, W, H);
       // bavure rouge qui déborde à droite des aplats
       f.globalCompositeOperation = "screen";
       f.globalAlpha = 0.16;
@@ -354,9 +390,9 @@ export function EcranVhs(props: EcranVhsProps) {
       f.drawImage(luma, 2, 0);
       // écho du signal (image fantôme décalée)
       f.globalCompositeOperation = "lighter";
-      f.globalAlpha = 0.09;
+      f.globalAlpha = 0.06;
       f.drawImage(luma, 10, 0);
-      f.globalAlpha = 0.05;
+      f.globalAlpha = 0.03;
       f.drawImage(luma, 21, 0);
       // dominante chaude des cassettes fatiguées
       f.globalCompositeOperation = "soft-light";
@@ -413,7 +449,7 @@ export function EcranVhs(props: EcranVhsProps) {
       }
       if (!reduit && Math.random() < 0.08) bandeBruit(Math.floor(Math.random() * H), 2 + Math.floor(Math.random() * 3), 0.5);
       o.globalCompositeOperation = "overlay";
-      o.globalAlpha = 0.26;
+      o.globalAlpha = 0.18;
       o.drawImage(bruits[n % 4]!, reduit ? 0 : -Math.floor(Math.random() * 20), reduit ? 0 : -Math.floor(Math.random() * 20));
       // noirs délavés, légèrement violacés
       o.globalAlpha = 1;

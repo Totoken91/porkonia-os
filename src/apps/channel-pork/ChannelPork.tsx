@@ -176,6 +176,7 @@ export function ChannelPork() {
           programme={cleProgramme}
           lecture
           chaine={ch.name}
+          habillage={p.sansHabillage ? null : ch.habillage}
           numero={ci + 1}
           bandeau={s.chyron ? { etiquette, texte: s.chyron } : null}
           mention={s.caption}

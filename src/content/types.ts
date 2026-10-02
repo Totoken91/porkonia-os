@@ -148,6 +148,8 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
+  /** Programme diffusé sans habillage d'antenne (ni logo de chaîne ni bandeau), comme un dessin animé. */
+  sansHabillage?: boolean;
   kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip" | "jeu" | "anime";
   /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
   etiquette?: string;
@@ -195,9 +197,27 @@ export interface BulletinMeteo {
 }
 
 /** Chaîne en direct : sa grille tourne en boucle sur l'horloge réelle (on arrive en cours d'émission). */
+/** Habillage d'antenne d'une chaîne : logo incrusté et bandeau, chacun avec son style. */
+export interface Habillage {
+  /** Texte du logo incrusté (« CANAL 1 », « ZOUK »…). */
+  logo: string;
+  /** Petite ligne sous le logo (« DÉCOUVERTE »), facultative. */
+  sousLogo?: string;
+  position: "haut-droite" | "haut-gauche" | "bas-droite";
+  /** Pastille « DIRECT » sous le logo (chaîne d'information). */
+  direct?: boolean;
+  /** Logo en italique penché (chaîne musicale). */
+  italique?: boolean;
+  /** Couleur du logo, couleur d'accent (étiquette du bandeau, pastille), fond et texte du bandeau. */
+  couleurs: { logo: string; accent: string; barre: string; barreTexte: string };
+  /** Opacité du logo (0–1) : les chaînes de nuit et de documentaires restent discrètes. */
+  opacite?: number;
+}
+
 export interface Channel {
   id: string;
   name: string;
+  habillage?: Habillage;
   /** Identifiants des programmes, dans l'ordre de diffusion (un programme peut revenir, les pubs surtout). */
   grid: string[];
 }

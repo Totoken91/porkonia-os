@@ -58,6 +58,8 @@ Pièges connus :
 
 ## Mixer et publier
 
+Bruitages : de vrais sons enregistrés, sous licence CC0, rangés dans `scripts/channel-pork/sons/bruitages/` (sources dans `LICENCES.md`). Pas de nappe ni de moteur synthétiques : ils sonnent faux. La musique reste présente sous les voix et ne s'efface que de 6 dB au plus, en douceur, sans « pomper » à chaque réplique.
+
 ```
 cd scripts/channel-pork
 python3 mix-ftg-ep1.py           # sortie/ftg-ep1.mp3 + ftg-ep1.json
