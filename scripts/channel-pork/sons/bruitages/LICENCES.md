@@ -13,3 +13,10 @@ Tous les fichiers de ce dossier sont sous licence **CC0** (domaine public), tél
 | toc-1, toc-2, toc-3, porte-coup, grincement | « 100 CC0 metal and wood SFX », https://opengameart.org/content/100-cc0-metal-and-wood-sfx |
 | poignee | « Door lock sounds », https://opengameart.org/content/door-lock-sounds |
 | sonnette | « Doorbell ring », https://opengameart.org/content/doorbell-ring |
+| jingle-sax | « 85 short music jingles » (Kenney), https://opengameart.org/content/85-short-music-jingles |
+| toux | « Old man cough », https://opengameart.org/content/old-man-cough |
+| chaudiere | « Steam boiler sound loop », https://opengameart.org/content/steam-boiler-sound-loop |
+| bourdon | « The Shop » (Legit Audio, frigo de supérette), https://opengameart.org/content/the-shop |
+| pieces | « Coin sounds », https://opengameart.org/content/coin-sounds |
+| fourchette | « Cutlery sounds », https://opengameart.org/content/cutlery-sounds |
+| croque-1, croque-2, croque-3, croque-5 | « 7 eating crunches », https://opengameart.org/content/7-eating-crunches |

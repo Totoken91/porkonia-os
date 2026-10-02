@@ -27,10 +27,11 @@ def ffmpeg():
         sys.exit("ffmpeg introuvable : installer ffmpeg ou « pip install imageio-ffmpeg ».")
 
 
-def lire(chemin, sr=SR):
-    """Signal mono flottant à `sr` Hz, quel que soit le format d'origine."""
+def lire(chemin, sr=SR, tempo=1.0):
+    """Signal mono flottant à `sr` Hz, quel que soit le format d'origine ; `tempo` accélère sans changer la hauteur."""
+    filtre = ["-af", f"atempo={tempo}"] if tempo != 1.0 else []
     brut = subprocess.run(
-        [ffmpeg(), "-loglevel", "error", "-i", chemin, "-f", "s16le", "-ac", "1", "-ar", str(sr), "-"],
+        [ffmpeg(), "-loglevel", "error", "-i", chemin, *filtre, "-f", "s16le", "-ac", "1", "-ar", str(sr), "-"],
         check=True,
         capture_output=True,
     ).stdout

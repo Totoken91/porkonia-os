@@ -26,6 +26,19 @@
      ]
     }
    }
+  },
+  "elevenlabs_v4": {
+   "intent": {
+    "language": "fr-FR"
+   },
+   "model": "eleven_v4",
+   "constraints": {
+    "allowedProviders": {
+     "tts": [
+      "elevenlabs"
+     ]
+    }
+   }
   }
  },
  "personnages": {
@@ -259,7 +272,8 @@
     "worried whisper",
     "almost crying"
    ],
-   "note": "Joue aussi son double paniqué (panicked, screaming), filtré comme à travers la porte au mixage."
+   "note": "Joue aussi son double paniqué (panicked, screaming), filtré comme à travers la porte au mixage.",
+   "modele": "eleven_v4"
   },
   "voix-off-judas": {
    "moteur": "elevenlabs",
@@ -267,11 +281,39 @@
    "voix_nom": "Charlotte",
    "balises": [
     "radiant, bright announcer"
-   ]
+   ],
+   "modele": "eleven_v4"
+  },
+  "eric-saucissignal": {
+   "moteur": "elevenlabs",
+   "modele": "eleven_v4",
+   "voice": "CYw3kZ02Hs0563khs1Fj",
+   "voix_nom": "Dave",
+   "balises": [
+    "dead serious, completely convinced",
+    "confident startup pitch",
+    "irritated",
+    "matter-of-fact",
+    "mouth full, chewing"
+   ],
+   "note": "Conviction professionnelle absolue, jamais de grimace de sketch."
+  },
+  "presentateur-saucissignal": {
+   "moteur": "elevenlabs",
+   "modele": "eleven_v4",
+   "voice": "5Q0t7uMcjvnagumLfvZi",
+   "voix_nom": "Paul",
+   "balises": [
+    "polite TV host",
+    "polite, puzzled",
+    "polite, curious"
+   ],
+   "note": "Reste poli et continue ses questions, même après les insultes."
   }
  },
  "libres": {
   "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
   "Fin": "D38z5RcWu1voky8WS1ja"
- }
+ },
+ "_comparatif_moteurs": "Octobre 2026, même réplique sur six moteurs (étendue de hauteur 5e-95e centile, demi-tons) : ElevenLabs v4 18,5 · MiniMax speech-2.8-hd 17,3 · Fish Audio s2.1-pro 16,0 · OpenAI gpt-4o-mini-tts 12,5 · Hume Octave 2 11,6 · Inworld TTS-2 9,3 · ElevenLabs v3 7,9. Préférer eleven_v4 pour les nouvelles voix (garde les balises de jeu)."
 }

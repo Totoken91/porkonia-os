@@ -26,7 +26,15 @@ Pub auto façon années 90 : la petite voiture violette aux pare-chocs cuivrés,
 
 ## Pub « Judas Qui c'est ? »
 
-Télé-achat trash d'après le script de l'utilisateur : un vendeur moustachu en veste de velours vante un judas en laiton qui montre les visiteurs douze minutes à l'avance, aperçoit son propre double paniqué sur le palier, puis finit en pleurs quand la poignée descend. Le vendeur et son double ont la même voix, **Clyde** (le double est étouffé comme à travers la porte au mixage) ; voix off finale radieuse : **Charlotte**. Images dans `public/tv/judas/`, mixage `scripts/channel-pork/mix-pub-judas.py` (sonnette, coups, poignée, coup violent : bruitages CC0).
+Télé-achat trash d'après le script de l'utilisateur : un vendeur moustachu en veste de velours vante un judas en laiton qui montre les visiteurs douze minutes à l'avance, aperçoit son propre double paniqué sur le palier, puis finit en pleurs quand la poignée descend. Doublage ElevenLabs **v4** (nettement plus vivant que v3). Le vendeur et son double ont la même voix, **Clyde** (le double est étouffé comme à travers la porte au mixage) ; voix off finale radieuse : **Charlotte**. Images dans `public/tv/judas/`, mixage `scripts/channel-pork/mix-pub-judas.py` (sonnette, coups, poignée, coup violent : bruitages CC0).
+
+## « Éric présente Saucissignal »
+
+Faux talk-show de startup d'après le script de l'utilisateur : Éric vend un abonnement pour entendre un saucisson à distance ; le client ne reçoit rien. Éric (**Dave**, ElevenLabs v4) dit chaque absurdité avec une conviction professionnelle absolue, sans grimace ; le présentateur (**Paul**) reste poli quoi qu'il arrive. Pas de bip, pas de bruitage comique sur les jurons, silences qui respirent ; fond de plateau (bourdon électrique, chaudière de brasserie, toux en régie), jingle minable et coupe nette. Images dans `public/tv/eric/`, mixage `scripts/channel-pork/mix-eric-saucissignal.py`.
+
+## Choisir un moteur de voix
+
+Comparatif d'octobre 2026 (même réplique, étendue de hauteur en demi-tons) : ElevenLabs v4 18,5 · MiniMax 2.8 HD 17,3 · Fish Audio 16,0 · OpenAI 12,5 · Hume Octave 2 11,6 · Inworld 9,3 · ElevenLabs v3 7,9. Pour toute nouvelle voix : `eleven_v4`, qui garde les balises de jeu.
 
 ## Initial P
 

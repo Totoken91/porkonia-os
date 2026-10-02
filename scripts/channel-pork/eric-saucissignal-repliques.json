@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "« Éric présente Saucissignal » (script de l'utilisateur). ElevenLabs v4. Éric : Dave (CYw3kZ02Hs0563khs1Fj), conviction professionnelle absolue. Présentateur : Paul (5Q0t7uMcjvnagumLfvZi), poli quoi qu'il arrive. Balises de jeu entre crochets dans le texte envoyé.",
+ "modele": "eleven_v4",
+ "voix": {"E": "Dave CYw3kZ02Hs0563khs1Fj", "P": "Paul 5Q0t7uMcjvnagumLfvZi"},
+ "ecarts_au_script": ["P8 : « Ah bon ? Où ça ? » au lieu de « Où ? » (prise plus nette)", "P15 : « Et les abonnés, alors ? » au lieu de « Et les abonnés ? »"]
+}
