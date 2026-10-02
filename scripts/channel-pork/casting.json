@@ -1,8 +1,32 @@
 {
   "_lisezmoi": "Réglages de voix des personnages de Channel Pork (Speko, outil audio.synthesize). Voir docs/CASTING.md. Corps de requête = base + champs du personnage ; le texte porte les balises de jeu entre crochets pour ElevenLabs v3.",
   "base": {
-    "elevenlabs": { "intent": { "language": "fr-FR" }, "model": "eleven_v3", "constraints": { "allowedProviders": { "tts": ["elevenlabs"] } } },
-    "qwen": { "intent": { "language": "fr-FR" }, "model": "qwen3-tts-instruct-flash", "constraints": { "allowedProviders": { "tts": ["alibaba"] } } }
+    "elevenlabs": {
+      "intent": {
+        "language": "fr-FR"
+      },
+      "model": "eleven_v3",
+      "constraints": {
+        "allowedProviders": {
+          "tts": [
+            "elevenlabs"
+          ]
+        }
+      }
+    },
+    "qwen": {
+      "intent": {
+        "language": "fr-FR"
+      },
+      "model": "qwen3-tts-instruct-flash",
+      "constraints": {
+        "allowedProviders": {
+          "tts": [
+            "alibaba"
+          ]
+        }
+      }
+    }
   },
   "personnages": {
     "jean-groin": {
@@ -11,8 +35,18 @@
       "moteur": "elevenlabs",
       "voice": "VR6AewLTigWG4xSOukaG",
       "voix_nom": "Arnold",
-      "balises": ["overly excited, cheesy game show host", "dramatic quiz host voice", "big fake smile, sweetly mocking", "forced smile, slowly, as if to a child", "cold", "calm, smiling, menacing"],
-      "plans": ["animateur", "crispe"]
+      "balises": [
+        "overly excited, cheesy game show host",
+        "dramatic quiz host voice",
+        "big fake smile, sweetly mocking",
+        "forced smile, slowly, as if to a child",
+        "cold",
+        "calm, smiling, menacing"
+      ],
+      "plans": [
+        "animateur",
+        "crispe"
+      ]
     },
     "frederic": {
       "nom": "Frédéric Legaigneur",
@@ -20,8 +54,16 @@
       "moteur": "elevenlabs",
       "voice": "N2lVS1w4EtoT3dr4eOWO",
       "voix_nom": "Callum",
-      "balises": ["smug show-off, smooth talker, chuckles", "bragging, leaning back", "condescending", "offended, shouting", "slamming the desk, defiant, loud"],
-      "plans": ["frederic"]
+      "balises": [
+        "smug show-off, smooth talker, chuckles",
+        "bragging, leaning back",
+        "condescending",
+        "offended, shouting",
+        "slamming the desk, defiant, loud"
+      ],
+      "plans": [
+        "frederic"
+      ]
     },
     "kevin": {
       "nom": "Kevin Ranga",
@@ -29,8 +71,14 @@
       "moteur": "elevenlabs",
       "voice": "SOYHLrjzK2X1ezoPC6cr",
       "voix_nom": "Harry",
-      "balises": ["shy, nervous, stuttering, voice cracking", "mumbling, clutching his phone", "awkward pause"],
-      "plans": ["kevin"]
+      "balises": [
+        "shy, nervous, stuttering, voice cracking",
+        "mumbling, clutching his phone",
+        "awkward pause"
+      ],
+      "plans": [
+        "kevin"
+      ]
     },
     "martin": {
       "nom": "Martin Chou",
@@ -39,33 +87,73 @@
       "voice": "Ethan",
       "instructions": "Homme chinois d'une quarantaine d'années, originaire de Pékin, qui parle français avec un fort accent mandarin. Patriote chinois fier et hautain, esthète méprisant, dégoûté par tout ce qui n'est pas chinois.",
       "remarque": "Pas de balises entre crochets avec Qwen : tout le jeu passe par instructions. Pour un mot difficile, ajouter « Parle lentement et articule bien. »",
-      "plans": ["martin"]
+      "plans": [
+        "martin"
+      ]
     },
     "tonio": {
       "nom": "Tonio",
       "role": "candidat, propriétaire d'une Brasswagen Palou, témoin de la pub Brasswagen",
       "moteur": "elevenlabs",
-      "voice": "nPczCjzI2devNBz1zQrb",
-      "voix_nom": "Brian",
-      "balises": ["calm, proud, deadpan", "pause, frowning", "correcting himself, very calm", "pause, confused"],
-      "plans": ["tonio"]
+      "voice": "TxGEqnHWrfWFTfGW9XjX",
+      "voix_nom": "Josh",
+      "balises": [
+        "dopey, slow, proud of himself",
+        "dopey, proud",
+        "pause",
+        "pause, confused"
+      ],
+      "plans": [
+        "tonio"
+      ]
     }
   },
   "secondaires": {
-    "chauffeur-de-salle": { "moteur": "elevenlabs", "voice": "JBFqnCBsd6RMkjVDRZzb", "voix_nom": "George", "balises": ["shouting to the crowd, energetic warm-up guy"] },
-    "homme-du-public": { "moteur": "elevenlabs", "voice": "yoZ06aMxZJJ28mfd3POQ", "voix_nom": "Sam", "balises": ["heckling loudly from the audience, cheeky"] },
-    "jury": { "moteur": "elevenlabs", "voice": "onwK4e9ZLuTAKqWW03F9", "voix_nom": "Daniel", "balises": ["flat, bored"] },
-    "narrateur-brasswagen": { "moteur": "elevenlabs", "voice": "pqHfZKP75CvOlQylNhV4", "voix_nom": "Bill", "balises": ["deep, epic car commercial voice, slow", "epic, proud", "warm, epic", "very fast, mumbled legal disclaimer"] }
+    "chauffeur-de-salle": {
+      "moteur": "elevenlabs",
+      "voice": "JBFqnCBsd6RMkjVDRZzb",
+      "voix_nom": "George",
+      "balises": [
+        "shouting to the crowd, energetic warm-up guy"
+      ]
+    },
+    "homme-du-public": {
+      "moteur": "elevenlabs",
+      "voice": "yoZ06aMxZJJ28mfd3POQ",
+      "voix_nom": "Sam",
+      "balises": [
+        "heckling loudly from the audience, cheeky"
+      ]
+    },
+    "jury": {
+      "moteur": "elevenlabs",
+      "voice": "onwK4e9ZLuTAKqWW03F9",
+      "voix_nom": "Daniel",
+      "balises": [
+        "flat, bored"
+      ]
+    },
+    "narrateur-brasswagen": {
+      "moteur": "elevenlabs",
+      "voice": "pqHfZKP75CvOlQylNhV4",
+      "voix_nom": "Bill",
+      "balises": [
+        "deep, epic car commercial voice, slow",
+        "epic, proud",
+        "warm, epic",
+        "very fast, mumbled legal disclaimer"
+      ]
+    }
   },
   "libres": {
     "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
     "Patrick": "ODq5zmih8GrVes37Dizd",
     "Clyde": "2EiwWnXFnvU5JabPnv8n",
-    "Josh": "TxGEqnHWrfWFTfGW9XjX",
     "Antoni": "ErXwobaYiN019PkySvjV",
     "Will": "bIHbv24MWmeRgasZH58o",
     "Thomas": "GBv7mTt0atIp3Br8iCZE",
     "Fin": "D38z5RcWu1voky8WS1ja",
-    "Adam": "pNInz6obpgDQGcFmaJgB"
+    "Adam": "pNInz6obpgDQGcFmaJgB",
+    "Brian": "nPczCjzI2devNBz1zQrb"
   }
 }

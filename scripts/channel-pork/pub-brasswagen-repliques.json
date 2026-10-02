@@ -19,12 +19,12 @@
   {
    "id": "T1",
    "perso": "tonio",
-   "tts": "[calm, proud, deadpan] Elle a jamais calé. Une fois, elle a calé... [pause] euh, non. J'ai calé. Elle, jamais."
+   "tts": "[dopey, proud] Elle a jamais calé. Une fois, elle a calé... [pause] euh, non. J'ai calé. Elle, jamais."
   },
   {
    "id": "T2",
    "perso": "tonio",
-   "tts": "[calm, proud] Je l'ai achetée en deux mille douze. Elle m'a acheté en... [pause, confused] euh. Je l'ai achetée. Voilà."
+   "tts": "[dopey, proud] Je l'ai achetée en deux mille douze. Elle m'a acheté en... [pause, confused] euh. Je l'ai achetée. Voilà."
   },
   {
    "id": "N4",
