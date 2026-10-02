@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
-import type { Win, WinAction } from "@/os/windows";
+import { ordreRecents, type Win, type WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
 import { Calendrier } from "./Calendrier";
+import { demanderPleinEcran } from "./Monitor";
 
 /** Horloge : un clic ouvre Date et heure (calendrier et horloge à aiguilles). */
 function Clock() {
@@ -42,14 +43,39 @@ interface Props {
   onLayout(op: "desktop" | "cascade" | "tile"): void;
   /** Activité en cours (chargement) : le témoin réseau s'affole. */
   busy: boolean;
+  /** PorkOS Poche : barre d'état en haut, barre de navigation tactile en bas. */
+  poche?: boolean;
 }
 
 type Sub = "programmes" | "accessoires" | null;
 
-export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy }: Props) {
+/** Bascule le plein écran du navigateur (le Poche s'y met tout seul à l'allumage, quand c'est permis). */
+function BoutonPleinEcran({ str }: { str(k: string): string }) {
+  const [plein, setPlein] = useState(false);
+  const [permis, setPermis] = useState(false);
+  useEffect(() => {
+    setPermis(!!document.fullscreenEnabled);
+    const on = () => setPlein(!!document.fullscreenElement);
+    on();
+    document.addEventListener("fullscreenchange", on);
+    return () => document.removeEventListener("fullscreenchange", on);
+  }, []);
+  if (!permis) return null;
+  const label = str(plein ? "poche.plein-ecran.quitter" : "poche.plein-ecran");
+  return (
+    <button className="tb-son" onClick={() => (plein ? document.exitFullscreen().catch(() => {}) : demanderPleinEcran())} aria-label={label} title={label} data-testid="plein-ecran">
+      <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
+        {plein ? <path d="M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5" fill="none" stroke="#2a2118" strokeWidth="2" /> : <path d="M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5" fill="none" stroke="#2a2118" strokeWidth="2" />}
+      </svg>
+    </button>
+  );
+}
+
+export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, poche }: Props) {
   const { pack, str, openApp, runAction, settings, setSettings, mail, showMenu } = useOs();
   const nonLus = mail.boite.messages.filter((m) => m.folder === "reception" && !m.read).length;
   const [open, setOpen] = useState(false);
+  const [taches, setTaches] = useState(false);
   const [sub, setSub] = useState<Sub>(null);
   const menu = useRef<HTMLDivElement>(null);
   const startBtn = useRef<HTMLButtonElement>(null);
@@ -99,52 +125,162 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy }
     </li>
   );
 
+  const menuDemarrer = () => (
+    <div className="menu-porkos" ref={menu} data-testid="programme">
+      <div className="menu-bandeau">
+        <span>{str("menu.bandeau")}</span>
+      </div>
+      <ul>
+        <Flyout id="programmes" apps={group("programmes")} />
+        <Flyout id="accessoires" apps={group("accessoires")} />
+        <li onPointerEnter={() => setSub(null)}>
+          <button onClick={go(() => openApp("fichiers", { path: "Documents officiels" }))}>
+            <Icon name="texte" size={32} />
+            <span>{str("menu.documents")}</span>
+          </button>
+        </li>
+        {config && (
+          <li onPointerEnter={() => setSub(null)}>
+            <button onClick={go(() => openApp(config.id))}>
+              <Icon name={config.icon} size={32} />
+              <span>{str("menu.systeme")}</span>
+            </button>
+          </li>
+        )}
+        <li onPointerEnter={() => setSub(null)}>
+          <button onClick={go(() => openApp("executer"))} data-testid="menu-executer">
+            <Icon name="executer" size={32} />
+            <span>{str("menu.executer")}</span>
+          </button>
+        </li>
+        <li className="separateur" />
+        <li onPointerEnter={() => setSub(null)}>
+          <button onClick={go(() => runAction({ type: "lock" }))}>
+            <Icon name="cadenas" size={32} />
+            <span>{str("menu.verrouiller")}</span>
+          </button>
+        </li>
+        <li onPointerEnter={() => setSub(null)}>
+          <button onClick={go(() => runAction({ type: "dialog-ref", id: "arret" }))}>
+            <Icon name="embleme" size={32} />
+            <span>{str("menu.arreter")}</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  );
+
+  const tray = (
+    <div className="tb-tray">
+      {nonLus > 0 && (
+        <button className="tb-son tb-courrier" onClick={() => openApp("mail")} title={str("courrier.nonlus", { n: nonLus })} aria-label={str("courrier.nonlus", { n: nonLus })} data-testid="tray-courrier">
+          <Icon name="mail" size={16} />
+        </button>
+      )}
+      <button className="tb-son" onClick={() => setSettings({ sons: !settings.sons })} title={str("barre.sons")} aria-pressed={settings.sons} aria-label={str("config.sons")}>
+        <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
+          <path d="M2 6h3l4-3v10l-4-3H2z" fill="#e8e0cc" stroke="#000" />
+          {settings.sons ? <path d="M11 5c1 1 1 5 0 6M13 3c2 2 2 8 0 10" fill="none" stroke="#000" /> : <path d="M11 5l4 6M15 5l-4 6" stroke="#b3121b" strokeWidth="1.5" />}
+        </svg>
+      </button>
+      <span className={`tb-reseau${busy ? " actif" : ""}`} title={str("barre.reseau")} aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges">
+          <rect x="1" y="2" width="8" height="6" fill="#e8e0cc" stroke="#000" />
+          <rect x="2.5" y="3.5" width="5" height="3" className="lampe a" />
+          <rect x="7" y="8" width="8" height="6" fill="#e8e0cc" stroke="#000" />
+          <rect x="8.5" y="9.5" width="5" height="3" className="lampe b" />
+          <path d="M5 8v3h2" fill="none" stroke="#000" />
+        </svg>
+      </span>
+      <span title="Douzi Ambrée : niveau de mousse conforme">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3 5h8v9H3z" fill="#e0a526" stroke="#2a2118" />
+          <path d="M11 7h2v4h-2" fill="none" stroke="#2a2118" />
+          <path d="M2.5 5c0-2 2-2.5 3-1.5 1-1.5 3.5-1 3.5.5 1-.5 2.5 0 2 1z" fill="#fff" stroke="#2a2118" strokeWidth=".8" />
+        </svg>
+      </span>
+      {poche && <BoutonPleinEcran str={str} />}
+      <Clock />
+    </div>
+  );
+
+  const premierPlan = windows.find((w) => w.id === focusedId && !w.minimized);
+  if (poche) {
+    return (
+      <>
+        {open && menuDemarrer()}
+        <header className="barre-etat">
+          <span className="be-marque">
+            <img src="/brand/embleme-64.png" alt="" width={16} height={16} />
+            <b>{premierPlan ? premierPlan.title : pack.os.name}</b>
+          </span>
+          {tray}
+        </header>
+        {taches && (
+          <div className="taches-poche" data-testid="taches">
+            <header>
+              <b>{str("poche.taches.titre")}</b>
+              {windows.length > 0 && (
+                <button className="pk-btn" onClick={() => (setTaches(false), dispatch({ type: "closeAll" }))}>
+                  {str("poche.taches.tout")}
+                </button>
+              )}
+            </header>
+            {windows.length === 0 && <p>{str("poche.taches.aucun")}</p>}
+            <ul>
+              {[...windows].sort((a, b) => b.z - a.z).map((w) => {
+                const m = pack.apps.find((a) => a.id === w.appId);
+                return (
+                  <li key={w.id} className={w.id === focusedId && !w.minimized ? "actif" : undefined}>
+                    <button className="tache" data-task={w.id} onClick={() => (setTaches(false), dispatch({ type: "focus", id: w.id }))}>
+                      {m && <Icon name={m.icon} size={32} />}
+                      <span>{w.title}</span>
+                    </button>
+                    <button className="tache-fermer" aria-label={`${str("barre.fermer")} ${w.title}`} onClick={() => dispatch({ type: "close", id: w.id })}>
+                      <svg width="12" height="12" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.6" /></svg>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        <nav className="barre-nav">
+          <button ref={startBtn} className="bn-bouton bn-demarrer" aria-expanded={open} aria-haspopup="menu" onClick={() => (setTaches(false), setOpen((o) => !o))} data-testid="start" aria-label={str("demarrer")}>
+            <img src="/brand/embleme-64.png" alt="" width={24} height={24} />
+          </button>
+          <button
+            className="bn-bouton"
+            onClick={() => {
+              setOpen(false);
+              setTaches(false);
+              if (!premierPlan) return;
+              // Retour au programme d'avant (le plus récent après celui-ci), sinon à l'accueil.
+              const precedent = ordreRecents(windows, focusedId)[1];
+              dispatch({ type: "minimize", id: premierPlan.id });
+              if (precedent) dispatch({ type: "focus", id: precedent });
+            }}
+            disabled={!premierPlan}
+            aria-label={str("poche.retour")}
+            data-testid="retour"
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M14 4l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" /></svg>
+          </button>
+          <button className="bn-bouton" onClick={() => (setOpen(false), setTaches(false), onLayout("desktop"))} aria-label={str("poche.accueil")} data-testid="afficher-bureau">
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 11l8-7 8 7M5 9v9h4v-5h4v5h4V9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="miter" /></svg>
+          </button>
+          <button className={`bn-bouton${taches ? " actif" : ""}`} onClick={() => (setOpen(false), setTaches((t) => !t))} aria-label={str("poche.taches")} aria-expanded={taches} data-testid="taches-bouton">
+            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="4" y="4" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" /></svg>
+            {windows.length > 0 && <i className="bn-compte">{windows.length}</i>}
+          </button>
+        </nav>
+      </>
+    );
+  }
+
   return (
     <>
-      {open && (
-        <div className="menu-porkos" ref={menu} data-testid="programme">
-          <div className="menu-bandeau">
-            <span>{str("menu.bandeau")}</span>
-          </div>
-          <ul>
-            <Flyout id="programmes" apps={group("programmes")} />
-            <Flyout id="accessoires" apps={group("accessoires")} />
-            <li onPointerEnter={() => setSub(null)}>
-              <button onClick={go(() => openApp("fichiers", { path: "Documents officiels" }))}>
-                <Icon name="texte" size={32} />
-                <span>{str("menu.documents")}</span>
-              </button>
-            </li>
-            {config && (
-              <li onPointerEnter={() => setSub(null)}>
-                <button onClick={go(() => openApp(config.id))}>
-                  <Icon name={config.icon} size={32} />
-                  <span>{str("menu.systeme")}</span>
-                </button>
-              </li>
-            )}
-            <li onPointerEnter={() => setSub(null)}>
-              <button onClick={go(() => openApp("executer"))} data-testid="menu-executer">
-                <Icon name="executer" size={32} />
-                <span>{str("menu.executer")}</span>
-              </button>
-            </li>
-            <li className="separateur" />
-            <li onPointerEnter={() => setSub(null)}>
-              <button onClick={go(() => runAction({ type: "lock" }))}>
-                <Icon name="cadenas" size={32} />
-                <span>{str("menu.verrouiller")}</span>
-              </button>
-            </li>
-            <li onPointerEnter={() => setSub(null)}>
-              <button onClick={go(() => runAction({ type: "dialog-ref", id: "arret" }))}>
-                <Icon name="embleme" size={32} />
-                <span>{str("menu.arreter")}</span>
-              </button>
-            </li>
-          </ul>
-        </div>
-      )}
+      {open && menuDemarrer()}
       <nav
         className="taskbar"
         onContextMenu={(e) => {
@@ -198,36 +334,7 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy }
             );
           })}
         </div>
-        <div className="tb-tray">
-          {nonLus > 0 && (
-            <button className="tb-son tb-courrier" onClick={() => openApp("mail")} title={str("courrier.nonlus", { n: nonLus })} aria-label={str("courrier.nonlus", { n: nonLus })} data-testid="tray-courrier">
-              <Icon name="mail" size={16} />
-            </button>
-          )}
-          <button className="tb-son" onClick={() => setSettings({ sons: !settings.sons })} title={str("barre.sons")} aria-pressed={settings.sons} aria-label={str("config.sons")}>
-            <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden="true">
-              <path d="M2 6h3l4-3v10l-4-3H2z" fill="#e8e0cc" stroke="#000" />
-              {settings.sons ? <path d="M11 5c1 1 1 5 0 6M13 3c2 2 2 8 0 10" fill="none" stroke="#000" /> : <path d="M11 5l4 6M15 5l-4 6" stroke="#b3121b" strokeWidth="1.5" />}
-            </svg>
-          </button>
-          <span className={`tb-reseau${busy ? " actif" : ""}`} title={str("barre.reseau")} aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 16 16" shapeRendering="crispEdges">
-              <rect x="1" y="2" width="8" height="6" fill="#e8e0cc" stroke="#000" />
-              <rect x="2.5" y="3.5" width="5" height="3" className="lampe a" />
-              <rect x="7" y="8" width="8" height="6" fill="#e8e0cc" stroke="#000" />
-              <rect x="8.5" y="9.5" width="5" height="3" className="lampe b" />
-              <path d="M5 8v3h2" fill="none" stroke="#000" />
-            </svg>
-          </span>
-          <span title="Douzi Ambrée : niveau de mousse conforme">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M3 5h8v9H3z" fill="#e0a526" stroke="#2a2118" />
-              <path d="M11 7h2v4h-2" fill="none" stroke="#2a2118" />
-              <path d="M2.5 5c0-2 2-2.5 3-1.5 1-1.5 3.5-1 3.5.5 1-.5 2.5 0 2 1z" fill="#fff" stroke="#2a2118" strokeWidth=".8" />
-            </svg>
-          </span>
-          <Clock />
-        </div>
+        {tray}
       </nav>
     </>
   );

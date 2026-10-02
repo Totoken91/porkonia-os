@@ -5,7 +5,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import type { ContentPack, UserProfile } from "@/content/types";
-import { makeStr } from "@/os/context";
+import { makeStr, useEcran } from "@/os/context";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from "@/os/settings";
 import { jouer } from "@/os/sons";
 import { Boot } from "./Boot";
@@ -95,7 +95,7 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
   };
 
   return (
-    <Monitor crt={settings.crt} power={power} onPower={togglePower} sons={settings.sons} nette={settings.pixelsNets} str={str}>
+    <Monitor crt={settings.crt} power={power} onPower={togglePower} sons={settings.sons} nette={settings.pixelsNets} affichage={settings.affichage} str={str}>
       {phase.kind === "boot" && brutal !== null && <Boot key={bootId} pack={pack} brutal={brutal} sons={settings.sons} onDone={bootDone} />}
       {phase.kind === "login" && (
         <Login pack={pack} fond={settings.fond} onLogin={(user) => setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false })} />
@@ -139,8 +139,22 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
       {phase.kind === "securite" && (
         <div className="securite" data-testid="securite">
           <p>{pack.shutdown.safe}</p>
+          <EteindrePoche onPower={togglePower} label={str("moniteur.alimentation")} />
         </div>
       )}
     </Monitor>
+  );
+}
+
+/** Poche : pas de bouton d'alimentation sur un téléphone allumé ; l'écran « vous pouvez éteindre » en porte un. */
+function EteindrePoche({ onPower, label }: { onPower(): void; label: string }) {
+  const { mode } = useEcran();
+  if (mode !== "poche") return null;
+  return (
+    <button className="bouton-allumer" onClick={onPower} aria-label={label} data-testid="power">
+      <svg width="28" height="28" viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    </button>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 /** Contextes partagés : l'OS (pack, réglages, actions) et la fenêtre courante (pour les applis). */
 import { createContext, useContext, useEffect, useRef } from "react";
+import { choisirEcran, type Ecran } from "./ecran";
 import type { ActionRef, ContentPack, UserProfile } from "@/content/types";
 import type { Rng } from "./rng";
 import type { Son } from "./sons";
@@ -99,6 +100,10 @@ export function makeStr(pack: ContentPack) {
 /** Facteur d'échelle de l'écran 4:3 (les déplacements à la souris sont divisés par ce facteur). */
 export const ScaleContext = createContext(1);
 export const useScale = () => useContext(ScaleContext);
+
+/** Format de l'écran en cours (moniteur 800×600 ou PorkOS Poche à la taille de l'appareil). */
+export const EcranContext = createContext<Ecran>(choisirEcran(1366, 800));
+export const useEcran = () => useContext(EcranContext);
 
 /**
  * Déclare les commandes de menu d'une appli. Les libellés viennent du pack ; l'appli ne fournit que le comportement

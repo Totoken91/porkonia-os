@@ -6,6 +6,9 @@ façon poste administratif de 1998 : écran 4:3 (800×600) dans son moniteur bei
 publicités de la Douzi Ambrée et mises à jour obligatoires. Le moniteur s'allume et s'éteint vraiment,
 les icônes se rangent sur une grille, le clic droit, « Exécuter… », les sons système et l'écran de veille répondent. Alt+² fait défiler les fenêtres ouvertes (Alt+Tab appartient au vrai ordinateur) ; un clic sur l'heure ouvre le calendrier.
 
+Sur téléphone, il devient le **PorkOS Poche** : écran à la taille de l'appareil, lanceur au doigt, barre de navigation, fenêtres et
+PorkTV en plein écran, installable sur l'écran d'accueil.
+
 > Le porc. La bière. Toujours plus.
 
 L'ancien atelier éditorial (import Porkopédia, Bible, révisions…) est conservé sur la branche `archive/atelier`.
@@ -24,7 +27,7 @@ npm start            # sert out/
 ```bash
 npm run typecheck
 npm test             # logique pure + cohérence du pack
-npm run build && npm run test:e2e   # parcours complet (bureau + mobile), captures si SHOTS=dossier
+npm run build && npm run test:e2e   # parcours complet (bureau, poche paysage, poche portrait), captures si SHOTS=dossier
 ```
 
 ## Applis de la V1

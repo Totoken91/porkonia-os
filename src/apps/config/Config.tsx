@@ -82,6 +82,16 @@ export function Config() {
               </label>
             </fieldset>
             <fieldset className="pk-fieldset">
+              <legend>{str("config.affichage")}</legend>
+              {(["auto", "moniteur", "poche"] as const).map((v) => (
+                <label key={v} className="case-a-cocher">
+                  <input type="radio" name="affichage" checked={settings.affichage === v} onChange={() => setSettings({ affichage: v })} data-testid={`config-affichage-${v}`} />
+                  {str(`config.affichage.${v}`)}
+                </label>
+              ))}
+              <p className="note">{str("config.affichage.note")}</p>
+            </fieldset>
+            <fieldset className="pk-fieldset">
               <legend>{str("config.fond")}</legend>
               <div className={`apercu fond-${settings.fond}`} aria-hidden="true" />
               {fonds.map((f) => (

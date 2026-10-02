@@ -52,9 +52,15 @@ const shot = async (page, name) => SHOTS && page.screenshot({ path: join(SHOTS, 
 const step = (m) => console.log("✓", m);
 
 try {
-  for (const viewport of [{ width: 1366, height: 800 }, { width: 844, height: 390 }]) {
-    const tag = viewport.height < 500 ? "mobile" : "bureau";
-    const ctx = await browser.newContext({ viewport });
+  // Bureau (moniteur d'État), puis téléphone en paysage et en portrait (PorkOS Poche, au doigt).
+  const formats = [
+    { tag: "bureau", viewport: { width: 1366, height: 800 } },
+    { tag: "poche-paysage", viewport: { width: 844, height: 390 }, mobile: true },
+    { tag: "poche-portrait", viewport: { width: 390, height: 844 }, mobile: true },
+  ];
+  for (const { tag, viewport, mobile } of formats) {
+    const poche = !!mobile;
+    const ctx = await browser.newContext({ viewport, ...(mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) });
     if (process.env.HTTPS_PROXY)
       await ctx.route("https://porkopedia.totoken.chatgpt.site/**", async (route) => {
         const body = await relay(route.request().url());
@@ -136,11 +142,16 @@ try {
         }
       }
     };
-    const open = async (id) => (tag === "mobile" ? page.getByTestId(`icon-${id}`).tap?.() ?? page.getByTestId(`icon-${id}`).click() : page.getByTestId(`icon-${id}`).dblclick());
+    // Sur le bureau, double clic sur l'icône ; sur le Poche, retour à l'accueil puis un appui sur la tuile du lanceur.
+    const open = async (id) => {
+      if (!poche) return page.getByTestId(`icon-${id}`).dblclick();
+      await page.getByTestId("afficher-bureau").click();
+      await page.getByTestId(`icon-${id}`).tap();
+    };
     const closeTop = () => page.locator(".pk-window.focused [data-testid=window-close]").click();
 
     // Navigateur → notice Douzi → lien interne
-    await page.getByTestId("icon-d-nav").dblclick();
+    await open("d-nav");
     await page.getByTestId("window-navigateur").waitFor();
     // Portail : une du jour, sondage (le vote est compté, ceux des voisins aussi), rubrique → index
     await page.getByTestId("portail-une").waitFor();
@@ -172,7 +183,7 @@ try {
     await closeTop();
 
     // Channel Pork
-    await page.getByTestId("icon-d-tv").dblclick();
+    await open("d-tv");
     await page.getByTestId("tv-screen").waitFor();
     // Direct : on tombe en cours d'émission ; musique tout de suite, une voix off dans les secondes qui suivent
     // (ou la bande complète du jeu télévisé).
@@ -192,6 +203,20 @@ try {
     await page.waitForFunction((t0) => performance.now() - t0 > 1500, await page.evaluate(() => performance.now()), { polling: "raf" });
     await shot(page, `${tag}-06b-channel-pork-zap`);
     step(`${tag} : Channel Pork (direct, musique, voix off, zapping)`);
+    // Plein écran : l'image seule couvre tout l'appareil ; la télécommande zappe ; on en sort.
+    await page.getByTestId("tv-plein-ecran").click();
+    await page.locator(".tuner-image.plein").waitFor();
+    await page.waitForFunction(() => {
+      const r = document.querySelector(".tuner-image.plein").getBoundingClientRect();
+      return r.width >= window.innerWidth - 1 && r.height >= window.innerHeight - 1;
+    });
+    await page.getByTestId("tv-image").click({ position: { x: 20, y: 20 } });
+    await page.getByTestId("tv-plein-zapper").click();
+    await page.locator(".tv-numero", { hasText: "03" }).waitFor();
+    await shot(page, `${tag}-06d-tv-plein-ecran`);
+    await page.getByTestId("tv-plein-sortir").click();
+    await page.locator(".tuner-image.plein").waitFor({ state: "detached" });
+    step(`${tag} : PorkTV en plein écran (télécommande, sortie)`);
     // PorkTexte : sommaire, lien vers les programmes, page absente, retour à l'image
     await page.getByTestId("tv-txt").click();
     await page.locator(".ttx-titre", { hasText: "SOMMAIRE" }).waitFor();
@@ -210,7 +235,7 @@ try {
     await closeTop();
 
     // Nappe Vide : premier service toujours sûr
-    await page.getByTestId("icon-d-nappe").dblclick();
+    await open("d-nappe");
     await page.getByTestId("nappe-grille").waitFor();
     await page.locator(".nv").nth(40).click();
     if ((await page.locator(".nv.ouverte").count()) < 1) throw new Error("aucune case servie");
@@ -219,7 +244,7 @@ try {
     await closeTop();
 
     // Configuration : luminosité du Fondateur, puis mise à jour manuelle
-    await page.getByTestId("icon-d-config").dblclick();
+    await open("d-config");
     await page.getByTestId("dialog").waitFor(); // dialogue de bienvenue
     await page.locator("[data-testid=dialog] .pk-btn").first().click();
     await page.getByTestId("config-luminosite").fill("40");
@@ -261,24 +286,45 @@ try {
       step(`${tag} : pause publicitaire`);
     }
 
-    // Icônes : glisser vers une autre case de la grille, menu contextuel du bureau
-    const icone = page.getByTestId("icon-d-tv");
-    const avant = await icone.boundingBox();
-    await icone.hover();
-    await page.mouse.down();
-    await page.mouse.move(avant.x + avant.width / 2 + 260, avant.y + avant.height / 2 + 40, { steps: 8 });
-    await page.mouse.up();
-    await page.waitForTimeout(200);
-    const apres = await icone.boundingBox();
-    if (Math.abs(apres.x - avant.x) < 100) throw new Error("l'icône n'a pas bougé");
-    const left = await icone.evaluate((el) => parseFloat(el.style.left));
-    if ((left - 4 - 1) % 76 !== 0) throw new Error(`icône hors grille (left=${left})`);
-    const zoneBox = await page.locator(".bureau-zone").boundingBox();
-    await page.locator(".bureau-zone").click({ button: "right", position: { x: zoneBox.width * 0.75, y: zoneBox.height * 0.5 } });
-    await page.getByTestId("menu-contexte").waitFor();
-    await shot(page, `${tag}-12-menu-contexte`);
-    await page.getByRole("menuitem", { name: "Réorganiser les icônes" }).click();
-    step(`${tag} : icônes sur grille, glisser-déposer, clic droit`);
+    if (!poche) {
+      // Icônes : glisser vers une autre case de la grille, menu contextuel du bureau
+      const icone = page.getByTestId("icon-d-tv");
+      const avant = await icone.boundingBox();
+      await icone.hover();
+      await page.mouse.down();
+      await page.mouse.move(avant.x + avant.width / 2 + 260, avant.y + avant.height / 2 + 40, { steps: 8 });
+      await page.mouse.up();
+      await page.waitForTimeout(200);
+      const apres = await icone.boundingBox();
+      if (Math.abs(apres.x - avant.x) < 100) throw new Error("l'icône n'a pas bougé");
+      const left = await icone.evaluate((el) => parseFloat(el.style.left));
+      if ((left - 4 - 1) % 76 !== 0) throw new Error(`icône hors grille (left=${left})`);
+      const zoneBox = await page.locator(".bureau-zone").boundingBox();
+      await page.locator(".bureau-zone").click({ button: "right", position: { x: zoneBox.width * 0.75, y: zoneBox.height * 0.5 } });
+      await page.getByTestId("menu-contexte").waitFor();
+      await shot(page, `${tag}-12-menu-contexte`);
+      await page.getByRole("menuitem", { name: "Réorganiser les icônes" }).click();
+      step(`${tag} : icônes sur grille, glisser-déposer, clic droit`);
+    } else {
+      // Poche : lanceur au doigt, bouton Retour (programme précédent), Accueil, panneau des programmes ouverts.
+      await open("d-docs");
+      await page.getByTestId("window-fichiers").waitFor();
+      await open("d-mail");
+      await page.getByTestId("window-mail").waitFor();
+      await page.getByTestId("retour").click();
+      await page.locator(".pk-window.focused[data-testid=window-fichiers]").waitFor();
+      await page.getByTestId("afficher-bureau").click();
+      await page.getByTestId("window-fichiers").waitFor({ state: "hidden" });
+      await page.getByTestId("taches-bouton").click();
+      await page.getByTestId("taches").waitFor();
+      await shot(page, `${tag}-12-taches`);
+      await page.locator("[data-testid=taches] .tache", { hasText: "Courrier" }).click();
+      await page.getByTestId("window-mail").waitFor();
+      await page.getByTestId("taches-bouton").click();
+      await page.getByRole("button", { name: "Tout fermer" }).click();
+      await page.getByTestId("window-mail").waitFor({ state: "detached" });
+      step(`${tag} : lanceur, Retour, Accueil et programmes ouverts`);
+    }
 
     // Exécuter…
     await viaDemarrer(() => page.getByTestId("menu-executer"));
@@ -303,11 +349,13 @@ try {
     step(`${tag} : exception fatale`);
 
     // Curseur : jamais le curseur de texte sur l'interface (régression)
-    const curseur = await page.locator(".tb-start").evaluate((el) => getComputedStyle(el).cursor);
-    if (!curseur.startsWith("url(")) throw new Error(`curseur d'interface invalide : ${curseur}`);
+    if (!poche) {
+      const curseur = await page.locator(".tb-start").evaluate((el) => getComputedStyle(el).cursor);
+      if (!curseur.startsWith("url(")) throw new Error(`curseur d'interface invalide : ${curseur}`);
+    }
 
     // Courrier d'État : lire un message, répondre, retrouver l'envoi
-    await page.getByTestId("icon-d-mail").dblclick();
+    await open("d-mail");
     await page.getByTestId("window-mail").waitFor();
     await page.getByTestId("courrier-message-m4").click();
     await page.getByTestId("courrier-apercu").getByText("sourire non conforme", { exact: false }).waitFor();
@@ -322,7 +370,7 @@ try {
     step(`${tag} : Courrier d'État (lecture, réponse, envoi)`);
 
     // PorkAmp : lecture d'un morceau, le temps avance, arrêt
-    await page.getByTestId("icon-d-porkamp").dblclick();
+    await open("d-porkamp");
     await page.getByTestId("window-porkamp").waitFor();
     await page.getByTestId("amp-lecture").click();
     await page.waitForFunction(() => window.__lectures.some((s) => /viteau-merci-copain\.mp3/.test(s)), null, { timeout: 8000 }).catch(async () => {
@@ -337,7 +385,7 @@ try {
     step(`${tag} : PorkAmp (lecture, piste suivante, arrêt)`);
 
     // Mes décorations : la connexion et le courrier envoyé ont été décorés, et le restent
-    await page.getByTestId("icon-d-decorations").dblclick();
+    await open("d-decorations");
     await page.getByTestId("window-distinctions").waitFor();
     for (const id of ["connexion", "courrier"]) await page.locator(`[data-testid=decor-${id}].obtenue`).waitFor({ timeout: 8000 });
     if ((await page.locator("[data-testid=decor-liste] li.obtenue").count()) < 2) throw new Error("distinctions non décernées");
@@ -365,7 +413,7 @@ try {
       // L'écran de bienvenue s'ouvre peu après la connexion : on l'attend et on le ferme, il couvrirait la Poubelle.
       await page.getByTestId("window-bienvenue").waitFor({ timeout: 5000 }).then(() => fermer("bienvenue"), () => {});
       await page.getByTestId("afficher-bureau").click();
-      await page.getByTestId("icon-d-docs").dblclick();
+      await open("d-docs");
       await page.getByTestId("window-fichiers").waitFor();
       await page.getByTestId("fichier-Documents officiels").dblclick();
       await page.getByTestId("fichier-Lettre de bienvenue.txt").waitFor();
@@ -402,7 +450,7 @@ try {
           if (essai >= 2) throw e;
         }
       }
-      await page.getByTestId("icon-d-poubelle").dblclick();
+      await open("d-poubelle");
       await page.getByTestId("jete-Lettre de bienvenue.txt").click();
       await page.getByTestId("poubelle-restaurer").click();
       await icone.waitFor();
@@ -420,9 +468,9 @@ try {
       step(`${tag} : fichiers (dossier, glisser vers le bureau, Poubelle, restaurer, enregistrer)`);
 
       // Commutateur de tâches (Alt+²) : deux fenêtres, on bascule vers la précédente
-      await page.getByTestId("icon-d-docs").dblclick();
+      await open("d-docs");
       await page.getByTestId("window-fichiers").waitFor();
-      await page.getByTestId("icon-d-mail").dblclick();
+      await open("d-mail");
       await page.getByTestId("window-mail").waitFor();
       await page.keyboard.down("Alt");
       await page.keyboard.press("Backquote");
@@ -467,7 +515,7 @@ try {
     }
 
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche
-    await page.getByTestId("icon-d-docs").dblclick();
+    await open("d-docs");
     await page.getByTestId("window-fichiers").waitFor();
     for (let essai = 0; ; essai++) {
       await page.locator("[data-testid=window-fichiers] [data-testid=menu-systeme]").click();
@@ -484,9 +532,14 @@ try {
     await page.getByTestId("window-fichiers").waitFor({ state: "hidden" });
     // Une pub surprise peut refermer le menu entre son ouverture et le clic : on le rouvre alors.
     for (let essai = 0; ; essai++) {
-      await page.locator(".tb-task", { hasText: "Mes documents" }).click({ button: "right" });
       try {
-        await page.getByRole("menuitem", { name: "Restaurer" }).click({ timeout: 5000 });
+        if (poche) {
+          await page.getByTestId("taches-bouton").click();
+          await page.locator("[data-testid=taches] .tache", { hasText: "Mes documents" }).click({ timeout: 5000 });
+        } else {
+          await page.locator(".tb-task", { hasText: "Mes documents" }).click({ button: "right" });
+          await page.getByRole("menuitem", { name: "Restaurer" }).click({ timeout: 5000 });
+        }
         break;
       } catch (e) {
         if (essai >= 2) throw e;

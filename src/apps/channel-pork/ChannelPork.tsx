@@ -5,6 +5,8 @@
  * Habillage façon logiciel des années 90 : barre de titre dessinée, image plate, afficheur à cristaux
  * liquides (chaîne, émission qui défile, volume), boutons CH − + et VOL − +. On déplace la fenêtre par
  * son panneau. Clavier (fenêtre au premier plan) : flèches haut/bas pour les chaînes, + et − pour le volume.
+ * Plein écran (bouton du titre, double appui ou touche F) : l'image seule occupe tout l'appareil, en paysage si
+ * le navigateur le permet ; une télécommande apparaît au toucher puis s'efface.
  */
 import { useEffect, useRef, useState } from "react";
 import { useOs, useWin } from "@/os/context";
@@ -101,9 +103,64 @@ export function ChannelPork() {
     minuterieOsd.current = setTimeout(() => setOsdVolume(null), 2200);
   };
 
+  // Plein écran : API du navigateur quand elle existe (elle ignore l'échelle du moniteur et permet de verrouiller le
+  // paysage), sinon une couche fixe par-dessus tout (iPhone, qui ne met en plein écran que les vidéos).
+  const image = useRef<HTMLDivElement>(null);
+  const [plein, setPlein] = useState(false);
+  const natif = useRef(false);
+  const [telecommande, setTelecommande] = useState(true);
+  const minuterieTel = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reveiller = () => {
+    setTelecommande(true);
+    if (minuterieTel.current) clearTimeout(minuterieTel.current);
+    minuterieTel.current = setTimeout(() => setTelecommande(false), 3500);
+  };
+  const orientation = () => (typeof screen !== "undefined" ? (screen.orientation as unknown as { lock?(o: string): Promise<void>; unlock?(): void } | undefined) : undefined);
+  const entrer = () => {
+    setPlein(true);
+    reveiller();
+    signal("tv:plein-ecran");
+    const el = image.current;
+    if (!el?.requestFullscreen) return;
+    el.requestFullscreen({ navigationUI: "hide" })
+      .then(() => {
+        natif.current = true;
+        orientation()?.lock?.("landscape").catch(() => {});
+      })
+      .catch(() => {});
+  };
+  const sortir = () => {
+    setPlein(false);
+    if (natif.current && document.fullscreenElement === image.current) document.exitFullscreen().catch(() => {});
+    natif.current = false;
+    try {
+      orientation()?.unlock?.();
+    } catch {
+      /* orientation non verrouillée */
+    }
+  };
+  useEffect(() => {
+    const on = () => {
+      if (natif.current && document.fullscreenElement !== image.current) {
+        natif.current = false;
+        setPlein(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", on);
+    return () => document.removeEventListener("fullscreenchange", on);
+  }, []);
+  // Pendant le plein écran de secours, les barres du système s'effacent.
+  useEffect(() => {
+    if (!plein) return;
+    document.body.dataset.tvPlein = "1";
+    return () => {
+      delete document.body.dataset.tvPlein;
+    };
+  }, [plein]);
+
   // Télécommande au clavier, seulement quand le poste est au premier plan.
-  const commandes = useRef({ zap, regler, basculerTxt, chiffre, enTxt: txt !== null });
-  commandes.current = { zap, regler, basculerTxt, chiffre, enTxt: txt !== null };
+  const commandes = useRef({ zap, regler, basculerTxt, chiffre, enTxt: txt !== null, plein, entrer, sortir });
+  commandes.current = { zap, regler, basculerTxt, chiffre, enTxt: txt !== null, plein, entrer, sortir };
   useEffect(() => {
     if (!focused) return;
     const touche = (e: KeyboardEvent) => {
@@ -114,6 +171,8 @@ export function ChannelPork() {
       else if (e.key === "+" || e.key === "=") c.regler(1);
       else if (e.key === "-") c.regler(-1);
       else if (e.key === "t" || e.key === "T") c.basculerTxt();
+      else if (e.key === "f" || e.key === "F") (c.plein ? c.sortir() : c.entrer());
+      else if (c.plein && e.key === "Escape" && !c.enTxt) c.sortir();
       else if (c.enTxt && /^[0-9]$/.test(e.key)) c.chiffre(e.key);
       else if (c.enTxt && e.key === "Escape") c.basculerTxt();
       else return;
@@ -143,6 +202,9 @@ export function ChannelPork() {
       <div className="tuner-titre" data-poignee>
         <b className="tuner-logo">{str("tv.logiciel")}</b>
         <span className="tuner-sous">{str("tv.logiciel.sous")}</span>
+        <button className="tuner-mini" aria-label={str("tv.plein-ecran")} title={str("tv.plein-ecran")} onClick={entrer} data-testid="tv-plein-ecran">
+          <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M0.5 3V0.5H3M6 0.5h2.5V3M8.5 6v2.5H6M3 8.5H0.5V6" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
+        </button>
         <button className="tuner-mini" aria-label={str("tv.reduire")} onClick={minimize}>
           <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 7h7" stroke="currentColor" strokeWidth="2" /></svg>
         </button>
@@ -150,7 +212,13 @@ export function ChannelPork() {
           <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 0l8 8M8 0L0 8" stroke="currentColor" strokeWidth="1.8" /></svg>
         </button>
       </div>
-      <div className="tuner-image">
+      <div
+        className={`tuner-image${plein ? " plein" : ""}`}
+        ref={image}
+        onDoubleClick={() => (plein ? sortir() : entrer())}
+        onPointerDown={() => plein && reveiller()}
+        data-testid="tv-image"
+      >
         <EcranVhs
           image={p.videoSrc ? null : s.image}
           video={p.videoSrc}
@@ -187,6 +255,34 @@ export function ChannelPork() {
           <button className="pk-btn tv-activer-son" onClick={son.debloquer} data-testid="tv-activer-son">
             {str("tv.activerSon")}
           </button>
+        )}
+        {plein && (
+          <>
+            <p className="tv-paysage" aria-hidden="true">
+              {str("tv.plein-ecran.paysage")}
+            </p>
+            <div className={`tv-telecommande${telecommande ? " visible" : ""}`} onPointerDown={(e) => (e.stopPropagation(), reveiller())} onDoubleClick={(e) => e.stopPropagation()}>
+              <span className="tv-tel-numero">{String(ci + 1).padStart(2, "0")}</span>
+              <button className="tuner-bouton" aria-label={str("tv.chaineMoins")} onClick={() => zap(-1)}>
+                CH−
+              </button>
+              <button className="tuner-bouton" aria-label={str("tv.chainePlus")} onClick={() => zap(1)} data-testid="tv-plein-zapper">
+                CH+
+              </button>
+              <button className="tuner-bouton" aria-label={str("tv.volumeMoins")} onClick={() => regler(-1)}>
+                VOL−
+              </button>
+              <button className="tuner-bouton" aria-label={str("tv.volumePlus")} onClick={() => regler(1)}>
+                VOL+
+              </button>
+              <button className={`tuner-bouton tuner-txt${txt !== null ? " actif" : ""}`} aria-label={str("tv.teletexte")} aria-pressed={txt !== null} onClick={basculerTxt}>
+                {str("tv.txt")}
+              </button>
+              <button className="tuner-bouton" aria-label={str("tv.plein-ecran.quitter")} onClick={sortir} data-testid="tv-plein-sortir">
+                <svg width="14" height="14" viewBox="0 0 9 9" aria-hidden="true"><path d="M3 0.5V3H0.5M6 0.5V3h2.5M8.5 6H6v2.5M3 8.5V6H0.5" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
+              </button>
+            </div>
+          </>
         )}
       </div>
       <div className="tuner-pupitre" data-poignee>

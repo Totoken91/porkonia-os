@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { ActionRef, Ad, ContentPack, DesktopIcon, DialogSpec, ForcedUpdate, UserProfile } from "@/content/types";
 import { APPS } from "@/apps/registry";
-import { OsContext, makeStr, type MailApi, type OsApi } from "@/os/context";
+import { OsContext, makeStr, useEcran, type MailApi, type OsApi } from "@/os/context";
 import { makeRng, pick } from "@/os/rng";
 import { emptyRuleState, schedule, type SchedulerInput } from "@/os/scheduler";
 import { etatVide, observer, sanitizeDistinctions, type EtatDistinctions } from "@/os/distinctions";
@@ -18,8 +18,8 @@ import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, typ
 import { emptyWinState, saveWindows, winReducer, type SavedWin, type Viewport, type WinAction } from "@/os/windows";
 import { ContextMenu, type MenuItem, type MenuState } from "./Menu";
 import { Desktop, type Rect } from "./Desktop";
+import { Lanceur } from "./Lanceur";
 import { Economiseur } from "./Economiseur";
-import { SCREEN } from "./Monitor";
 import { AdBox, DialogBox, Toasts, UpdateScreen, type LiveToast } from "./Overlays";
 import { Taskbar } from "./Taskbar";
 import { Commutateur } from "./Commutateur";
@@ -28,10 +28,6 @@ import { WindowFrame } from "./WindowFrame";
 
 type Input = SchedulerInput extends infer T ? (T extends unknown ? Omit<T, "elapsed"> : never) : never;
 
-const TASKBAR = 28;
-const VP: Viewport = { w: SCREEN.w, h: SCREEN.h, bottom: TASKBAR };
-const AREA = { w: SCREEN.w, h: SCREEN.h - TASKBAR };
-const START: Rect = { x: 2, y: SCREEN.h - TASKBAR + 3, w: 70, h: 22 };
 
 interface Zoom {
   key: number;
@@ -59,7 +55,12 @@ interface Props {
 const DISCRETION_MEDAILLES = 120_000;
 
 export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart, restaurer, veille }: Props) {
-  const vp = VP;
+  // Zone des fenêtres : sous la barre d'état du Poche (rien sur le moniteur), au-dessus de la barre du bas.
+  const ecran = useEcran();
+  const poche = ecran.mode === "poche";
+  const vp = useMemo<Viewport>(() => ({ w: ecran.w, h: ecran.h - ecran.haut, bottom: ecran.bas, poche }), [ecran.w, ecran.h, ecran.haut, ecran.bas, poche]);
+  const AREA = { w: ecran.w, h: ecran.h - ecran.haut - ecran.bas };
+  const START: Rect = { x: 2, y: ecran.h - ecran.bas + 3, w: 70, h: 22 };
   const [wins, dispatchRaw] = useReducer(winReducer, undefined, emptyWinState);
   const [toasts, setToasts] = useState<LiveToast[]>([]);
   const [dialogs, setDialogs] = useState<DialogSpec[]>([]);
@@ -159,6 +160,8 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   }, []);
 
   const zoom = useCallback((from: Rect, to: Rect) => {
+    // Au doigt, les programmes s'ouvrent en plein écran : pas de rectangle qui file.
+    if (live.current.vp.poche) return;
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const key = ++counter.current;
     setZooms((z) => [...z, { key, from, to }]);
@@ -171,7 +174,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     if (!el || !ecran) return START;
     const e = ecran.getBoundingClientRect();
     const r = el.getBoundingClientRect();
-    const k = SCREEN.w / e.width;
+    const k = live.current.vp.w / e.width;
     return { x: (r.left - e.left) * k, y: (r.top - e.top) * k, w: r.width * k, h: r.height * k };
   };
 
@@ -209,11 +212,12 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
 
   /** Ouverture d'un programme : sablier, chargement « du disque », puis zoom vers la fenêtre. */
   const openApp = useCallback(
-    (appId: string, args?: Record<string, string>, from: Rect = START) => {
+    (appId: string, args?: Record<string, string>, from?: Rect) => {
       const m = pack.apps.find((a) => a.id === appId);
       if (!m) return;
       setBusy((b) => b + 1);
-      const delai = 350 + Math.floor(rng() * 450);
+      // Le disque mouline un peu ; sur le Poche, la mémoire flash d'État répond plus vite.
+      const delai = live.current.vp.poche ? 120 + Math.floor(rng() * 160) : 350 + Math.floor(rng() * 450);
       setTimeout(() => {
         setBusy((b) => b - 1);
         const before = live.current.wins;
@@ -222,10 +226,11 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         if (existing) {
           if (existing.minimized) zoom(taskRect(existing.id), existing.rect);
         } else {
+          const V = live.current.vp;
           const offset = (before.windows.length % 6) * 22;
-          const x = Math.max(4, Math.round((VP.w - m.size.w) / 2) - 60 + offset);
-          const y = Math.max(4, Math.round((VP.h - VP.bottom - m.size.h) / 2) - 50 + offset);
-          zoom(from, { x, y, w: Math.min(m.size.w, VP.w), h: Math.min(m.size.h, VP.h - VP.bottom) });
+          const x = Math.max(4, Math.round((V.w - m.size.w) / 2) - 60 + offset);
+          const y = Math.max(4, Math.round((V.h - V.bottom - m.size.h) / 2) - 50 + offset);
+          zoom(from ?? { x: 2, y: V.h - V.bottom + 3, w: 70, h: 22 }, { x, y, w: Math.min(m.size.w, V.w), h: Math.min(m.size.h, V.h - V.bottom) });
         }
         feed({ kind: "app-open", app: appId });
       }, delai);
@@ -476,7 +481,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         const ecran = document.querySelector<HTMLElement>(".ecran");
         if (!ecran) return;
         const r = ecran.getBoundingClientRect();
-        const k = SCREEN.w / r.width;
+        const k = live.current.vp.w / r.width;
         setCtxMenu({ x: (at.clientX - r.left) * k, y: (at.clientY - r.top) * k, items });
       },
     }),
@@ -496,7 +501,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     }
     if (saved.length) {
       if (restaurer) {
-        dispatchRaw({ type: "restore", windows: saved, vp: VP });
+        dispatchRaw({ type: "restore", windows: saved, vp: live.current.vp });
         setTimeout(() => pushToast(pack.os.name, str("session.restauree")), 2500);
       } else setTimeout(() => pushToast(pack.os.name, str("session.perdue")), 2500);
     }
@@ -532,7 +537,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     });
   };
 
-  const layout = (op: "desktop" | "cascade" | "tile") => dispatch(op === "desktop" ? { type: "minimizeAll" } : { type: op, vp: VP });
+  const layout = (op: "desktop" | "cascade" | "tile") => dispatch(op === "desktop" ? { type: "minimizeAll" } : { type: op, vp });
 
   const closeToast = useCallback((key: number) => setToasts((ts) => ts.filter((t) => t.key !== key)), []);
   const launch = useCallback(
@@ -549,7 +554,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     <OsContext.Provider value={api}>
       <div className={`bureau${busy > 0 ? " occupe" : ""}`}>
         <Wallpaper pack={pack} fond={settings.fond} />
-        <Desktop area={AREA} onLaunch={launch} />
+        {poche ? <Lanceur onLaunch={launch} /> : <Desktop area={AREA} onLaunch={launch} />}
 
         <div className="fenetres">
           {wins.windows.map((w) => {
@@ -585,6 +590,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
           dispatch={dispatch}
           onLayout={layout}
           busy={busy > 0}
+          poche={poche}
         />
         <Commutateur windows={wins.windows} focusedId={wins.focusedId} apps={pack.apps} onChoisir={(id) => dispatch({ type: "focus", id })} />
         {dialogs[0] && (
@@ -616,8 +622,8 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
             }}
           />
         )}
-        {ctxMenu && <ContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} bounds={{ w: SCREEN.w, h: SCREEN.h }} />}
-        {saver && <Economiseur onExit={exitSaver} />}
+        {ctxMenu && <ContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} bounds={{ w: ecran.w, h: ecran.h }} />}
+        {saver && <Economiseur onExit={exitSaver} w={ecran.w} h={ecran.h} />}
         {fatal && (
           <EcranFatal
             titre={str("fatal.titre")}

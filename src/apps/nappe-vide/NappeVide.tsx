@@ -2,7 +2,7 @@
 /** Nappe Vide : découvrir la table sans révéler de nappe vide. Le résultat est signalé au système. */
 import { useEffect, useRef, useState } from "react";
 import { Groin } from "@/components/Icon";
-import { useMenuCommands, useOs, useWin } from "@/os/context";
+import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
 import { chord, LEVELS, newGame, remaining, reveal, toggleAssiette, type Game } from "./logic";
 import { ListeDeroulante } from "@/components/ListeDeroulante";
 
@@ -11,8 +11,11 @@ const CELL = 22;
 export function NappeVide() {
   const { rng, signal, str } = useOs();
   const { resize } = useWin();
+  // Au doigt (PorkOS Poche), les cases grandissent autant que la largeur le permet.
+  const ecran = useEcran();
   const [levelId, setLevelId] = useState(LEVELS[0]!.id);
   const level = LEVELS.find((l) => l.id === levelId)!;
+  const taille = ecran.mode === "poche" ? Math.max(CELL, Math.min(40, Math.floor((ecran.w - 24) / level.w))) : CELL;
   const [game, setGame] = useState<Game>(() => newGame(level));
   const [modeAssiette, setModeAssiette] = useState(false);
   const [now, setNow] = useState(0);
@@ -91,7 +94,7 @@ export function NappeVide() {
         )}
         <div
           className="nappe-grille"
-          style={{ gridTemplateColumns: `repeat(${level.w}, ${CELL}px)` }}
+          style={{ gridTemplateColumns: `repeat(${level.w}, ${taille}px)`, "--nv": `${taille}px` } as React.CSSProperties}
           onContextMenu={(e) => e.preventDefault()}
           data-testid="nappe-grille"
         >

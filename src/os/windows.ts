@@ -33,6 +33,8 @@ export interface Viewport {
   h: number;
   /** Hauteur réservée en bas (barre des tâches + bandeau). */
   bottom: number;
+  /** PorkOS Poche : toute fenêtre occupe la zone utile, on ne déplace ni ne redimensionne rien. */
+  poche?: boolean;
 }
 
 const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
@@ -106,7 +108,7 @@ export function winReducer(s: WinState, a: WinAction): WinState {
       }
       const seq = s.seq + 1;
       const offset = (s.windows.length % 6) * 22;
-      const small = a.vp.w < 700;
+      const small = a.vp.poche ?? a.vp.w < 700;
       const rect = small
         ? { x: 0, y: 0, w: a.vp.w, h: a.vp.h - a.vp.bottom }
         : constrain(
@@ -177,7 +179,7 @@ export function winReducer(s: WinState, a: WinAction): WinState {
     case "restore": {
       let seq = s.seq;
       let z = s.nextZ;
-      const windows: Win[] = a.windows.map((sw) => ({ ...sw, rect: constrain(sw.rect, a.vp), id: `w${++seq}`, z: z++ }));
+      const windows: Win[] = a.windows.map((sw) => ({ ...sw, rect: constrain(sw.rect, a.vp), maximized: a.vp.poche || sw.maximized, id: `w${++seq}`, z: z++ }));
       const top = [...windows].reverse().find((w) => !w.minimized);
       return { windows: [...s.windows, ...windows], focusedId: top?.id ?? s.focusedId, nextZ: z, seq };
     }

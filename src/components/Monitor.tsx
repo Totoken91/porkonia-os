@@ -2,15 +2,17 @@
 /**
  * Moniteur d'État 14" : boîtier beige, tube cathodique 800×600 (lignes, grille RGB, reflet, bombé),
  * bouton marche/arrêt, démagnétisation et voyant. Mis à l'échelle de la fenêtre du navigateur.
+ * Sur un téléphone, le PorkOS Poche : plus de boîtier, l'écran épouse l'appareil (zones sûres comprises).
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScaleContext } from "@/os/context";
+import { EcranContext, ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
+import { choisirEcran, choixDansAdresse, MONITEUR, type ChoixEcran } from "@/os/ecran";
 import { ambiance, jouer } from "@/os/sons";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
 
-export const SCREEN = { w: 800, h: 600 };
+export const SCREEN = MONITEUR;
 const COQUE = { x: 58, top: 52, bottom: 82 };
 /** Démarrage et ambiance sont calés au même niveau : la boucle prolonge le régime établi du démarrage. */
 const VOLUME_MACHINE = 0.3;
@@ -25,11 +27,23 @@ interface Props {
   sons: boolean;
   /** Pixels nets : échelle entière imposée, quitte à afficher un écran plus petit. */
   nette: boolean;
+  /** Format choisi dans les réglages (l'adresse ?ecran=… l'emporte). */
+  affichage: ChoixEcran;
   str(key: string): string;
 }
 
-export function Monitor({ children, crt, power, onPower, sons, nette, str }: Props) {
+/** Plein écran du navigateur (Android, ordinateur) : demandé au geste de l'utilisateur, ignoré s'il est refusé. */
+export function demanderPleinEcran(el: Element = document.documentElement) {
+  if (document.fullscreenElement || !el.requestFullscreen) return;
+  el.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
+}
+
+export function Monitor({ children, crt, power, onPower, sons, nette, affichage, str }: Props) {
   const [box, setBox] = useState<{ vw: number; vh: number; dpr: number } | null>(null);
+  const [choixAdresse, setChoixAdresse] = useState<ChoixEcran>("auto");
+  // Zone sûre du Poche (encoche, barre d'accueil) : mesurée sur une sonde qui en porte les marges.
+  const sonde = useRef<HTMLDivElement>(null);
+  const [sure, setSure] = useState<{ w: number; h: number; x: number; y: number } | null>(null);
   const [ignore, setIgnore] = useState(false);
   const [tube, setTube] = useState<Tube>(power ? "allumage" : "eteint");
   // Tant qu'on n'a jamais allumé, une invitation clignote à côté du bouton d'alimentation.
@@ -39,10 +53,24 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   const [degauss, setDegauss] = useState(false);
 
   useEffect(() => {
-    const on = () => setBox({ vw: window.innerWidth, vh: window.innerHeight, dpr: window.devicePixelRatio || 1 });
+    setChoixAdresse(choixDansAdresse(window.location.search));
+    const on = () => {
+      setBox({ vw: window.innerWidth, vh: window.innerHeight, dpr: window.devicePixelRatio || 1 });
+      const r = sonde.current?.getBoundingClientRect();
+      if (r) setSure({ w: r.width, h: r.height, x: r.left, y: r.top });
+    };
     on();
     window.addEventListener("resize", on);
-    return () => window.removeEventListener("resize", on);
+    window.addEventListener("orientationchange", on);
+    window.visualViewport?.addEventListener("resize", on);
+    const ro = typeof ResizeObserver !== "undefined" && sonde.current ? new ResizeObserver(on) : null;
+    if (ro && sonde.current) ro.observe(sonde.current);
+    return () => {
+      window.removeEventListener("resize", on);
+      window.removeEventListener("orientationchange", on);
+      window.visualViewport?.removeEventListener("resize", on);
+      ro?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -74,13 +102,17 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
     return () => ambiance(false);
   }, [power, sons]);
 
-  const bezel = !!box && box.vw >= 720 && box.vh >= 520;
-  const W = SCREEN.w + (bezel ? COQUE.x * 2 : 0);
-  const H = SCREEN.h + (bezel ? COQUE.top + COQUE.bottom : 0);
+  const choix = choixAdresse !== "auto" ? choixAdresse : affichage;
+  const ecran = box ? choisirEcran(sure?.w ?? box.vw, sure?.h ?? box.vh, choix) : choisirEcran(1366, 800);
+  const poche = ecran.mode === "poche";
+  const bezel = !poche && !!box && box.vw >= 720 && box.vh >= 520;
+  const W = ecran.w + (bezel ? COQUE.x * 2 : 0);
+  const H = ecran.h + (bezel ? COQUE.top + COQUE.bottom : 0);
   const fit = box ? Math.min((box.vw * (bezel ? 0.98 : 1)) / W, (box.vh * (bezel ? 0.98 : 1)) / H) : 1;
-  const scale = box ? echelle(fit, box.dpr, nette) : 1;
+  const scale = poche ? 1 : box ? echelle(fit, box.dpr, nette) : 1;
   const zoom = Math.max(1, Math.round(scale));
-  const crtEff = (scale < 0.85 ? crt * 0.35 : crt) / 100;
+  // Le Poche allège le tube : les effets coûteux (halo, convergence) fatiguent les petits processeurs.
+  const crtEff = (poche ? crt * 0.45 : scale < 0.85 ? crt * 0.35 : crt) / 100;
   // Grain du tube : une petite tuile de bruit générée une fois, animée en CSS.
   const [grain, setGrain] = useState<string | null>(null);
   useEffect(() => {
@@ -106,12 +138,19 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
       }) as React.CSSProperties,
     [zoom],
   );
-  if (!box) return <div className="piece" />;
-  const portrait = box.vh > box.vw && box.vw < 600;
+  if (!box)
+    return (
+      <div className="piece">
+        <div className="sonde-sure" ref={sonde} aria-hidden="true" />
+      </div>
+    );
+  const portrait = !poche && box.vh > box.vw && box.vw < 600;
 
   // Un bouton physique ne garde pas le focus : sinon Espace (pour passer le BIOS) rééteindrait la machine.
   const appuyer = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.blur();
+    // Sur un téléphone, allumer passe aussi l'appareil en plein écran (quand le navigateur le permet).
+    if (poche && !power) demanderPleinEcran();
     onPower();
   };
 
@@ -123,14 +162,16 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
   };
 
   return (
-    <div className="piece">
+    <div className={`piece${poche ? " poche" : ""}`}>
+      <div className="sonde-sure" ref={sonde} aria-hidden="true" />
       <div style={{ width: W * scale, height: H * scale }}>
-        <div className={bezel ? "moniteur" : "moniteur nu"} style={{ width: W, height: H, transform: `scale(${scale})` }}>
+        <div className={bezel ? "moniteur" : "moniteur nu"} style={{ width: W, height: H, transform: scale === 1 ? undefined : `scale(${scale})` }}>
           <div className="coque">
             <div className="cadre-tube">
               <div
-                className={`ecran tube-${tube}${degauss ? " degauss" : ""}`}
-                style={{ width: SCREEN.w, height: SCREEN.h, "--crt": crtEff, "--grain": grain ? `url(${grain})` : "none", ...curseurs } as React.CSSProperties}
+                className={`ecran tube-${tube}${degauss ? " degauss" : ""}${poche ? " poche" : ""}`}
+                style={{ width: ecran.w, height: ecran.h, "--crt": crtEff, "--grain": grain ? `url(${grain})` : "none", "--haut": `${ecran.haut}px`, "--bas": `${ecran.bas}px`, ...curseurs } as React.CSSProperties}
+                data-mode={ecran.mode}
               >
                 {/* Aberration chromatique : rouge et bleu légèrement décalés, comme sur un tube mal convergé. */}
                 <svg className="filtres-crt" aria-hidden="true" width="0" height="0">
@@ -144,10 +185,14 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
                     <feBlend in="rv" in2="b2" mode="screen" />
                   </filter>
                 </svg>
-                <div className={`tube${crtEff > 0.12 ? " convergence" : ""}`}>
-                  {tube !== "eteint" && <ScaleContext.Provider value={scale}>{children}</ScaleContext.Provider>}
+                <div className={`tube${crtEff > 0.12 && !poche ? " convergence" : ""}`}>
+                  {tube !== "eteint" && (
+                    <EcranContext.Provider value={ecran}>
+                      <ScaleContext.Provider value={scale}>{children}</ScaleContext.Provider>
+                    </EcranContext.Provider>
+                  )}
                 </div>
-                {tube !== "eteint" && <InfoBulles />}
+                {tube !== "eteint" && !poche && <InfoBulles />}
                 <div className="crt crt-halo" aria-hidden="true" />
                 <div className="crt crt-lignes" aria-hidden="true" />
                 <div className="crt crt-grain" aria-hidden="true" />
@@ -186,12 +231,25 @@ export function Monitor({ children, crt, power, onPower, sons, nette, str }: Pro
           </div>
         </div>
       </div>
-      {!bezel && jamaisAllume && !power && (
+      {poche && !power && tube === "eteint" && (
+        <div className="poche-eteint">
+          <img src="/brand/embleme-128.png" alt="" width={96} height={96} />
+          <b>PorkOS</b>
+          <span>{str("poche.modele")}</span>
+          <button className="bouton-allumer" onClick={appuyer} aria-pressed={false} aria-label={str("moniteur.alimentation")} data-testid="power">
+            <svg width="28" height="28" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+            </svg>
+          </button>
+          <span className="invite-allumer">{str("moniteur.allumer")}</span>
+        </div>
+      )}
+      {!bezel && !poche && jamaisAllume && !power && (
         <span className="invite-allumer flottant" aria-hidden="true">
           {str("moniteur.allumer")} ▸
         </span>
       )}
-      {!bezel && (
+      {!bezel && !poche && (
         <button className="bouton-marche flottant" onClick={appuyer} aria-pressed={power} aria-label={str("moniteur.alimentation")} data-testid="power">
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

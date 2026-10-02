@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AppManifest, MenuEntry } from "@/content/types";
 import { WinContext, useOs, useScale, type MenuHandlers, type MenuState, type WinApi } from "@/os/context";
+import { echelleHabillage } from "@/os/ecran";
 import { findShortcut, isPlainShortcut, menuForKey } from "@/os/menus";
 import { MenuBar } from "./MenuBar";
 import type { Viewport, Win, WinAction } from "@/os/windows";
@@ -118,10 +119,13 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
     [win, focused, dispatch, vp, registerMenu],
   );
 
-  const rect = win.maximized ? { x: 0, y: 0, w: vp.w, h: vp.h - vp.bottom } : win.rect;
+  const poche = !!vp.poche;
+  const zone = { x: 0, y: 0, w: vp.w, h: vp.h - vp.bottom };
+  const rect = win.maximized || poche ? zone : win.rect;
+  const basculer = () => !poche && dispatch({ type: "toggleMaximize", id: win.id });
 
   const start = (kind: "move" | "resize") => (e: React.PointerEvent) => {
-    if (e.button !== 0 || (kind === "move" && win.maximized)) return;
+    if (poche || e.button !== 0 || (kind === "move" && win.maximized)) return;
     if ((e.target as HTMLElement).closest("button")) return;
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -143,6 +147,37 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
     final.current = null;
     setGhost(null);
   };
+
+  if (manifest.habillage && poche) {
+    // Poche : le tuner occupe toute la zone (son image s'étire) ; le lecteur garde son boîtier, mis à l'échelle et centré.
+    const fixe = manifest.habillage === "lecteur";
+    const k = fixe ? echelleHabillage(manifest.size, zone) : 1;
+    return (
+      <section
+        className={`pk-window habille habille-${manifest.habillage} poche-habille${focused ? " focused" : ""}`}
+        style={{ left: 0, top: 0, width: zone.w, height: zone.h, zIndex: win.z, display: win.minimized ? "none" : undefined }}
+        onPointerDownCapture={() => !focused && dispatch({ type: "focus", id: win.id })}
+        aria-label={win.title}
+        data-testid={`window-${win.appId}`}
+        data-win={win.id}
+      >
+        <div className="poche-boitier" style={fixe ? { width: manifest.size.w, height: manifest.size.h, transform: `scale(${k})` } : { width: "100%", height: "100%" }}>
+          <WinContext.Provider value={api}>{children}</WinContext.Provider>
+        </div>
+        {frozen && (
+          <div
+            className="gel"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onFrozenClick?.();
+            }}
+            data-testid="fenetre-gelee"
+          />
+        )}
+      </section>
+    );
+  }
 
   if (manifest.habillage) {
     // Fenêtre habillée : l'appli dessine son boîtier ; on la déplace en l'attrapant par une zone [data-poignee].
@@ -184,14 +219,14 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
   return (
     <>
     <section
-      className={`pk-window${focused ? " focused" : ""}${win.maximized ? " maximized" : ""}`}
+      className={`pk-window${focused ? " focused" : ""}${win.maximized || poche ? " maximized" : ""}`}
       style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h, zIndex: win.z, display: win.minimized ? "none" : undefined }}
       onPointerDownCapture={() => !focused && dispatch({ type: "focus", id: win.id })}
       aria-label={win.title}
       data-testid={`window-${win.appId}`}
       data-win={win.id}
     >
-      <header className="pk-titlebar" onPointerDown={start("move")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onDoubleClick={() => dispatch({ type: "toggleMaximize", id: win.id })}>
+      <header className="pk-titlebar" onPointerDown={start("move")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onDoubleClick={basculer}>
         <button
           className="icone-systeme"
           aria-label={str("barre.fermer")}
@@ -210,10 +245,10 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
           {frozen && str("gel.suffixe")}
         </h2>
         <div className="pk-controls">
-          <button className="pk-ctl" aria-label="Réduire" onClick={() => dispatch({ type: "minimize", id: win.id })}>
+          <button className="pk-ctl pk-reduire" aria-label="Réduire" onClick={() => dispatch({ type: "minimize", id: win.id })}>
             <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="M0 7h6" stroke="currentColor" strokeWidth="2" /></svg>
           </button>
-          <button className="pk-ctl" aria-label={win.maximized ? "Restaurer" : "Agrandir"} onClick={() => dispatch({ type: "toggleMaximize", id: win.id })}>
+          <button className="pk-ctl pk-agrandir" aria-label={win.maximized ? "Restaurer" : "Agrandir"} onClick={basculer}>
             {win.maximized ? (
               <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M2.5.5h6v5M2.5 1.5h6" fill="none" stroke="currentColor" /><rect x="0.5" y="3.5" width="5" height="5" fill="none" stroke="currentColor" /><path d="M0 4.5h6" stroke="currentColor" /></svg>
             ) : (
@@ -238,7 +273,7 @@ export function WindowFrame({ win, manifest, focused, vp, dispatch, outline, fro
           data-testid="fenetre-gelee"
         />
       )}
-      {!win.maximized && <div className="pk-resize" onPointerDown={start("resize")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />}
+      {!win.maximized && !poche && <div className="pk-resize" onPointerDown={start("resize")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} />}
     </section>
     {ghost && <div className="contour-fenetre" style={{ left: ghost.x, top: ghost.y, width: ghost.w, height: ghost.h, zIndex: win.z + 1 }} aria-hidden="true" />}
     </>

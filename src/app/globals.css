@@ -34,7 +34,7 @@
 }
 
 @layer base {
-  html, body { height: 100%; overflow: hidden; background: #14110e; }
+  html, body { height: 100%; overflow: hidden; background: #14110e; overscroll-behavior: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { font-family: var(--font-sans); font-size: 16px; line-height: 16px; color: #2a2118; -webkit-font-smoothing: none; font-smooth: never; font-kerning: none; font-synthesis: none; text-rendering: optimizeSpeed; }
   button { font: inherit; color: inherit; }
 }
@@ -231,7 +231,7 @@
 
   /* ============================== Connexion ============================== */
   .connexion { position: absolute; inset: 0; display: grid; place-items: center; }
-  .connexion-fenetre { position: relative; width: 400px; }
+  .connexion-fenetre { position: relative; width: min(400px, calc(100% - 12px)); }
   .connexion-bandeau { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: linear-gradient(90deg, #f1e4c4, #e3cf9e); border-bottom: 1px solid var(--lo); }
   .connexion-bandeau b { font: bold 22px var(--font-serif); color: var(--color-rouge-sombre); }
   .connexion-bandeau span { font: italic 13px var(--font-serif); }
@@ -249,7 +249,7 @@
 
   /* ============================== Bureau ============================== */
   .bureau { position: absolute; inset: 0; overflow: hidden; overflow: clip; }
-  .bureau-zone { position: absolute; inset: 0 0 28px 0; outline: none; touch-action: none; }
+  .bureau-zone { position: absolute; inset: var(--haut, 0px) 0 var(--bas, 28px) 0; outline: none; touch-action: none; }
   .desk-icon { position: absolute; width: 74px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0; background: none; border: none; color: #fff; touch-action: none; }
   .desk-icon span {
     max-width: 74px; line-height: 16px; text-align: center; padding: 0 2px 1px; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.65);
@@ -275,7 +275,7 @@
   .contour-fenetre { position: absolute; pointer-events: none; outline: 3px dotted #f3d58f; outline-offset: -3px; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.55); }
   .pk-window { animation: apparait 0.23s steps(1); }
   @keyframes apparait { 0% { visibility: hidden; } 100% { visibility: visible; } }
-  .fenetres { position: absolute; inset: 0 0 28px 0; z-index: 20; pointer-events: none; overflow: clip; }
+  .fenetres { position: absolute; inset: var(--haut, 0px) 0 var(--bas, 28px) 0; z-index: 20; pointer-events: none; overflow: clip; }
   .fenetres > * { pointer-events: auto; }
 
   /* ============================== Barre des tâches & menu ============================== */
@@ -385,14 +385,14 @@
   .pk-tabpanel { background: var(--panel); box-shadow: inset 1px 1px 0 var(--hi), inset -1px -1px 0 var(--dk); padding: 8px 10px; margin: 0 4px 4px; }
 
   /* ============================== Messages ============================== */
-  .dialog-layer { position: absolute; inset: 0 0 28px 0; z-index: 7000; display: grid; place-items: center; }
+  .dialog-layer { position: absolute; inset: var(--haut, 0px) 0 var(--bas, 28px) 0; z-index: 7000; display: grid; place-items: center; }
   .dialog-layer > .pk-window { position: relative; width: 380px; }
   .dialog-corps { display: flex; gap: 12px; padding: 12px 12px 6px; align-items: flex-start; }
   .dialog-corps svg, .dialog-corps img { flex-shrink: 0; }
   .dialog-corps p { white-space: pre-line; line-height: 1.4; }
   .dialog-boutons { display: flex; justify-content: center; gap: 6px; padding: 6px 10px 8px; flex-wrap: wrap; }
   .dialog-boutons .pk-btn { min-width: 76px; }
-  .bulles { position: absolute; right: 6px; bottom: 34px; width: 260px; display: flex; flex-direction: column; gap: 6px; z-index: 6500; }
+  .bulles { position: absolute; right: 6px; bottom: calc(var(--bas, 28px) + 6px); width: 260px; display: flex; flex-direction: column; gap: 6px; z-index: 6500; }
   .bulle { position: relative; background: #fffbe8; border: 1px solid #2a2118; border-radius: 7px; padding: 5px 7px 7px; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25); cursor: inherit; }
   .bulle:last-child::after { content: ""; position: absolute; right: 26px; bottom: -9px; border: 8px solid transparent; border-top-color: #2a2118; border-bottom: 0; border-right: 0; }
   .bulle:last-child::before { content: ""; position: absolute; right: 27px; bottom: -7px; border: 7px solid transparent; border-top-color: #fffbe8; border-bottom: 0; border-right: 0; z-index: 1; }
@@ -549,8 +549,24 @@
   .tuner-mini:active { background: #2a2623; box-shadow: inset 1px 1px 0 #111; }
   .tuner-image { position: relative; flex: 1; min-height: 0; display: flex; background: #000; border: 1px solid #0f0d0c; box-shadow: 0 0 0 1px #4a443e; }
   .tuner-image .tv-ecran { background: #000; }
-  .tv-ecran { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; background: #000; }
+  .tv-ecran { position: relative; flex: 1; min-height: 0; min-width: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; overflow: hidden; background: #000; }
+  .tv-canvas { max-width: 100%; max-height: 100%; }
   .tv-canvas { display: block; image-rendering: auto; background: #050308; }
+  /* Plein écran de PorkTV : l'image seule, une télécommande qui apparaît au toucher. */
+  .tuner-image.plein { position: fixed; inset: 0; z-index: 2147483000; border: none; box-shadow: none; background: #000; }
+  .tuner-image:fullscreen { width: 100%; height: 100%; border: none; box-shadow: none; }
+  .tuner-image.plein .tv-ecran { padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+  body[data-tv-plein] .barre-etat, body[data-tv-plein] .barre-nav, body[data-tv-plein] .bulles { display: none; }
+  .tv-telecommande {
+    position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 6px; padding: 8px;
+    background: rgba(28, 24, 21, 0.86); border: 1px solid #0f0d0c; box-shadow: inset 1px 1px 0 #5a534c, 0 6px 18px rgba(0, 0, 0, 0.6); opacity: 0; pointer-events: none; transition: opacity 0.35s; max-width: calc(100% - 16px); overflow-x: auto;
+  }
+  .tv-telecommande.visible { opacity: 1; pointer-events: auto; }
+  .tv-telecommande .tuner-bouton { min-width: 52px; height: 44px; padding: 0 8px; flex: none; }
+  .tv-tel-numero { font-family: var(--font-pixel-mono); color: #ffb640; text-shadow: 0 0 5px rgba(255, 182, 64, 0.55); padding: 0 6px; }
+  .tv-paysage { display: none; position: absolute; top: max(12px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 5; width: max-content; max-width: 90%; text-align: center; padding: 6px 10px; background: rgba(28, 24, 21, 0.86); color: #e2bd62; animation: efface 4s forwards; }
+  @media (orientation: portrait) { .tv-paysage { display: block; } }
+  @keyframes efface { 0%, 75% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
   .tv-activer-son { position: absolute; left: 50%; top: 40%; transform: translateX(-50%); z-index: 2; max-width: 80%; }
   .tuner-pupitre { display: flex; align-items: center; gap: 8px; height: 62px; }
   .tuner-lcd {
@@ -769,7 +785,7 @@
   .nappe-verdict.conforme { background: var(--color-noir); color: var(--color-or); }
   .nappe-grille { display: grid; box-shadow: var(--sunken); padding: 3px; background: #b3a384; user-select: none; }
   .nv {
-    width: 22px; height: 22px; padding: 0; border: none; cursor: inherit; font-weight: bold; line-height: 22px;
+    width: var(--nv, 22px); height: var(--nv, 22px); padding: 0; border: none; cursor: inherit; font-weight: bold; line-height: var(--nv, 22px);
     background-color: #f3ead3; box-shadow: var(--raised);
     background-image: linear-gradient(45deg, rgba(179, 18, 27, 0.07) 25%, transparent 25%, transparent 75%, rgba(179, 18, 27, 0.07) 75%);
     background-size: 8px 8px;
@@ -921,4 +937,156 @@
   @keyframes deroule { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
   @keyframes monte { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
   @media (prefers-reduced-motion: reduce) { .menu-deroulant, .menu-contexte, .menu-porkos, .menu-sous, .tb-reseau .lampe { animation: none; } }
+
+  /* ============================== PorkOS Poche (téléphone) ============================== */
+  /* L'écran épouse l'appareil, à l'échelle 1 ; le doigt remplace la souris : cibles de 44 px, appui unique. */
+  .sonde-sure { position: fixed; inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); pointer-events: none; visibility: hidden; }
+  .piece.poche { place-items: start; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: #15110d; }
+  .ecran.poche { border-radius: 0; box-shadow: none; filter: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .ecran.poche, .ecran.poche * { cursor: default; }
+  .ecran.poche .crt-halo, .ecran.poche .crt-grille, .ecran.poche .crt-roulant { display: none; }
+  .ecran.poche .crt-grain { animation: none; }
+  .ecran.poche .crt-vignette { box-shadow: inset 0 0 40px 6px rgba(0, 0, 0, calc(0.12 + 0.2 * var(--crt))); background: none; }
+  .ecran.poche.tube-allume .tube { animation: none; }
+  .ecran.poche button, .ecran.poche [role="button"] { touch-action: manipulation; }
+
+  .poche-eteint {
+    position: fixed; inset: 0; z-index: 9998; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    background: radial-gradient(ellipse at 50% 40%, #2b2219 0%, #15110d 70%); color: #d8ccb0; text-align: center; padding: 24px;
+  }
+  .poche-eteint img { filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.4)); }
+  .poche-eteint b { font: bold 44px/1 var(--font-serif); color: #f3d58f; text-shadow: 2px 3px 0 #3a0a0d; }
+  .poche-eteint span { font: italic 15px var(--font-serif); color: #a99d82; }
+  .poche-eteint .invite-allumer { font-size: 15px; color: #d8ccb0; }
+  .bouton-allumer {
+    width: 76px; height: 76px; margin-top: 18px; border-radius: 50%; border: none; display: grid; place-items: center; color: #6d624c;
+    background: radial-gradient(circle at 40% 30%, #f4ecd9, #cdc2a6 70%); box-shadow: 0 5px 0 #8e8268, 0 0 0 3px #b6aa8d, 0 12px 24px rgba(0, 0, 0, 0.5); touch-action: manipulation;
+  }
+  .bouton-allumer:active { transform: translateY(3px); box-shadow: 0 2px 0 #8e8268, 0 0 0 3px #b6aa8d; }
+  .securite .bouton-allumer { margin-top: 26px; }
+
+  /* Barre d'état (haut) */
+  .barre-etat {
+    position: absolute; left: 0; right: 0; top: 0; height: var(--haut); z-index: 5000; display: flex; align-items: center; gap: 6px; padding: 0 4px 0 6px;
+    background: linear-gradient(180deg, #7a1016, #5c0f14); color: #f3d58f; border-bottom: 2px solid var(--color-or);
+  }
+  .be-marque { flex: 1; min-width: 0; display: flex; align-items: center; gap: 5px; }
+  .be-marque b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 0 #3a0a0d; }
+  .barre-etat .tb-tray { height: 20px; gap: 7px; padding: 0 6px; background: var(--face); color: #2a2118; }
+  .barre-etat .tb-son { min-width: 22px; height: 20px; }
+
+  /* Barre de navigation (bas) */
+  .barre-nav {
+    position: absolute; left: 0; right: 0; bottom: 0; height: var(--bas); z-index: 5000; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px;
+    background: var(--face); box-shadow: inset 0 2px 0 var(--hi), 0 -2px 0 var(--lo);
+  }
+  .bn-bouton { position: relative; display: grid; place-items: center; border: none; color: #2a2118; background: var(--face); box-shadow: var(--raised); min-height: 42px; }
+  .bn-bouton:active:not(:disabled), .bn-bouton[aria-expanded="true"], .bn-bouton.actif { box-shadow: var(--pressed); background: repeating-conic-gradient(#f8f2e4 0 25%, #efe6d2 0 50%) 0 0 / 2px 2px; }
+  .bn-bouton:disabled { color: #a99d86; }
+  .bn-demarrer { background: linear-gradient(180deg, #8a2328, #5c0f14); }
+  .bn-demarrer[aria-expanded="true"] { background: #3a0a0d; }
+  .bn-compte { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); font-style: normal; font-weight: bold; font-size: 16px; line-height: 16px; }
+
+  /* Programmes ouverts */
+  .taches-poche {
+    position: absolute; left: 0; right: 0; bottom: var(--bas); max-height: calc(100% - var(--haut) - var(--bas)); z-index: 5900; overflow: auto; overscroll-behavior: contain;
+    background: var(--face); box-shadow: var(--raised), 0 -4px 0 rgba(0, 0, 0, 0.25); padding: 6px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .taches-poche header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 2px 2px 6px; border-bottom: 2px solid var(--lo); }
+  .taches-poche p { padding: 10px 4px; color: #6d5f45; }
+  .taches-poche ul { display: flex; flex-direction: column; gap: 4px; }
+  .taches-poche li { display: flex; gap: 4px; }
+  .taches-poche li.actif .tache { font-weight: bold; box-shadow: var(--pressed); }
+  .tache { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 4px 8px; border: none; background: var(--panel); box-shadow: var(--raised); text-align: left; }
+  .tache span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tache-fermer { width: 48px; display: grid; place-items: center; border: none; background: var(--face); box-shadow: var(--raised); color: var(--color-rouge-sombre); }
+
+  /* Menu Démarrer en tiroir */
+  .ecran.poche .menu-porkos { left: 0; right: 0; bottom: var(--bas); max-height: calc(100% - var(--haut) - var(--bas)); overflow: auto; overscroll-behavior: contain; }
+  .ecran.poche .menu-porkos > ul { flex: 1; min-width: 0; }
+  .ecran.poche .menu-porkos li > button { min-height: 46px; }
+  .ecran.poche .menu-sous { position: static; box-shadow: none; padding: 0 0 4px 30px; background: none; min-width: 0; }
+  .ecran.poche .menu-sous li > button { min-height: 42px; }
+  .ecran.poche .menu-parent > button[aria-expanded="true"] .fleche { transform: rotate(90deg); }
+
+  /* Lanceur */
+  .lanceur { position: absolute; inset: var(--haut) 0 var(--bas) 0; overflow: auto; overscroll-behavior: contain; padding: 10px 8px 16px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+  .lanceur h3 { color: #f3d58f; font-weight: bold; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6); padding: 0 4px 4px; border-bottom: 1px solid rgba(243, 213, 143, 0.35); margin-bottom: 6px; }
+  .lanceur-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px 4px; }
+  .tuile { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 2px 6px; min-height: 84px; border: none; background: none; color: #fff; border-radius: 0; }
+  .tuile span { max-width: 92px; text-align: center; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+  .tuile:active { background: rgba(122, 16, 22, 0.55); }
+  .tuile:active span { background: var(--color-rouge-sombre); text-shadow: none; }
+
+  /* Fenêtres plein écran */
+  .ecran.poche .pk-window { padding: 0; box-shadow: none; }
+  .ecran.poche .pk-titlebar { min-height: 34px; padding: 0 0 0 6px; gap: 8px; touch-action: auto; }
+  .ecran.poche .pk-controls .pk-reduire, .ecran.poche .pk-controls .pk-agrandir { display: none; }
+  .ecran.poche .pk-ctl { width: 44px; height: 32px; margin: 0; }
+  .ecran.poche .pk-ctl svg { width: 12px; height: 12px; }
+  .ecran.poche .pk-controls .pk-ctl:last-child { margin-left: 0; }
+  .ecran.poche .icone-systeme { padding: 6px 2px; }
+  .ecran.poche .pk-menubar { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .ecran.poche .menu-titre > button { padding: 6px 10px; }
+  .ecran.poche .menu-deroulant button { min-height: 40px; }
+  .ecran.poche .menu-deroulant { max-width: calc(100vw - 8px); }
+  .ecran.poche .menu-contexte button { min-height: 42px; }
+  .ecran.poche .pk-body { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .ecran.poche .pk-btn { min-height: 34px; }
+  .ecran.poche .pk-tab { padding: 8px 10px; }
+  .ecran.poche input[type="range"] { height: 32px; }
+  .ecran.poche .case-a-cocher { min-height: 34px; align-items: center; }
+  .pk-window.habille.poche-habille { display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); place-items: center; background: #15110d; overflow: hidden; filter: none; }
+  .poche-boitier { flex: none; transform-origin: center; }
+  .ecran.poche .habille-tuner .tuner { border-radius: 0; min-width: 0; }
+  .ecran.poche .tuner-pupitre { min-width: 0; }
+  @media (max-width: 520px) {
+    .ecran.poche .tuner-pupitre { flex-wrap: wrap; height: auto; }
+    .ecran.poche .tuner-lcd { flex-basis: 100%; }
+    .ecran.poche .tuner-commandes { margin-left: auto; }
+  }
+  .ecran.poche .tuner-bouton, .ecran.poche .tuner-mini { min-height: 40px; min-width: 40px; }
+  .ecran.poche .tuner-commandes { grid-template-columns: auto 44px 44px 48px; grid-auto-rows: 40px; }
+  .ecran.poche .tuner-pupitre { height: auto; min-height: 88px; }
+  .ecran.poche .tuner-titre { height: 34px; }
+
+  /* Boîtes, bulles, pubs et mises à jour à la largeur du téléphone */
+  .ecran.poche .dialog-layer > .pk-window { width: min(380px, calc(100% - 16px)); }
+  .ecran.poche .dialog-layer > .pk-window.pub { width: min(470px, calc(100% - 12px)) !important; max-height: calc(100% - 12px); }
+  .ecran.poche .dialog-layer > .pk-window.maj { width: min(440px, calc(100% - 12px)) !important; }
+  .ecran.poche .dialog-boutons .pk-btn { min-height: 40px; }
+  /* Bulles en haut, comme les notifications d'un téléphone : elles ne cachent plus les boutons du bas. */
+  .ecran.poche .bulles { left: auto; right: 6px; top: calc(var(--haut) + 40px); bottom: auto; width: min(380px, calc(100% - 12px)); z-index: 6600; }
+  .ecran.poche .bulle::before, .ecran.poche .bulle::after { display: none; }
+  .ecran.poche .dialog-layer { background: rgba(21, 17, 13, 0.45); }
+  .ecran.poche .calendrier { top: calc(var(--haut) + 2px); bottom: auto; right: 2px; width: min(330px, calc(100% - 4px)); }
+  .ecran.poche .veille span { max-width: 92%; }
+  .ecran.poche .chargement-titre b { font-size: 44px; }
+  /* Paysage : la hauteur est précieuse, la barre de titre se fait discrète. */
+  @media (max-height: 500px) {
+    .ecran.poche .pk-titlebar { min-height: 28px; }
+    .ecran.poche .pk-ctl { height: 26px; }
+    .ecran.poche .tuner-titre { height: 28px; }
+    .ecran.poche .tuner-pupitre { min-height: 0; height: 62px; }
+    .ecran.poche .tuner-commandes { grid-auto-rows: 28px; }
+    .ecran.poche .tuner-bouton, .ecran.poche .tuner-mini { min-height: 28px; }
+  }
+  /* Listes : des lignes qui tiennent sous le doigt. */
+  .ecran.poche .courrier-liste td { height: 34px; }
+  .ecran.poche .courrier-dossiers button { min-height: 34px; }
+  @media (max-width: 600px) {
+    .ecran.poche .courrier-corps { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .ecran.poche .courrier-dossiers { display: flex; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+    .ecran.poche .courrier-dossiers > li { flex: none; }
+    .ecran.poche .courrier-liste .col-date { width: 92px; }
+    .ecran.poche .courrier-droite { grid-template-rows: 46% minmax(0, 1fr); }
+  }
+  /* Calculatrice : le pavé prend toute la place qui reste, touches grandes comme un pouce. */
+  .ecran.poche .calc { overflow: auto; }
+  .ecran.poche .calc-touches { flex: 1; min-height: 0; grid-auto-rows: minmax(30px, 64px); }
+  .ecran.poche .calc-note { min-height: 0; }
+  @media (max-width: 460px) {
+    .ecran.poche .pub-corps { grid-template-columns: 1fr; }
+    .ecran.poche .pub-corps img { width: 100%; height: 150px; }
+  }
 }

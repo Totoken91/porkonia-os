@@ -30,7 +30,7 @@ src/
 
 ## Flux
 
-1. `PorkOS` gère l'alimentation (bouton du moniteur) et enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle) : (ScanDisque si le poste n'a pas été arrêté proprement) → PorkBIOS → chargement → connexion → session → fermeture → « vous pouvez éteindre ». Un marqueur en localStorage détecte les arrêts brutaux, y compris un onglet fermé.
+1. `PorkOS` gère l'alimentation (bouton du moniteur) et enchaîne les phases dans le `Monitor` (écran logique 800×600 mis à l'échelle ; les déplacements de fenêtres sont divisés par l'échelle ; sur téléphone ou fenêtre étroite, PorkOS Poche : `choisirEcran` de `src/os/ecran.ts` donne un écran à la taille de l'appareil, zones sûres comprises, fourni par `EcranContext`) : (ScanDisque si le poste n'a pas été arrêté proprement) → PorkBIOS → chargement → connexion → session → fermeture → « vous pouvez éteindre ». Un marqueur en localStorage détecte les arrêts brutaux, y compris un onglet fermé.
 2. `Session` tient les fenêtres (`winReducer`), la file de dialogues, les flash infos, la pub et la mise à jour en cours.
 3. Toutes les secondes, `schedule()` reçoit un `tick` ; ouvrir une appli envoie `app-open` ; une appli peut émettre un `signal` (`nappe:incident`, `tv:zapper`…). Les règles du pack décident de ce qui en découle.
 4. Une règle peut livrer un courrier tardif (action `mail`) : il arrive dans la boîte de réception, avec bulle et enveloppe dans la zone de notification. La boîte est retenue dans le navigateur.
@@ -52,3 +52,10 @@ beige (plaque PORKONIA, voyant vert), léger balayage cathodique réglable. Châ
 titre lie-de-vin liseré d'or, titres à empattements, Pixel Operator 16 px (sa taille native). Bureau uni (vert bouteille par défaut ; lie-de-vin, portrait du Fondateur
 centré ou mosaïque d'emblèmes), icônes 32 px, barre des tâches en relief, menu PorkOS à bandeau vertical et sous-menus, bulles de notification.
 BIOS en VT323. Pictogrammes SVG maison, pas d'emoji. `prefers-reduced-motion` respecté.
+
+Sur téléphone, le **PorkOS Poche** : plus de boîtier, l'écran épouse l'appareil à l'échelle 1 (zones sûres comprises) pour que la police
+pixel reste nette. Barre d'état lie-de-vin en haut (titre du programme, courrier, son, réseau, mousse, plein écran, heure), lanceur
+d'icônes au doigt à la place du bureau, barre de navigation en bas (menu PorkOS en tiroir, Retour au programme précédent, Accueil,
+programmes ouverts). Fenêtres en plein écran, cibles tactiles d'au moins 44 px, bulles en haut. PorkTV a son plein écran (API du
+navigateur et verrou paysage quand c'est permis, couche fixe sinon) avec une télécommande qui s'efface. Effets cathodiques allégés.
+Installable sur l'écran d'accueil (`app/manifest.ts`, plein écran). Le format se choisit dans Réglages d'État › Affichage (ou `?ecran=poche|moniteur`).
