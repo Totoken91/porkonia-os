@@ -51,9 +51,14 @@ interface Props {
   onRestart(): void;
   /** Restaurer les fenêtres de la session précédente (faux après un arrêt brutal). */
   restaurer: boolean;
+  /** Veille patriotique en cours : le temps des événements (pubs, rappels, gels) est suspendu. */
+  veille?: boolean;
 }
 
-export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart, restaurer }: Props) {
+/** Délai minimal entre deux bulles de distinction (ms). */
+const DISCRETION_MEDAILLES = 120_000;
+
+export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart, restaurer, veille }: Props) {
   const vp = VP;
   const [wins, dispatchRaw] = useReducer(winReducer, undefined, emptyWinState);
   const [toasts, setToasts] = useState<LiveToast[]>([]);
@@ -142,9 +147,10 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const loginAt = useRef(0);
   const rules = useRef(emptyRuleState());
   const counter = useRef(0);
+  const medailles = useRef<{ derniere: number; enAttente: number; minuterie?: ReturnType<typeof setTimeout> }>({ derniere: 0, enAttente: 0 });
   const lastActivity = useRef(Date.now());
-  const live = useRef({ ad, update, settings, vp, wins });
-  live.current = { ad, update, settings, vp, wins };
+  const live = useRef({ ad, update, settings, vp, wins, veille, saver: false });
+  live.current = { ad, update, settings, vp, wins, veille, saver };
   const runRef = useRef<(a: ActionRef) => void>(() => {});
 
   const playSound = useCallback((son: Son) => {
@@ -317,9 +323,22 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [pack, rng, pushToast, openApp, onSleep, onLock, onShutdown, onRestart, feed],
   );
   runRef.current = runAction;
+  // Une bulle par distinction au plus toutes les deux minutes ; celles d'entre-temps sont regroupées en une seule.
   decerneRef.current = (d) => {
-    pushToast(str("distinctions.decernee"), str("distinctions.bulle", { titre: d.titre, motif: d.motif }), { type: "open", app: "distinctions" });
-    playSound("medaille");
+    const m = medailles.current;
+    if (Date.now() - m.derniere > DISCRETION_MEDAILLES) {
+      m.derniere = Date.now();
+      pushToast(str("distinctions.decernee"), str("distinctions.bulle", { titre: d.titre, motif: d.motif }), { type: "open", app: "distinctions" });
+      playSound("medaille");
+      return;
+    }
+    m.enAttente += 1;
+    if (m.minuterie) return;
+    m.minuterie = setTimeout(() => {
+      const n = m.enAttente;
+      Object.assign(m, { enAttente: 0, minuterie: undefined, derniere: Date.now() });
+      if (n) pushToast(str("distinctions.decernee"), n === 1 ? str("distinctions.autre") : str("distinctions.autres", { n: String(n) }), { type: "open", app: "distinctions" });
+    }, m.derniere + DISCRETION_MEDAILLES - Date.now());
   };
 
   // Horloge des règles : une vérification par seconde depuis l'ouverture de session.
@@ -330,6 +349,11 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     if (!restaurer) setTimeout(() => feed({ kind: "signal", name: "session:perdue" }), 7000);
     if (impatient) setTimeout(() => runRef.current({ type: "signal", name: "boot:impatience" }), 4000);
     const id = setInterval(() => {
+      // En veille ou sous l'économiseur, l'horloge des règles s'arrête : rien ne surgit dessous ni au réveil.
+      if (live.current.veille || live.current.saver) {
+        loginAt.current += 1000;
+        return;
+      }
       feed({ kind: "tick" });
       const s = live.current.settings;
       if (s.economiseur > 0 && !live.current.update && Date.now() - lastActivity.current > s.economiseur * 1000) setSaver(true);

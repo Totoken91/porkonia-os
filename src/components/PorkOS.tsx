@@ -113,6 +113,7 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
             onShutdown={() => fermer("arret")}
             onRestart={() => fermer("redemarrage")}
             restaurer={brutal === false}
+            veille={phase.sleeping}
           />
           {phase.sleeping && (
             <button className="veille" onClick={() => setPhase({ ...phase, sleeping: false })} data-testid="veille">

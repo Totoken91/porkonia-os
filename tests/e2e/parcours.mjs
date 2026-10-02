@@ -253,6 +253,8 @@ try {
         if (t > 160000) throw new Error("aucune pause publicitaire");
         await page.waitForTimeout(500);
         if (await page.getByTestId("ad").count()) await page.getByTestId("start").hover().catch(() => {});
+        // Un utilisateur qui attend bouge la souris : l'économiseur (qui suspend les pubs) ne se lance pas.
+        else if (t % 10000 === 0) await page.mouse.move(400 + (t % 20000 ? 7 : 0), 300);
       }
       if (pubVue.fermableTout2Suite) throw new Error("pub fermable immédiatement");
       await page.getByTestId("ad").waitFor({ state: "detached" });
