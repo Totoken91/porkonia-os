@@ -24,6 +24,10 @@ Découpage prévu : épisode 1 = introduction et questions 1 à 3 (en ligne) ; �
 
 Pub auto façon années 90 : la petite voiture violette aux pare-chocs cuivrés, compteur « 1 000 000 000 porkomètres ». Tonio y témoigne avec ses lapsus. Slogans : « Elle ne s'arrête pas. Elle se repose en roulant. », « Brasswagen. Et toujours plus de route. ». Mention légale débitée vite : partenaire officiel du jeu, « Kilométrage non contractuel. Route non fournie. »
 
+## Pub « Judas Qui c'est ? »
+
+Télé-achat trash d'après le script de l'utilisateur : un vendeur moustachu en veste de velours vante un judas en laiton qui montre les visiteurs douze minutes à l'avance, aperçoit son propre double paniqué sur le palier, puis finit en pleurs quand la poignée descend. Le vendeur et son double ont la même voix, **Clyde** (le double est étouffé comme à travers la porte au mixage) ; voix off finale radieuse : **Charlotte**. Images dans `public/tv/judas/`, mixage `scripts/channel-pork/mix-pub-judas.py` (sonnette, coups, poignée, coup violent : bruitages CC0).
+
 ## Initial P
 
 Parodie d'animé de course des années 80, en images fixes : Tonio livre de la Douzi Ambrée la nuit sur le Mont Porcin dans sa Brasswagen Palou et gagne une course de drift à 40 km/h contre **John Pork**, parce que celui-ci s'arrête pour ne pas le dépasser. Doublage VF surjoué, musique « Night Highway Heartbreak » (fournie). Images dans `public/tv/initial-p/` ; brief ChatGPT : style « capture d'écran d'une série animée japonaise télévisée de 1986, celluloïd peint à la main, aplats, contours noirs nets, ombrage en deux tons, grain de pellicule, 4:3 », avec aquarelle, rendu peinture et 3D explicitement interdits (sinon ChatGPT fait de l'aquarelle).

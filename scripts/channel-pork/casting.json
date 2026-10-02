@@ -247,11 +247,31 @@
     "deadpan"
    ]
   },
-  "_brume": "Brume (Nuit) garde ses voix monotones d'origine : ne pas la revoicer."
+  "_brume": "Brume (Nuit) garde ses voix monotones d'origine : ne pas la revoicer.",
+  "vendeur-judas": {
+   "moteur": "elevenlabs",
+   "voice": "2EiwWnXFnvU5JabPnv8n",
+   "voix_nom": "Clyde",
+   "balises": [
+    "enthusiastic teleshopping host, big smile",
+    "forced cheerful",
+    "cold",
+    "worried whisper",
+    "almost crying"
+   ],
+   "note": "Joue aussi son double paniqué (panicked, screaming), filtré comme à travers la porte au mixage."
+  },
+  "voix-off-judas": {
+   "moteur": "elevenlabs",
+   "voice": "XB0fDUnXU5powFXDhCwa",
+   "voix_nom": "Charlotte",
+   "balises": [
+    "radiant, bright announcer"
+   ]
+  }
  },
  "libres": {
   "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
-  "Clyde": "2EiwWnXFnvU5JabPnv8n",
   "Fin": "D38z5RcWu1voky8WS1ja"
  }
 }

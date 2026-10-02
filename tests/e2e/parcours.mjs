@@ -176,7 +176,7 @@ try {
     await page.getByTestId("tv-screen").waitFor();
     // Direct : on tombe en cours d'émission ; musique tout de suite, une voix off dans les secondes qui suivent
     // (ou la bande complète du jeu télévisé).
-    await page.waitForFunction(() => /channel-pork\/(ftg-ep\d|pub-brasswagen|initial-p-ep\d)\.mp3/.test(window.__lectures.join(" ")) || /(quiet-morning-vhs|brume-nappe)\.mp3/.test(window.__lectures.join(" ")) && /channel-pork\/[a-z-]+-\d\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 12000 }).catch(async () => {
+    await page.waitForFunction(() => /channel-pork\/(ftg-ep\d|pub-brasswagen|pub-judas|initial-p-ep\d)\.mp3/.test(window.__lectures.join(" ")) || /(quiet-morning-vhs|brume-nappe)\.mp3/.test(window.__lectures.join(" ")) && /channel-pork\/[a-z-]+-\d\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 12000 }).catch(async () => {
       throw new Error(`Channel Pork muet : ${await page.evaluate(() => window.__lectures.join(" "))}`);
     });
     await page.waitForTimeout(600);
