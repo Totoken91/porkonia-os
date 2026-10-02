@@ -1,0 +1,90 @@
+{
+ "_lisezmoi": "Initial P, épisode 1 : texte envoyé à la synthèse. Sous-titres dans mix-initial-p-ep1.py.",
+ "repliques": [
+  {
+   "id": "N1",
+   "perso": "narrateur-anime",
+   "tts": "[overexcited anime narrator, dramatic] Mont Porcin. Deux heures du matin ! Sur ces routes, un seul nom fait trembler les glissières... Tonio ! Le livreur de bière !"
+  },
+  {
+   "id": "T1",
+   "perso": "tonio",
+   "tts": "[pumped up, dopey] Douze caisses de Douzi avant l'aube ! Euh... douze aubes avant la caisse. [pause] Non. Bref, on y va !"
+  },
+  {
+   "id": "T2",
+   "perso": "tonio",
+   "tts": "[surprised, looking in the mirror] Hein ?! Des phares dans mon rétro ? À cette heure-ci ?!"
+  },
+  {
+   "id": "J1",
+   "perso": "john-pork",
+   "tts": "[deep, seductive, slow, sensual] Bonsoir, livreur. Je suis John Pork. [low chuckle] Et cette montagne... m'appartient."
+  },
+  {
+   "id": "T3",
+   "perso": "tonio",
+   "tts": "[dopey, friendly] Ah. Moi c'est Tonio. Et la bière, elle appartient à la taverne."
+  },
+  {
+   "id": "J2",
+   "perso": "john-pork",
+   "tts": "[deep, seductive, whispering] Course jusqu'au sommet. Le perdant... paie sa tournée."
+  },
+  {
+   "id": "T4",
+   "perso": "tonio",
+   "tts": "[pumped up, dopey] Ça marche ! Euh... ça roule !"
+  },
+  {
+   "id": "N2",
+   "perso": "narrateur-anime",
+   "tts": "[overexcited anime narrator, shouting] Quarante kilomètres-heure ! L'aiguille tremble ! La Palou donne tout ce qu'elle a !"
+  },
+  {
+   "id": "T5",
+   "perso": "tonio",
+   "tts": "[shouting, gripping the wheel] Allez ma belle ! Allez !"
+  },
+  {
+   "id": "J3",
+   "perso": "john-pork",
+   "tts": "[deep, shocked, breathless] Impossible... Il drifte... à quarante ?!"
+  },
+  {
+   "id": "N3",
+   "perso": "narrateur-anime",
+   "tts": "[overexcited anime narrator, screaming] Le drift du verre plein ! Pas une goutte renversée !"
+  },
+  {
+   "id": "T6",
+   "perso": "tonio",
+   "tts": "[panicked, shouting] Attention les caisses ! Euh... les caisses, attention !"
+  },
+  {
+   "id": "J4",
+   "perso": "john-pork",
+   "tts": "[deep, broken, sensual, slow] Il roulait si lentement... que j'ai dû m'arrêter pour ne pas le dépasser. [sigh] Personne... ne m'avait jamais fait ça."
+  },
+  {
+   "id": "T7",
+   "perso": "tonio",
+   "tts": "[proud, dopey] Douze caisses. Pile à l'heure ! [pause] Enfin... à une heure près."
+  },
+  {
+   "id": "J5",
+   "perso": "john-pork",
+   "tts": "[deep, seductive, warm] Tonio... Tu m'as battu. Ce soir, la tournée est pour moi."
+  },
+  {
+   "id": "T8",
+   "perso": "tonio",
+   "tts": "[dopey, confused] C'est moi qui livre la bière, en fait."
+  },
+  {
+   "id": "N4",
+   "perso": "narrateur-anime",
+   "tts": "[overexcited anime narrator, dramatic] Prochain épisode : la Palou contre le tracteur ! Ne le manquez pas !"
+  }
+ ]
+}

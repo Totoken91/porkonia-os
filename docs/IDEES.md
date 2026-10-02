@@ -74,6 +74,7 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 - [x] PigNet : pages perso de citoyens (Tonton Marcel, Chopes du Monde, Nappe Vide astuces, Le Site du Douze, un site B.R.U.M.E. retiré de l'annuaire), annuaire, livre d'or signable, compteurs, Anneau des pages perso.
 - [x] **Jeu télévisé** — « Ferme ta gueule et réponds », épisode 1 sur Canal 1 (plateau, portraits, jingle du logo, score au bandeau, applaudissements).
 - [x] Pub Brasswagen Palou (partenaire du jeu, diffusée sur toutes les chaînes) ; épisode 1 revoicé (ElevenLabs v3 / Qwen via Speko) et gros plans dédiés.
+- [x] Animé « Initial P », épisode 1 (Tonio contre John Pork) sur Canal 1 Nuit.
 - [ ] Épisodes 2 et 3 du jeu (questions 4 à 12, finale) ; pub téléachat « Le Décapsuleur Perpétuel ».
 - [x] Secrets : commandes cachées dans Exécuter (absentes des suggestions, retenues dans l'historique une fois trouvées), fichiers cachés révélés par « Afficher les fichiers cachés » ; les nouveautés du pack arrivent aussi sur les disques déjà enregistrés.
 

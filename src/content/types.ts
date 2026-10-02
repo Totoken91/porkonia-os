@@ -148,7 +148,7 @@ export interface ForcedUpdate {
 export interface Program {
   id: string;
   title: string;
-  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip" | "jeu";
+  kind: "journal" | "education" | "publicite" | "divertissement" | "documentaire" | "sport" | "meteo" | "clip" | "jeu" | "anime";
   /** Étiquette du bandeau (sinon celle du genre, `tv.etiquette.<kind>`). */
   etiquette?: string;
   /** Vidéo réelle facultative (sinon : diaporama d'images + sous-titres). */

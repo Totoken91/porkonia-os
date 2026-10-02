@@ -93,7 +93,7 @@
     },
     "tonio": {
       "nom": "Tonio",
-      "role": "candidat, propriétaire d'une Brasswagen Palou, témoin de la pub Brasswagen",
+      "role": "candidat de « Ferme ta gueule et réponds », témoin de la pub Brasswagen, héros d'« Initial P » (livreur de bière en Brasswagen Palou)",
       "moteur": "elevenlabs",
       "voice": "TxGEqnHWrfWFTfGW9XjX",
       "voix_nom": "Josh",
@@ -101,10 +101,31 @@
         "dopey, slow, proud of himself",
         "dopey, proud",
         "pause",
-        "pause, confused"
+        "pause, confused",
+        "pumped up, dopey",
+        "panicked, shouting"
       ],
       "plans": [
         "tonio"
+      ]
+    },
+    "john-pork": {
+      "nom": "John Pork",
+      "role": "rival de Tonio dans « Initial P », pilote d'une voiture de sport noire",
+      "moteur": "elevenlabs",
+      "voice": "nPczCjzI2devNBz1zQrb",
+      "voix_nom": "Brian",
+      "balises": [
+        "deep, seductive, slow, sensual",
+        "deep, seductive, whispering",
+        "deep, shocked, breathless",
+        "deep, broken, sensual, slow",
+        "deep, seductive, warm"
+      ],
+      "plans": [
+        "rival",
+        "arrete",
+        "sommet"
       ]
     }
   },
@@ -143,17 +164,25 @@
         "warm, epic",
         "very fast, mumbled legal disclaimer"
       ]
+    },
+    "narrateur-anime": {
+      "moteur": "elevenlabs",
+      "voice": "ODq5zmih8GrVes37Dizd",
+      "voix_nom": "Patrick",
+      "balises": [
+        "overexcited anime narrator, dramatic",
+        "overexcited anime narrator, shouting",
+        "overexcited anime narrator, screaming"
+      ]
     }
   },
   "libres": {
     "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
-    "Patrick": "ODq5zmih8GrVes37Dizd",
     "Clyde": "2EiwWnXFnvU5JabPnv8n",
     "Antoni": "ErXwobaYiN019PkySvjV",
     "Will": "bIHbv24MWmeRgasZH58o",
     "Thomas": "GBv7mTt0atIp3Br8iCZE",
     "Fin": "D38z5RcWu1voky8WS1ja",
-    "Adam": "pNInz6obpgDQGcFmaJgB",
-    "Brian": "nPczCjzI2devNBz1zQrb"
+    "Adam": "pNInz6obpgDQGcFmaJgB"
   }
 }

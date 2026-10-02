@@ -16,13 +16,23 @@ Jeu télévisé de Canal 1, d'après le script fourni (télé porkoniaise du dé
 | **Martin Chou** | Chemise blanche, cheveux courts dressés, deux moulures dorées posées sur son pupitre. Esthète des finitions. | Patriote chinois à fond : tout est mieux en Chine (« En Chine, à Jingdezhen, on renvoie l'artisan pour moins que ça », « La porcelaine. Chinoise, évidemment »). Méprisant, soupire (« Pfff »). Accent mandarin. | Qwen (Alibaba), **Ethan**, avec consigne d'accent |
 | **Tonio** | Chemise crème, cheveux courts. Propriétaire d'une Brasswagen Palou à un milliard de kilomètres. | Très calme, lent, pinailleur (exige des précisions même quand il gagne). Fait des lapsus et inverse les mots, puis se corrige posément (« Un kilo de milliards de mètres. Euh… non. Un milliard de kilomètres »). Voix ordinaire de type un peu bête, fier de lui, sans accent (aucun moteur n'a réussi l'accent congolais ; Brian, trop solennel, a été écarté). | ElevenLabs v3, **Josh** |
 
-Voix secondaires : chauffeur de salle **George** (crie au public), homme du public **Sam** (lance des vannes), jury **Daniel** (sec, ennuyé). Narrateur de la pub Brasswagen : **Bill**.
+Voix secondaires : chauffeur de salle **George** (crie au public), homme du public **Sam** (lance des vannes), jury **Daniel** (sec, ennuyé). Narrateur de la pub Brasswagen : **Bill**. Narrateur d'Initial P : **Patrick**.
 
 Découpage prévu : épisode 1 = introduction et questions 1 à 3 (en ligne) ; épisode 2 = questions 4 à 8 ; épisode 3 = questions 9 à 12 et finale.
 
 ## Pub Brasswagen Palou
 
 Pub auto façon années 90 : la petite voiture violette aux pare-chocs cuivrés, compteur « 1 000 000 000 porkomètres ». Tonio y témoigne avec ses lapsus. Slogans : « Elle ne s'arrête pas. Elle se repose en roulant. », « Brasswagen. Et toujours plus de route. ». Mention légale débitée vite : partenaire officiel du jeu, « Kilométrage non contractuel. Route non fournie. »
+
+## Initial P
+
+Parodie d'animé de course des années 80, en images fixes : Tonio livre de la Douzi Ambrée la nuit sur le Mont Porcin dans sa Brasswagen Palou et gagne une course de drift à 40 km/h contre **John Pork**, parce que celui-ci s'arrête pour ne pas le dépasser. Doublage VF surjoué, musique « Night Highway Heartbreak » (fournie). Images dans `public/tv/initial-p/` ; brief ChatGPT : style « capture d'écran d'une série animée japonaise télévisée de 1986, celluloïd peint à la main, aplats, contours noirs nets, ombrage en deux tons, grain de pellicule, 4:3 », avec aquarelle, rendu peinture et 3D explicitement interdits (sinon ChatGPT fait de l'aquarelle).
+
+| Personnage | Qui il est | Comment il parle | Voix |
+|---|---|---|---|
+| **Tonio** | Héros, gilet violet sur pull crème, au volant de la Palou violette pleine de caisses. | Gonflé à bloc mais toujours un peu bête, lapsus et inversions (« douze aubes avant la caisse »). | ElevenLabs v3, **Josh** |
+| **John Pork** | Rival : cheveux noirs, t-shirt noir, très musclé, voiture de sport noire à phares escamotables. | Voix grave, divine, ultra sexy ; parle lentement, susurre ses défis, s'effondre avec sensualité quand il perd. | ElevenLabs v3, **Brian** |
+| Narrateur | Voix off d'animé. | Surexcité, crie chaque évidence comme une finale du monde. | ElevenLabs v3, **Patrick** |
 
 ## Images
 
@@ -53,6 +63,7 @@ cd scripts/channel-pork
 python3 mix-ftg-ep1.py           # sortie/ftg-ep1.mp3 + ftg-ep1.json
 python3 programme.py sortie/ftg-ep1.json > /tmp/prog.txt   # slides et sous-titres pour le pack
 python3 mix-pub-brasswagen.py    # sortie/pub-brasswagen.mp3 + .json
+python3 mix-initial-p-ep1.py     # sortie/initial-p-ep1.mp3 + .json
 ```
 
 Copier le mp3 dans `public/audio/channel-pork/` et coller slides et sous-titres dans le programme du pack (`src/content/packs/porkos.ts`, champ `bande` pour une bande son complète). Pour un nouvel épisode, copier `mix-ftg-ep1.py` : le déroulé (`DEROULE`) liste répliques, bruitages, plans et scores dans l'ordre. Dépendances : numpy, scipy, ffmpeg (ou `pip install imageio-ffmpeg`).
