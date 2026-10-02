@@ -73,7 +73,8 @@ Parcours complet et inventaire du code. Le mobile est hors sujet.
 - [x] Courrier : 17 courriers tardifs qui réagissent à ce qu'on fait (format c:, arrêt brutal, Niveau VII, BRUME regardé jusqu'au bout, pub cliquée, dessin enregistré, livre d'or signé…) ou arrivent au fil des sessions (2e, 3e, 4e, 6e), avec suites des fils existants (Pork ID, Tonton Marcel, Gobelins).
 - [x] PigNet : pages perso de citoyens (Tonton Marcel, Chopes du Monde, Nappe Vide astuces, Le Site du Douze, un site B.R.U.M.E. retiré de l'annuaire), annuaire, livre d'or signable, compteurs, Anneau des pages perso.
 - [x] **Jeu télévisé** — « Ferme ta gueule et réponds », épisode 1 sur Canal 1 (plateau, portraits, jingle du logo, score au bandeau, applaudissements).
-- [ ] Épisodes 2 et 3 du jeu (questions 4 à 12, finale), d'autres pubs que la Douzi Ambrée.
+- [x] Pub Brasswagen Palou (partenaire du jeu, diffusée sur toutes les chaînes) ; épisode 1 revoicé (ElevenLabs v3 / Qwen via Speko) et gros plans dédiés.
+- [ ] Épisodes 2 et 3 du jeu (questions 4 à 12, finale) ; pub téléachat « Le Décapsuleur Perpétuel ».
 - [x] Secrets : commandes cachées dans Exécuter (absentes des suggestions, retenues dans l'historique une fois trouvées), fichiers cachés révélés par « Afficher les fichiers cachés » ; les nouveautés du pack arrivent aussi sur les disques déjà enregistrés.
 
 ### 4. Technique
