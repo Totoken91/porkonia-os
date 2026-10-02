@@ -14,3 +14,4 @@ next-env.d.ts
 /medias-locales/
 /apercu/
 /scripts/channel-pork/sortie/
+__pycache__/
