@@ -440,7 +440,8 @@
    "voix_nom": "Antoni",
    "role": "le patron de la taverne Au Fond du Fût",
    "balises": [
-    "standard Parisian French accent, tavern owner, perfectly serious, proud, calm"
+    "standard Parisian French accent, tavern owner, perfectly serious, proud, calm",
+    "dismayed, controlled (de plus en plus consterné, jamais idiot)"
    ]
   },
   "voix-off-teleralite": {
@@ -497,6 +498,15 @@
    "role": "Responsable du service, « Allô, Stéphane ? »",
    "balises": [
     "standard Parisian French accent, calm administrator"
+   ]
+  },
+  "cuisinier-fond-du-fut": {
+   "moteur": "elevenlabs_v4",
+   "voice": "D38z5RcWu1voky8WS1ja",
+   "voix_nom": "Fin",
+   "role": "le cuisinier sobre d'Au Fond du Fût, hors champ (« Cauchemar en Taverne — Trop propre pour être honnête »)",
+   "balises": [
+    "standard Parisian French accent, sober young cook, polite"
    ]
   }
  },

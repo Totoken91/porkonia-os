@@ -1,14 +1,16 @@
 {
- "_lisezmoi": "« Cauchemar en Taverne — Au Fond du Fût » (script de l'utilisateur ; parodie). ElevenLabs v4, balise « standard Parisian French accent ». G : Gordon Ramsgroin (Clyde), P : le patron (Antoni), C : le client hors champ (Sam), V : voix off (Matilda). Les répliques sont dans cauchemar-taverne-textes.json.",
+ "_lisezmoi": "« Cauchemar en Taverne — Trop propre pour être honnête » (script de l'utilisateur, parodie ; remplace « Au Fond du Fût »). ElevenLabs v4, balise « standard Parisian French accent ». R : Gordon Ramsgroin (Clyde), P : le patron (Antoni), K : le cuisinier hors champ (Fin), C : le client hors champ (Sam), V : voix off (Matilda). Les répliques sont dans cauchemar-taverne-textes.json.",
  "modele": "eleven_v4",
  "voix": {
-  "G": "Clyde 2EiwWnXFnvU5JabPnv8n",
+  "R": "Clyde 2EiwWnXFnvU5JabPnv8n",
   "P": "Antoni ErXwobaYiN019PkySvjV",
+  "K": "Fin D38z5RcWu1voky8WS1ja",
   "C": "Sam yoZ06aMxZJJ28mfd3POQ",
   "V": "Matilda XrExE9yKIg1WjnnlVkGX"
  },
  "ecarts_au_script": [
-  "Prises répétées par le moteur coupées à une seule occurrence (G01, G02, G04, G10, G23, G25, G27, P01, P10, P18…)",
-  "La voix prononce « Ramsgren » ; les sous-titres gardent « Ramsgroin »"
+  "Prises répétées par le moteur coupées à la première occurrence (R02, R08, R11, R16, R18, R28, P13, P18, K02, C02, P07)",
+  "R24 garde « Deux bières ! » crié deux fois, comme une commande lancée dans le brouhaha",
+  "La voix dit « Ramgroin » ; les sous-titres gardent « Ramsgroin »"
  ]
 }

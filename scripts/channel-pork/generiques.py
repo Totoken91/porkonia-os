@@ -255,7 +255,7 @@ def carton_taverne():
     logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
     im.paste(logo, ((W - lw) // 2, (H - logo.height) // 2 - 30), logo)
     d = ImageDraw.Draw(im)
-    texte(d, (W / 2, 520), "ÉPISODE : « AU FOND DU FÛT »", police("sans", 22), (240, 214, 160), ecart=3)
+    texte(d, (W / 2, 520), "ÉPISODE : « TROP PROPRE POUR ÊTRE HONNÊTE »", police("sans", 22), (240, 214, 160), ecart=3)
     return im
 
 
