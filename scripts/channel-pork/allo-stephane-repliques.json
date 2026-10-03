@@ -1,0 +1,16 @@
+{
+ "_lisezmoi": "« Allô, Stéphane ? — Pris en charge » (script de l'utilisateur). ElevenLabs v4. S : Stéphane (Landry, voix partagée, sans balise d'accent) ; J : journaliste (Will) ; V : voix off (Brian) ; A : appelant au téléphone (Paul) ; R : responsable (Dave) ; K : Stéphane en aparté. Balise « standard Parisian French accent » pour tous sauf Stéphane. Les répliques sont dans allo-stephane-textes.json.",
+ "modele": "eleven_v4",
+ "voix": {
+  "S": "Landry YwEKgPNrswweXodAZi29",
+  "J": "Will bIHbv24MWmeRgasZH58o",
+  "V": "Brian nPczCjzI2devNBz1zQrb",
+  "A": "Paul 5Q0t7uMcjvnagumLfvZi",
+  "R": "Dave CYw3kZ02Hs0563khs1Fj"
+ },
+ "ecarts_au_script": [
+  "Prises répétées par le moteur coupées à une seule occurrence (K01, S13, S16, J11)",
+  "A05 coupée net sur « avant leur dé— » (l'appel est raccroché)",
+  "S04 refaite : « Vers l'arrivée d'avant »"
+ ]
+}

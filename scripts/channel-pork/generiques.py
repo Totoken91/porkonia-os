@@ -259,6 +259,21 @@ def carton_taverne():
     return im
 
 
+def carton_allo():
+    """Allô, Stéphane ? : le logo fourni par l'utilisateur, sur le beige d'un bureau de guichet."""
+    im = degrade((214, 196, 158), (150, 128, 92))
+    d = ImageDraw.Draw(im)
+    for y in range(0, H, 40):
+        d.line([(0, y), (W, y)], fill=(196, 176, 136), width=1)
+    logo = Image.open(os.path.join(ICI, "logo-allo-stephane.png")).convert("RGBA")
+    lw = 660
+    logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
+    im.paste(logo, ((W - lw) // 2, (H - logo.height) // 2 - 30), logo)
+    d = ImageDraw.Draw(im)
+    texte(d, (W / 2, 520), "ÉPISODE : « PRIS EN CHARGE »", police("sans", 22), (60, 40, 22), ecart=3)
+    return im
+
+
 # id : (carton, jingle, voix, début de la voix (s), gain voix, bande(s) intégrale(s) à préfixer ou None)
 GENERIQUES = {
     "ministere": (carton_ministere, synthe.jingle_ministere, "ministere", 2.3, 1.0, "pub-repulsif"),
@@ -273,6 +288,7 @@ GENERIQUES = {
     "meteo": (carton_meteo, synthe.jingle_meteo, "meteo", 1.6, 1.0, None),
     "ministere-porc": (carton_ministere_porc, synthe.jingle_ministere_porc, "ministere-porc", 2.3, 1.0, "pub-mangez-gras"),
     "taverne": (carton_taverne, synthe.jingle_taverne, "taverne", 1.7, 1.0, "cauchemar-taverne"),
+    "allo-stephane": (carton_allo, synthe.jingle_allo, "allo-stephane", 2.6, 1.0, "allo-stephane"),
     "alvarez": (carton_alvarez, synthe.jingle_alvarez, "alvarez", 2.4, 1.0, "dossiers-alvarez"),
 }
 

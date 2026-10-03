@@ -417,3 +417,20 @@ def jingle_taverne():
     cymb = filtre(rng.standard_normal(int(2.2 * SR)), "high", 4000) * np.exp(-np.arange(int(2.2 * SR)) / SR * 2.2)
     _poser(s, cymb, 1.45, 0.18)
     return finir(s * env(len(s), 0.005, 0.8))
+
+
+def jingle_allo():
+    """Allô, Stéphane ? : trois notes de xylophone, puis la sonnerie d'un téléphone filaire beige, décroché net."""
+    s = np.zeros(int(3.6 * SR))
+    for k, n in enumerate((72, 76, 79)):
+        _poser(s, xylo(n, 0.6) * 0.5 + cloche(n + 12, 0.6, 0.15), 0.1 + k * 0.22)
+    d = 1.5
+    t = np.arange(int(d * SR)) / SR
+    marteau = (np.sin(2 * np.pi * 25 * t) > 0).astype(float)
+    son = (np.sin(2 * np.pi * 1180 * t) + 0.6 * np.sin(2 * np.pi * 1420 * t) + 0.3 * np.sin(2 * np.pi * 2650 * t)) * marteau
+    _poser(s, filtre(son, "band", [700, 5000]) * env(len(t), 0.005, 0.01) * 0.35, 0.9)
+    rng = np.random.default_rng(31)
+    m = int(0.25 * SR)
+    clic = filtre(rng.standard_normal(m), "band", [300, 3000]) * np.exp(-np.arange(m) / SR * 40)
+    _poser(s, clic, 2.4, 0.6)
+    return finir(s * env(len(s), 0.005, 0.6))

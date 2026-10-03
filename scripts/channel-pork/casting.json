@@ -452,6 +452,52 @@
     "standard Parisian French accent, reality TV narrator, dramatic, serious",
     "very neutral documentary narrator, flat"
    ]
+  },
+  "stephane": {
+   "moteur": "elevenlabs_v4",
+   "voice": "YwEKgPNrswweXodAZi29",
+   "voix_nom": "Landry (voix partagée de la bibliothèque ElevenLabs)",
+   "role": "Stéphane Tchimbakala Matoutou, chargé de présence téléphonique, Ligne des Retours (« Allô, Stéphane ? »)",
+   "balises": [
+    "aucune balise d'accent : la voix porte déjà un accent d'Afrique francophone ; jeu sincère, posé, consciencieux"
+   ],
+   "remarque": "Choisie par l'utilisateur (échantillon C4) parmi des voix de la bibliothèque partagée par leurs auteurs ; pas de clonage."
+  },
+  "journaliste-allo": {
+   "moteur": "elevenlabs_v4",
+   "voice": "bIHbv24MWmeRgasZH58o",
+   "voix_nom": "Will",
+   "role": "Journaliste de terrain, « Allô, Stéphane ? »",
+   "balises": [
+    "standard Parisian French accent, field reporter, curious, a bit lost"
+   ]
+  },
+  "voix-off-allo": {
+   "moteur": "elevenlabs_v4",
+   "voice": "nPczCjzI2devNBz1zQrb",
+   "voix_nom": "Brian",
+   "role": "Voix off sérieuse, « Allô, Stéphane ? »",
+   "balises": [
+    "standard Parisian French accent, serious documentary narrator, deadpan"
+   ]
+  },
+  "appelant-camion": {
+   "moteur": "elevenlabs_v4",
+   "voice": "5Q0t7uMcjvnagumLfvZi",
+   "voix_nom": "Paul",
+   "role": "Transporteur au téléphone, « Allô, Stéphane ? »",
+   "balises": [
+    "standard Parisian French accent, angry truck driver on the phone"
+   ]
+  },
+  "responsable-retours": {
+   "moteur": "elevenlabs_v4",
+   "voice": "CYw3kZ02Hs0563khs1Fj",
+   "voix_nom": "Dave",
+   "role": "Responsable du service, « Allô, Stéphane ? »",
+   "balises": [
+    "standard Parisian French accent, calm administrator"
+   ]
   }
  },
  "libres": {
