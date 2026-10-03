@@ -324,6 +324,28 @@ export interface Installeur {
   desinstallation: { question: string; fin: string };
 }
 
+/* ------------------------------- Assistant -------------------------------- */
+
+/**
+ * Assistant numérique façon trombone de bureau : il apparaît au coin de l'écran, commente l'ouverture des
+ * programmes et certains événements (signaux, « * » final pour un préfixe), donne des conseils d'État.
+ */
+export interface AssistantSpec {
+  nom: string;
+  titre: string;
+  accueil: string;
+  presentation: string;
+  conseils: string[];
+  /** Question posée à la première ouverture d'un programme (réponse Oui / Non). */
+  parApp: Record<string, string[]>;
+  parSignal: Record<string, string>;
+  /** Ce qu'il fait quand on lui répond « Oui ». */
+  oui: string[];
+  non: string[];
+  adieu: string;
+  retour: string;
+}
+
 /* ------------------------------- Jambonjon ------------------------------- */
 
 export type Emplacement = "arme" | "armure" | "tete" | "breloque";
@@ -533,6 +555,7 @@ export interface ContentPack {
   telechargements: Telechargement[];
   installeurs: Installeur[];
   jambonjon: JeuJambonjon;
+  assistant: AssistantSpec;
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;
 }

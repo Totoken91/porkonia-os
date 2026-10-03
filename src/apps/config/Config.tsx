@@ -213,6 +213,10 @@ export function Config() {
                 />
                 {str("config.rappels")}
               </label>
+              <label className="case-a-cocher">
+                <input type="checkbox" checked={settings.assistant} data-testid="config-assistant" onChange={(e) => setSettings({ assistant: e.target.checked })} />
+                {str("config.assistant", { nom: pack.assistant.nom })}
+              </label>
             </fieldset>
             <fieldset className="pk-fieldset">
               <legend>Mises à jour</legend>

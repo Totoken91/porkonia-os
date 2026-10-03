@@ -16,6 +16,8 @@ export const PALETTE: Record<string, string> = {
   N: "#e9b777", n: "#b5773a", z: "#6e4318",
   P: "#ffd4cf", p: "#f29a97", q: "#c4566a",
   E: "#f2ead4", e: "#d6cba9", f: "#a4987a",
+  // Écran phosphore vert de l'assistant.
+  s: "#0c2410", S: "#1c4a20", a: "#7ef06a", A: "#c8ffb4",
 };
 
 export type Grid = (string | null)[];

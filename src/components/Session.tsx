@@ -26,6 +26,8 @@ import { Taskbar } from "./Taskbar";
 import { Commutateur } from "./Commutateur";
 import { Wallpaper } from "./Wallpaper";
 import { WindowFrame } from "./WindowFrame";
+import { Assistant } from "./Assistant";
+import type { EvenementOs } from "@/os/assistant";
 
 type Input = SchedulerInput extends infer T ? (T extends unknown ? Omit<T, "elapsed"> : never) : never;
 
@@ -190,6 +192,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [zoom],
   );
 
+  const [evOs, setEvOs] = useState<{ n: number; ev: EvenementOs } | null>(null);
   const feed = useCallback(
     (input: Input) => {
       const elapsed = Date.now() - loginAt.current;
@@ -197,6 +200,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       rules.current = r.state;
       for (const { action } of r.actions) runRef.current(action);
       if (input.kind === "tick") return;
+      if (input.kind === "app-open" || input.kind === "signal") setEvOs((e) => ({ n: (e?.n ?? 0) + 1, ev: input.kind === "app-open" ? { kind: "app-open", app: input.app } : { kind: "signal", name: input.name } }));
       const d = observer(pack.distinctions, decorRef.current, input, applisDuPoste, new Date().toISOString());
       if (JSON.stringify(d.etat) === JSON.stringify(decorRef.current)) return;
       decorRef.current = d.etat;
@@ -580,7 +584,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
 
   return (
     <OsContext.Provider value={api}>
-      <div className={`bureau${busy > 0 ? " occupe" : ""}`}>
+      <div className={`bureau${busy > 0 ? " occupe" : ""}${settings.assistant ? " avec-gruik" : ""}`}>
         <Wallpaper pack={pack} fond={settings.fond} />
         {poche ? <Lanceur onLaunch={launch} /> : <Desktop area={AREA} onLaunch={launch} />}
 
@@ -611,6 +615,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         ))}
 
         <Toasts toasts={toasts.slice(0, 1)} onClose={closeToast} onAction={runAction} />
+        <Assistant ev={evOs} />
         <Taskbar
           windows={wins.windows}
           focusedId={wins.focusedId}

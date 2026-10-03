@@ -95,7 +95,7 @@ try {
     // elles laissent passer les clics (les fermer au passage refermerait aussi les menus ouverts).
     await page.addInitScript(() => document.addEventListener("DOMContentLoaded", () => {
       const st = document.createElement("style");
-      st.textContent = ".bulles, .bulles * { pointer-events: none !important; }";
+      st.textContent = ".bulles, .bulles *, .gruik, .gruik * { pointer-events: none !important; }";
       document.head.appendChild(st);
     }));
     await page.goto(base);
@@ -129,6 +129,11 @@ try {
     await page.locator("[data-testid=window-bienvenue] [data-testid=window-close]").click();
     await shot(page, `${tag}-04-bureau`);
     step(`${tag} : connexion et bureau`);
+    // Gruik, l'assistant, salue peu après la connexion.
+    await page.getByTestId("gruik-bulle").waitFor({ timeout: 8000 });
+    if (!(await page.getByTestId("gruik-bulle").textContent()).includes("Gruik")) throw new Error("Gruik ne se présente pas");
+    await shot(page, `${tag}-05-gruik`);
+    step(`${tag} : Gruik, l'assistant, salue`);
 
     if (tag === "bureau") {
       // Plein écran : le bouton de la façade bascule la page entière, puis la rend.

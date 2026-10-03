@@ -196,3 +196,26 @@ describe("Téléchargement", () => {
     expect(formatDuree(75)).toBe("1 min 15 s");
   });
 });
+
+describe("Assistant Gruik", () => {
+  const spec = porkos.assistant;
+  const rng = () => 0.3;
+  it("pose une question à la première ouverture d'un programme, une seule fois", async () => {
+    const { reagir } = await import("@/os/assistant");
+    const b = reagir(spec, { kind: "app-open", app: "texte" }, new Set(), rng);
+    expect(b?.question).toBe(true);
+    expect(reagir(spec, { kind: "app-open", app: "texte" }, new Set([b!.cle]), rng)).toBeNull();
+    expect(reagir(spec, { kind: "app-open", app: "visionneuse" }, new Set(), rng)).toBeNull();
+  });
+  it("commente les signaux, préfixes compris, et donne des conseils variés", async () => {
+    const { reagir, conseil, signalCouvert } = await import("@/os/assistant");
+    expect(reagir(spec, { kind: "signal", name: "installeur:installe:jambonjon" }, new Set(), rng)?.question).toBe(false);
+    expect(reagir(spec, { kind: "signal", name: "rien:du:tout" }, new Set(), rng)).toBeNull();
+    expect(signalCouvert("a:*", "a:b")).toBe(true);
+    const c = conseil(spec, rng);
+    expect(conseil(spec, rng, c.texte).texte).not.toBe(c.texte);
+  });
+  it("ne commente que des programmes qui existent", () => {
+    for (const app of Object.keys(spec.parApp)) expect(porkos.apps.map((a) => a.id)).toContain(app);
+  });
+});
