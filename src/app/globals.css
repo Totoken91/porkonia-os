@@ -583,7 +583,7 @@
   .tuner-vu { display: inline-flex; gap: 2px; }
   .tuner-vu i { width: 6px; height: 10px; background: rgba(255, 182, 64, 0.16); }
   .tuner-vu i.plein { background: #ffb640; box-shadow: 0 0 4px rgba(255, 182, 64, 0.6); }
-  .tuner-commandes { display: grid; grid-template-columns: auto 30px 30px 34px; grid-auto-rows: 26px; column-gap: 4px; row-gap: 4px; align-items: center; }
+  .tuner-commandes { display: grid; grid-template-columns: auto 30px 30px 34px 34px; grid-auto-rows: 26px; column-gap: 4px; row-gap: 4px; align-items: center; }
   .tuner-legende { color: #8f7a4c; text-align: right; padding-right: 2px; }
   .tuner-bouton { height: 24px; display: grid; place-items: center; padding: 0; border: 1px solid #0f0d0c; border-radius: 2px; color: #e2bd62; background: linear-gradient(#4f4841, #2f2b27); box-shadow: inset 1px 1px 0 #736a60, inset -1px -1px 0 #1c1917; cursor: var(--c-main); }
   .tuner-bouton:active { background: #2a2623; box-shadow: inset 1px 1px 0 #111; color: #ffd27a; }
@@ -591,6 +591,23 @@
 
   .tuner-txt { grid-column: 4; grid-row: 1 / span 2; height: auto; align-self: stretch; font-family: var(--font-pixel-mono); color: #5dd6ff; }
   .tuner-txt.actif { color: #0f0d0c; background: #5dd6ff; box-shadow: inset 1px 1px 0 #1a6f8a; }
+  .tuner-k7 { grid-column: 5; grid-row: 1 / span 2; height: auto; align-self: stretch; font-family: var(--font-pixel-mono); color: #ffb640; }
+  .tuner-k7.actif { color: #0f0d0c; background: #ffb640; box-shadow: inset 1px 1px 0 #8a5a12; }
+  .tv-telecommande .tuner-k7 { grid-column: auto; grid-row: auto; }
+  /* Magnétoscope : menu de cassettes façon écran de magnétoscope, bleu uni et lettres blanches. */
+  .tv-k7-osd { position: absolute; top: 10px; left: 12px; z-index: 2; color: #fff; font-family: var(--font-pixel-mono); text-shadow: 2px 2px 0 #000; letter-spacing: 2px; }
+  .vtq { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; padding: 6px 8px; background: #0a1fa8; color: #fff; font-family: var(--font-pixel-mono); }
+  .vtq-entete { display: flex; align-items: center; justify-content: space-between; gap: 6px; color: #ffe74a; }
+  .vtq-fermer { min-width: 28px; height: 22px; padding: 0 6px; border: 1px solid #fff; background: none; color: #fff; font: inherit; cursor: var(--c-main); }
+  .vtq-sous { margin: 2px 0 6px; color: #b9c4ff; }
+  .vtq-liste { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+  .vtq-liste h4 { margin: 6px 0 2px; color: #ffe74a; font: inherit; text-transform: uppercase; }
+  .vtq-k7 { width: 100%; display: flex; justify-content: space-between; gap: 8px; padding: 1px 4px; border: none; background: none; color: #fff; font: inherit; text-align: left; cursor: var(--c-main); }
+  .vtq-k7 span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vtq-k7 i { font-style: normal; color: #b9c4ff; flex: none; }
+  .vtq-k7:hover, .vtq-k7:focus-visible { background: #fff; color: #0a1fa8; outline: none; }
+  .vtq-k7:hover i { color: #0a1fa8; }
+  .vtq-k7.actif { color: #ffe74a; }
 
   /* ============================== PorkAmp ============================== */
   .amp { height: 100%; display: flex; flex-direction: column; gap: 4px; padding: 3px 5px 5px; color: #e2bd62; background: linear-gradient(#3a3531, #26221f); border: 1px solid #0f0d0c; box-shadow: inset 1px 1px 0 #5b534b, inset -1px -1px 0 #141210; }
@@ -1099,7 +1116,8 @@
     .ecran.poche .tuner-commandes { margin-left: auto; }
   }
   .ecran.poche .tuner-bouton, .ecran.poche .tuner-mini { min-height: 40px; min-width: 40px; }
-  .ecran.poche .tuner-commandes { grid-template-columns: auto 44px 44px 48px; grid-auto-rows: 40px; }
+  .ecran.poche .tuner-commandes { grid-template-columns: auto 44px 44px 48px 48px; grid-auto-rows: 40px; }
+  .ecran.poche .vtq-k7 { min-height: 34px; align-items: center; }
   .ecran.poche .tuner-pupitre { height: auto; min-height: 88px; }
   .ecran.poche .tuner-titre { height: 34px; }
 

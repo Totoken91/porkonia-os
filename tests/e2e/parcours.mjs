@@ -238,6 +238,17 @@ try {
     await page.getByTestId("tv-txt").click();
     await page.getByTestId("tv-teletexte").waitFor({ state: "detached" });
     step(`${tag} : PorkTexte (sommaire, programmes, page absente)`);
+    // Magnétoscope : la vidéothèque lance n'importe quelle émission depuis son début ; zapper revient au direct.
+    await page.getByTestId("tv-k7").click();
+    await page.getByTestId("tv-videotheque").waitFor();
+    if (tag === "bureau" || tag === "poche-portrait") await shot(page, `${tag}-11b-videotheque`);
+    await page.getByTestId("vtq-ftg-2").click();
+    await page.getByTestId("tv-videotheque").waitFor({ state: "detached" });
+    await page.locator(".tuner-lcd-chaine", { hasText: "MAGNÉTOSCOPE" }).waitFor();
+    await page.waitForFunction(() => /ftg-ep2\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 8000 }).catch(() => {});
+    await page.getByTestId("tv-zapper").click();
+    await page.locator(".tuner-lcd-chaine", { hasText: "MAGNÉTOSCOPE" }).waitFor({ state: "detached" });
+    step(`${tag} : magnétoscope (vidéothèque, lecture à la demande, retour au direct)`);
     await closeTop();
 
     // Nappe Vide : premier service toujours sûr

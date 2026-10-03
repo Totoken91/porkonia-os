@@ -104,3 +104,28 @@ export function live(c: Channel, programs: Program[], now: number, decalage = 0)
   }
   return { program: grille[0]!, slot: 0, t: 0, suivant: grille[1 % grille.length]! };
 }
+
+/**
+ * Magnétoscope : une émission lancée à la demande à l'instant `debut` (s, horloge réelle) se lit depuis son début,
+ * hors de la grille. `fini` quand la bande est arrivée au bout.
+ */
+export function aLaDemande(p: Program, debut: number, maintenant: number): { t: number; fini: boolean } {
+  const t = Math.max(0, maintenant - debut);
+  return { t, fini: t >= programLength(p) };
+}
+
+/** Vidéothèque : toutes les émissions, rangées par genre (dans l'ordre d'apparition des genres), puis par titre. */
+export function videotheque(programs: Program[]): { kind: Program["kind"]; programmes: Program[] }[] {
+  const genres: Program["kind"][] = [];
+  for (const p of programs) if (!genres.includes(p.kind)) genres.push(p.kind);
+  return genres.map((kind) => ({
+    kind,
+    programmes: programs.filter((p) => p.kind === kind).sort((a, b) => a.title.localeCompare(b.title, "fr")),
+  }));
+}
+
+/** Durée affichée « m:ss ». */
+export function minSec(s: number): string {
+  const r = Math.round(s);
+  return `${Math.floor(r / 60)}:${String(r % 60).padStart(2, "0")}`;
+}

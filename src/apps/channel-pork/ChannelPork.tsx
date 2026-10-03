@@ -7,14 +7,17 @@
  * son panneau. Clavier (fenêtre au premier plan) : flèches haut/bas pour les chaînes, + et − pour le volume.
  * Plein écran (bouton du titre, double appui ou touche F) : l'image seule occupe tout l'appareil, en paysage si
  * le navigateur le permet ; une télécommande apparaît au toucher puis s'efface.
+ * Magnétoscope (bouton K7 ou touche V) : la Vidéothèque d'État propose toutes les émissions, lues depuis leur début
+ * hors du direct ; zapper ou arriver au bout de la bande ramène au direct.
  */
 import { useEffect, useRef, useState } from "react";
 import { useOs, useWin } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
 import { Teletexte } from "./Teletexte";
+import { Videotheque } from "./Videotheque";
 import { voisine } from "./teletexte";
 import { useSonTv } from "./sonTv";
-import { DECALAGE, at, live, sousTitre, voiceAt } from "./timeline";
+import { DECALAGE, aLaDemande, at, live, sousTitre, voiceAt } from "./timeline";
 
 const VOLUME_DEFAUT = 7;
 
@@ -34,8 +37,18 @@ export function ChannelPork() {
     return () => clearInterval(id);
   }, []);
 
+  // Magnétoscope : émission choisie dans la vidéothèque, lue depuis `debut` (horloge réelle), hors de la grille.
+  const [cassette, setCassette] = useState<{ id: string; debut: number } | null>(null);
+  const [vtq, setVtq] = useState(false);
+  const k7 = cassette ? pack.programs.find((x) => x.id === cassette.id) : undefined;
+  const lectureK7 = k7 && cassette ? aLaDemande(k7, cassette.debut, maintenant) : null;
+  useEffect(() => {
+    if (lectureK7?.fini) setCassette(null);
+  }, [lectureK7?.fini]);
+
   const ch = chaines[ci]!;
-  const direct = live(ch, pack.programs, maintenant, ci * DECALAGE);
+  const enDirect = live(ch, pack.programs, maintenant, ci * DECALAGE);
+  const direct = k7 && lectureK7 && !lectureK7.fini ? { program: k7, slot: -1, t: lectureK7.t, suivant: enDirect.program } : enDirect;
   const p = direct.program;
   const t = direct.t;
   const { slide } = at(p, t);
@@ -43,7 +56,7 @@ export function ChannelPork() {
   const s = p.slides[slide]!;
   const duree = p.slides.reduce((acc, x) => acc + x.seconds, 0);
   const debut = p.slides.slice(0, slide).reduce((acc, x) => acc + x.seconds, 0);
-  const cleProgramme = `${ci}-${direct.slot}-${Math.round(maintenant + ci * DECALAGE - t)}`;
+  const cleProgramme = cassette && direct.slot === -1 ? `k7-${cassette.id}-${cassette.debut}` : `${ci}-${direct.slot}-${Math.round(maintenant + ci * DECALAGE - t)}`;
   const voix = voiceAt(p, t);
 
   const son = useSonTv({
@@ -87,11 +100,25 @@ export function ChannelPork() {
 
   const zap = (d: number) => {
     if (txt !== null) return allerPage(voisine(pack, txt, d > 0 ? 1 : -1));
+    // Zapper éjecte la cassette : retour au direct, sur la chaîne voisine.
+    setCassette(null);
     const n = chaines.length;
     setCi((i) => (i + d + n) % n);
     playSound("neige");
     zaps.current++;
     if (zaps.current % n === 0) signal("tv:tour");
+  };
+  const basculerVtq = () => {
+    setTxt(null);
+    setVtq((v) => !v);
+  };
+  const lireK7 = (prog: { id: string }) => {
+    setVtq(false);
+    setTxt(null);
+    setCassette({ id: prog.id, debut: Date.now() / 1000 });
+    setMaintenant(Date.now() / 1000);
+    playSound("neige");
+    signal(`tv:k7:${prog.id}`);
   };
   const regler = (d: number) => {
     setVolume((v) => {
@@ -159,8 +186,8 @@ export function ChannelPork() {
   }, [plein]);
 
   // Télécommande au clavier, seulement quand le poste est au premier plan.
-  const commandes = useRef({ zap, regler, basculerTxt, chiffre, enTxt: txt !== null, plein, entrer, sortir });
-  commandes.current = { zap, regler, basculerTxt, chiffre, enTxt: txt !== null, plein, entrer, sortir };
+  const commandes = useRef({ zap, regler, basculerTxt, basculerVtq, chiffre, enTxt: txt !== null, enVtq: vtq, plein, entrer, sortir });
+  commandes.current = { zap, regler, basculerTxt, basculerVtq, chiffre, enTxt: txt !== null, enVtq: vtq, plein, entrer, sortir };
   useEffect(() => {
     if (!focused) return;
     const touche = (e: KeyboardEvent) => {
@@ -171,6 +198,8 @@ export function ChannelPork() {
       else if (e.key === "+" || e.key === "=") c.regler(1);
       else if (e.key === "-") c.regler(-1);
       else if (e.key === "t" || e.key === "T") c.basculerTxt();
+      else if (e.key === "v" || e.key === "V") c.basculerVtq();
+      else if (c.enVtq && e.key === "Escape") c.basculerVtq();
       else if (e.key === "f" || e.key === "F") (c.plein ? c.sortir() : c.entrer());
       else if (c.plein && e.key === "Escape" && !c.enTxt) c.sortir();
       else if (c.enTxt && /^[0-9]$/.test(e.key)) c.chiffre(e.key);
@@ -243,14 +272,20 @@ export function ChannelPork() {
           cle={`${cleProgramme}-${slide}`}
           programme={cleProgramme}
           lecture
-          chaine={ch.name}
-          habillage={p.sansHabillage ? null : ch.habillage}
+          chaine={cassette ? str("tv.magnetoscope") : ch.name}
+          habillage={p.sansHabillage || cassette ? null : ch.habillage}
           numero={ci + 1}
           bandeau={s.chyron ? { etiquette, texte: s.chyron } : null}
           mention={s.caption}
           soustitre={!s.meteo && !s.fond ? subtitle : null}
         />
         {txt !== null && <Teletexte page={txt} saisie={saisie} maintenant={maintenant} onPage={allerPage} />}
+        {cassette && !vtq && txt === null && t < 4 && (
+          <span className="tv-k7-osd" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor" /></svg> {str("tv.lecture")}
+          </span>
+        )}
+        {vtq && <Videotheque enCours={cassette?.id ?? null} onChoisir={lireK7} onFermer={() => setVtq(false)} />}
         {son.bloque && (
           <button className="pk-btn tv-activer-son" onClick={son.debloquer} data-testid="tv-activer-son">
             {str("tv.activerSon")}
@@ -278,6 +313,9 @@ export function ChannelPork() {
               <button className={`tuner-bouton tuner-txt${txt !== null ? " actif" : ""}`} aria-label={str("tv.teletexte")} aria-pressed={txt !== null} onClick={basculerTxt}>
                 {str("tv.txt")}
               </button>
+              <button className={`tuner-bouton tuner-k7${vtq ? " actif" : ""}`} aria-label={str("tv.videotheque")} aria-pressed={vtq} onClick={basculerVtq}>
+                {str("tv.k7")}
+              </button>
               <button className="tuner-bouton" aria-label={str("tv.plein-ecran.quitter")} onClick={sortir} data-testid="tv-plein-sortir">
                 <svg width="14" height="14" viewBox="0 0 9 9" aria-hidden="true"><path d="M3 0.5V3H0.5M6 0.5V3h2.5M8.5 6H6v2.5M3 8.5V6H0.5" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
               </button>
@@ -288,14 +326,12 @@ export function ChannelPork() {
       <div className="tuner-pupitre" data-poignee>
         <div className="tuner-lcd" aria-live="polite">
           <div className="tuner-lcd-ligne">
-            <span className="tv-numero">
-              {str("tv.chaine")} {String(ci + 1).padStart(2, "0")}
-            </span>
-            <span className="tuner-lcd-chaine">{ch.name.toUpperCase()}</span>
+            <span className="tv-numero">{cassette ? str("tv.k7") : `${str("tv.chaine")} ${String(ci + 1).padStart(2, "0")}`}</span>
+            <span className="tuner-lcd-chaine">{cassette ? str("tv.magnetoscope").toUpperCase() : ch.name.toUpperCase()}</span>
           </div>
           <div className="tuner-lcd-defile" aria-label={p.title}>
             {/* Deux fois la même boucle : le défilement de -50 % retombe exactement sur ses pieds. */}
-            <span>{`${p.title}  ·  ${str("tv.aSuivre")} : ${direct.suivant.title}  ·  `.repeat(2)}</span>
+            <span>{(cassette ? `${p.title}  ·  ${str("tv.lecture")}  ·  ` : `${p.title}  ·  ${str("tv.aSuivre")} : ${direct.suivant.title}  ·  `).repeat(2)}</span>
           </div>
           <div className="tuner-lcd-ligne">
             <span>{str("tv.volume")}</span>
@@ -323,6 +359,9 @@ export function ChannelPork() {
           </button>
           <button className={`tuner-bouton tuner-txt${txt !== null ? " actif" : ""}`} aria-label={str("tv.teletexte")} aria-pressed={txt !== null} onClick={basculerTxt} data-testid="tv-txt">
             {str("tv.txt")}
+          </button>
+          <button className={`tuner-bouton tuner-k7${vtq ? " actif" : ""}`} aria-label={str("tv.videotheque")} aria-pressed={vtq} onClick={basculerVtq} data-testid="tv-k7">
+            {str("tv.k7")}
           </button>
         </div>
       </div>

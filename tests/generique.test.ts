@@ -31,3 +31,21 @@ describe("deplierGenerique", () => {
     expect(p.subtitles[0]!.at).toBe(4);
   });
 });
+
+describe("magnétoscope", () => {
+  it("lit une émission depuis son début et dit quand la bande est finie", async () => {
+    const { aLaDemande } = await import("../src/apps/channel-pork/timeline");
+    expect(aLaDemande(base, 100, 104)).toEqual({ t: 4, fini: false });
+    expect(aLaDemande(base, 100, 99)).toEqual({ t: 0, fini: false });
+    expect(aLaDemande(base, 100, 110).fini).toBe(true);
+  });
+  it("range la vidéothèque par genre puis par titre, et affiche les durées en m:ss", async () => {
+    const { videotheque, minSec } = await import("../src/apps/channel-pork/timeline");
+    const p = (id: string, kind: Program["kind"]) => ({ ...base, id, title: id, kind });
+    const v = videotheque([p("Zèbre", "jeu"), p("Météo", "meteo"), p("Abeille", "jeu")]);
+    expect(v.map((g) => g.kind)).toEqual(["jeu", "meteo"]);
+    expect(v[0]!.programmes.map((x) => x.id)).toEqual(["Abeille", "Zèbre"]);
+    expect(minSec(257.4)).toBe("4:17");
+    expect(minSec(59.7)).toBe("1:00");
+  });
+});
