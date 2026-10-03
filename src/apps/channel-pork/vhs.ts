@@ -54,3 +54,28 @@ export function lineOffset(y: number, h: number, d: Defauts): number {
   if (y >= h - 10) dx += 5 + (d.alea - 0.5) * 12 * ((y - (h - 10)) / 10 + 0.4);
   return dx;
 }
+
+/**
+ * Boîte de la partie visible d'une image RGBA (pixels d'alpha supérieur à `seuil`) : les logos ont souvent des marges
+ * transparentes inégales, qu'il faut ignorer pour les centrer. Renvoie toute l'image si rien n'est visible.
+ */
+export function boiteVisible(rgba: ArrayLike<number>, w: number, h: number, seuil = 24): [number, number, number, number] {
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (rgba[(y * w + x) * 4 + 3]! > seuil) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        y1 = y;
+      }
+    }
+  }
+  return x1 < 0 ? [0, 0, w, h] : [x0, y0, x1 - x0 + 1, y1 - y0 + 1];
+}
+
+/** Place une boîte `bw`×`bh` au centre d'un écran `W`×`H`, sans dépasser `maxL` et `maxH` (fractions de l'écran). */
+export function centrer(bw: number, bh: number, W: number, H: number, maxL = 0.84, maxH = 0.6, echelle = 1): [number, number, number, number] {
+  const k = Math.min((W * maxL) / bw, (H * maxH) / bh) * echelle;
+  return [(W - bw * k) / 2, (H - bh * k) / 2, bw * k, bh * k];
+}

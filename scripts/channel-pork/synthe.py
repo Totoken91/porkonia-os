@@ -395,3 +395,25 @@ def jingle_ministere_porc():
         _poser(s, piano(n, 1.8, 0.5), 0.9 + j * 0.28)
     _poser(s, accord_final() * 0.7, 2.1)
     return finir(s * env(len(s), 0.02, 1.0))
+
+
+def jingle_taverne():
+    """Cauchemar en Taverne : coups de couteau, accord de guitare saturée, grosse caisse, cymbale."""
+    s = np.zeros(int(4.6 * SR))
+    rng = np.random.default_rng(23)
+    for k in range(3):
+        m = int(0.1 * SR)
+        t = np.arange(m) / SR
+        c = filtre(rng.standard_normal(m), "band", [700, 5000]) * np.exp(-t * 60) + np.sin(2 * np.pi * 190 * t) * np.exp(-t * 40) * 0.5
+        _poser(s, c, 0.1 + k * 0.22, 0.5)
+    t = np.arange(int(0.3 * SR)) / SR
+    gc = np.sin(2 * np.pi * (48 + 110 * np.exp(-t * 30)) * t) * np.exp(-t * 9)
+    for t0 in (0.85, 1.25, 1.45):
+        _poser(s, gc, t0, 0.9)
+    d = 2.8
+    accord = sum(scie(note(n), d, 0.006, 2) for n in (40, 47, 52, 55))
+    accord = np.tanh(filtre(accord, "low", 3500) * 4) * env(int(d * SR), 0.01, 1.4)
+    _poser(s, accord, 1.45, 0.45)
+    cymb = filtre(rng.standard_normal(int(2.2 * SR)), "high", 4000) * np.exp(-np.arange(int(2.2 * SR)) / SR * 2.2)
+    _poser(s, cymb, 1.45, 0.18)
+    return finir(s * env(len(s), 0.005, 0.8))

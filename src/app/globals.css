@@ -184,6 +184,8 @@
   .facade .modele { font-size: 10px; letter-spacing: 0.06em; color: #85795f; }
   .commandes { margin-left: auto; display: flex; align-items: center; gap: 14px; }
   .bouton-rond { width: 18px; height: 18px; border-radius: 50%; border: none; padding: 0; background: radial-gradient(circle at 35% 30%, #f1e9d6, #b6aa8d); box-shadow: 0 1px 0 #f7f1e2, inset 0 -1px 2px rgba(0, 0, 0, 0.25), 0 0 0 2px #c3b89c; }
+  .bouton-plein { width: 22px; height: 18px; display: grid; place-items: center; padding: 0; border: none; border-radius: 3px; color: #4a3f2c; background: linear-gradient(180deg, #ece3cd, #c9bea2); box-shadow: 0 1px 0 #f7f1e2, inset 0 -1px 2px rgba(0, 0, 0, 0.2), 0 0 0 1px #b6aa8d; }
+  .bouton-plein:active, .bouton-plein[aria-pressed="true"] { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px #b6aa8d; }
   .bouton-rond:active { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45), 0 0 0 2px #c3b89c; }
   .voyant { width: 8px; height: 8px; border-radius: 50%; background: #3f3b2e; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5); transition: background 0.3s, box-shadow 0.3s; }
   .voyant.allume { background: #74e35f; box-shadow: 0 0 6px 1px rgba(116, 227, 95, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.3); }
@@ -232,6 +234,13 @@
   .fond-fondateur { background: #2f5b4c; }
   .fond-fondateur img { width: 360px; height: 270px; object-fit: cover; border: 3px solid var(--color-creme); box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35); margin-bottom: 28px; }
   .fond-emblemes { background: #6b1c22 url("/brand/embleme-64.png") repeat; background-size: 48px 48px; }
+  .fond-image { background-color: #2f5b4c; background-size: cover; background-position: center; }
+  .apercu.fond-image { background-size: cover; }
+  .fonds-titre { clear: both; margin: 8px 0 4px; }
+  .fonds-images { display: grid; grid-template-columns: repeat(5, 56px); gap: 4px; }
+  .fonds-images button { width: 56px; height: 44px; padding: 3px; border: none; background: var(--face); box-shadow: var(--raised); display: grid; place-items: center; }
+  .fonds-images button img { width: 48px; height: 36px; display: block; image-rendering: auto; }
+  .fonds-images button[aria-checked="true"] { box-shadow: var(--sunken); outline: 2px solid var(--color-rouge-sombre, #6b1c22); outline-offset: -2px; }
   .apercu { width: 120px; height: 80px; float: right; border: 6px solid #d6ccb4; box-shadow: var(--raised); background-size: 14px 14px; margin: 0 0 6px 10px; }
 
   /* ============================== Connexion ============================== */

@@ -200,6 +200,40 @@ def humide():
     return derriere_porte(s * 0.25)
 
 
+def chiasse(duree=2.4, force=1.0, seed=0):
+    """Chiasse derrière la porte : pets liquides qui crépitent, éclaboussures dans la cuvette, gouttes. Étouffé."""
+    rng = np.random.default_rng(77 + seed)
+    n = int(duree * SR)
+    x = np.zeros(n + SR)
+    t = 0.0
+    while t < duree - 0.2:
+        d = rng.uniform(0.18, 0.7)
+        m = int(d * SR)
+        tt = np.arange(m) / SR
+        # Le « prrrt » : un bourdon grave modulé de façon irrégulière, avec des bulles qui claquent.
+        f = rng.uniform(55, 110) * (1 + 0.35 * np.sin(2 * np.pi * rng.uniform(2, 6) * tt))
+        bourdon = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.4 + rng.standard_normal(m) * 0.6
+        bourdon *= np.abs(np.sin(2 * np.pi * rng.uniform(14, 32) * tt)) ** 1.5
+        bourdon = filtre(bourdon, "band", [50, 900]) * env(m, 0.01, 0.06)
+        i = int(t * SR)
+        x[i : i + m] += bourdon * rng.uniform(0.6, 1.0)
+        # Éclaboussures humides.
+        for _ in range(rng.integers(2, 6)):
+            e = int(rng.uniform(0.03, 0.09) * SR)
+            sp = filtre(rng.standard_normal(e), "band", [250, 2400]) * np.exp(-np.arange(e) / SR * 45)
+            j = i + int(rng.uniform(0, d) * SR)
+            x[j : j + e] += sp * rng.uniform(0.4, 0.9)
+        t += d + rng.uniform(0.05, 0.35)
+    # Plic dans l'eau, en fin de rafale.
+    for k in range(3):
+        e = int(0.12 * SR)
+        tt = np.arange(e) / SR
+        plic = np.sin(2 * np.pi * (900 - 500 * tt / 0.12) * tt) * np.exp(-tt * 40)
+        j = int((duree - 0.35 + k * 0.11) * SR)
+        x[j : j + e] += plic * 0.25
+    return derriere_porte(x[:n] * env(n, 0.02, 0.2) * 0.2 * force)
+
+
 def cle():
     """Clé tournée puis retirée, très sec."""
     x = filtre(bruitage("poignee", 0.2), "high", 500)
@@ -292,6 +326,7 @@ D = [
     ("x", appeau(), 0.4, True),
     ("x", croa(2), 0.2, True),
     ("s", 0.6),
+    ("x", chiasse(2.6, 1.0, 0), 0.0, True),
     ("x", humide(), 0.0, True),
     ("v", "K01", 0.25),
     ("s", 1.4),  # silence
@@ -309,6 +344,7 @@ D = [
     ("v", "A08", 0.6),
     ("x", cle(), 0.1, True),  # clic sec
     ("v", "R01", 0.2),
+    ("x", chiasse(1.6, 0.8, 1), 0.3, False),  # le dossier continue derrière la porte
     ("s", 2.0),  # deux secondes de silence
     ("v", "A09", 0.0),
     ("s", 1.2),
@@ -325,7 +361,8 @@ D = [
     ("v", "S04", 0.4),
     ("x", coups(4), 0.3, True),
     ("v", "R02", 0.0),
-    ("v", "S05", 0.4),
+    ("x", chiasse(1.4, 0.7, 2), 0.2, True),
+    ("v", "S05", 0.1),
     ("v", "A13", 0.7),
     ("x", applaudissements(), -1.4, False),
     ("s", 1.4),
@@ -355,7 +392,8 @@ D = [
     ("v", "S08", 0.6),
     ("s", 1.2),
     ("p", "04_cctv_sortie", "cctv"),
-    ("x", chasse(), 0.0, False),
+    ("x", chiasse(1.2, 0.6, 3), 0.0, False),
+    ("x", chasse(), 1.3, False),
     ("v", "A22", 1.0),
     ("v", "R03", 0.4),
     ("v", "S09", 0.5),

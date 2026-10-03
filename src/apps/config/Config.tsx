@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMenuCommands, useOs } from "@/os/context";
 import { DELAIS_ECONOMISEUR, type Fond } from "@/os/settings";
 import { ListeDeroulante } from "@/components/ListeDeroulante";
+import { imageDeFond } from "@/components/Wallpaper";
 
 const TABS = ["Affichage", "Son", "Citoyenneté", "Système"] as const;
 type Tab = (typeof TABS)[number];
@@ -93,13 +94,37 @@ export function Config() {
             </fieldset>
             <fieldset className="pk-fieldset">
               <legend>{str("config.fond")}</legend>
-              <div className={`apercu fond-${settings.fond}`} aria-hidden="true" />
+              {imageDeFond(pack, settings.fond) ? (
+                <div className="apercu fond-image" style={{ backgroundImage: `url(${imageDeFond(pack, settings.fond)!.image})` }} aria-hidden="true" />
+              ) : (
+                <div className={`apercu fond-${settings.fond.startsWith("image:") ? "bouteille" : settings.fond}`} aria-hidden="true" />
+              )}
               {fonds.map((f) => (
                 <label key={f.v} className="case-a-cocher">
                   <input type="radio" name="fond" disabled={f.v === "aucun"} checked={settings.fond === f.v} onChange={() => f.v !== "aucun" && setSettings({ fond: f.v })} />
                   {f.label}
                 </label>
               ))}
+              {!!pack.wallpaper?.images?.length && (
+                <>
+                  <p className="fonds-titre">{str("config.fond.images")}</p>
+                  <div className="fonds-images" role="radiogroup" aria-label={str("config.fond.images")}>
+                    {pack.wallpaper.images.map((i) => (
+                      <button
+                        key={i.id}
+                        role="radio"
+                        aria-checked={settings.fond === `image:${i.id}`}
+                        title={i.label}
+                        aria-label={i.label}
+                        onClick={() => setSettings({ fond: `image:${i.id}` })}
+                        data-testid={`fond-${i.id}`}
+                      >
+                        <img src={i.vignette} alt="" width={48} height={36} />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </fieldset>
           </>
         )}

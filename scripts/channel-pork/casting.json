@@ -76,7 +76,8 @@
    ],
    "plans": [
     "frederic"
-   ]
+   ],
+   "remarque": "Depuis « Une journée sans mentir » (octobre 2026) : Callum en eleven_v4 avec la balise « standard Parisian French accent »."
   },
   "kevin": {
    "nom": "Kevin Ranga",
@@ -419,6 +420,37 @@
    "role": "voix off des campagnes de prévention de l'État",
    "balises": [
     "standard Parisian French accent, soft, warm, paternalistic public health announcer, reassuring, slow"
+   ]
+  },
+  "ramsgroin": {
+   "moteur": "elevenlabs_v4",
+   "voice": "2EiwWnXFnvU5JabPnv8n",
+   "voix_nom": "Clyde",
+   "role": "Gordon Ramsgroin, chef de « Cauchemar en Taverne »",
+   "balises": [
+    "standard Parisian French accent, celebrity chef, dry, impatient, cutting",
+    "shouting, furious",
+    "suddenly quiet, low, cold, intense"
+   ],
+   "remarque": "Saturer le micro au mixage pendant les cris ; la voix dit « Ramsgren »."
+  },
+  "patron-au-fond-du-fut": {
+   "moteur": "elevenlabs_v4",
+   "voice": "ErXwobaYiN019PkySvjV",
+   "voix_nom": "Antoni",
+   "role": "le patron de la taverne Au Fond du Fût",
+   "balises": [
+    "standard Parisian French accent, tavern owner, perfectly serious, proud, calm"
+   ]
+  },
+  "voix-off-teleralite": {
+   "moteur": "elevenlabs_v4",
+   "voice": "XrExE9yKIg1WjnnlVkGX",
+   "voix_nom": "Matilda",
+   "role": "voix off de « Cauchemar en Taverne »",
+   "balises": [
+    "standard Parisian French accent, reality TV narrator, dramatic, serious",
+    "very neutral documentary narrator, flat"
    ]
   }
  },

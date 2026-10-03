@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
 import { ordreRecents, voisine, type Win, type WinAction } from "@/os/windows";
+import { usePleinEcran } from "@/os/pleinEcran";
 import { Icon } from "./Icon";
 import { Calendrier } from "./Calendrier";
 import { demanderPleinEcran } from "./Monitor";
@@ -78,6 +79,7 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
   const [taches, setTaches] = useState(false);
   const [sub, setSub] = useState<Sub>(null);
   const menu = useRef<HTMLDivElement>(null);
+  const plein = usePleinEcran();
   const startBtn = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -153,6 +155,14 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
             <span>{str("menu.executer")}</span>
           </button>
         </li>
+        {plein.disponible && (
+          <li onPointerEnter={() => setSub(null)}>
+            <button onClick={go(plein.basculer)} data-testid="menu-plein-ecran">
+              <Icon name="ordinateur" size={32} />
+              <span>{str(plein.actif ? "menu.quitterPleinEcran" : "menu.pleinEcran")}</span>
+            </button>
+          </li>
+        )}
         <li className="separateur" />
         <li onPointerEnter={() => setSub(null)}>
           <button onClick={go(() => runAction({ type: "lock" }))}>

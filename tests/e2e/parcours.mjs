@@ -130,6 +130,16 @@ try {
     await shot(page, `${tag}-04-bureau`);
     step(`${tag} : connexion et bureau`);
 
+    if (tag === "bureau") {
+      // Plein écran : le bouton de la façade bascule la page entière, puis la rend.
+      await page.getByTestId("plein-ecran").click();
+      await page.waitForFunction(() => Boolean(document.fullscreenElement), null, { timeout: 4000 });
+      await page.locator("[data-testid=plein-ecran][aria-pressed=true]").waitFor();
+      await page.getByTestId("plein-ecran").click();
+      await page.waitForFunction(() => !document.fullscreenElement, null, { timeout: 4000 });
+      step(`${tag} : plein écran (aller-retour)`);
+    }
+
     /** Ouvre le menu Démarrer puis clique `cible` ; si une pub surprise a refermé le menu entre-temps, on recommence. */
     const viaDemarrer = async (cible) => {
       for (let essai = 0; ; essai++) {
@@ -193,7 +203,7 @@ try {
     await page.getByTestId("tv-screen").waitFor();
     // Direct : on tombe en cours d'émission ; musique tout de suite, une voix off dans les secondes qui suivent
     // (ou la bande complète du jeu télévisé).
-    await page.waitForFunction(() => /channel-pork\/(ftg-ep\d|pub-brasswagen|pub-judas|eric-saucissignal|reportage-fatbass|pub-repulsif|pub-mangez-gras|dossiers-alvarez|initial-p-ep\d)\.mp3/.test(window.__lectures.join(" ")) || /(quiet-morning-vhs|brume-nappe)\.mp3/.test(window.__lectures.join(" ")) && /channel-pork\/[a-z-]+-\d\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 12000 }).catch(async () => {
+    await page.waitForFunction(() => /channel-pork\/(ftg-ep\d|pub-brasswagen|pub-judas|eric-saucissignal|reportage-fatbass|pub-repulsif|pub-mangez-gras|dossiers-alvarez|fred-sans-mentir|cauchemar-taverne|initial-p-ep\d)\.mp3/.test(window.__lectures.join(" ")) || /(quiet-morning-vhs|brume-nappe)\.mp3/.test(window.__lectures.join(" ")) && /channel-pork\/[a-z-]+-\d\.mp3/.test(window.__lectures.join(" ")), null, { timeout: 12000 }).catch(async () => {
       throw new Error(`Channel Pork muet : ${await page.evaluate(() => window.__lectures.join(" "))}`);
     });
     await page.waitForTimeout(600);
@@ -268,6 +278,10 @@ try {
     await page.getByText("Erreur 1212", { exact: false }).waitFor();
     await shot(page, `${tag}-08-config-erreur`);
     await page.locator("[data-testid=dialog] .pk-btn").first().click();
+    // Fond d'écran en image (Images d'État) : le bureau le prend aussitôt.
+    await page.getByTestId("fond-lac").click();
+    await page.waitForFunction(() => /\/fonds\/lac\.jpg/.test(document.querySelector(".fond.fond-image")?.getAttribute("style") ?? ""), null, { timeout: 4000 });
+    step(`${tag} : fond d'écran en image`);
     await page.getByRole("tab", { name: "Système" }).click();
     await page.getByTestId("config-maj").click();
     await page.getByTestId("update").waitFor();

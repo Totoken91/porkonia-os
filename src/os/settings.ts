@@ -1,8 +1,11 @@
 /** Réglages du citoyen (conservés dans le navigateur, jamais ailleurs). */
 import type { ChoixEcran } from "./ecran";
 
-export type Fond = "bouteille" | "lie" | "fondateur" | "emblemes";
-export const FONDS: Fond[] = ["bouteille", "lie", "fondateur", "emblemes"];
+export type FondUni = "bouteille" | "lie" | "fondateur" | "emblemes";
+/** Fond uni du système, ou image d'un pack (« image:<id> », voir `wallpaper.images`). */
+export type Fond = FondUni | `image:${string}`;
+export const FONDS: FondUni[] = ["bouteille", "lie", "fondateur", "emblemes"];
+const estFond = (v: unknown): v is Fond => FONDS.includes(v as FondUni) || (typeof v === "string" && /^image:[a-z0-9-]{1,40}$/.test(v));
 
 export interface Settings {
   /** Rémanence du tube (lignes de balayage), 12–100. */
@@ -58,7 +61,7 @@ export function sanitizeSettings(v: unknown): Settings {
   return {
     crt: clampPct(o.crt, d.crt),
     hymne: clampPct(o.hymne, d.hymne),
-    fond: FONDS.includes(o.fond as Fond) ? (o.fond as Fond) : d.fond,
+    fond: estFond(o.fond) ? o.fond : d.fond,
     rappels: typeof o.rappels === "boolean" ? o.rappels : d.rappels,
     sons: typeof o.sons === "boolean" ? o.sons : d.sons,
     economiseur: DELAIS_ECONOMISEUR.includes(o.economiseur as number) ? (o.economiseur as number) : d.economiseur,

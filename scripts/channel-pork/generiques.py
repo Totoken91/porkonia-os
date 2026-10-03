@@ -244,11 +244,26 @@ def carton_alvarez():
     return im
 
 
-# id : (carton, jingle, voix, début de la voix (s), gain voix, bande intégrale à préfixer ou None)
+def carton_taverne():
+    """Cauchemar en Taverne : le logo fourni par l'utilisateur, sur un fond de cuisine sombre."""
+    im = degrade((48, 30, 18), (14, 8, 4))
+    d = ImageDraw.Draw(im)
+    for y in range(0, H, 60):
+        d.line([(0, y), (W, y)], fill=(58, 38, 22), width=2)
+    logo = Image.open(os.path.join(ICI, "logo-cauchemar-taverne.png")).convert("RGBA")
+    lw = 680
+    logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
+    im.paste(logo, ((W - lw) // 2, (H - logo.height) // 2 - 30), logo)
+    d = ImageDraw.Draw(im)
+    texte(d, (W / 2, 520), "ÉPISODE : « AU FOND DU FÛT »", police("sans", 22), (240, 214, 160), ecart=3)
+    return im
+
+
+# id : (carton, jingle, voix, début de la voix (s), gain voix, bande(s) intégrale(s) à préfixer ou None)
 GENERIQUES = {
     "ministere": (carton_ministere, synthe.jingle_ministere, "ministere", 2.3, 1.0, "pub-repulsif"),
     "gras-capital": (carton_gras_capital, synthe.jingle_gras_capital, "gras-capital", 0.9, 1.0, "eric-saucissignal"),
-    "porc-attache": (carton_porc_attache, synthe.jingle_porc_attache, "porc-attache", 1.2, 1.0, "reportage-fatbass"),
+    "porc-attache": (carton_porc_attache, synthe.jingle_porc_attache, "porc-attache", 1.2, 1.0, ("reportage-fatbass", "fred-sans-mentir")),
     "initial-p": (carton_initial_p, synthe.jingle_initial_p, "initial-p", 1.0, 1.5, "initial-p-ep1"),
     "journal": (carton_journal, synthe.jingle_journal, "journal", 2.0, 1.0, None),
     "stade": (carton_stade, synthe.jingle_stade, "stade", 1.95, 1.0, None),
@@ -257,6 +272,7 @@ GENERIQUES = {
     "betes": ((lambda: carton_betes(False)), lambda: synthe.jingle_nature(True), "betes", 1.9, 1.0, None),
     "meteo": (carton_meteo, synthe.jingle_meteo, "meteo", 1.6, 1.0, None),
     "ministere-porc": (carton_ministere_porc, synthe.jingle_ministere_porc, "ministere-porc", 2.3, 1.0, "pub-mangez-gras"),
+    "taverne": (carton_taverne, synthe.jingle_taverne, "taverne", 1.7, 1.0, "cauchemar-taverne"),
     "alvarez": (carton_alvarez, synthe.jingle_alvarez, "alvarez", 2.4, 1.0, "dossiers-alvarez"),
 }
 
@@ -290,8 +306,8 @@ def main():
         carton().save(os.path.join(CARTONS, f"{gid}.png"), optimize=True)
         x = mixer(jingle(), voix, debut, gain)
         durees[gid] = round(len(x) / SR, 2)
-        if bande:
-            nu = os.path.join(SORTIE, f"{bande}.wav")
+        for b in (bande if isinstance(bande, tuple) else (bande,) if bande else ()):
+            nu = os.path.join(SORTIE, f"{b}.wav")
             sr, y = wavfile.read(nu)
             y = y.astype(float) / 32768
             if y.ndim > 1:
@@ -299,10 +315,10 @@ def main():
             assert sr == SR, (nu, sr)
             z = np.concatenate([x / (np.abs(x).max() + 1e-9) * 0.9, np.zeros(int(0.15 * SR)), y])
             durees[gid] = round((len(x) + int(0.15 * SR)) / SR, 2)
-            chemin = os.path.join(SORTIE, f"{bande}-avec-generique.wav")
+            chemin = os.path.join(SORTIE, f"{b}-avec-generique.wav")
             wavfile.write(chemin, SR, (np.clip(z, -1, 1) * 32767).astype(np.int16))
-            encoder_mp3(chemin, os.path.join(AUDIO, f"{bande}.mp3"))
-        else:
+            encoder_mp3(chemin, os.path.join(AUDIO, f"{b}.mp3"))
+        if not bande:
             chemin = os.path.join(SORTIE, f"generique-{gid}.wav")
             wavfile.write(chemin, SR, (x / (np.abs(x).max() + 1e-9) * 0.9 * 32767).astype(np.int16))
             encoder_mp3(chemin, os.path.join(AUDIO, f"generique-{gid}.mp3"))

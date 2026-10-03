@@ -9,7 +9,7 @@
 import type { Habillage } from "@/content/types";
 import { useEffect, useRef } from "react";
 import { type Bulletin, dessinerBulletin } from "./meteoCanvas";
-import { VHS, lineOffset, wrapText } from "./vhs";
+import { VHS, boiteVisible, centrer, lineOffset, wrapText } from "./vhs";
 
 export interface EcranVhsProps {
   image: string | null;
@@ -107,6 +107,26 @@ export function EcranVhs(props: EcranVhsProps) {
     const f = trame.getContext("2d")!;
     const bruits = [bruit(), bruit(), bruit(), bruit()];
     const images = new Map<string, HTMLImageElement>();
+    /** Partie visible (hors marges transparentes) de chaque logo, mesurée une fois. */
+    const boites = new Map<CanvasImageSource, [number, number, number, number]>();
+    const boite = (src: CanvasImageSource, sw: number, sh: number) => {
+      let r = boites.get(src);
+      if (!r) {
+        r = [0, 0, sw, sh];
+        try {
+          const k = Math.min(1, 256 / Math.max(sw, sh));
+          const t = toile(Math.max(1, Math.round(sw * k)), Math.max(1, Math.round(sh * k)));
+          const tc = t.getContext("2d")!;
+          tc.drawImage(src, 0, 0, t.width, t.height);
+          const [x, y, w, h] = boiteVisible(tc.getImageData(0, 0, t.width, t.height).data, t.width, t.height);
+          r = [x / k, y / k, w / k, h / k];
+        } catch {
+          // Image d'une autre origine : pas de lecture des pixels, on garde l'image entière.
+        }
+        boites.set(src, r);
+      }
+      return r;
+    };
     let video: HTMLVideoElement | null = null;
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const racine = getComputedStyle(document.documentElement);
@@ -333,9 +353,10 @@ export function EcranVhs(props: EcranVhsProps) {
           // Générique : fond uni voilé, image entière au centre, légère respiration.
           b.fillStyle = p.fond;
           b.fillRect(0, 0, W, H);
-          // Logo réduit et remonté : le bandeau du bas reste lisible.
-          const k = Math.min(W / sw, (H * 0.66) / sh) * (1 + 0.05 * (reduit ? 0 : p.progression));
-          b.drawImage(src, (W - sw * k) / 2, H * 0.36 - (sh * k) / 2, sw * k, sh * k);
+          // Partie visible du logo centrée dans l'écran, marges transparentes ignorées.
+          const [bx, by, bw, bh] = boite(src, sw, sh);
+          const [dx, dy, dw, dh] = centrer(bw, bh, W, H, 0.84, 0.6, 1 + 0.05 * (reduit ? 0 : p.progression));
+          b.drawImage(src, bx, by, bw, bh, dx, dy, dw, dh);
           const v = b.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.8);
           v.addColorStop(0, "rgba(0,0,0,0)");
           v.addColorStop(1, "rgba(0,0,0,0.5)");

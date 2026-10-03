@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "« Porc d'Attache — Une journée sans mentir » (script de l'utilisateur). ElevenLabs v4, balise « standard Parisian French accent » en tête. F : Frédéric Legaigneur (Callum, la voix de « Ferme ta gueule et réponds »), J : le reporter du magazine, V : voix off (Charlie, le reporter de « Porc d'Attache »).",
+ "modele": "eleven_v4",
+ "voix": {"F": "Callum N2lVS1w4EtoT3dr4eOWO", "J": "Charlie IKne3meq5aSn9XLyUdCD", "V": "Charlie IKne3meq5aSn9XLyUdCD"},
+ "ecarts_au_script": ["F13 : « Oui. » extrait d'une prise « Euh… oui. Oui. » ; réutilisé pour « Vous l'avez imprimé ici ? »", "J01, J24, J25, J27, J28, F25 : prises coupées après la première occurrence (le moteur répétait)", "F30 coupée au milieu de « sans les mains », comme demandé"]
+}

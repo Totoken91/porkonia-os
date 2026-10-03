@@ -217,6 +217,18 @@ describe("système de fichiers et réglages", () => {
     expect(sanitizeSettings(null)).toEqual(DEFAULT_SETTINGS);
     expect(sanitizeSettings({ crt: 3, hymne: 500, fond: "rien", rappels: "oui" })).toEqual({ ...DEFAULT_SETTINGS, crt: 12, hymne: 100 });
   });
+  it("accepte un fond en image du pack, refuse un chemin bricolé", () => {
+    expect(sanitizeSettings({ fond: "image:lac" }).fond).toBe("image:lac");
+    expect(sanitizeSettings({ fond: "image:../../etc" }).fond).toBe(DEFAULT_SETTINGS.fond);
+    const imgs = porkosPack.wallpaper?.images ?? [];
+    expect(imgs.length).toBe(10);
+    expect(new Set(imgs.map((i) => i.id)).size).toBe(imgs.length);
+    for (const i of imgs) {
+      expect(i.id).toMatch(/^[a-z0-9-]+$/);
+      expect(existsSync(`public${i.image}`), i.image).toBe(true);
+      expect(existsSync(`public${i.vignette}`), i.vignette).toBe(true);
+    }
+  });
 });
 
 describe("Exécuter", async () => {

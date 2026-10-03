@@ -172,3 +172,17 @@ describe("ordonnanceur : préfixes et sessions", () => {
     expect(schedule(regles, emptyRuleState(), { kind: "tick", elapsed: 10 }, makeRng(1), {}, 2).actions.map((a) => a.rule)).toEqual(["retour"]);
   });
 });
+
+it("logos sur fond uni : la partie visible est centrée, marges transparentes ignorées", async () => {
+  const { boiteVisible, centrer } = await import("@/apps/channel-pork/vhs");
+  // Image 4×4 dont seul le pixel (1,0) et (2,1) sont opaques : un logo collé en haut.
+  const px = new Uint8ClampedArray(4 * 4 * 4);
+  px[(0 * 4 + 1) * 4 + 3] = 255;
+  px[(1 * 4 + 2) * 4 + 3] = 255;
+  expect(boiteVisible(px, 4, 4)).toEqual([1, 0, 2, 2]);
+  expect(boiteVisible(new Uint8ClampedArray(16), 2, 2)).toEqual([0, 0, 2, 2]);
+  const [x, y, w, h] = centrer(200, 100, 384, 288);
+  expect(x + w / 2).toBeCloseTo(192);
+  expect(y + h / 2).toBeCloseTo(144);
+  expect(h).toBeLessThanOrEqual(288 * 0.6 + 1e-9);
+});

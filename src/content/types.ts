@@ -384,8 +384,11 @@ export interface ContentPack {
   users: UserProfile[];
   apps: AppManifest[];
   desktop: DesktopIcon[];
-  /** Fond d'écran « Portrait du Fondateur » (référence d'origine, jamais une copie). */
-  wallpaper?: { portrait?: string };
+  /**
+   * Fond d'écran « Portrait du Fondateur » (référence d'origine, jamais une copie) et fonds en image proposés dans
+   * les Réglages (`image` en 4:3, `vignette` pour la liste).
+   */
+  wallpaper?: { portrait?: string; images?: { id: string; label: string; image: string; vignette: string }[] };
   /** Écran de bienvenue ouvert à la connexion. */
   welcome: { title: string; intro: string; tips: string[]; links: { label: string; action: ActionRef }[] };
   filesystem: FsNode;

@@ -9,6 +9,7 @@ import { EcranContext, ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
 import { choisirEcran, choixDansAdresse, MONITEUR, type ChoixEcran } from "@/os/ecran";
 import { ambiance, jouer } from "@/os/sons";
+import { usePleinEcran } from "@/os/pleinEcran";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
 
@@ -39,6 +40,7 @@ export function demanderPleinEcran(el: Element = document.documentElement) {
 }
 
 export function Monitor({ children, crt, power, onPower, sons, nette, affichage, str }: Props) {
+  const plein = usePleinEcran();
   const [box, setBox] = useState<{ vw: number; vh: number; dpr: number } | null>(null);
   const [choixAdresse, setChoixAdresse] = useState<ChoixEcran>("auto");
   // Zone sûre du Poche (encoche, barre d'accueil) : mesurée sur une sonde qui en porte les marges.
@@ -214,6 +216,20 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
                 </span>
                 <span className="modele">Moniteur d&apos;État 14&quot; · 800×600 · Homologué</span>
                 <span className="commandes">
+                  {plein.disponible && (
+                    <button
+                      className="bouton-plein"
+                      onClick={plein.basculer}
+                      aria-pressed={plein.actif}
+                      title={str(plein.actif ? "moniteur.quitterPleinEcran" : "moniteur.pleinEcran")}
+                      aria-label={str(plein.actif ? "moniteur.quitterPleinEcran" : "moniteur.pleinEcran")}
+                      data-testid="plein-ecran"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                        <path d={plein.actif ? "M4 1v3H1M8 1v3h3M4 11V8H1M8 11V8h3" : "M1 4V1h3M11 4V1H8M1 8v3h3M11 8v3H8"} fill="none" stroke="currentColor" strokeWidth="1.5" />
+                      </svg>
+                    </button>
+                  )}
                   <button className="bouton-rond" onClick={demagnetiser} title={str("moniteur.demagnetiser")} aria-label={str("moniteur.demagnetiser")} data-testid="degauss">
                     <i />
                   </button>
