@@ -269,7 +269,7 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
             </ul>
           </div>
         )}
-        <nav className="facade" aria-label={str("poche.facade")}>
+        <nav className="facade-poche" aria-label={str("poche.facade")}>
           <div className="facade-boutons">
             <button ref={startBtn} className="fb-bouton fb-demarrer" aria-expanded={open} aria-haspopup="menu" onClick={() => (fermerTiroirs(), setOpen((o) => !o))} data-testid="start" aria-label={str("demarrer")}>
               <img src="/brand/embleme-64.png" alt="" width={32} height={32} />
