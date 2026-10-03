@@ -8,8 +8,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useEcran, useOs } from "@/os/context";
 import { conseil, dureeLecture, reagir, type Bulle, type EvenementOs } from "@/os/assistant";
 import { pick } from "@/os/rng";
-import { gridPaths } from "./pixel";
-import { gruikGrid, TAILLE_GRUIK, type Pose } from "./gruik";
 
 type Affiche = (Bulle & { humeur?: "content" | "ouvert" | "surpris" }) | { cle: "menu"; texte: string; question: false; menu: true };
 
@@ -22,7 +20,6 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
   const [salue, setSalue] = useState(false);
   const [parle, setParle] = useState(false);
   const [regard, setRegard] = useState(false);
-  const [frame, setFrame] = useState(0);
   const [sortie, setSortie] = useState(false);
   const [decal, setDecal] = useState({ x: 0, y: 0 });
   const vus = useRef(new Set<string>());
@@ -90,13 +87,6 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
     return () => clearInterval(id);
   }, [visible, spec, rng, dire]);
 
-  // Animation : bras qui salue, groin qui parle.
-  useEffect(() => {
-    if (!salue && !parle) return;
-    const id = setInterval(() => setFrame((f) => f + 1), 220);
-    return () => clearInterval(id);
-  }, [salue, parle]);
-
   if (!visible) return null;
 
   const fermer = () => setBulle(null);
@@ -112,9 +102,7 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
   };
 
   const humeur = bulle && "humeur" in bulle && bulle.humeur ? bulle.humeur : regard ? "ouvert" : "content";
-  const pose: Pose = { bras: salue ? (frame % 2 ? "salut2" : "salut1") : "repos", visage: humeur, parle: parle && frame % 2 === 1 };
-  const paths = gridPaths(gruikGrid(pose));
-  const taille = ecran.mode === "poche" ? 72 : 96;
+  const taille = ecran.mode === "poche" ? (ecran.h < 500 ? 72 : 84) : 120;
 
   const bas = (e: React.PointerEvent) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -123,7 +111,7 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
   const bouge = (e: React.PointerEvent) => {
     const g = glisse.current;
     if (!g) return;
-    const k = ecran.mode === "poche" ? 1 : ((e.currentTarget as HTMLElement).getBoundingClientRect().width || taille) / taille;
+    const k = ecran.mode === "poche" ? 1 : ((e.currentTarget as HTMLElement).getBoundingClientRect().height || taille) / taille;
     const mx = (e.clientX - g.x) / k;
     const my = (e.clientY - g.y) / k;
     if (Math.abs(mx) + Math.abs(my) > 4) g.bouge = true;
@@ -184,24 +172,20 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
           )}
         </div>
       )}
-      <svg
-        className="gruik-corps"
-        width={taille}
-        height={taille}
-        viewBox={`0 0 ${TAILLE_GRUIK} ${TAILLE_GRUIK}`}
-        shapeRendering="crispEdges"
+      <img
+        className={`gruik-corps${salue ? " salue" : parle ? " parle" : ""}${humeur === "surpris" ? " surpris" : ""}${regard && !bulle ? " regarde" : ""}`}
+        src={spec.image}
+        srcSet={spec.image2x ? `${spec.image} 1x, ${spec.image2x} 2x` : undefined}
+        style={{ height: taille }}
+        alt={spec.nom}
+        draggable={false}
         onPointerDown={bas}
         onPointerMove={bouge}
         onPointerUp={haut}
         onPointerCancel={() => (glisse.current = null)}
         role="button"
-        aria-label={spec.nom}
         data-testid="gruik-corps"
-      >
-        {paths.map((p) => (
-          <path key={p.color} d={p.d} fill={p.color} />
-        ))}
-      </svg>
+      />
     </div>
   );
 }

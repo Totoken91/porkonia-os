@@ -2886,6 +2886,8 @@ export const porkosPack: ContentPack = {
 
   assistant: {
     nom: "Gruik",
+    image: "/assistant/gruik.png",
+    image2x: "/assistant/gruik@2x.png",
     titre: "Assistant Numérique d'État",
     accueil: "Bonjour ! Je suis Gruik, votre Assistant Numérique d'État. Je suis là pour vous aider. Je suis aussi là pour le reste.",
     presentation: "Je suis Gruik, Assistant Numérique d'État, modèle 12.12. J'ai été livré avec votre poste, comme l'écran et la souris, mais je suis le seul des trois à prendre des notes.",

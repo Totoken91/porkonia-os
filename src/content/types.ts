@@ -332,6 +332,9 @@ export interface Installeur {
  */
 export interface AssistantSpec {
   nom: string;
+  /** Image du personnage (PNG transparent), et sa version double densité. */
+  image: string;
+  image2x?: string;
   titre: string;
   accueil: string;
   presentation: string;

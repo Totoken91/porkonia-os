@@ -1318,8 +1318,16 @@
   .gruik.sortie { animation: gruik-sortie 0.6s steps(6) forwards; }
   @keyframes gruik-entree { from { opacity: 0; translate: 0 40px; } to { opacity: 1; translate: 0 0; } }
   @keyframes gruik-sortie { to { opacity: 0; translate: 0 60px; } }
-  .gruik-corps { pointer-events: auto; cursor: pointer; touch-action: none; filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.35)); animation: gruik-souffle 2.4s steps(2) infinite; }
-  @keyframes gruik-souffle { 50% { translate: 0 -1px; } }
+  .gruik-corps { pointer-events: auto; cursor: pointer; touch-action: none; user-select: none; width: auto; filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.35)); transform-origin: 50% 100%; animation: gruik-souffle 2.6s ease-in-out infinite; }
+  .gruik-corps.salue { animation: gruik-salue 0.5s ease-in-out 4; }
+  .gruik-corps.parle { animation: gruik-parle 0.32s ease-in-out infinite; }
+  .gruik-corps.surpris { animation: gruik-saut 0.45s ease-out 2; }
+  .gruik-corps.regarde { animation: gruik-regarde 1.4s ease-in-out 1; }
+  @keyframes gruik-regarde { 30%, 70% { transform: rotate(-3deg) translateX(-2px); } }
+  @keyframes gruik-souffle { 50% { transform: scale(1.015, 0.985); } }
+  @keyframes gruik-salue { 25% { transform: rotate(-5deg); } 75% { transform: rotate(4deg); } }
+  @keyframes gruik-parle { 50% { transform: translateY(-2px) scale(1.01, 0.99); } }
+  @keyframes gruik-saut { 40% { transform: translateY(-10px); } 70% { transform: translateY(0) scale(1.04, 0.95); } }
   .gruik-bulle { pointer-events: auto; position: relative; width: 236px; max-width: calc(100vw - 24px); margin: 0 18px 10px 0; padding: 6px 8px 8px; background: #fffbe0; color: #15110d; border: 1px solid #15110d; box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3); }
   .gruik-bulle::after { content: ""; position: absolute; right: 30px; bottom: -9px; width: 14px; height: 9px; background: #fffbe0; clip-path: polygon(0 0, 100% 0, 70% 100%); }
   .gruik-bulle::before { content: ""; position: absolute; right: 29px; bottom: -11px; width: 16px; height: 10px; background: #15110d; clip-path: polygon(0 0, 100% 0, 70% 100%); }
@@ -1327,7 +1335,7 @@
   .gruik-bulle p { margin: 2px 0 6px; }
   .gruik-boutons { display: flex; justify-content: flex-end; gap: 6px; }
   .gruik-menu { display: flex; flex-direction: column; gap: 4px; }
-  .avec-gruik .bulles { right: 112px; }
+  .avec-gruik .bulles { right: 150px; }
   .ecran.poche .gruik { right: 4px; }
   .ecran.poche .gruik-bulle { width: 260px; margin-right: 8px; }
   .ecran.poche.avec-gruik .bulles, .ecran.poche .avec-gruik .bulles { right: 6px; }
