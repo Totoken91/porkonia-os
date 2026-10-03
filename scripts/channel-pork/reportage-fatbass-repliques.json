@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "Reportage « DJ Fatbass à bord du Gras-Fond » (script de l'utilisateur). ElevenLabs v4. F : Fatbass (Drew), R : reporter (Charlie), M : marin (Fin). ronfle : prise v4 non verbale de Drew « [asleep, snoring loudly, deep snore] Rrrrrhhhhh... pfffff... ». Balises de jeu entre crochets dans le texte envoyé (voir CASTING.md).",
+ "modele": "eleven_v4",
+ "voix": {"F": "Drew 29vD33N1CtxCmqQRPOHJ", "R": "Charlie IKne3meq5aSn9XLyUdCD", "M": "Fin D38z5RcWu1voky8WS1ja"},
+ "ecarts_au_script": ["M2 : « Normalement, lui. »", "F11 : la prise dit « Ouais, ouais… »"]
+}

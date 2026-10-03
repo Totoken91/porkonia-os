@@ -309,11 +309,65 @@
     "polite, curious"
    ],
    "note": "Reste poli et continue ses questions, même après les insultes."
+  },
+  "dj-fatbass": {
+   "moteur": "elevenlabs_v4",
+   "voice": "29vD33N1CtxCmqQRPOHJ",
+   "voix_nom": "Drew",
+   "role": "Edwin Valentin, alias DJ Fatbass / lieutenant Salamander, reportage du Gras-Fond",
+   "balises": [
+    "tired, slow, deadpan, low voice",
+    "flat, matter-of-fact, slow",
+    "yawns loudly",
+    "asleep, mumbling, barely intelligible"
+   ]
+  },
+  "reporter-channel-pork": {
+   "moteur": "elevenlabs_v4",
+   "voice": "IKne3meq5aSn9XLyUdCD",
+   "voix_nom": "Charlie",
+   "role": "reporter local de Channel Pork (micro trop près)",
+   "balises": [
+    "local TV reporter, earnest, energetic intro, close to the mic",
+    "serious, slightly worried",
+    "whispering",
+    "quietly, resigned, low voice"
+   ]
+  },
+  "marin-gras-fond": {
+   "moteur": "elevenlabs_v4",
+   "voice": "D38z5RcWu1voky8WS1ja",
+   "voix_nom": "Fin",
+   "role": "marin hors champ du Gras-Fond",
+   "balises": [
+    "bored, off-hand, unimpressed"
+   ]
+  },
+  "fonctionnaire-ministere": {
+   "moteur": "elevenlabs_v4",
+   "voice": "flq6f7yk4E4fJM5XTYuZ",
+   "voix_nom": "Michael",
+   "role": "fonctionnaire du ministère, publicités d'État",
+   "balises": [
+    "neutral government official, slow, carefully articulated, monotone",
+    "flat, administrative"
+   ],
+   "remarque": "Prononce « goblins » à l'anglaise : écrire « gobeulin(s) » ou « gaubelin » dans le texte envoyé."
+  },
+  "luis-fontanillas": {
+   "moteur": "elevenlabs_v4",
+   "voice": "zcAOhNBS3c14rBihAFp1",
+   "voix_nom": "Giovanni",
+   "role": "Luis Fontanillas, gobelin opportuniste (pub du répulsif)",
+   "balises": [
+    "whispering, delighted, greedy discovery",
+    "mouth full, chewing, satisfied",
+    "louder, insistent, annoyed"
+   ]
   }
  },
  "libres": {
-  "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages.",
-  "Fin": "D38z5RcWu1voky8WS1ja"
+  "_note": "Voix ElevenLabs testées et encore libres, pour de futurs personnages."
  },
  "_comparatif_moteurs": "Octobre 2026, même réplique sur six moteurs (étendue de hauteur 5e-95e centile, demi-tons) : ElevenLabs v4 18,5 · MiniMax speech-2.8-hd 17,3 · Fish Audio s2.1-pro 16,0 · OpenAI gpt-4o-mini-tts 12,5 · Hume Octave 2 11,6 · Inworld TTS-2 9,3 · ElevenLabs v3 7,9. Préférer eleven_v4 pour les nouvelles voix (garde les balises de jeu)."
 }

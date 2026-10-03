@@ -97,3 +97,11 @@ python3 mix-initial-p-ep1.py     # sortie/initial-p-ep1.mp3 + .json
 ```
 
 Copier le mp3 dans `public/audio/channel-pork/` et coller slides et sous-titres dans le programme du pack (`src/content/packs/porkos.ts`, champ `bande` pour une bande son complète). Pour un nouvel épisode, copier `mix-ftg-ep1.py` : le déroulé (`DEROULE`) liste répliques, bruitages, plans et scores dans l'ordre. Dépendances : numpy, scipy, ffmpeg (ou `pip install imageio-ffmpeg`).
+
+## Reportage « DJ Fatbass à bord du Gras-Fond »
+
+Reportage local des années 2000 d'après le script de l'utilisateur (ElevenLabs v4). DJ Fatbass / lieutenant Salamander (**Drew**) parle lentement, fatigué dès le début, sans surjouer, puis s'endort ; ses ronflements sont des prises v4 non verbales de la même voix. Le reporter (**Charlie**) pose ses questions sérieusement, micro trop près (effet de proximité, légère saturation). Le marin hors champ (**Fin**) est banal. Son : générique de magazine régional synthétisé, puis uniquement le bruit de bord (ventilation, tuyaux, chaudière, secteur), pings de sonar, trois secondes de techno-zouk synthétisée coupées au fader, silences gênants, coupe franche au noir en plein ronflement. Images fixes sans bandeau dans `public/tv/fatbass/`, mixage `scripts/channel-pork/mix-reportage-fatbass.py` (instruments dans `synthe.py`).
+
+## Publicité d'État « Le répulsif à gobelins officiel »
+
+D'après le script de l'utilisateur. Le fonctionnaire (**Michael**, v4) reste neutre, lent et appliqué, et n'avoue jamais la présence de Luis ; il prononce « goblins » à l'anglaise, d'où l'orthographe phonétique « gobeulin » / « gaubelin » dans les textes envoyés. Luis Fontanillas (**Giovanni**) est un opportuniste ordinaire et gourmand, étouffé dans le placard derrière. Son : néon qui grésille, sifflement de téléviseur cathodique, souffle de micro, bouteilles dans le placard, orgue bon marché de trois notes (synthétisé), mastication très audible, claquement de langue, coupe au noir sur un dernier bruit de mastication. Images dans `public/tv/repulsif/`, mixage `scripts/channel-pork/mix-pub-repulsif.py`.

@@ -20,3 +20,7 @@ Tous les fichiers de ce dossier sont sous licence **CC0** (domaine public), tél
 | pieces | « Coin sounds », https://opengameart.org/content/coin-sounds |
 | fourchette | « Cutlery sounds », https://opengameart.org/content/cutlery-sounds |
 | croque-1, croque-2, croque-3, croque-5 | « 7 eating crunches », https://opengameart.org/content/7-eating-crunches |
+| sonar | « Sonar ping », https://opengameart.org/content/sonar-ping |
+| ventilation | « Defect motor loop » (fan_interval), https://opengameart.org/content/defect-motor-loop |
+| bouteille-ouvre, bouteille-ferme | « Glass bottle open / close », https://opengameart.org/content/glass-bottle-open-close |
+| mastique-01 à mastique-04, souffle | « 80 CC0 creature SFX », https://opengameart.org/content/80-cc0-creature-sfx |
