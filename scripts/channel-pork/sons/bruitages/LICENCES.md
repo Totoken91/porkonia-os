@@ -1,6 +1,6 @@
 # Bruitages
 
-Tous les fichiers de ce dossier sont sous licence **CC0** (domaine public), téléchargés sur OpenGameArt.org et convertis en Opus mono.
+Sauf exceptions listées en bas de page, les fichiers de ce dossier sont sous licence **CC0** (domaine public), téléchargés sur OpenGameArt.org et convertis en Opus mono.
 
 | Fichiers | Source |
 |---|---|
@@ -24,3 +24,13 @@ Tous les fichiers de ce dossier sont sous licence **CC0** (domaine public), tél
 | ventilation | « Defect motor loop » (fan_interval), https://opengameart.org/content/defect-motor-loop |
 | bouteille-ouvre, bouteille-ferme | « Glass bottle open / close », https://opengameart.org/content/glass-bottle-open-close |
 | mastique-01 à mastique-04, souffle | « 80 CC0 creature SFX », https://opengameart.org/content/80-cc0-creature-sfx |
+
+## Exceptions (chiasse des « Dossiers d'Alvarez »)
+
+Ces fichiers ne viennent pas tous d'OpenGameArt ; licence indiquée pour chacun.
+
+| Fichiers | Source | Licence |
+|---|---|---|
+| chiasse-01 à chiasse-11 | « Gastric distress » (bylfa), https://opengameart.org/content/gastric-distress | CC0 |
+| pet-01 à pet-08 | « farts-pieruja » (Zache, ylearkisto), https://commons.wikimedia.org/wiki/File:425594_ylearkisto_farts-pieruja.wav | CC BY 3.0 : crédit à Zache |
+| pet-mouille, gargouillis | « Wet fart tummy rumbles » (natalie), https://commons.wikimedia.org/wiki/File:Wet_fart_tummy_rumbles.ogg | domaine public |

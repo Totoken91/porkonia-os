@@ -144,6 +144,8 @@ def roues(d):
         for dk in (0.0, 0.12):
             i = int((k + dk) * SR)
             m = int(0.06 * SR)
+            if i >= n:
+                continue
             x[i : i + m] += filtre(_rng.standard_normal(m), "band", [100, 1500])[: n - i] * np.exp(-np.arange(min(m, n - i)) / SR * 60) * 0.05
     return x
 

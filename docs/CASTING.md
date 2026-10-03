@@ -132,7 +132,7 @@ D'après le script de l'utilisateur. Frédéric Legaigneur garde sa voix de « F
 
 Parodie de téléréalité d'après le script de l'utilisateur. Gordon Ramsgroin (**Clyde**) sec, impatient puis explosif, micro-cravate qui sature pendant les cris ; le patron (**Antoni**) parfaitement sérieux ; un client hors champ (**Sam**) ; voix off (**Matilda**). Son : couteau sur la planche, ventilation, porte, fourchette et verre, frigo (joint, moteur), eau, brosse, seau, tireuse et mousse qui déborde cinq secondes, gouttes, verre cassé hors champ, nappe de tension grave coupée pendant les silences, coupe franche puis logo sur noir. Générique avec le logo fourni (`scripts/channel-pork/logo-cauchemar-taverne.png`) et un jingle synthétisé (`synthe.jingle_taverne`). Images dans `public/tv/taverne/`, mixage `scripts/channel-pork/mix-cauchemar-taverne.py`.
 
-Le Coup de Hamelot (« Les Dossiers d'Alvarez ») comporte aussi, à la demande de l'utilisateur, des bruits de chiasse synthétisés derrière la porte des toilettes (`chiasse()` dans le mixage).
+Le Coup de Hamelot (« Les Dossiers d'Alvarez ») comporte aussi, à la demande de l'utilisateur, des bruits de chiasse derrière la porte des toilettes : de vrais enregistrements (`chiasse-*`, `pet-*`, `gargouillis` dans `sons/bruitages/`, licences dans `LICENCES.md`), montés en salves par `chiasse()` et à peine étouffés par la porte.
 
 ## « Allô, Stéphane ? — Pris en charge »
 

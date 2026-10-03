@@ -201,37 +201,32 @@ def humide():
 
 
 def chiasse(duree=2.4, force=1.0, seed=0):
-    """Chiasse derrière la porte : pets liquides qui crépitent, éclaboussures dans la cuvette, gouttes. Étouffé."""
+    """Chiasse derrière la porte : vrais enregistrements (rafales « Gastric distress », pets mouillés, gargouillis),
+    montés en salve. La porte n'étouffe qu'à moitié : on entend tout."""
     rng = np.random.default_rng(77 + seed)
     n = int(duree * SR)
-    x = np.zeros(n + SR)
+    x = np.zeros(n + 3 * SR)
     t = 0.0
-    while t < duree - 0.2:
-        d = rng.uniform(0.18, 0.7)
-        m = int(d * SR)
-        tt = np.arange(m) / SR
-        # Le « prrrt » : un bourdon grave modulé de façon irrégulière, avec des bulles qui claquent.
-        f = rng.uniform(55, 110) * (1 + 0.35 * np.sin(2 * np.pi * rng.uniform(2, 6) * tt))
-        bourdon = np.sign(np.sin(2 * np.pi * np.cumsum(f) / SR)) * 0.4 + rng.standard_normal(m) * 0.6
-        bourdon *= np.abs(np.sin(2 * np.pi * rng.uniform(14, 32) * tt)) ** 1.5
-        bourdon = filtre(bourdon, "band", [50, 900]) * env(m, 0.01, 0.06)
+    if rng.random() < 0.7:
+        g = bruitage("gargouillis", 0.5)
+        x[: len(g)] += g
+        t = 0.5
+    rafales = [f"chiasse-{k:02d}" for k in rng.permutation(11)]
+    pets = [f"pet-{k:02d}" for k in rng.permutation(np.arange(1, 9))] + ["pet-mouille"]
+    while t < duree:
+        nom = rafales.pop() if rng.random() < 0.65 or not pets else pets.pop()
+        y = bruitage(nom, rng.uniform(0.75, 1.0))
+        reste = int((duree + 0.6 - t) * SR)
+        if len(y) > reste:
+            y = y[:reste] * env(reste, 0.001, 0.15)
         i = int(t * SR)
-        x[i : i + m] += bourdon * rng.uniform(0.6, 1.0)
-        # Éclaboussures humides.
-        for _ in range(rng.integers(2, 6)):
-            e = int(rng.uniform(0.03, 0.09) * SR)
-            sp = filtre(rng.standard_normal(e), "band", [250, 2400]) * np.exp(-np.arange(e) / SR * 45)
-            j = i + int(rng.uniform(0, d) * SR)
-            x[j : j + e] += sp * rng.uniform(0.4, 0.9)
-        t += d + rng.uniform(0.05, 0.35)
-    # Plic dans l'eau, en fin de rafale.
-    for k in range(3):
-        e = int(0.12 * SR)
-        tt = np.arange(e) / SR
-        plic = np.sin(2 * np.pi * (900 - 500 * tt / 0.12) * tt) * np.exp(-tt * 40)
-        j = int((duree - 0.35 + k * 0.11) * SR)
-        x[j : j + e] += plic * 0.25
-    return derriere_porte(x[:n] * env(n, 0.02, 0.2) * 0.2 * force)
+        x[i : i + len(y)] += y
+        t += len(y) / SR * rng.uniform(0.55, 0.9)  # les rafales se chevauchent
+    x = x[: int((duree + 0.7) * SR)]
+    # À travers la porte : un peu de grave en moins d'aigu, la petite pièce carrelée.
+    y = filtre(x, "low", 3200)
+    y = reflets(y, ((0.006, 0.35), (0.013, 0.25), (0.022, 0.15)), 2500)
+    return couloir(y * 0.55 * force)
 
 
 def cle():
@@ -326,7 +321,7 @@ D = [
     ("x", appeau(), 0.4, True),
     ("x", croa(2), 0.2, True),
     ("s", 0.6),
-    ("x", chiasse(2.6, 1.0, 0), 0.0, True),
+    ("x", chiasse(4.5, 1.0, 0), 0.0, True),
     ("x", humide(), 0.0, True),
     ("v", "K01", 0.25),
     ("s", 1.4),  # silence
@@ -344,7 +339,7 @@ D = [
     ("v", "A08", 0.6),
     ("x", cle(), 0.1, True),  # clic sec
     ("v", "R01", 0.2),
-    ("x", chiasse(1.6, 0.8, 1), 0.3, False),  # le dossier continue derrière la porte
+    ("x", chiasse(2.8, 0.9, 1), 0.3, False),  # le dossier continue derrière la porte
     ("s", 2.0),  # deux secondes de silence
     ("v", "A09", 0.0),
     ("s", 1.2),
@@ -361,7 +356,7 @@ D = [
     ("v", "S04", 0.4),
     ("x", coups(4), 0.3, True),
     ("v", "R02", 0.0),
-    ("x", chiasse(1.4, 0.7, 2), 0.2, True),
+    ("x", chiasse(2.6, 0.9, 2), 0.2, True),
     ("v", "S05", 0.1),
     ("v", "A13", 0.7),
     ("x", applaudissements(), -1.4, False),
@@ -392,7 +387,7 @@ D = [
     ("v", "S08", 0.6),
     ("s", 1.2),
     ("p", "04_cctv_sortie", "cctv"),
-    ("x", chiasse(1.2, 0.6, 3), 0.0, False),
+    ("x", chiasse(2.4, 0.85, 3), 0.0, False),
     ("x", chasse(), 1.3, False),
     ("v", "A22", 1.0),
     ("v", "R03", 0.4),
