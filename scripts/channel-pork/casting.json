@@ -364,6 +364,16 @@
     "mouth full, chewing, satisfied",
     "louder, insistent, annoyed"
    ]
+  },
+  "capuche": {
+   "moteur": "elevenlabs_v4",
+   "voice": "g5CIjZEefAph4nQFvHAz",
+   "voix_nom": "Ethan (ElevenLabs)",
+   "role": "l'intrus à capuche de « Ferme ta gueule et réponds », épisode 2",
+   "balises": [
+    "low, breathy, way too close to the microphone, calm and unsettling, slowly"
+   ],
+   "remarque": "Descendre de 2,2 demi-tons et coller au micro au mixage (mix-ftg-ep2.py)."
   }
  },
  "libres": {

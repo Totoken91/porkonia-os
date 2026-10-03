@@ -20,6 +20,8 @@ Voix secondaires : chauffeur de salle **George** (crie au public), homme du publ
 
 Découpage prévu : épisode 1 = introduction et questions 1 à 3 (en ligne) ; épisode 2 = questions 4 à 8 ; épisode 3 = questions 9 à 12 et finale.
 
+Épisode 2 (en ligne) : voix passées en ElevenLabs **v4** (mêmes voix). Le jury s'appelle **Gérard** (Daniel). Nouveau : **la capuche**, intrus au visage aux proportions fausses qui débarque, insulte tout le monde et repart (voix Ethan d'ElevenLabs, descendue et collée au micro) ; personne ne réagit. Scores en fin d'épisode : Tonio 4, Kevin 2, Martin 2, Frédéric 0 ; Kevin et Martin ont encore leur « J'insiste ». Mixage `scripts/channel-pork/mix-ftg-ep2.py`.
+
 ## Pub Brasswagen Palou
 
 Pub auto façon années 90 : la petite voiture violette aux pare-chocs cuivrés, compteur « 1 000 000 000 porkomètres ». Tonio y témoigne avec ses lapsus. Slogans : « Elle ne s'arrête pas. Elle se repose en roulant. », « Brasswagen. Et toujours plus de route. ». Mention légale débitée vite : partenaire officiel du jeu, « Kilométrage non contractuel. Route non fournie. »

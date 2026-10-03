@@ -1,0 +1,247 @@
+{
+ "_lisezmoi": "Épisode 2 de « Ferme ta gueule et réponds » (questions 4 à 8, script validé par l'utilisateur). ElevenLabs v4 avec balises de jeu entre crochets (Martin : Qwen). Coupes au montage : C01 et C02 répétaient leur première phrase, J05 et J07 doublaient leur mot.",
+ "modele": "eleven_v4",
+ "voix": {
+  "J": "Jean-Groin — Arnold VR6AewLTigWG4xSOukaG",
+  "F": "Frédéric — Callum N2lVS1w4EtoT3dr4eOWO",
+  "K": "Kevin — Harry SOYHLrjzK2X1ezoPC6cr",
+  "T": "Tonio — Josh TxGEqnHWrfWFTfGW9XjX",
+  "MA": "Martin — Qwen Ethan (consigne d'accent, casting.json)",
+  "D": "Jury (Gérard) — Daniel onwK4e9ZLuTAKqWW03F9",
+  "M0": "Chauffeur de salle — George JBFqnCBsd6RMkjVDRZzb",
+  "H": "Homme du public — Sam yoZ06aMxZJJ28mfd3POQ",
+  "B": "Narrateur Brasswagen — Bill pqHfZKP75CvOlQylNhV4",
+  "C": "La capuche — Ethan (ElevenLabs) g5CIjZEefAph4nQFvHAz, descendue de 2,2 demi-tons au mixage",
+  "P": "Chœur du public — George, Sam, Matilda, Charlie, Rachel"
+ },
+ "repliques": [
+  {
+   "id": "M01",
+   "sous_titre": "On applaudit, on est de retour !"
+  },
+  {
+   "id": "J01",
+   "sous_titre": "Rebonsoir ! Les scores : Martin, un point. Frédéric… zéro."
+  },
+  {
+   "id": "F01",
+   "sous_titre": "Zéro, c'est rien. J'ai déjà été déclaré mort trois fois. Les trois fois, j'ai rappelé l'hôpital pour me plaindre du service."
+  },
+  {
+   "id": "J02",
+   "sous_titre": "Et ils ont fait quoi ?"
+  },
+  {
+   "id": "F02",
+   "sous_titre": "Ils m'ont offert un quatrième séjour, mon vieux."
+  },
+  {
+   "id": "J03",
+   "sous_titre": "Question quatre ! À quelle température à cœur un rôti de porc est-il bien cuit ?"
+  },
+  {
+   "id": "J04",
+   "sous_titre": "Kevin. Le téléphone est interdit."
+  },
+  {
+   "id": "K01",
+   "sous_titre": "C'est… c'est pas un téléphone. C'est un c-collègue."
+  },
+  {
+   "id": "J05",
+   "sous_titre": "Le jury ?"
+  },
+  {
+   "id": "D01",
+   "sous_titre": "Accordé."
+  },
+  {
+   "id": "K02",
+   "sous_titre": "S-soixante-huit degrés. Et on le laisse reposer. Comme moi le week-end."
+  },
+  {
+   "id": "J06",
+   "sous_titre": "Un point pour Kevin ! Et pour son collègue."
+  },
+  {
+   "id": "F03",
+   "sous_titre": "Je réclame ce point. J'ai pensé « soixante-huit » avant lui. Très fort. J'ai un témoin."
+  },
+  {
+   "id": "J07",
+   "sous_titre": "Qui ?"
+  },
+  {
+   "id": "F04",
+   "sous_titre": "Moi. À sept ans. Je m'étais prévenu."
+  },
+  {
+   "id": "J08",
+   "sous_titre": "Question cinq ! Combien de roues sur une Brasswagen Palou ?"
+  },
+  {
+   "id": "T01",
+   "sous_titre": "C'est elle. Elle a entendu son nom."
+  },
+  {
+   "id": "T02",
+   "sous_titre": "Six. Quatre roues, celle de secours… et le volant. Euh… non. Le volant, on roule pas dessus. Quatre."
+  },
+  {
+   "id": "T03",
+   "sous_titre": "Vous parlez de la Palou d'avant l'accident ou d'après ?"
+  },
+  {
+   "id": "J09",
+   "sous_titre": "Il n'y a pas eu d'accident, Tonio."
+  },
+  {
+   "id": "T04",
+   "sous_titre": "Pas encore."
+  },
+  {
+   "id": "J10",
+   "sous_titre": "Quatre. Un point."
+  },
+  {
+   "id": "J11",
+   "sous_titre": "Question six ! Combien de pattes a un cochon ?"
+  },
+  {
+   "id": "F05",
+   "sous_titre": "Cinq. Avec celle qu'il garde pour les grandes occasions."
+  },
+  {
+   "id": "J12",
+   "sous_titre": "Je vais faire comme si je n'avais rien entendu."
+  },
+  {
+   "id": "MA1",
+   "sous_titre": "Quatre. En Chine, quatre aussi. Mais mieux finies."
+  },
+  {
+   "id": "J13",
+   "sous_titre": "Un point pour Martin."
+  },
+  {
+   "id": "C01",
+   "sous_titre": "Bonsoir. Je viens pour la vidange."
+  },
+  {
+   "id": "C02",
+   "sous_titre": "Qui c'est qui a chié dans le présentoir à jambon ? Je vais vous enculer vos pupitres un par un, bande de sacs à foutre. Toi, le cochon, ta cravate pue la pisse de moine. Et vous, là-haut, dans le public, vous puez le cul de cave."
+  },
+  {
+   "id": "C03",
+   "sous_titre": "Bon. Je vais rater mon bus."
+  },
+  {
+   "id": "J14",
+   "sous_titre": "Question sept ! Une imprimante sort des pages de plus en plus pâles. Que faut-il changer ?"
+  },
+  {
+   "id": "K03",
+   "sous_titre": "La… la cartouche ?"
+  },
+  {
+   "id": "J15",
+   "sous_titre": "La cartouche ! Un point pour Kevin. Frédéric, c'était votre spécialité…"
+  },
+  {
+   "id": "F06",
+   "sous_titre": "Je ne réponds pas aux questions sur ma famille."
+  },
+  {
+   "id": "F07",
+   "sous_titre": "J'ai été élevé par une imprimante. Michèle. Elle imprimait mes devoirs. Un jour, elle est devenue pâle… Ils ont changé sa cartouche. Elle n'a plus jamais été la même."
+  },
+  {
+   "id": "F08",
+   "sous_titre": "J'insiste !"
+  },
+  {
+   "id": "J16",
+   "sous_titre": "Vous avez déjà insisté, Frédéric."
+  },
+  {
+   "id": "F09",
+   "sous_titre": "Alors je revends mon « J'insiste » usagé. Douze porkos. Quelqu'un ?"
+  },
+  {
+   "id": "D02",
+   "sous_titre": "Refusé."
+  },
+  {
+   "id": "F10",
+   "sous_titre": "Je connais ce jury. Gérard, c'est moi qui t'ai appris à compter."
+  },
+  {
+   "id": "D03",
+   "sous_titre": "Résultat : non."
+  },
+  {
+   "id": "J17",
+   "sous_titre": "C'était la pub !"
+  },
+  {
+   "id": "J18",
+   "sous_titre": "Dernière question de la soirée ! À cent kilomètres-heure, combien de temps pour parcourir un milliard de kilomètres ?"
+  },
+  {
+   "id": "T05",
+   "sous_titre": "Dix millions de minutes. Euh… non. D'heures. Dix millions d'heures."
+  },
+  {
+   "id": "J19",
+   "sous_titre": "Vous êtes sûr ?"
+  },
+  {
+   "id": "T06",
+   "sous_titre": "J'insiste."
+  },
+  {
+   "id": "D04",
+   "sous_titre": "Résultat : dix millions d'heures."
+  },
+  {
+   "id": "M02",
+   "sous_titre": "On applaudit !"
+  },
+  {
+   "id": "J20",
+   "sous_titre": "Tonio double ses points… Quatre."
+  },
+  {
+   "id": "T07",
+   "sous_titre": "Je l'ai fait en vrai. C'est pour ça que je sais."
+  },
+  {
+   "id": "J21",
+   "sous_titre": "Tonio… dix millions d'heures, ça fait plus de mille ans."
+  },
+  {
+   "id": "T08",
+   "sous_titre": "Oui. Je suis parti tôt."
+  },
+  {
+   "id": "J22",
+   "sous_titre": "Les scores ! Tonio quatre, Kevin deux, Martin deux, Frédéric zéro."
+  },
+  {
+   "id": "F11",
+   "sous_titre": "Je porte plainte contre le chiffre zéro. J'ai déjà un avocat. Il est sous mon pupitre."
+  },
+  {
+   "id": "MA2",
+   "sous_titre": "Votre cravate est moutarde. En Chine, on l'aurait mangée."
+  },
+  {
+   "id": "J23",
+   "sous_titre": "Restez avec nous : dans l'épisode trois, la finale ! Ferme ta gueule…"
+  },
+  {
+   "id": "H01",
+   "sous_titre": "Et le jambon ?!"
+  }
+ ]
+}

@@ -22,7 +22,9 @@ for i,(t,plan,sc) in enumerate(out):
     fin=out[i+1][0] if i+1<len(out) else D
     p=P[plan];sec=round(fin-t,2)
     parts=[]
-    if plan=='logo':
+    if 'chemin' in p:
+        parts=[f"image: `${{T}}{p['chemin']}`",f"seconds: {sec}",f"fond: {js(p['fond'])}"]
+    elif plan=='logo':
         parts=[f"image: `${{T}}ftg/logo.png`",f"seconds: {sec}",f"fond: {js(p['fond'])}"]
     else:
         parts=[f"image: `${{T}}ftg/{p['image']}.jpg`",f"seconds: {sec}"]
