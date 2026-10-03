@@ -105,3 +105,7 @@ Reportage local des années 2000 d'après le script de l'utilisateur (ElevenLabs
 ## Publicité d'État « Le répulsif à gobelins officiel »
 
 D'après le script de l'utilisateur. Le fonctionnaire (**Michael**, v4) reste neutre, lent et appliqué, et n'avoue jamais la présence de Luis ; il prononce « goblins » à l'anglaise, d'où l'orthographe phonétique « gobeulin » / « gaubelin » dans les textes envoyés. Luis Fontanillas (**Giovanni**) est un opportuniste ordinaire et gourmand, étouffé dans le placard derrière. Son : néon qui grésille, sifflement de téléviseur cathodique, souffle de micro, bouteilles dans le placard, orgue bon marché de trois notes (synthétisé), mastication très audible, claquement de langue, coupe au noir sur un dernier bruit de mastication. Images dans `public/tv/repulsif/`, mixage `scripts/channel-pork/mix-pub-repulsif.py`.
+
+## Génériques d'émission
+
+Chaque émission ouvre sur un carton titre et un jingle (`scripts/channel-pork/generiques.py` : musique synthétisée dans `synthe.py`, cartons dans `public/tv/generiques/`). La voix d'antenne de Channel Pork est **Bill** (v4), sauf l'animé, annoncé par **Patrick**. Noms d'émission inventés pour la démo : « Gras Capital » (l'émission des startups d'Éric) et « Porc d'Attache » (le magazine local du reportage Fatbass). Les messages d'État s'ouvrent sur l'emblème de Porkonia : « Ce message vous est diffusé par le Ministère des Affaires Trop Compliquées » (nom de ministère tiré de Porkopédia, attribution du message inventée).

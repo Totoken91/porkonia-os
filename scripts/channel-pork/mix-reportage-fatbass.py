@@ -1,5 +1,5 @@
-"""Reportage « DJ Fatbass à bord du Gras-Fond » (script de l'utilisateur) : reportage local des années 2000, son de
-caméra médiocre. Générique bref, puis seulement le bruit de bord (ventilation, tuyaux qui vibrent, chaudière, secteur),
+"""Reportage « DJ Fatbass à bord du Gras-Fond » (script de l'utilisateur), dans le magazine « Porc d'Attache » :
+reportage local des années 2000, son de caméra médiocre. Générique (generiques.py), puis seulement le bruit de bord (ventilation, tuyaux qui vibrent, chaudière, secteur),
 pings de sonar, trois secondes de techno-zouk coupées net, ronflements beaucoup trop près du micro, silences gênants
 et coupe franche au noir en plein ronflement. Voix : voix/reportage-fatbass/*.opus. Bruitages CC0 : sons/bruitages/.
 Sortie : sortie/reportage-fatbass.wav, .mp3 et .json (plans, sous-titres)."""
@@ -10,7 +10,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from commun import ICI, SORTIE, SR, encoder_mp3, lire
-from synthe import env, filtre, generique_reportage, techno_zouk
+from synthe import env, filtre, techno_zouk
 
 DOSSIER = os.path.join(ICI, "voix", "reportage-fatbass")
 
@@ -133,8 +133,7 @@ def fader():
 # Événements : ("v", réplique, écart) · ("x", signal, écart, avance) · ("s", silence) · ("p", plan) · ("coupe",)
 D = [
     ("p", "01_accueil"),
-    ("x", generique_reportage() * 0.45, 0.0, True),
-    ("s", 0.5),
+    ("s", 0.6),
     ("v", "R1", 0.0),
     ("x", bruitage("porte-coup", 0.16), 0.5, False),
     ("v", "F1", 0.7),
@@ -250,7 +249,7 @@ def boucle(x, d, fondu=0.4):
 
 
 # Bruit de bord : ventilation, tuyaux qui vibrent (chaudière très grave), secteur 50 Hz, souffle de la caméra,
-# quelques claquements de tuyauterie au loin. Le générique passe avant : le bord entre juste après.
+# quelques claquements de tuyauterie au loin. Le générique « Porc d'Attache » est posé devant par generiques.py.
 rng = np.random.default_rng(12)
 tt = np.arange(n) / SR
 bord = filtre(boucle(bruitage("ventilation", 1.0), DUREE), "band", [120, 3500]) * 0.035
@@ -261,7 +260,7 @@ for tc in np.arange(9.0, COUPE - 4, 11.3):
     c = coque(filtre(bruitage(f"toc-{1 + int(tc) % 3}", 0.04), "low", 1400), 2.0)
     i = int((tc + rng.uniform(0, 3)) * SR)
     bord[i : i + len(c)] += c[: n - i]
-debut_bord = int(3.4 * SR)
+debut_bord = 0
 g = np.zeros(n)
 g[debut_bord:] = 1
 g = np.convolve(g, np.ones(int(0.15 * SR)) / int(0.15 * SR), mode="same")

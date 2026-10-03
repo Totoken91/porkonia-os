@@ -3,7 +3,8 @@
  * Tout le texte, les fichiers, les mails, les programmes et les événements vivent ici.
  * Les images renvoient à Porkopédia (hébergement d'origine), rien n'est copié.
  */
-import type { ActionRef, ContentPack, MenuEntry, MenuSpec } from "../types";
+import type { ActionRef, ContentPack, MenuEntry, MenuSpec, Program } from "../types";
+import { deplierGenerique } from "@/os/generique";
 
 // Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
 const P = "/porkopedia/";
@@ -1089,11 +1090,12 @@ export const porkosPack: ContentPack = {
     },
   ],
 
-  programs: [
+  programs: ([
     {
       id: "journal",
       title: "Le Journal du Groin",
       kind: "journal",
+      generique: { image: `${T}generiques/journal.png`, secondes: 4.6, son: `${V}generique-journal.mp3` },
       music: MUSIQUE,
       slides: [
         { image: `${P}douzi-archives/fondation-table.jpg`, seconds: 8.9, chyron: "LE JOURNAL DU GROIN — Édition du soir" },
@@ -1136,6 +1138,7 @@ export const porkosPack: ContentPack = {
       id: "pork-id",
       title: "Ma Pork ID et moi",
       kind: "education",
+      generique: { image: `${T}generiques/pork-id.png`, secondes: 5.78, son: `${V}generique-pork-id.mp3` },
       music: MUSIQUE,
       slides: [
         { image: `${P}pork-id.png`, seconds: 12.08, chyron: "ÉDUCATION CIVIQUE — Leçon n° 12", focus: [0.3, 0.5] },
@@ -1158,6 +1161,7 @@ export const porkosPack: ContentPack = {
       id: "groinball",
       title: "Stade du Groin — Finale des Douze Fûts",
       kind: "sport",
+      generique: { image: `${T}generiques/stade.png`, secondes: 4.47, son: `${V}generique-stade.mp3` },
       music: MUSIQUE,
       slides: [
         { image: `${P}mickael-jox-finale.png`, seconds: 24.44, chyron: "STADE DU GROIN — Finale des Douze Fûts", focus: [0.45, 0.3] },
@@ -1179,6 +1183,7 @@ export const porkosPack: ContentPack = {
       id: "petites-betes",
       title: "Petites Bêtes de la République",
       kind: "documentaire",
+      generique: { image: `${T}generiques/petites-betes.png`, secondes: 4.8, son: `${V}generique-petites-betes.mp3` },
       music: MUSIQUE_DOCU,
       slides: [
         { image: `${P}bestiaire-poule-wifi.jpg`, seconds: 13.36, chyron: "PETITES BÊTES DE LA RÉPUBLIQUE", focus: [0.3, 0.6] },
@@ -1203,6 +1208,7 @@ export const porkosPack: ContentPack = {
       id: "bestiaire",
       title: "Bêtes de la République",
       kind: "documentaire",
+      generique: { image: `${T}generiques/betes.png`, secondes: 4.8, son: `${V}generique-betes.mp3` },
       music: MUSIQUE_DOCU,
       slides: [
         { image: `${P}fresh-beast-cochon-de-mer.jpg`, seconds: 12.58, chyron: "BÊTES DE LA RÉPUBLIQUE", focus: [0.35, 0.5] },
@@ -1323,6 +1329,7 @@ export const porkosPack: ContentPack = {
       id: "meteo",
       title: "La Météo de la Mousse",
       kind: "meteo",
+      generique: { image: `${T}generiques/meteo.png`, secondes: 4.4, son: `${V}generique-meteo.mp3` },
       music: MUSIQUE_METEO,
       slides: [
         { image: `${T}meteo-carte.jpg`, seconds: 7.14, fixe: true, meteo: { titre: "La Météo de la Mousse", points: [{lieu: "Nouvelle Groin"}, {lieu: "Biereval"}, {lieu: "Port-Cochon"}, {lieu: "Lardonville"}, {lieu: "Truffe-sur-Neige"}, {lieu: "Hamelot"}, {lieu: "Saucissonnia"}, {lieu: "Porcinia"}, {lieu: "Douzi City"}, {lieu: "Belle-Côte"}, {lieu: "Grasset"}, {lieu: "Porcalis"}] } },
@@ -1349,6 +1356,7 @@ export const porkosPack: ContentPack = {
       id: "initial-p-1",
       title: "Initial P — Épisode 1 : Le drift du verre plein",
       kind: "anime",
+      generique: { image: `${T}generiques/initial-p.png`, secondes: 3.75 },
       sansHabillage: true,
       bande: `${V}initial-p-ep1.mp3`,
       slides: [
@@ -1443,8 +1451,9 @@ export const porkosPack: ContentPack = {
     },
     {
       id: "eric-saucissignal",
-      title: "Éric présente Saucissignal",
+      title: "Gras Capital — Éric présente Saucissignal",
       kind: "divertissement",
+      generique: { image: `${T}generiques/gras-capital.png`, secondes: 5.35 },
       etiquette: "Startup",
       bande: `${V}eric-saucissignal.mp3`,
       slides: [
@@ -1497,11 +1506,12 @@ export const porkosPack: ContentPack = {
     },
     {
       id: "reportage-fatbass",
-      title: "Reportage — DJ Fatbass à bord du Gras-Fond",
+      title: "Porc d'Attache — DJ Fatbass à bord du Gras-Fond",
       kind: "documentaire",
+      generique: { image: `${T}generiques/porc-attache.png`, secondes: 6.05 },
       bande: `${V}reportage-fatbass.mp3`,
       slides: [
-        { image: `${T}fatbass/01_accueil.jpg`, seconds: 25.26, focus: [0.5, 0.5] },
+        { image: `${T}fatbass/01_accueil.jpg`, seconds: 21.76, focus: [0.5, 0.5] },
         { image: `${T}fatbass/02_sonar.jpg`, seconds: 18.4, focus: [0.5, 0.5] },
         { image: `${T}fatbass/03_setup.jpg`, seconds: 17.21, focus: [0.5, 0.5] },
         { image: `${T}fatbass/04_mix.jpg`, seconds: 28.4, focus: [0.5, 0.5] },
@@ -1512,50 +1522,51 @@ export const porkosPack: ContentPack = {
         { image: `${T}fatbass/noir.png`, seconds: 1.2, fond: "#000000" },
       ],
       subtitles: [
-        { at: 4.1, dur: 9.8, text: "Aujourd'hui, Channel Pork embarque à bord du Gras-Fond. À la fois sous-marin de ravitaillement et salle de fête, il accueille le lieutenant Salamander, également connu sous le nom de DJ Fatbass." },
-        { at: 14.89, dur: 5.52, text: "Faites gaffe en entrant. La porte est étanche, mais le plateau de rillettes, non." },
-        { at: 20.83, dur: 1.22, text: "Nous sommes déjà en plongée ?" },
-        { at: 22.4, dur: 2.86, text: "Non. On attend que la mousse redescende." },
-        { at: 26.63, dur: 2.98, text: "Ce point sur le sonar, c'est un bâtiment ennemi ?" },
-        { at: 30.03, dur: 1.08, text: "C'est un fût." },
-        { at: 31.73, dur: 1.22, text: "Comment faites-vous la différence ?" },
-        { at: 33.3, dur: 4.32, text: "Un bâtiment ennemi, on le laisse passer. Le fût, on le récupère." },
-        { at: 38.11, dur: 2.34, text: "Et si c'est un ennemi avec de la bière ?" },
-        { at: 41.48, dur: 2.18, text: "On négocie. Je suis pas un connard." },
-        { at: 44.36, dur: 3.56, text: "Deux platines et une table de mixage, directement au poste sonar." },
-        { at: 48.34, dur: 4.78, text: "Le sonar faisait ping au milieu de mes transitions. Ça me niquait tous les morceaux." },
-        { at: 53.47, dur: 1.34, text: "Vous avez déplacé les platines ?" },
-        { at: 55.23, dur: 1.54, text: "Non. J'ai coupé le sonar." },
-        { at: 59.35, dur: 1.52, text: "Qui l'a rallumé, bordel ?" },
-        { at: 61.57, dur: 7.62, text: "Ça, c'est le crossfader. À gauche, zouk. À droite, techno. Au milieu, incident diplomatique." },
-        { at: 69.61, dur: 1.56, text: "La musique s'entend depuis l'extérieur ?" },
-        { at: 71.52, dur: 1.42, text: "Seulement les basses." },
-        { at: 73.29, dur: 1.74, text: "Donc on peut vous repérer ?" },
-        { at: 75.38, dur: 3.26, text: "Ouais, mais faut aimer le morceau." },
-        { at: 83.04, dur: 1.34, text: "Vous venez de couper la musique ?" },
-        { at: 84.73, dur: 4.54, text: "Non, le micro du capitaine. Il parle toujours pendant les drops." },
-        { at: 89.97, dur: 1.7, text: "Combien de temps pouvez-vous rester sous l'eau ?" },
-        { at: 92.09, dur: 1.12, text: "Douze fûts." },
-        { at: 93.56, dur: 0.52, text: "En heures ?" },
-        { at: 94.43, dur: 1.52, text: "Ça dépend de qui vient." },
-        { at: 96.85, dur: 4.96, text: "Les porte-verres sont renforcés. On peut perdre un moteur, mais pas une ambrée." },
-        { at: 102.23, dur: 0.58, text: "Et l'air ?" },
-        { at: 103.23, dur: 3.14, text: "Y en a partout. Regardez, on respire." },
-        { at: 107.78, dur: 2.26, text: "Comment garantissez-vous la discrétion du sous-marin ?" },
-        { at: 110.53, dur: 6.18, text: "La furtivité acoustique, c'est très simple. Il faut que l'ennemi entende absolument…" },
-        { at: 119.92, dur: 0.72, text: "Lieutenant ?" },
-        { at: 122.64, dur: 1.44, text: "Lieutenant Salamander ?" },
-        { at: 133.71, dur: 0.64, text: "Il fait ça." },
-        { at: 134.77, dur: 1.18, text: "Et qui surveille le sonar ?" },
-        { at: 136.3, dur: 1.58, text: "Normalement lui." },
-        { at: 141.16, dur: 1.78, text: "On coupe. On a ce qu'il faut." },
-        { at: 143.43, dur: 1.2, text: "Touche pas au fader…" },
+        { at: 0.6, dur: 9.8, text: "Aujourd'hui, Channel Pork embarque à bord du Gras-Fond. À la fois sous-marin de ravitaillement et salle de fête, il accueille le lieutenant Salamander, également connu sous le nom de DJ Fatbass." },
+        { at: 11.39, dur: 5.52, text: "Faites gaffe en entrant. La porte est étanche, mais le plateau de rillettes, non." },
+        { at: 17.33, dur: 1.22, text: "Nous sommes déjà en plongée ?" },
+        { at: 18.9, dur: 2.86, text: "Non. On attend que la mousse redescende." },
+        { at: 23.13, dur: 2.98, text: "Ce point sur le sonar, c'est un bâtiment ennemi ?" },
+        { at: 26.53, dur: 1.08, text: "C'est un fût." },
+        { at: 28.23, dur: 1.22, text: "Comment faites-vous la différence ?" },
+        { at: 29.8, dur: 4.32, text: "Un bâtiment ennemi, on le laisse passer. Le fût, on le récupère." },
+        { at: 34.61, dur: 2.34, text: "Et si c'est un ennemi avec de la bière ?" },
+        { at: 37.98, dur: 2.18, text: "On négocie. Je suis pas un connard." },
+        { at: 40.86, dur: 3.56, text: "Deux platines et une table de mixage, directement au poste sonar." },
+        { at: 44.84, dur: 4.78, text: "Le sonar faisait ping au milieu de mes transitions. Ça me niquait tous les morceaux." },
+        { at: 49.97, dur: 1.34, text: "Vous avez déplacé les platines ?" },
+        { at: 51.73, dur: 1.54, text: "Non. J'ai coupé le sonar." },
+        { at: 55.85, dur: 1.52, text: "Qui l'a rallumé, bordel ?" },
+        { at: 58.07, dur: 7.62, text: "Ça, c'est le crossfader. À gauche, zouk. À droite, techno. Au milieu, incident diplomatique." },
+        { at: 66.11, dur: 1.56, text: "La musique s'entend depuis l'extérieur ?" },
+        { at: 68.02, dur: 1.42, text: "Seulement les basses." },
+        { at: 69.79, dur: 1.74, text: "Donc on peut vous repérer ?" },
+        { at: 71.88, dur: 3.26, text: "Ouais, mais faut aimer le morceau." },
+        { at: 79.54, dur: 1.34, text: "Vous venez de couper la musique ?" },
+        { at: 81.23, dur: 4.54, text: "Non, le micro du capitaine. Il parle toujours pendant les drops." },
+        { at: 86.47, dur: 1.7, text: "Combien de temps pouvez-vous rester sous l'eau ?" },
+        { at: 88.59, dur: 1.12, text: "Douze fûts." },
+        { at: 90.06, dur: 0.52, text: "En heures ?" },
+        { at: 90.93, dur: 1.52, text: "Ça dépend de qui vient." },
+        { at: 93.35, dur: 4.96, text: "Les porte-verres sont renforcés. On peut perdre un moteur, mais pas une ambrée." },
+        { at: 98.73, dur: 0.58, text: "Et l'air ?" },
+        { at: 99.73, dur: 3.14, text: "Y en a partout. Regardez, on respire." },
+        { at: 104.28, dur: 2.26, text: "Comment garantissez-vous la discrétion du sous-marin ?" },
+        { at: 107.03, dur: 6.18, text: "La furtivité acoustique, c'est très simple. Il faut que l'ennemi entende absolument…" },
+        { at: 116.42, dur: 0.72, text: "Lieutenant ?" },
+        { at: 119.14, dur: 1.44, text: "Lieutenant Salamander ?" },
+        { at: 130.21, dur: 0.64, text: "Il fait ça." },
+        { at: 131.27, dur: 1.18, text: "Et qui surveille le sonar ?" },
+        { at: 132.8, dur: 1.58, text: "Normalement lui." },
+        { at: 137.66, dur: 1.78, text: "On coupe. On a ce qu'il faut." },
+        { at: 139.93, dur: 1.2, text: "Touche pas au fader…" },
       ],
     },
     {
       id: "pub-repulsif",
       title: "Message de l'État — Le répulsif à gobelins officiel",
       kind: "publicite",
+      generique: { image: `${T}generiques/ministere.png`, secondes: 6.83 },
       etiquette: "Message de l'État",
       bande: `${V}pub-repulsif.mp3`,
       slides: [
@@ -1869,7 +1880,7 @@ export const porkosPack: ContentPack = {
       ],
       subtitles: [],
     },
-  ],
+  ] as Program[]).map(deplierGenerique),
 
   portal: {
     compteur: { base: 4_120_000, parJour: 1212 },

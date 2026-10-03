@@ -205,6 +205,12 @@ export interface Program {
   music?: string;
   /** Clip musical : `music` est le morceau lui-même, calé sur le direct ; incrustation artiste et titre. */
   clip?: { artiste: string; titre: string; mention?: string };
+  /**
+   * Générique d'ouverture : carton titre de `secondes`, avant la première diapositive. `son` : le jingle, joué comme
+   * une réplique (programmes à voix séparées) ; pour une bande intégrale, le jingle est déjà en tête de la bande.
+   * Déplié par `deplierGenerique` (src/os/generique.ts).
+   */
+  generique?: { image: string; secondes: number; son?: string; fond?: string };
 }
 
 export type IconeMeteo = "soleil" | "eclaircies" | "nuages" | "pluie" | "neige" | "brouillard" | "confettis" | "mousse" | "vent";

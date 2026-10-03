@@ -135,7 +135,8 @@ describe("Channel Pork", () => {
   it("cale la voix off sur les répliques enregistrées", () => {
     const p = porkosPack.programs[0]!;
     const s1 = p.subtitles[1]!;
-    expect(voiceAt(p, 0)).toBeNull();
+    // Le journal s'ouvre sur son générique : le jingle passe comme une réplique sans texte.
+    expect(voiceAt(p, 0)).toMatchObject({ index: 0, src: "/audio/channel-pork/generique-journal.mp3" });
     expect(voiceAt(p, s1.at + 1.5)).toEqual({ index: 1, src: s1.voice, offset: 1.5 });
     const muet = { ...p, subtitles: [{ at: 0, text: "a", voice: "/a.mp3" }, { at: 2, text: "(silence)" }] };
     expect(voiceAt(muet, 3)).toBeNull();
@@ -160,7 +161,7 @@ describe("Channel Pork", () => {
   it("place chaque point du bulletin météo sur un lieu de la carte", () => {
     const lieux = porkosPack.carteMeteo.lieux;
     const meteo = porkosPack.programs.find((p) => p.kind === "meteo")!;
-    for (const s of meteo.slides) {
+    for (const s of meteo.slides.filter((x) => !x.image.includes("/generiques/"))) {
       expect(s.meteo, s.image).toBeTruthy();
       for (const pt of s.meteo!.points) expect(lieux[pt.lieu], pt.lieu).toBeDefined();
     }
