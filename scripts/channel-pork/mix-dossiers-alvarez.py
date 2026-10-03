@@ -57,11 +57,13 @@ def rogner(x):
 
 # Traitement par réplique : « plateau » (Alvarez face caméra), « vo » (voix off de studio), « hc » (question hors
 # champ), « itw » (interview, micro tendu), « recon » (reconstitution), « porte » (derrière la porte), « corbeau »,
-# « regie » (hors micro), « agent » (au fond du couloir).
+# « regie » (hors micro), « agent » (au fond du couloir), « porte_itw » (interview du maire, micro tendu contre la porte
+# des toilettes, dont il n'est jamais sorti), « porte_cri » (le maire qui hurle derrière la porte).
 MODE = {"A01": "plateau", "A02": "plateau", "A25": "plateau", "A26": "plateau", "A27": "plateau",
         "A03": "vo", "A04": "vo", "A08": "vo", "A09": "vo", "A12": "vo", "A13": "vo", "A18": "vo", "A22": "vo",
         "A23": "vo", "A24": "vo", "R01": "porte", "R02": "porte", "S04": "recon", "S05": "recon", "S09": "recon",
-        "R03": "recon_cri", "K01": "corbeau", "RG": "regie", "AG": "agent"}
+        "R03": "porte_cri", "K01": "corbeau",
+        "A28": "vo", "M01a": "porte_itw", "M01b": "porte_itw", "M02": "porte_itw", "M03": "porte_itw", "RG": "regie", "AG": "agent"}
 
 
 def voix(nom):
@@ -81,6 +83,12 @@ def voix(nom):
         x = piece(filtre(x, "band", [250, 3200]) * 0.06, 1.5)
     elif mode == "recon_cri":
         x = couloir(filtre(np.tanh(x * 0.12), "band", [250, 3200]) * 0.6)
+    elif mode == "porte_itw":
+        # Micro collé au battant : on comprend tout, mais à travers le bois et le carrelage.
+        y = filtre(np.tanh(x * 0.11), "low", 2400)
+        x = piece(reflets(y, ((0.005, 0.3), (0.011, 0.22), (0.019, 0.14)), 1600) * 0.95, 0.7)
+    elif mode == "porte_cri":
+        x = derriere_porte(np.tanh(x * 0.14) * 0.85)
     elif mode == "porte":
         x = derriere_porte(np.tanh(x * 0.12) * (0.5 if nom == "R01" else 0.6))
     elif mode == "corbeau":
@@ -111,7 +119,8 @@ T = {
     "A08": "La clé d'entretien est sur la serrure extérieure. Stanley la tourne et la retire. Il ne consulte personne. La porte non plus.",
     "R01": "Y a quelqu'un ? Pourquoi ça tourne dehors ?",
     "A09": "Il vérifie que la porte tient. Puis il rejoint le conseil. L'opposition est désormais à huis clos.",
-    "M01": "J'étais maire quand j'ai baissé mon pantalon. Quand j'ai voulu le remonter, il était élu. Vous trouvez ça normal, vous ?",
+    "M01a": "J'étais maire quand j'ai baissé mon pantalon. Quand j'ai voulu le remonter, il était élu.",
+    "M01b": "Vous trouvez ça normal, vous ?",
     "A10": "À quel moment avez-vous compris ?",
     "M02": "J'ai entendu les applaudissements. Au début, j'ai cru qu'ils avaient entendu la chasse.",
     "A11": "Vous avez appelé à l'aide ?",
@@ -136,9 +145,9 @@ T = {
     "S07": "Sa place, c'était aux chiottes. Moi, j'étais au conseil.",
     "A21": "Vous comprenez ce qu'on vous reproche ?",
     "S08": "D'avoir été disponible.",
-    "A22": "Après le repas, le maire sortant retrouve le couloir. Il a perdu sa fonction, mais conservé sa colère. Stanley lui propose une chaise.",
-    "R03": "TA CHAISE, TU TE LA FOUS AU CUL !",
-    "S09": "Elle appartient à la commune.",
+    "A22": "Après le repas, le conseil lève la séance. Derrière la porte, le maire sortant a perdu sa fonction, mais conservé sa colère. Stanley lui glisse un formulaire de passation sous la porte.",
+    "R03": "TON FORMULAIRE, TU TE LE FOUS AU CUL !",
+    "S09": "Il est en trois exemplaires.",
     "A23": "Les deux hommes ne s'accordent pas sur la transition.",
     "A24": "Aujourd'hui, le trousseau repose sous une cloche. Les visiteurs baissent la voix. L'agent qui demande la clé du placard à balais doit attendre la fin de la cérémonie.",
     "A25": "J'estime à quatre-vingt-dix-neuf pour cent la probabilité que Stanley ait organisé ce coup.",
@@ -146,6 +155,7 @@ T = {
     "A26": "Il a peut-être tourné la clé avec le cul. Mais les images montrent une main.",
     "A27": "L'affaire est résolue. Elle n'est pas réglée.",
     "AG": "Qui a encore les clés ?",
+    "A28": "Au premier étage, la porte des toilettes n'a jamais été rouverte. Le maire sortant ne répond plus qu'aux questions écrites.",
 }
 
 # ----------------------------- Bruitages -----------------------------
@@ -240,6 +250,14 @@ def coups(n=4):
     for k in range(n):
         out += [filtre(bruitage(f"toc-{1 + k % 3}", 0.35), "low", 700), np.zeros(int(_rng.uniform(0.12, 0.2) * SR))]
     return derriere_porte(np.concatenate(out) * 0.6)
+
+
+def toquer(n=2):
+    """Alvarez frappe à la porte des toilettes, micro à la main : sec et proche."""
+    out = []
+    for k in range(n):
+        out += [filtre(bruitage(f"toc-{1 + k % 3}", 0.45), "low", 2500), np.zeros(int(0.16 * SR))]
+    return reflets(np.concatenate(out), ((0.008, 0.25), (0.017, 0.15)), 2000)
 
 
 def banquet(duree):
@@ -344,7 +362,12 @@ D = [
     ("v", "A09", 0.0),
     ("s", 1.2),
     ("p", "06_interview_maire", "itw"),
-    ("v", "M01", 0.4),
+    ("x", toquer(2), 0.3, True),
+    ("v", "M01a", 0.5),
+    ("s", 0.7),  # il s'interrompt…
+    ("x", chiasse(3.2, 1.25, 4), 0.0, True),  # …pour laisser parler ses intestins
+    ("s", 0.9),
+    ("v", "M01b", 0.0),
     ("v", "A10", 0.7),
     ("v", "M02", 0.5),
     ("v", "A11", 0.7),
@@ -386,7 +409,7 @@ D = [
     ("v", "A21", 0.4),
     ("v", "S08", 0.6),
     ("s", 1.2),
-    ("p", "04_cctv_sortie", "cctv"),
+    ("p", "06_interview_maire", "itw"),
     ("x", chiasse(2.4, 0.85, 3), 0.0, False),
     ("x", chasse(), 1.3, False),
     ("v", "A22", 1.0),
@@ -398,6 +421,7 @@ D = [
     ("musique", 0.45),  # musique réduite
     ("s", 1.0),  # une seconde de silence avant la voix
     ("v", "A24", 0.0),
+    ("v", "A28", 0.8),
     ("s", 1.4),
     ("p", "10_alvarez_presentateur", "crt"),
     ("musique", 1.0),

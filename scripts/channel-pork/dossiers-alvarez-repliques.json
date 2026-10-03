@@ -1,6 +1,17 @@
 {
  "_lisezmoi": "« Les Dossiers d'Alvarez — Le Coup de Hamelot » (script de l'utilisateur, sa version de l'affaire). ElevenLabs v4, balise « standard Parisian French accent » en tête de chaque texte. A : François Alvarez (Joseph), S : Stanley Ferret (Liam), M et R : le maire sortant, interview et reconstitutions (Jeremy), K01 : le corbeau qui restitue la voix du maire (Jeremy, traitée au mixage), G : la greffière (Emily), RG : voix de régie (Sam), AG : l'agent du couloir (Fin).",
  "modele": "eleven_v4",
- "voix": {"A": "Joseph Zlb1dXrM653N07WRdFW3", "S": "Liam TX3LPaxmHKxFdv7VOQHJ", "M": "Jeremy bVMeCyTHy58xNoL34h3p", "G": "Emily LcfcDJNUP1GQjkzn1xUU", "RG": "Sam yoZ06aMxZJJ28mfd3POQ", "AG": "Fin D38z5RcWu1voky8WS1ja"},
- "ecarts_au_script": ["G01, G03 et S07 : prises coupées après la première occurrence (le moteur répétait la réplique)", "M03 : « La séance a commencé » dit par le maire, qui cite Stanley"]
+ "voix": {
+  "A": "Joseph Zlb1dXrM653N07WRdFW3",
+  "S": "Liam TX3LPaxmHKxFdv7VOQHJ",
+  "M": "Jeremy bVMeCyTHy58xNoL34h3p",
+  "G": "Emily LcfcDJNUP1GQjkzn1xUU",
+  "RG": "Sam yoZ06aMxZJJ28mfd3POQ",
+  "AG": "Fin D38z5RcWu1voky8WS1ja"
+ },
+ "ecarts_au_script": [
+  "G01, G03 et S07 : prises coupées après la première occurrence (le moteur répétait la réplique)",
+  "M03 : « La séance a commencé » dit par le maire, qui cite Stanley",
+  "Version révisée à la demande de l'utilisateur : le maire n'est jamais libéré des toilettes. Son interview se fait à travers la porte (M01 coupée en M01a/M01b, interrompue par une salve de chiasse) ; A22, R03 et S09 réécrites (formulaire de passation glissé sous la porte), A28 ajoutée en fin d'épisode."
+ ]
 }
