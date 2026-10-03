@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import type { DesktopIcon, FsNode } from "@/content/types";
 import { useOs } from "@/os/context";
 import { childPath } from "@/os/fs";
-import { BUREAU } from "@/os/vfs";
+import { BUREAU, raccourcisVers } from "@/os/vfs";
 import { Icon } from "./Icon";
 import { iconOf } from "./Fichier";
 import type { Rect } from "./Desktop";
@@ -20,7 +20,7 @@ export function Lanceur({ onLaunch }: { onLaunch(icon: DesktopIcon, from: Rect):
   const fichiers = (bureau?.children ?? []).filter((n) => settings.fichiersCaches || !n.cache);
   // Les programmes déjà présents en raccourci ne sont pas répétés plus bas.
   const surBureau = useMemo(() => new Set(pack.desktop.flatMap((d) => ("app" in d.open ? [d.open.app] : []))), [pack.desktop]);
-  const groupe = (g: "programmes" | "accessoires") => pack.apps.filter((a) => a.menu === g && !surBureau.has(a.id));
+  const groupe = (g: "programmes" | "accessoires") => pack.apps.filter((a) => a.menu === g && !surBureau.has(a.id) && (!a.installable || raccourcisVers(fs.disque, a.id).length > 0));
 
   return (
     <div className="lanceur" data-testid="bureau">

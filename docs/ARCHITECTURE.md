@@ -41,6 +41,7 @@ src/
 - **un fichier, un mail, une pub, un programme, un message** : uniquement dans le pack.
 - **une réaction du système** : une règle dans `rules` (+ un pool de flash infos ou un dialogue).
 - **une appli** : un `kind` dans `types.ts`, un composant dans `src/apps/<kind>/`, une entrée dans `registry.tsx`, un manifeste dans le pack.
+- **un programme à télécharger** : un manifeste `installable: true` (absent des menus tant qu'aucun raccourci vers lui n'existe sur le disque), une entrée de `telechargements` et d'`installeurs`, un bloc `{ t: "telecharger" }` sur une page PigNet. La boîte « Téléchargement de fichier » dépose le programme d'installation sur le disque ; l'assistant (`src/apps/installeur/`) crée le dossier, les raccourcis et le désinstalleur. Exemple : Jambonjon (`src/apps/jambonjon/` : logique au tour par tour, rendu par lancer de rayons en 224×168).
 - **un nouvel ordinateur** (spin-off) : un nouveau pack ; `page.tsx` choisit le pack.
 
 `tests/pack.test.ts` refuse un pack dont une référence (appli, dialogue, pool, pub, mise à jour, signal) ne mène nulle part.

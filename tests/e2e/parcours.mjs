@@ -570,6 +570,38 @@ try {
       await page.locator(".site-livre-message").nth(avant).waitFor();
       await fermer("navigateur");
       step(`${tag} : PigNet (commande secrète, annuaire, page perso, livre d'or)`);
+
+      // Partagiciel : téléchargement sur PigNet, assistant d'installation, lancement du jeu.
+      await open("d-nav");
+      await page.getByTestId("nav-url").fill("porko://grenier-partagiciels");
+      await page.getByTestId("nav-url").press("Enter");
+      await page.getByTestId("telecharger-jambonjon").click();
+      await page.getByTestId("dl-enregistrer").click();
+      await page.getByTestId("dl-enregistrer-ici").click();
+      await page.getByTestId("dl-ouvrir-fichier").waitFor({ timeout: 60000 });
+      await shot(page, `${tag}-25-telechargement`);
+      await page.getByTestId("dl-ouvrir-fichier").click();
+      await page.getByTestId("installeur").waitFor();
+      await page.getByTestId("inst-suivant").click();
+      if (!(await page.getByTestId("inst-suivant").isDisabled())) throw new Error("licence non acceptée mais Suivant actif");
+      await page.getByTestId("inst-accepte").check();
+      for (let k = 0; k < 5; k++) await page.getByTestId("inst-suivant").click();
+      await page.getByTestId("inst-fin").waitFor({ timeout: 20000 });
+      await page.getByTestId("inst-suivant").click();
+      await page.getByTestId("window-jambonjon").waitFor();
+      await page.getByTestId("jbj-nouvelle").click();
+      await page.getByTestId("jbj-vue").waitFor();
+      const journal = await page.getByTestId("jbj-journal").textContent();
+      for (const k of ["e", "z", "e", "z", "a", "z"]) {
+        await page.keyboard.press(k);
+        await page.waitForTimeout(220);
+      }
+      if ((await page.getByTestId("jbj-journal").textContent()) === journal) throw new Error("Jambonjon ne réagit pas au clavier");
+      await shot(page, `${tag}-26-jambonjon`);
+      await fermer("jambonjon");
+      await page.getByTestId("icon-f:Jambonjon").waitFor();
+      await fermer("navigateur");
+      step(`${tag} : partagiciel téléchargé, installé et lancé (Jambonjon)`);
     }
 
     // Menu système d'une fenêtre, « Afficher le bureau », clic droit sur un bouton de tâche

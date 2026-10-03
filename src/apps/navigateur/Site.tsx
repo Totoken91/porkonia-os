@@ -59,6 +59,23 @@ function LivreDor({ site }: { site: SitePerso }) {
   );
 }
 
+/** Lien de téléchargement : ouvre la boîte « Téléchargement de fichier » du système. */
+function Telecharger({ id }: { id: string }) {
+  const { pack, str, openApp } = useOs();
+  const f = pack.telechargements.find((t) => t.id === id);
+  if (!f) return null;
+  return (
+    <div className="site-telecharger">
+      <button className="site-telecharger-b" onClick={() => openApp("telechargement", { id })} data-testid={`telecharger-${id}`}>
+        {str("site.telecharger", { nom: f.nom })}
+      </button>
+      <small>
+        {f.description} — {str("site.telechargerTaille", { taille: (f.taille / 1024).toFixed(2).replace(".", ","), duree: Math.ceil(f.taille / f.debit) })}
+      </small>
+    </div>
+  );
+}
+
 function Bloc({ b, site, go }: { b: BlocSite; site: SitePerso; go(u: string): void }) {
   const { pack, str } = useOs();
   switch (b.t) {
@@ -139,6 +156,8 @@ function Bloc({ b, site, go }: { b: BlocSite; site: SitePerso; go(u: string): vo
         </div>
       );
     }
+    case "telecharger":
+      return <Telecharger id={b.fichier} />;
     case "annuaire": {
       const categories = [...new Set(pack.sites.filter((x) => x.hote !== site.hote && x.categorie !== "Retirés").map((x) => x.categorie))];
       return (

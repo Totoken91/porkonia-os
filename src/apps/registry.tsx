@@ -14,6 +14,9 @@ import { PorkAmp } from "./porkamp/PorkAmp";
 import { Calculatrice } from "./calculatrice/Calculatrice";
 import { Defrag } from "./defrag/Defrag";
 import { Paint } from "./paint/Paint";
+import { Jambonjon } from "./jambonjon/Jambonjon";
+import { Installeur } from "./installeur/Installeur";
+import { Telechargement } from "./telechargement/Telechargement";
 
 export const APPS: Record<AppKind, ComponentType> = {
   bienvenue: Bienvenue,
@@ -31,4 +34,7 @@ export const APPS: Record<AppKind, ComponentType> = {
   calculatrice: Calculatrice,
   defrag: Defrag,
   paint: Paint,
+  jambonjon: Jambonjon,
+  installeur: Installeur,
+  telechargement: Telechargement,
 };

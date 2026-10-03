@@ -253,3 +253,47 @@ export function sanitizeDisque(v: unknown, fs: FsNode): Disque {
     : [...chemins(racine), ...poubelle.flatMap((j) => [childPath(j.origine, j.node.name), ...chemins(j.node, childPath(j.origine, j.node.name))])];
   return fusionnerPack({ racine, poubelle, connus }, fs);
 }
+
+/** Efface pour de bon (désinstallation) : rien ne passe par la Poubelle d'État. */
+export function effacer(d: Disque, chemins: string[]): Resultat {
+  let disque = d;
+  for (const chemin of chemins) {
+    const n = resolve(disque.racine, chemin);
+    if (!n || !chemin) continue;
+    if (n.protege) return echec(n.protege, { nom: n.name });
+    const parent = parentPath(chemin);
+    const p = verifierDossier(disque, parent);
+    if (estResultat(p)) return p;
+    disque = { ...disque, racine: modifier(disque.racine, parent, (e) => e.filter((c) => c !== n)) };
+  }
+  return { ok: true, disque, chemins: [] };
+}
+
+/** Crée les dossiers manquants d'un chemin (« Programmes/Jambonjon »). */
+export function creerDossiers(d: Disque, chemin: string): Resultat {
+  let disque = d;
+  let courant = "";
+  for (const nom of splitPath(chemin)) {
+    if (!nomValide(nom)) return echec("fichiers.err.nom", { nom });
+    const suivant = childPath(courant, nom);
+    const n = resolve(disque.racine, suivant);
+    if (!n) {
+      const r = creer(disque, courant, { type: "dossier", name: nom, children: [] });
+      if (!r.ok) return r;
+      disque = r.disque;
+    } else if (n.type !== "dossier") return echec("fichiers.err.existe", { nom });
+    courant = suivant;
+  }
+  return { ok: true, disque, chemins: [courant] };
+}
+
+/** Chemins de tous les raccourcis vers une appli (hors Poubelle). */
+export function raccourcisVers(d: Disque, app: string): string[] {
+  const out: string[] = [];
+  const rec = (n: FsNode, chemin: string) => {
+    if (n.type === "lien" && n.app === app) out.push(chemin);
+    if (n.type === "dossier") for (const c of n.children) rec(c, childPath(chemin, c.name));
+  };
+  for (const c of d.racine.children) rec(c, c.name);
+  return out;
+}

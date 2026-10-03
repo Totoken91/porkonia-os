@@ -8,6 +8,7 @@ import { usePleinEcran } from "@/os/pleinEcran";
 import { Icon } from "./Icon";
 import { Calendrier } from "./Calendrier";
 import { demanderPleinEcran } from "./Monitor";
+import { raccourcisVers } from "@/os/vfs";
 
 /** Horloge : un clic ouvre Date et heure (calendrier et horloge à aiguilles). */
 function Clock() {
@@ -73,7 +74,7 @@ function BoutonPleinEcran({ str }: { str(k: string): string }) {
 }
 
 export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, poche }: Props) {
-  const { pack, str, openApp, runAction, settings, setSettings, mail, showMenu } = useOs();
+  const { pack, str, openApp, runAction, settings, setSettings, mail, showMenu, fs } = useOs();
   const nonLus = mail.boite.messages.filter((m) => m.folder === "reception" && !m.read).length;
   const [open, setOpen] = useState(false);
   const [taches, setTaches] = useState(false);
@@ -102,7 +103,8 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
     setOpen(false);
     fn();
   };
-  const group = (g: AppManifest["menu"]) => pack.apps.filter((a) => a.menu === g);
+  // Un programme à installer n'apparaît qu'une fois installé (un raccourci vers lui existe sur le disque).
+  const group = (g: AppManifest["menu"]) => pack.apps.filter((a) => a.menu === g && (!a.installable || raccourcisVers(fs.disque, a.id).length > 0));
   const config = group("systeme")[0];
 
   const Flyout = ({ id, apps }: { id: Exclude<Sub, null>; apps: AppManifest[] }) => (

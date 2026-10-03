@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp" | "calculatrice" | "defrag" | "paint";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp" | "calculatrice" | "defrag" | "paint" | "telechargement" | "installeur" | "jambonjon";
 
-export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique" | "calculatrice" | "defrag" | "paint";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique" | "calculatrice" | "defrag" | "paint" | "jambonjon" | "installeur" | "telechargement";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -45,6 +45,11 @@ export interface AppManifest {
   about?: string;
   /** Fenêtre habillée : pas de barre de titre ni de menus, l'appli dessine son propre boîtier. */
   habillage?: "tuner" | "lecteur";
+  /**
+   * Programme à installer (voir `installeurs`) : il n'apparaît dans les menus que si un raccourci vers lui existe sur
+   * le disque, posé par son assistant d'installation.
+   */
+  installable?: boolean;
 }
 
 export interface DesktopIcon {
@@ -261,7 +266,9 @@ export type BlocSite =
   | { t: "compteur"; base: number; parJour: number }
   | { t: "livreDor" }
   | { t: "anneau" }
-  | { t: "annuaire" };
+  | { t: "annuaire" }
+  /** Lien de téléchargement d'un fichier de `telechargements`. */
+  | { t: "telecharger"; fichier: string };
 
 export interface SitePerso {
   /** Adresse : porko://<hote>/<page>. */
@@ -277,6 +284,91 @@ export interface SitePerso {
   pages: Record<string, { titre?: string; blocs: BlocSite[] }>;
   /** Messages déjà présents dans le livre d'or. */
   livreDor?: { nom: string; date: string; message: string }[];
+}
+
+/** Fichier qu'on peut télécharger sur PigNet : il arrive sur le disque sous forme de programme d'installation. */
+export interface Telechargement {
+  id: string;
+  /** Nom du fichier enregistré (« jambonjon_setup.exe »). */
+  nom: string;
+  /** Taille en Ko. */
+  taille: number;
+  /** Débit moyen du téléchargement, en Ko/s. */
+  debit: number;
+  /** Assistant d'installation lancé à l'ouverture du fichier (clé de `installeurs`). */
+  installeur: string;
+  /** Description sur la page de téléchargement. */
+  description: string;
+}
+
+/** Assistant d'installation d'un programme téléchargé. */
+export interface Installeur {
+  id: string;
+  /** Appli installée (identifiant de `apps`, avec `installation`). */
+  programme: string;
+  nom: string;
+  version: string;
+  editeur: string;
+  accueil: string;
+  licence: string;
+  /** Dossier proposé (chemin depuis la racine du disque). */
+  dossier: string;
+  /** Options supplémentaires proposées avant l'installation (cases à cocher), certaines imposées. */
+  options: { id: string; label: string; coche: boolean; imposee?: string }[];
+  composants: { id: string; label: string; description: string; taille: number; obligatoire?: boolean; fichiers: FsNode[] }[];
+  /** Fichiers « copiés » affichés pendant l'installation. */
+  copie: string[];
+  /** Nom du raccourci (programme, Bureau). */
+  raccourci: string;
+  fin: string;
+  desinstallation: { question: string; fin: string };
+}
+
+/* ------------------------------- Jambonjon ------------------------------- */
+
+export type Emplacement = "arme" | "armure" | "tete" | "breloque";
+export type SpriteMonstre = "rat" | "gobelin" | "moisissure" | "saucisson" | "inspecteur" | "tonneau" | "affineur" | "fantome";
+
+export interface MonstreDef {
+  id: string;
+  nom: string;
+  sprite: SpriteMonstre;
+  pv: number;
+  att: number;
+  def: number;
+  xp: number;
+  /** Premier et dernier étage où il apparaît. */
+  etages: [number, number];
+  /** Se déplace un tour sur deux (lent). */
+  lent?: boolean;
+  description: string;
+}
+
+export interface ObjetDef {
+  id: string;
+  nom: string;
+  emplacement: Emplacement;
+  att?: number;
+  def?: number;
+  pv?: number;
+  mousse?: number;
+  /** Premier étage où on le trouve. */
+  etage: number;
+}
+
+/** Jeu Jambonjon : bestiaire, objets, raretés et paliers. */
+export interface JeuJambonjon {
+  /** Nombre d'étages ; le boss garde le dernier. */
+  etages: number;
+  monstres: MonstreDef[];
+  boss: MonstreDef;
+  objets: ObjetDef[];
+  /** Raretés, de la plus commune à la plus rare : suffixe du nom, multiplicateur des bonus, poids du tirage. */
+  raretes: { id: string; suffixe: string; mult: number; poids: number; couleur: string }[];
+  /** Préfixe des monstres d'élite. */
+  elite: string;
+  /** Nom de chaque étage (cycle). */
+  nomsEtages: string[];
 }
 
 export interface Portal {
@@ -437,6 +529,10 @@ export interface ContentPack {
   /** Distinctions civiques (succès) et rangs atteints selon leur nombre (seuils croissants, le premier à 0). */
   distinctions: Distinction[];
   rangs: { seuil: number; titre: string }[];
+  /** Téléchargements de PigNet et assistants d'installation. */
+  telechargements: Telechargement[];
+  installeurs: Installeur[];
+  jambonjon: JeuJambonjon;
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;
 }

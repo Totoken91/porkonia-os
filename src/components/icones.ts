@@ -600,6 +600,77 @@ export const DESSINS: Record<Nom, Dessin> = {
     t.rect(19, 16, 3, 3, "g");
     t.pts([[18, 19], [19, 19], [18, 20]], "m");
   },
+  /** Jambonjon : porte de cave en arc de pierre, jambon pendu dans l'ombre. */
+  jambonjon: (t) => {
+    t.rect(3, 6, 26, 24, "d");
+    t.ellipse(16, 12, 11, 8, "d");
+    for (let y = 8; y < 30; y += 4) for (let x = 3 + ((y / 4) % 2) * 3; x < 29; x += 6) t.hline(x, y, 4, "g");
+    t.rect(8, 12, 16, 18, "k");
+    t.ellipse(16, 13, 8, 6, "k");
+    t.dither(8, 22, 16, 8, "D");
+    t.line(16, 8, 16, 13, "g");
+    t.ellipse(16, 19, 4, 6, "m");
+    t.ellipse(15, 18, 2, 4, "r");
+    t.rect(15, 13, 3, 2, "E");
+    t.rect(4, 26, 24, 4, "z");
+    t.hline(4, 26, 24, "n");
+  },
+  /** Installation : carton ouvert d'où sort une disquette. */
+  installeur: (t) => {
+    t.poly(
+      [
+        [4, 14],
+        [28, 14],
+        [28, 29],
+        [4, 29],
+      ],
+      "N",
+    );
+    t.rect(4, 14, 24, 2, "n");
+    t.dither(4, 22, 24, 7, "n");
+    t.poly(
+      [
+        [4, 14],
+        [1, 9],
+        [12, 9],
+        [14, 14],
+      ],
+      "n",
+    );
+    t.poly(
+      [
+        [28, 14],
+        [31, 9],
+        [20, 9],
+        [18, 14],
+      ],
+      "n",
+    );
+    t.rect(10, 2, 13, 13, "B");
+    t.rect(12, 2, 9, 5, "g");
+    t.rect(18, 3, 2, 3, "D");
+    t.rect(12, 9, 9, 5, "W");
+    t.hline(13, 11, 7, "c");
+    t.rect(13, 20, 6, 3, "z");
+  },
+  /** Téléchargement : feuille de fichier et grosse flèche verte vers le bas. */
+  telechargement: (t) => {
+    t.rect(6, 2, 18, 24, "W");
+    t.bevel(6, 2, 18, 24, "W", "d");
+    for (let y = 6; y < 22; y += 3) t.hline(9, y, 12, "g");
+    t.rect(13, 8, 6, 12, "v");
+    t.poly(
+      [
+        [8, 19],
+        [24, 19],
+        [16, 28],
+      ],
+      "v",
+    );
+    t.vline(14, 9, 10, "V");
+    t.rect(4, 28, 24, 3, "d");
+    t.hline(4, 28, 24, "g");
+  },
 };
 
 /* ================================ 16 × 16 ================================ */
@@ -867,5 +938,34 @@ export const DESSINS16: Record<Nom, Dessin> = {
     t.pts([[4, 11], [5, 11]], "B");
     t.line(10, 8, 15, 1, "z");
     t.pts([[9, 9], [10, 9]], "m");
+  },
+  jambonjon: (t) => {
+    t.rect(1, 3, 14, 13, "d");
+    t.rect(4, 6, 8, 10, "k");
+    t.ellipse(8, 7, 4, 3, "k");
+    t.line(8, 4, 8, 7, "g");
+    t.ellipse(8, 10, 2, 3, "m");
+    t.pts([[7, 9], [7, 10]], "r");
+    t.hline(1, 14, 14, "z");
+  },
+  installeur: (t) => {
+    t.rect(2, 7, 12, 8, "N");
+    t.dither(2, 11, 12, 4, "n");
+    t.rect(5, 1, 7, 7, "B");
+    t.rect(6, 1, 5, 2, "g");
+    t.rect(6, 5, 5, 2, "W");
+  },
+  telechargement: (t) => {
+    t.rect(3, 1, 9, 11, "W");
+    t.rect(6, 3, 3, 6, "v");
+    t.poly(
+      [
+        [3, 8],
+        [12, 8],
+        [8, 13],
+      ],
+      "v",
+    );
+    t.hline(2, 14, 12, "d");
   },
 };
