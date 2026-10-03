@@ -456,6 +456,8 @@ export interface EventRule {
   unlessSetting?: string;
   /** Ne joue qu'à partir de la n-ième session du citoyen sur ce poste (courriers qui arrivent au fil du temps). */
   apresSessions?: number;
+  /** Ne joue que pendant les premières sessions (1 = la toute première seulement). */
+  jusquaSessions?: number;
 }
 
 /* ------------------------------- Télétexte -------------------------------- */

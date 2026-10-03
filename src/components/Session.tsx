@@ -56,6 +56,8 @@ interface Props {
 
 /** Délai minimal entre deux bulles de distinction (ms). */
 const DISCRETION_MEDAILLES = 120_000;
+/** Démarrage calme : pendant ce délai après la connexion, les bulles attendent, puis passent regroupées. */
+const DEMARRAGE_CALME = 25_000;
 
 export function Session({ pack, user, settings, setSettings, impatient, onLock, onSleep, onShutdown, onRestart, restaurer, veille }: Props) {
   // Zone des fenêtres : sous la barre d'état du Poche (rien sur le moniteur), au-dessus de la barre du bas.
@@ -255,7 +257,12 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
    * File des bulles : une seule à l'écran, les suivantes attendent qu'elle se referme. Au-delà de quatre,
    * les plus anciennes en attente sont oubliées (un rappel civique de retard n'a plus d'intérêt).
    */
+  const auDemarrage = useRef<{ toasts: { title: string; body: string; action?: ActionRef }[]; medailles: import("@/content/types").Distinction[] } | null>({ toasts: [], medailles: [] });
   const pushToast = useCallback((title: string, body: string, action?: ActionRef) => {
+    if (auDemarrage.current) {
+      auDemarrage.current.toasts.push({ title, body, action });
+      return;
+    }
     const key = ++counter.current;
     setToasts((ts) => {
       const file = [...ts, { key, title, body, action }];
@@ -335,6 +342,10 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   runRef.current = runAction;
   // Une bulle par distinction au plus toutes les deux minutes ; celles d'entre-temps sont regroupées en une seule.
   decerneRef.current = (d) => {
+    if (auDemarrage.current) {
+      auDemarrage.current.medailles.push(d);
+      return;
+    }
     const m = medailles.current;
     if (Date.now() - m.derniere > DISCRETION_MEDAILLES) {
       m.derniere = Date.now();
@@ -350,6 +361,25 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       if (n) pushToast(str("distinctions.decernee"), n === 1 ? str("distinctions.autre") : str("distinctions.autres", { n: String(n) }), { type: "open", app: "distinctions" });
     }, m.derniere + DISCRETION_MEDAILLES - Date.now());
   };
+
+  // Fin du démarrage calme : une bulle pour les médailles (regroupées), puis les autres, au plus deux.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const att = auDemarrage.current;
+      auDemarrage.current = null;
+      if (!att) return;
+      const [premiere] = att.medailles;
+      if (premiere) {
+        medailles.current.derniere = Date.now();
+        if (att.medailles.length === 1) pushToast(str("distinctions.decernee"), str("distinctions.bulle", { titre: premiere.titre, motif: premiere.motif }), { type: "open", app: "distinctions" });
+        else pushToast(str("distinctions.plusieurs", { n: String(att.medailles.length) }), att.medailles.map((m) => m.titre).join(" · "), { type: "open", app: "distinctions" });
+        playSound("medaille");
+      }
+      for (const x of att.toasts.slice(-2)) pushToast(x.title, x.body, x.action);
+    }, DEMARRAGE_CALME);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Horloge des règles : une vérification par seconde depuis l'ouverture de session.
   useEffect(() => {
@@ -615,7 +645,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         ))}
 
         <Toasts toasts={toasts.slice(0, 1)} onClose={closeToast} onAction={runAction} />
-        <Assistant ev={evOs} />
+        <Assistant ev={evOs} calme={wins.windows.some((w) => w.appId === "bienvenue" && !w.minimized)} />
         <Taskbar
           windows={wins.windows}
           focusedId={wins.focusedId}

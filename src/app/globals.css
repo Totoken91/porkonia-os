@@ -65,19 +65,15 @@
     background: linear-gradient(180deg, #e7dec9 0%, #ddd3bb 45%, #cfc4a8 100%);
     box-shadow: inset 3px 3px 0 #f7f1e2, inset -4px -5px 0 #a99d81, inset 0 -22px 34px rgba(120, 100, 60, 0.2), 0 2px 0 #8e8268, 0 44px 70px rgba(0, 0, 0, 0.65);
   }
-  .coque::after {
-    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background-image: radial-gradient(rgba(70, 55, 25, 0.06) 0.6px, transparent 0.9px); background-size: 3px 3px;
-  }
   .coque::before {
     content: ""; position: absolute; top: 15px; right: 70px; width: 170px; height: 5px; border-radius: 3px;
     background: repeating-linear-gradient(90deg, rgba(60, 48, 30, 0.35) 0 16px, transparent 16px 22px);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   }
-  /* Au-dessus du grain de plastique de la coque (::after), qui sinon déborde sur le tube. */
-  .cadre-tube { position: relative; z-index: 1; padding: 12px; border-radius: 24px / 28px; background: linear-gradient(180deg, #a99d82 0%, #cdc2a6 60%, #ddd3bc 100%); box-shadow: inset 3px 5px 9px rgba(50, 38, 20, 0.6), inset -2px -2px 0 #f1e9d6; }
+  /* Gorge autour de la dalle : sombre et uniforme, sans reflet clair qui dessinerait un liseré autour de l'écran. */
+  .cadre-tube { position: relative; z-index: 1; padding: 12px; border-radius: 24px / 28px; background: linear-gradient(180deg, #8f846b 0%, #9c9177 100%); box-shadow: inset 3px 5px 9px rgba(40, 30, 15, 0.55), inset -1px -1px 2px rgba(40, 30, 15, 0.35); }
   .moniteur.nu .coque, .moniteur.nu .cadre-tube { padding: 0; border-radius: 0; background: none; box-shadow: none; }
-  .moniteur.nu .coque::before, .moniteur.nu .coque::after { display: none; }
+  .moniteur.nu .coque::before { display: none; }
   .ecran {
     position: relative; overflow: hidden; overflow: clip; background: #040404; isolation: isolate; border-radius: 18px / 22px;
     box-shadow: 0 0 0 2px #1a1612, 0 0 0 4px #3a3226;
@@ -93,10 +89,6 @@
     z-index: 9001;
     background: repeating-linear-gradient(180deg, rgba(0, 0, 0, calc(0.3 * var(--crt))) 0, rgba(0, 0, 0, calc(0.12 * var(--crt))) 0.8px, transparent 1.2px, transparent 2px);
   }
-  /* Halo : les zones claires débordent un peu (phosphore généreux). */
-  /* Le halo floute ce qu'il y a dessous : retiré de 8 px des bords, il ne lit jamais le plastique du cadre
-     (Safari et Firefox échantillonnent au-delà de l'écran), et ses bords sont fondus. */
-  .crt-halo { z-index: 9000; inset: 8px; border-radius: 12px / 16px; -webkit-mask-image: radial-gradient(ellipse 52% 54% at 50% 50%, #000 82%, transparent 100%); mask-image: radial-gradient(ellipse 52% 54% at 50% 50%, #000 82%, transparent 100%); backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); -webkit-backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); mix-blend-mode: screen; opacity: calc(0.28 * var(--crt)); }
   /* Grain : bruit du signal, qui fourmille. */
   .crt-grain { z-index: 9002; background-image: var(--grain); background-size: 128px 128px; mix-blend-mode: overlay; opacity: calc(0.09 * var(--crt)); animation: fourmille 0.5s steps(5) infinite; }
   @keyframes fourmille { 0% { background-position: 0 0; } 20% { background-position: -37px 19px; } 40% { background-position: 53px -71px; } 60% { background-position: -91px -13px; } 80% { background-position: 17px 83px; } 100% { background-position: 0 0; } }
@@ -975,7 +967,7 @@
   .piece.poche { place-items: start; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: #15110d; }
   .ecran.poche { border-radius: 0; box-shadow: none; --tube-filtre: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .ecran.poche, .ecran.poche * { cursor: default; }
-  .ecran.poche .crt-halo, .ecran.poche .crt-grille, .ecran.poche .crt-roulant { display: none; }
+  .ecran.poche .crt-grille, .ecran.poche .crt-roulant { display: none; }
   .ecran.poche .crt-grain { animation: none; }
   .ecran.poche .crt-vignette { box-shadow: inset 0 0 40px 6px rgba(0, 0, 0, calc(0.12 + 0.2 * var(--crt))); background: none; }
   .ecran.poche.tube-allume .tube { animation: none; }
@@ -1335,7 +1327,7 @@
   .gruik-bulle p { margin: 2px 0 6px; }
   .gruik-boutons { display: flex; justify-content: flex-end; gap: 6px; }
   .gruik-menu { display: flex; flex-direction: column; gap: 4px; }
-  .avec-gruik .bulles { right: 150px; }
+  .avec-gruik .bulles { right: 124px; }
   .ecran.poche .gruik { right: 4px; }
   .ecran.poche .gruik-bulle { width: 260px; margin-right: 8px; }
   .ecran.poche.avec-gruik .bulles, .ecran.poche .avec-gruik .bulles { right: 6px; }

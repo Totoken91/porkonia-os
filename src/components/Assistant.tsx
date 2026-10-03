@@ -11,7 +11,8 @@ import { pick } from "@/os/rng";
 
 type Affiche = (Bulle & { humeur?: "content" | "ouvert" | "surpris" }) | { cle: "menu"; texte: string; question: false; menu: true };
 
-export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null }) {
+/** `calme` : l'écran de bienvenue est ouvert ; Gruik attend qu'on le ferme pour dire bonjour. */
+export function Assistant({ ev, calme }: { ev: { n: number; ev: EvenementOs } | null; calme: boolean }) {
   const { pack, str, settings, setSettings, rng } = useOs();
   const ecran = useEcran();
   const spec = pack.assistant;
@@ -41,13 +42,17 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
     if (!b.question && !("menu" in b)) minuteur.current = setTimeout(() => setBulle(null), dureeLecture(b.texte));
   }, []);
 
-  // Bonjour, peu après l'ouverture de la session.
+  // Bonjour, peu après l'ouverture de la session, une fois l'écran de bienvenue refermé.
+  const aSalue = useRef(false);
   useEffect(() => {
-    if (!visible) return;
-    const t = setTimeout(() => dire({ cle: "accueil", texte: spec.accueil, question: false }, { saluer: true }), 2600);
+    if (!visible || calme || aSalue.current) return;
+    const t = setTimeout(() => {
+      aSalue.current = true;
+      dire({ cle: "accueil", texte: spec.accueil, question: false }, { saluer: true });
+    }, 2600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [visible, calme]);
 
   // Événements du système.
   useEffect(() => {
@@ -102,7 +107,7 @@ export function Assistant({ ev }: { ev: { n: number; ev: EvenementOs } | null })
   };
 
   const humeur = bulle && "humeur" in bulle && bulle.humeur ? bulle.humeur : regard ? "ouvert" : "content";
-  const taille = ecran.mode === "poche" ? (ecran.h < 500 ? 72 : 84) : 120;
+  const taille = ecran.mode === "poche" ? (ecran.h < 500 ? 60 : 70) : 96;
 
   const bas = (e: React.PointerEvent) => {
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);

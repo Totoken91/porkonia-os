@@ -198,7 +198,6 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
                   )}
                 </div>
                 {tube !== "eteint" && !poche && <InfoBulles />}
-                <div className="crt crt-halo" aria-hidden="true" />
                 <div className="crt crt-lignes" aria-hidden="true" />
                 <div className="crt crt-grain" aria-hidden="true" />
                 <div className="crt crt-grille" aria-hidden="true" />

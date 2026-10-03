@@ -1006,7 +1006,6 @@ export const porkosPack: ContentPack = {
   ],
 
   toastPools: {
-    bienvenue: [{ title: "Bienvenue dans PorkOS", body: "Votre session est ouverte, enregistrée et légèrement admirée." }],
     pignet: [{ title: "PigNet", body: "Connexion établie. Vos recherches sont désormais aussi les nôtres." }],
     rappels: [
       { title: "Rappel civique", body: "Vous n'avez pas regardé le portrait du Fondateur depuis quatre minutes. Aucune sanction. Pour l'instant." },
@@ -1028,7 +1027,6 @@ export const porkosPack: ContentPack = {
       { title: "Banquet conforme", body: "Le Grand Maître en a été informé, puis distrait par autre chose." },
       { title: "Banquet conforme", body: "Aucune nappe n'est visible. La République vous remercie à voix basse, pour ne pas réveiller le rôti." },
     ],
-    impatience: [{ title: "Impatience consignée", body: "Vous avez interrompu la séquence de démarrage. Cela a été noté dans votre dossier, à la rubrique « Tempérament »." }],
     "rappels-off": [{ title: "Rappels civiques désactivés", body: "Vous serez rappelé régulièrement qu'ils sont désactivés." }],
     zapper: [
       { title: "Channel Pork", body: "Vous avez fait le tour des chaînes. Elles s'appellent toutes Canal 1 : c'est une politique, pas un manque d'imagination." },
@@ -2516,8 +2514,8 @@ export const porkosPack: ContentPack = {
   ],
 
   rules: [
-    { id: "ecran-bienvenue", trigger: { type: "login", delay: 700 }, action: { type: "open", app: "bienvenue" }, max: 1 },
-    { id: "bienvenue", trigger: { type: "login", delay: 4000 }, action: { type: "toast-pool", pool: "bienvenue" }, max: 1 },
+    // L'écran de bienvenue n'accueille que la première fois ; ensuite, c'est Gruik qui dit bonjour.
+    { id: "ecran-bienvenue", trigger: { type: "login", delay: 700 }, action: { type: "open", app: "bienvenue" }, max: 1, jusquaSessions: 1 },
     { id: "pignet", trigger: { type: "app-open", app: "navigateur" }, action: { type: "toast-pool", pool: "pignet" }, max: 1 },
     { id: "config-bienvenue", trigger: { type: "app-open", app: "config" }, action: { type: "dialog-ref", id: "config-bienvenue" }, max: 1 },
     { id: "rappels", trigger: { type: "interval", startAfter: 300_000, every: 600_000, jitter: 120_000 }, action: { type: "toast-pool", pool: "rappels" }, unlessSetting: "rappels", max: 3 },
@@ -2525,7 +2523,6 @@ export const porkosPack: ContentPack = {
     { id: "maj-loyaute", trigger: { type: "login", delay: 600_000 }, action: { type: "update", id: "maj-loyaute" }, max: 1 },
     { id: "nappe-incident", trigger: { type: "signal", name: "nappe:incident" }, action: { type: "toast-pool", pool: "nappe-incident" } },
     { id: "nappe-conforme", trigger: { type: "signal", name: "nappe:conforme" }, action: { type: "toast-pool", pool: "nappe-conforme" } },
-    { id: "impatience", trigger: { type: "signal", name: "boot:impatience" }, action: { type: "toast-pool", pool: "impatience" }, max: 1 },
     { id: "rappels-off", trigger: { type: "signal", name: "config:rappels-off" }, action: { type: "toast-pool", pool: "rappels-off" } },
     { id: "zapper", trigger: { type: "signal", name: "tv:tour" }, action: { type: "toast-pool", pool: "zapper" } },
     { id: "enregistrer", trigger: { type: "signal", name: "texte:enregistrer" }, action: { type: "toast-pool", pool: "enregistrer" } },
@@ -3035,6 +3032,7 @@ export const porkosPack: ContentPack = {
     "gruik.conseil": "Un conseil, s'il vous plaît",
     "gruik.quiEstu": "Qui êtes-vous ?",
     "gruik.masquer": "Masquer {nom}",
+    "distinctions.plusieurs": "{n} distinctions décernées",
     "gruik.question": "Que puis-je faire pour vous ? Je peux aussi ne rien faire, mais avec application.",
     "site.telecharger": "Télécharger {nom}",
     "site.telechargerTaille": "{taille} Mo, environ {duree} s avec une ligne nationale",

@@ -22,7 +22,7 @@ export type SchedulerInput =
 /** Renvoie les actions à exécuter et le nouvel état. Ne fait aucun effet de bord. */
 /**
  * `sessions` : numéro de la session en cours pour ce citoyen (1 = première). Une règle avec `apresSessions`
- * ne joue qu'à partir de cette session-là. Un signal de règle en `nom*` accepte tout signal qui commence par `nom`.
+ * ne joue qu'à partir de cette session-là ; avec `jusquaSessions`, que jusqu'à celle-là. Un signal de règle en `nom*` accepte tout signal qui commence par `nom`.
  */
 export function schedule(rules: EventRule[], st: RuleState, input: SchedulerInput, rng: Rng, settings: Record<string, unknown> = {}, sessions = 1): { actions: { rule: string; action: ActionRef }[]; state: RuleState } {
   const fired = { ...st.fired };
@@ -36,6 +36,7 @@ export function schedule(rules: EventRule[], st: RuleState, input: SchedulerInpu
     if (r.max !== undefined && (fired[r.id] ?? 0) >= r.max) continue;
     if (r.unlessSetting && settings[r.unlessSetting] === false) continue;
     if (r.apresSessions !== undefined && sessions < r.apresSessions) continue;
+    if (r.jusquaSessions !== undefined && sessions > r.jusquaSessions) continue;
     const t = r.trigger;
     if (input.kind === "tick" && t.type === "login") {
       if (!fired[r.id] && input.elapsed >= t.delay) fire(r);
