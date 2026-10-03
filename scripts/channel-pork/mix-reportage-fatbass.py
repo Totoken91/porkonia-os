@@ -65,7 +65,7 @@ def voix(nom):
 
 
 T = {
-    "R1": "Aujourd'hui, Channel Pork embarque à bord du Gras-Fond. À la fois sous-marin de ravitaillement et salle de fête, il accueille le lieutenant Salamander, également connu sous le nom de DJ Fatbass.",
+    "R1": "Aujourd'hui, Channel Pork embarque à bord du Gras-Fond. À la fois sous-marin de ravitaillement et salle de fête, il accueille le lieutenant Salamandre, également connu sous le nom de DJ Fatbass.",
     "F1": "Faites gaffe en entrant. La porte est étanche, mais le plateau de rillettes, non.",
     "R2": "Nous sommes déjà en plongée ?",
     "F2": "Non. On attend que la mousse redescende.",
@@ -97,7 +97,7 @@ T = {
     "R14": "Comment garantissez-vous la discrétion du sous-marin ?",
     "F17": "La furtivité acoustique, c'est très simple. Il faut que l'ennemi entende absolument…",
     "R15": "Lieutenant ?",
-    "R16": "Lieutenant Salamander ?",
+    "R16": "Lieutenant Salamandre ?",
     "M1": "Il fait ça.",
     "R17": "Et qui surveille le sonar ?",
     "M2": "Normalement lui.",
