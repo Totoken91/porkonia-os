@@ -213,6 +213,37 @@ def carton_initial_p():
     return im
 
 
+def carton_ministere_porc():
+    """Ministère du Porc : même cadre d'État que le ministère des affaires, vert campagne de santé."""
+    im = degrade((38, 70, 34), (14, 32, 12))
+    d = ImageDraw.Draw(im)
+    for m in (18, 26):
+        d.rectangle([m, m, W - m, H - m], outline=(222, 196, 120), width=2 if m == 18 else 1)
+    e = Image.open(EMBLEME).convert("RGBA").resize((210, 210), Image.LANCZOS)
+    im.paste(e, ((W - 210) // 2, 70), e)
+    texte(d, (W / 2, 330), "CE MESSAGE VOUS EST DIFFUSÉ PAR", police("sans", 20), (232, 226, 190), ecart=3)
+    texte(d, (W / 2, 395), "LE MINISTÈRE DU PORC", ajuster(d, "LE MINISTÈRE DU PORC", "serif", 46, 680), (246, 226, 160), ombre=(8, 20, 6))
+    d.line([(W / 2 - 120, 448), (W / 2 + 120, 448)], fill=(222, 196, 120), width=2)
+    texte(d, (W / 2, 482), "PRÉVENTION · ALIMENTATION · REPOS", police("sans", 20), (210, 220, 180), ecart=2)
+    texte(d, (W / 2, 520), "RÉPUBLIQUE DE PORKONIA", police("serif2", 22), (210, 200, 160), ecart=4)
+    return im
+
+
+def carton_alvarez():
+    """Les Dossiers d'Alvarez : le logo fourni par l'utilisateur, sur un noir de régie avec un léger balayage."""
+    im = Image.new("RGB", (W, H), (6, 6, 8))
+    logo = Image.open(os.path.join(ICI, "logo-dossiers-alvarez.png")).convert("RGBA")
+    lw = 700
+    logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
+    im.paste(logo, ((W - lw) // 2, (H - logo.height) // 2 - 20), logo)
+    a = np.array(im).astype(float)
+    a[::3] *= 0.82  # lignes de balayage
+    im = Image.fromarray(a.astype(np.uint8))
+    d = ImageDraw.Draw(im)
+    texte(d, (W / 2, 520), "LE MAGAZINE QUI ROUVRE LES PORTES", police("sans", 20), (200, 196, 186), ecart=3)
+    return im
+
+
 # id : (carton, jingle, voix, début de la voix (s), gain voix, bande intégrale à préfixer ou None)
 GENERIQUES = {
     "ministere": (carton_ministere, synthe.jingle_ministere, "ministere", 2.3, 1.0, "pub-repulsif"),
@@ -225,6 +256,8 @@ GENERIQUES = {
     "petites-betes": (carton_betes_petites := (lambda: carton_betes(True)), lambda: synthe.jingle_nature(False), "petites-betes", 1.9, 1.0, None),
     "betes": ((lambda: carton_betes(False)), lambda: synthe.jingle_nature(True), "betes", 1.9, 1.0, None),
     "meteo": (carton_meteo, synthe.jingle_meteo, "meteo", 1.6, 1.0, None),
+    "ministere-porc": (carton_ministere_porc, synthe.jingle_ministere_porc, "ministere-porc", 2.3, 1.0, "pub-mangez-gras"),
+    "alvarez": (carton_alvarez, synthe.jingle_alvarez, "alvarez", 2.4, 1.0, "dossiers-alvarez"),
 }
 
 

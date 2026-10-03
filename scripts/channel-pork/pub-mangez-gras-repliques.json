@@ -1,0 +1,6 @@
+{
+ "_lisezmoi": "Annonce de prévention « Mangez gras. Bougez plus tard. » (script de l'utilisateur). ElevenLabs v4. V : voix off (Thomas), C : le collègue (Fin), F : le fonctionnaire (Michael), L : mention légale (Bill). Chaque texte envoyé commence par la balise « standard Parisian French accent » pour éviter l'accent québécois des voix v4 en français ; le rendu n'est pas garanti.",
+ "modele": "eleven_v4",
+ "voix": {"V": "Thomas GBv7mTt0atIp3Br8iCZE", "C": "Fin D38z5RcWu1voky8WS1ja", "F": "Michael flq6f7yk4E4fJM5XTYuZ", "L": "Bill pqHfZKP75CvOlQylNhV4"},
+ "ecarts_au_script": ["L1 accélérée de 12 % au mixage (mention légale)"]
+}

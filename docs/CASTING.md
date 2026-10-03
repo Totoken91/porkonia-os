@@ -111,3 +111,15 @@ D'après le script de l'utilisateur. Le fonctionnaire (**Michael**, v4) reste ne
 ## Génériques d'émission
 
 Chaque émission ouvre sur un carton titre et un jingle (`scripts/channel-pork/generiques.py` : musique synthétisée dans `synthe.py`, cartons dans `public/tv/generiques/`). La voix d'antenne de Channel Pork est **Bill** (v4), sauf l'animé, annoncé par **Patrick**. Noms d'émission inventés pour la démo : « Gras Capital » (l'émission des startups d'Éric) et « Porc d'Attache » (le magazine local du reportage Fatbass). Les messages d'État s'ouvrent sur l'emblème de Porkonia : « Ce message vous est diffusé par le Ministère des Affaires Trop Compliquées » (nom de ministère tiré de Porkopédia, attribution du message inventée).
+
+## Accent
+
+Les voix v4 lisent parfois le français avec un accent québécois. Depuis octobre 2026, chaque texte envoyé commence par la balise `[standard Parisian French accent, …]` ; c'est une consigne de jeu, pas un réglage : le rendu n'est pas garanti, réécouter chaque prise.
+
+## Annonce de prévention « Mangez gras. Bougez plus tard. »
+
+D'après le script de l'utilisateur. Voix off douce et paternaliste (**Thomas**), le collègue (**Fin**), le fonctionnaire (**Michael**), mention légale débitée par **Bill**. Musique de campagne rassurante (guitare et petit piano synthétisés, `synthe.campagne`), continue, abaissée sous les deux courtes répliques ; fourchette, verres, ambiance extérieure de village ; petit accord final ; coupe nette. Générique : « Ce message vous est diffusé par le Ministère du Porc » (ministère de Porkopédia, attribution du message inventée). Images dans `public/tv/mangez-gras/`, mixage `scripts/channel-pork/mix-pub-mangez-gras.py`.
+
+## « Les Dossiers d'Alvarez — Le Coup de Hamelot »
+
+Magazine d'enquête d'après le script de l'utilisateur, qui raconte sa propre version du Coup de Hamelot (pas celle de Porkopédia). François Alvarez (**Joseph**) parle doucement, très sérieusement, et mange du gâteau ; Stanley Ferret (**Liam**) trouve tout raisonnable ; le maire sortant (**Jeremy**) est outré, et le corbeau restitue sa voix (bande étroite, vibrato de gorge) ; la greffière (**Emily**) ne montre rien ; régie (**Sam**) et agent (**Fin**) hors champ. Son : ronflement des CRT au plateau, bruit analogique sur les archives CCTV muettes, musique d'enquête très grave (`synthe.enquete`), appeau, corbeau, clé, toilettes brefs et secs, coups contre la porte, couverts et chopes, applaudissements étouffés, chasse d'eau, magnétophone, verre, bière, coupe nette. Générique avec le logo fourni par l'utilisateur (`scripts/channel-pork/logo-dossiers-alvarez.png`). Images dans `public/tv/alvarez/`, mixage `scripts/channel-pork/mix-dossiers-alvarez.py`.

@@ -289,3 +289,109 @@ def jingle_initial_p():
         x = filtre(scie(note(n), b / 4 * 0.9, 0.004, 2), "low", 5000) * env(int(b / 4 * 0.9 * SR), 0.002, 0.02)
         _poser(s, x, k * b / 4, 0.35)
     return finir(s * env(len(s), 0.005, 0.25))
+
+
+# ----------------------------- Campagne de santé et enquête -----------------------------
+
+def guitare(n, d=1.6, g=1.0, seed=0):
+    """Corde pincée (Karplus-Strong) : guitare folk de campagne institutionnelle."""
+    f = note(n)
+    p = max(2, int(SR / f))
+    rng = np.random.default_rng(seed + n)
+    buf = filtre(rng.uniform(-1, 1, p), "low", 3000, 1)
+    out = np.zeros(int(d * SR))
+    for i in range(len(out)):
+        k = i % p
+        out[i] = buf[k]
+        buf[k] = 0.4985 * (buf[k] + buf[(k + 1) % p])
+    return filtre(out, "high", 70) * env(len(out), 0.002, 0.15) * g
+
+
+def piano(n, d=1.4, g=1.0):
+    """Petit piano droit optimiste : quelques partiels légèrement inharmoniques, attaque nette, décroissance."""
+    t = np.arange(int(d * SR)) / SR
+    f = note(n)
+    x = sum(np.sin(2 * np.pi * f * h * (1 + 0.0004 * h * h) * t) * np.exp(-t * (2.2 + h * 0.9)) / h for h in range(1, 7))
+    x += filtre(np.random.default_rng(n).standard_normal(len(t)), "band", [1500, 5000]) * np.exp(-t * 80) * 0.05
+    return x * env(len(t), 0.002, 0.08) * g
+
+
+def campagne(duree, bpm=92):
+    """Nappe rassurante de campagne de santé : arpèges de guitare en sol majeur et petites phrases de piano."""
+    b = 60 / bpm
+    s = np.zeros(int((duree + 3) * SR))
+    accords = [[43, 55, 59, 62, 67], [48, 55, 60, 64, 67], [50, 57, 62, 66, 69], [43, 55, 59, 62, 67],
+               [40, 52, 55, 59, 64], [48, 55, 60, 64, 67], [50, 57, 62, 66, 69], [50, 57, 62, 66, 69]]
+    motif = [0, 2, 3, 4, 3, 2, 1, 2]
+    melodie = [79, 78, 76, 74, None, 76, 74, 71, 72, None, 74, 76, 74, None, 72, 71]
+    t, k = 0.0, 0
+    while t < duree:
+        acc = accords[k % len(accords)]
+        for j, m in enumerate(motif):
+            _poser(s, guitare(acc[m], 1.5, 0.5, seed=k * 8 + j), t + j * b / 2)
+        for j in range(2):
+            n = melodie[(k * 2 + j) % len(melodie)]
+            if n:
+                _poser(s, piano(n, 1.6, 0.22), t + j * 2 * b + b * 0.02)
+        t += 4 * b
+        k += 1
+    s = s[: int(duree * SR)]
+    return s / (np.abs(s).max() + 1e-9) * env(len(s), 0.4, 1.2)
+
+
+def accord_final():
+    """Petit accord final : guitare grattée et piano à l'unisson, sol majeur."""
+    s = np.zeros(int(2.8 * SR))
+    for j, n in enumerate([43, 50, 55, 59, 62, 67]):
+        _poser(s, guitare(n, 2.6, 0.6, seed=90 + j), j * 0.018)
+    for n in (67, 71, 74, 79):
+        _poser(s, piano(n, 2.6, 0.25), 0.04)
+    return s / (np.abs(s).max() + 1e-9)
+
+
+def enquete(duree, seed=3):
+    """Musique d'enquête excessivement grave : bourdon de contrebasses, pulsation de timbale lointaine, pizz menaçants."""
+    rng = np.random.default_rng(seed)
+    n = int(duree * SR)
+    t = np.arange(n) / SR
+    drone = (scie(note(28), duree, 0.006, 4) * 0.6 + scie(note(35), duree, 0.005, 3) * 0.3)
+    drone = filtre(drone, "low", 260) * (0.75 + 0.25 * np.sin(2 * np.pi * 0.07 * t))
+    s = drone.copy()
+    k = 0.0
+    while k < duree:
+        _poser(s, timbale(46, 1.6), k, 0.35)
+        _poser(s, timbale(46, 1.6), k + 0.42, 0.2)
+        k += 3.6
+    k = 1.8
+    while k < duree:
+        for j, m in enumerate(rng.choice([[40, 41, 40], [40, 43, 41], [40, 39, 40]])):
+            x = filtre(scie(note(m), 0.35, 0.003, 2), "low", 900) * np.exp(-np.arange(int(0.35 * SR)) / SR * 9)
+            _poser(s, x, k + j * 0.3, 0.35)
+        k += 7.2
+    s = s / (np.abs(s).max() + 1e-9)
+    return s * env(n, 1.0, 1.5)
+
+
+def jingle_alvarez():
+    """Les Dossiers d'Alvarez : coup grave, bourdon, trois notes de cuivres sombres, un clic de magnétophone."""
+    s = np.zeros(int(5.4 * SR))
+    _poser(s, timbale(42, 2.4), 0.0, 1.0)
+    _poser(s, enquete(5.2, 9), 0.0, 0.5)
+    for t0, notes, d in ((0.8, [40, 47], 0.5), (1.4, [41, 48], 0.5), (2.0, [40, 46, 52], 2.4)):
+        _poser(s, cuivres(notes, d, 1400), t0, 0.7)
+    _poser(s, timbale(42, 2.4), 2.0, 0.8)
+    clic = filtre(np.random.default_rng(1).standard_normal(int(0.03 * SR)), "band", [800, 5000]) * np.exp(-np.arange(int(0.03 * SR)) / SR * 200)
+    _poser(s, clic, 4.9, 0.6)
+    return finir(s * env(len(s), 0.01, 0.6))
+
+
+def jingle_ministere_porc():
+    """Ministère du Porc : orgue solennel puis la petite phrase de guitare et piano de la campagne, en majeur."""
+    s = np.zeros(int(6.0 * SR))
+    _poser(s, timbale(55, 1.8), 0.0, 0.7)
+    for n in (43, 50, 55, 59):
+        _poser(s, orgue([n], [5.2], 0.3) * 0.32, 0.05)
+    for j, n in enumerate([67, 71, 74, 79]):
+        _poser(s, piano(n, 1.8, 0.5), 0.9 + j * 0.28)
+    _poser(s, accord_final() * 0.7, 2.1)
+    return finir(s * env(len(s), 0.02, 1.0))

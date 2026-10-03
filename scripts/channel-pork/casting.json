@@ -374,6 +374,52 @@
     "low, breathy, way too close to the microphone, calm and unsettling, slowly"
    ],
    "remarque": "Descendre de 2,2 demi-tons et coller au micro au mixage (mix-ftg-ep2.py)."
+  },
+  "alvarez": {
+   "moteur": "elevenlabs_v4",
+   "voice": "Zlb1dXrM653N07WRdFW3",
+   "voix_nom": "Joseph",
+   "role": "François Alvarez, enquêteur et présentateur des « Dossiers d'Alvarez »",
+   "balises": [
+    "standard Parisian French accent, speaking softly, very seriously, slow, intimate investigative journalist",
+    "documentary voice-over, soft, grave"
+   ]
+  },
+  "stanley-ferret": {
+   "moteur": "elevenlabs_v4",
+   "voice": "TX3LPaxmHKxFdv7VOQHJ",
+   "voix_nom": "Liam",
+   "role": "Stanley Ferret (« Le Coup de Hamelot »)",
+   "balises": [
+    "standard Parisian French accent, calm, smug, perfectly reasonable, slightly amused"
+   ]
+  },
+  "maire-sortant-hamelot": {
+   "moteur": "elevenlabs_v4",
+   "voice": "bVMeCyTHy58xNoL34h3p",
+   "voix_nom": "Jeremy",
+   "role": "le maire sortant de Hamelot ; aussi la voix restituée par le corbeau",
+   "balises": [
+    "standard Parisian French accent, outraged, indignant older man"
+   ]
+  },
+  "greffiere-hamelot": {
+   "moteur": "elevenlabs_v4",
+   "voice": "LcfcDJNUP1GQjkzn1xUU",
+   "voix_nom": "Emily",
+   "role": "la greffière du conseil de Hamelot",
+   "balises": [
+    "standard Parisian French accent, completely flat, emotionless clerk"
+   ]
+  },
+  "voix-off-prevention": {
+   "moteur": "elevenlabs_v4",
+   "voice": "GBv7mTt0atIp3Br8iCZE",
+   "voix_nom": "Thomas",
+   "role": "voix off des campagnes de prévention de l'État",
+   "balises": [
+    "standard Parisian French accent, soft, warm, paternalistic public health announcer, reassuring, slow"
+   ]
   }
  },
  "libres": {
