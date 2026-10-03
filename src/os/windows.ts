@@ -91,6 +91,16 @@ export function ordreRecents(ws: Win[], focusedId: string | null): string[] {
   return [...ws].sort((a, b) => rang(b) - rang(a) || b.z - a.z).map((w) => w.id);
 }
 
+/**
+ * Croix directionnelle du Poche : gauche ramène le programme d'avant, droite fait défiler jusqu'au plus ancien
+ * (on tourne dans la pile comme sur un PDA). Rend l'identifiant à mettre au premier plan, ou null s'il n'y en a pas.
+ */
+export function voisine(ws: Win[], focusedId: string | null, sens: "gauche" | "droite"): string | null {
+  const ordre = ordreRecents(ws, focusedId);
+  if (ordre.length < 2) return ordre[0] && ordre[0] !== focusedId ? ordre[0] : null;
+  return sens === "gauche" ? ordre[1]! : ordre[ordre.length - 1]!;
+}
+
 export function winReducer(s: WinState, a: WinAction): WinState {
   switch (a.type) {
     case "open": {

@@ -19,9 +19,10 @@ export interface Ecran {
 export const MONITEUR = { w: 800, h: 600 };
 /** Barre des tâches du moniteur. */
 export const BARRE_TACHES = 28;
-/** Barre d'état et barre de navigation du Poche (cibles tactiles d'au moins 44 px). */
+/** Barre d'état et façade à boutons du Poche (cibles tactiles d'au moins 44 px) ; la façade est plus basse en paysage. */
 export const BARRE_ETAT = 26;
-export const BARRE_NAV = 50;
+export const BARRE_NAV = 96;
+export const BARRE_NAV_PAYSAGE = 60;
 /** En dessous, le moniteur réduit deviendrait illisible : on passe au Poche. */
 const SEUIL = { w: 720, h: 500 };
 const MINI = 300;
@@ -29,7 +30,9 @@ const MINI = 300;
 export function choisirEcran(vw: number, vh: number, choix: ChoixEcran = "auto"): Ecran {
   const mode: ModeEcran = choix !== "auto" ? choix : vw < SEUIL.w || vh < SEUIL.h ? "poche" : "moniteur";
   if (mode === "moniteur") return { mode, ...MONITEUR, haut: 0, bas: BARRE_TACHES };
-  return { mode, w: Math.max(MINI, Math.floor(vw)), h: Math.max(MINI, Math.floor(vh)), haut: BARRE_ETAT, bas: BARRE_NAV };
+  const w = Math.max(MINI, Math.floor(vw));
+  const h = Math.max(MINI, Math.floor(vh));
+  return { mode, w, h, haut: BARRE_ETAT, bas: h > w ? BARRE_NAV : BARRE_NAV_PAYSAGE };
 }
 
 /** Lit un choix d'écran imposé dans l'adresse (?ecran=poche|moniteur), sinon `auto`. */

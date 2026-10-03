@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { aiguilles, decaler, grilleMois } from "@/os/calendrier";
-import { ordreRecents, type Win } from "@/os/windows";
+import { ordreRecents, voisine, type Win } from "@/os/windows";
 
 const w = (id: string, z: number, minimized = false) => ({ id, z, minimized }) as Win;
 
@@ -9,6 +9,19 @@ describe("commutateur de tâches", () => {
     expect(ordreRecents([w("a", 1), w("b", 5), w("c", 3, true), w("d", 4)], "b")).toEqual(["b", "d", "a", "c"]);
     expect(ordreRecents([w("a", 1), w("b", 2)], null)).toEqual(["b", "a"]);
     expect(ordreRecents([], null)).toEqual([]);
+  });
+});
+
+describe("croix directionnelle du Poche", () => {
+  const pile = [w("a", 1), w("b", 5), w("c", 3, true), w("d", 4)];
+  it("gauche ramène le programme d'avant, droite tourne jusqu'au plus ancien", () => {
+    expect(voisine(pile, "b", "gauche")).toBe("d");
+    expect(voisine(pile, "b", "droite")).toBe("c");
+  });
+  it("ne fait rien sans autre programme, et ramène l'unique programme s'il est caché", () => {
+    expect(voisine([], null, "gauche")).toBeNull();
+    expect(voisine([w("a", 1)], "a", "droite")).toBeNull();
+    expect(voisine([w("a", 1, true)], null, "droite")).toBe("a");
   });
 });
 

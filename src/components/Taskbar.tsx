@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AppManifest } from "@/content/types";
 import { useOs } from "@/os/context";
-import { ordreRecents, type Win, type WinAction } from "@/os/windows";
+import { ordreRecents, voisine, type Win, type WinAction } from "@/os/windows";
 import { Icon } from "./Icon";
 import { Calendrier } from "./Calendrier";
 import { demanderPleinEcran } from "./Monitor";
@@ -43,7 +43,7 @@ interface Props {
   onLayout(op: "desktop" | "cascade" | "tile"): void;
   /** Activité en cours (chargement) : le témoin réseau s'affole. */
   busy: boolean;
-  /** PorkOS Poche : barre d'état en haut, barre de navigation tactile en bas. */
+  /** PorkOS Poche : barre d'état en haut, façade à boutons physiques en bas (comme un PDA). */
   poche?: boolean;
 }
 
@@ -205,6 +205,30 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
   );
 
   const premierPlan = windows.find((w) => w.id === focusedId && !w.minimized);
+  const fermerTiroirs = () => (setOpen(false), setTaches(false));
+  const retour = () => {
+    fermerTiroirs();
+    if (!premierPlan) return;
+    // Retour au programme d'avant (le plus récent après celui-ci), sinon à l'accueil.
+    const precedent = ordreRecents(windows, focusedId)[1];
+    dispatch({ type: "minimize", id: premierPlan.id });
+    if (precedent) dispatch({ type: "focus", id: precedent });
+  };
+  const tourner = (sens: "gauche" | "droite") => {
+    fermerTiroirs();
+    const id = voisine(windows, focusedId, sens);
+    if (id) dispatch({ type: "focus", id });
+  };
+  /** Haut / bas de la croix : fait défiler ce qui est à l'écran (programme au premier plan, sinon le lanceur). */
+  const defiler = (sens: 1 | -1) => {
+    const racine = premierPlan ? document.querySelector(`[data-testid="window-${premierPlan.appId}"]`) : document.querySelector(".lanceur");
+    if (!racine) return;
+    const candidats = [racine, ...Array.from(racine.querySelectorAll<HTMLElement>("*"))] as HTMLElement[];
+    const cible = candidats
+      .filter((el) => el.scrollHeight > el.clientHeight + 4 && /auto|scroll/.test(getComputedStyle(el).overflowY))
+      .sort((x, y) => y.clientHeight - x.clientHeight)[0];
+    cible?.scrollBy({ top: sens * Math.max(60, cible.clientHeight * 0.7), behavior: "smooth" });
+  };
   if (poche) {
     return (
       <>
@@ -245,34 +269,40 @@ export function Taskbar({ windows, focusedId, onTask, dispatch, onLayout, busy, 
             </ul>
           </div>
         )}
-        <nav className="barre-nav">
-          <button ref={startBtn} className="bn-bouton bn-demarrer" aria-expanded={open} aria-haspopup="menu" onClick={() => (setTaches(false), setOpen((o) => !o))} data-testid="start" aria-label={str("demarrer")}>
-            <img src="/brand/embleme-64.png" alt="" width={24} height={24} />
-          </button>
-          <button
-            className="bn-bouton"
-            onClick={() => {
-              setOpen(false);
-              setTaches(false);
-              if (!premierPlan) return;
-              // Retour au programme d'avant (le plus récent après celui-ci), sinon à l'accueil.
-              const precedent = ordreRecents(windows, focusedId)[1];
-              dispatch({ type: "minimize", id: premierPlan.id });
-              if (precedent) dispatch({ type: "focus", id: precedent });
-            }}
-            disabled={!premierPlan}
-            aria-label={str("poche.retour")}
-            data-testid="retour"
-          >
-            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M14 4l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" /></svg>
-          </button>
-          <button className="bn-bouton" onClick={() => (setOpen(false), setTaches(false), onLayout("desktop"))} aria-label={str("poche.accueil")} data-testid="afficher-bureau">
-            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 11l8-7 8 7M5 9v9h4v-5h4v5h4V9" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="miter" /></svg>
-          </button>
-          <button className={`bn-bouton${taches ? " actif" : ""}`} onClick={() => (setOpen(false), setTaches((t) => !t))} aria-label={str("poche.taches")} aria-expanded={taches} data-testid="taches-bouton">
-            <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="4" y="4" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4" /></svg>
-            {windows.length > 0 && <i className="bn-compte">{windows.length}</i>}
-          </button>
+        <nav className="facade" aria-label={str("poche.facade")}>
+          <div className="facade-boutons">
+            <button ref={startBtn} className="fb-bouton fb-demarrer" aria-expanded={open} aria-haspopup="menu" onClick={() => (fermerTiroirs(), setOpen((o) => !o))} data-testid="start" aria-label={str("demarrer")}>
+              <img src="/brand/embleme-64.png" alt="" width={32} height={32} />
+            </button>
+            <button className="fb-bouton" onClick={retour} disabled={!premierPlan} aria-label={str("poche.retour")} data-testid="retour">
+              <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M14 4l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" /></svg>
+            </button>
+            <div className="croix" role="group" aria-label={str("poche.croix")}>
+              <button className="croix-b croix-haut" onClick={() => defiler(-1)} aria-label={str("poche.croix.haut")} data-testid="croix-haut">
+                <svg width="14" height="10" viewBox="0 0 14 10" aria-hidden="true"><path d="M7 1l6 8H1z" fill="currentColor" /></svg>
+              </button>
+              <button className="croix-b croix-gauche" onClick={() => tourner("gauche")} disabled={!voisine(windows, focusedId, "gauche")} aria-label={str("poche.croix.gauche")} data-testid="croix-gauche">
+                <svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M1 7l8-6v12z" fill="currentColor" /></svg>
+              </button>
+              <button className="croix-centre" onClick={() => (fermerTiroirs(), onLayout("desktop"))} aria-label={str("poche.accueil")} data-testid="afficher-bureau">
+                <svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 11l8-7 8 7M5 9v9h4v-5h4v5h4V9" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinejoin="miter" /></svg>
+              </button>
+              <button className="croix-b croix-droite" onClick={() => tourner("droite")} disabled={!voisine(windows, focusedId, "droite")} aria-label={str("poche.croix.droite")} data-testid="croix-droite">
+                <svg width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M9 7L1 1v12z" fill="currentColor" /></svg>
+              </button>
+              <button className="croix-b croix-bas" onClick={() => defiler(1)} aria-label={str("poche.croix.bas")} data-testid="croix-bas">
+                <svg width="14" height="10" viewBox="0 0 14 10" aria-hidden="true"><path d="M7 9l6-8H1z" fill="currentColor" /></svg>
+              </button>
+            </div>
+            <button className={`fb-bouton${taches ? " actif" : ""}`} onClick={() => (setOpen(false), setTaches((t) => !t))} aria-label={str("poche.taches")} aria-expanded={taches} data-testid="taches-bouton">
+              <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="6" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.4" /><path d="M7 3h12v12" fill="none" stroke="currentColor" strokeWidth="2.4" /></svg>
+              {windows.length > 0 && <i className="fb-compte">{windows.length}</i>}
+            </button>
+            <button className="fb-bouton fb-courrier" onClick={() => (fermerTiroirs(), openApp("mail"))} aria-label={str("poche.courrier")} data-testid="raccourci-courrier">
+              <svg width="24" height="18" viewBox="0 0 24 18" aria-hidden="true"><path d="M2 2h20v14H2zM2 2l10 8 10-8" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="miter" /></svg>
+              {nonLus > 0 && <i className="fb-voyant" aria-hidden="true" />}
+            </button>
+          </div>
         </nav>
       </>
     );

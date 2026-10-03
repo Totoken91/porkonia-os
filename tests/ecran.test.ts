@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BARRE_ETAT, BARRE_NAV, BARRE_TACHES, choisirEcran, choixDansAdresse, echelleHabillage } from "../src/os/ecran";
+import { BARRE_ETAT, BARRE_NAV, BARRE_NAV_PAYSAGE, BARRE_TACHES, choisirEcran, choixDansAdresse, echelleHabillage } from "../src/os/ecran";
 
 describe("choisirEcran", () => {
   it("garde le moniteur 800×600 sur un écran d'ordinateur ou une tablette", () => {
@@ -8,7 +8,7 @@ describe("choisirEcran", () => {
   });
   it("passe au Poche sur un téléphone, en portrait comme en paysage, à la taille de l'appareil", () => {
     expect(choisirEcran(390, 844)).toEqual({ mode: "poche", w: 390, h: 844, haut: BARRE_ETAT, bas: BARRE_NAV });
-    expect(choisirEcran(844, 390)).toMatchObject({ mode: "poche", w: 844, h: 390 });
+    expect(choisirEcran(844, 390)).toMatchObject({ mode: "poche", w: 844, h: 390, bas: BARRE_NAV_PAYSAGE });
   });
   it("respecte un choix imposé et un plancher de taille", () => {
     expect(choisirEcran(1366, 800, "poche").mode).toBe("poche");

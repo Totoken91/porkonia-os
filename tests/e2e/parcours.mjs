@@ -149,6 +149,12 @@ try {
       await page.getByTestId(`icon-${id}`).tap();
     };
     const closeTop = () => page.locator(".pk-window.focused [data-testid=window-close]").click();
+    // Croix du Poche : on appuie près de la flèche (le centre géométrique de chaque pétale est le bouton Accueil).
+    const croix = async (sens) => {
+      const { width: w, height: h } = await page.locator(".croix").boundingBox();
+      const pos = { haut: { x: w / 2, y: 6 }, bas: { x: w / 2, y: h - 6 }, gauche: { x: 6, y: h / 2 }, droite: { x: w - 6, y: h / 2 } }[sens];
+      await page.getByTestId(`croix-${sens}`).click({ position: pos });
+    };
 
     // Navigateur → notice Douzi → lien interne
     await open("d-nav");
@@ -320,10 +326,28 @@ try {
       await shot(page, `${tag}-12-taches`);
       await page.locator("[data-testid=taches] .tache", { hasText: "Courrier" }).click();
       await page.getByTestId("window-mail").waitFor();
+      // Croix directionnelle : gauche bascule entre les deux derniers programmes, droite tourne vers le plus ancien.
+      await croix("gauche");
+      await page.locator(".pk-window.focused[data-testid=window-fichiers]").waitFor();
+      await croix("gauche");
+      await page.locator(".pk-window.focused[data-testid=window-mail]").waitFor();
+      await croix("droite");
+      await page.waitForFunction(() => !document.querySelector(".pk-window.focused[data-testid=window-mail]"));
       await page.getByTestId("taches-bouton").click();
       await page.getByRole("button", { name: "Tout fermer" }).click();
       await page.getByTestId("window-mail").waitFor({ state: "detached" });
-      step(`${tag} : lanceur, Retour, Accueil et programmes ouverts`);
+      // Bas de la croix : fait défiler le lanceur quand il déborde ; bouton Courrier de la façade.
+      const lanceur = page.locator(".lanceur");
+      if (await lanceur.evaluate((el) => el.scrollHeight > el.clientHeight + 4)) {
+        await croix("bas");
+        await page.waitForFunction(() => document.querySelector(".lanceur").scrollTop > 20);
+        await croix("haut");
+      }
+      await page.getByTestId("raccourci-courrier").click();
+      await page.getByTestId("window-mail").waitFor();
+      await shot(page, `${tag}-12b-facade`);
+      await closeTop();
+      step(`${tag} : lanceur, Retour, Accueil, croix et programmes ouverts`);
     }
 
     // Exécuter…
