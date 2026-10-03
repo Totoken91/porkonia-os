@@ -181,8 +181,11 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
                     <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="v" />
                     <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
                     <feOffset in="b" dx={-(0.25 + 0.75 * crtEff)} dy="0" result="b2" />
-                    <feBlend in="r2" in2="v" mode="screen" result="rv" />
-                    <feBlend in="rv" in2="b2" mode="screen" />
+                    {/* Au bord, le canal décalé manque d'une colonne : on y remet le canal d'origine (sinon liseré coloré). */}
+                    <feComposite in="r2" in2="r" operator="over" result="r3" />
+                    <feComposite in="b2" in2="b" operator="over" result="b3" />
+                    <feBlend in="r3" in2="v" mode="screen" result="rv" />
+                    <feBlend in="rv" in2="b3" mode="screen" />
                   </filter>
                 </svg>
                 <div className={`tube${crtEff > 0.12 && !poche ? " convergence" : ""}`}>

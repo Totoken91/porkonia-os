@@ -81,10 +81,12 @@
   .ecran {
     position: relative; overflow: hidden; overflow: clip; background: #040404; isolation: isolate; border-radius: 18px / 22px;
     box-shadow: 0 0 0 2px #1a1612, 0 0 0 4px #3a3226;
-    filter: contrast(calc(1 + 0.06 * var(--crt))) saturate(calc(1 + 0.14 * var(--crt))) blur(calc(var(--crt) * 0.4px));
+    --tube-filtre: contrast(calc(1 + 0.06 * var(--crt))) saturate(calc(1 + 0.14 * var(--crt))) blur(calc(var(--crt) * 0.4px));
   }
   .moniteur.nu .ecran { border-radius: 0; box-shadow: none; }
-  .tube { position: absolute; inset: 0; transform-origin: center; overflow: hidden; overflow: clip; }
+  /* Les effets de tube ne touchent que l'image : posés sur .ecran, ils flouteraient et éclairciraient son liseré
+     et déborderaient sur le cadre du moniteur. */
+  .tube { position: absolute; inset: 0; transform-origin: center; overflow: hidden; overflow: clip; filter: var(--tube-filtre); }
   .crt { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; transition: opacity 0.4s; }
   /* Lignes de balayage : une par ligne paire, au profil adouci (le faisceau est rond, pas carré). */
   .crt-lignes {
@@ -92,11 +94,13 @@
     background: repeating-linear-gradient(180deg, rgba(0, 0, 0, calc(0.3 * var(--crt))) 0, rgba(0, 0, 0, calc(0.12 * var(--crt))) 0.8px, transparent 1.2px, transparent 2px);
   }
   /* Halo : les zones claires débordent un peu (phosphore généreux). */
-  .crt-halo { z-index: 9000; backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); -webkit-backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); mix-blend-mode: screen; opacity: calc(0.28 * var(--crt)); }
+  /* Le halo floute ce qu'il y a dessous : retiré de 8 px des bords, il ne lit jamais le plastique du cadre
+     (Safari et Firefox échantillonnent au-delà de l'écran), et ses bords sont fondus. */
+  .crt-halo { z-index: 9000; inset: 8px; border-radius: 12px / 16px; -webkit-mask-image: radial-gradient(ellipse 52% 54% at 50% 50%, #000 82%, transparent 100%); mask-image: radial-gradient(ellipse 52% 54% at 50% 50%, #000 82%, transparent 100%); backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); -webkit-backdrop-filter: blur(2.5px) brightness(1.35) saturate(1.2); mix-blend-mode: screen; opacity: calc(0.28 * var(--crt)); }
   /* Grain : bruit du signal, qui fourmille. */
   .crt-grain { z-index: 9002; background-image: var(--grain); background-size: 128px 128px; mix-blend-mode: overlay; opacity: calc(0.09 * var(--crt)); animation: fourmille 0.5s steps(5) infinite; }
   @keyframes fourmille { 0% { background-position: 0 0; } 20% { background-position: -37px 19px; } 40% { background-position: 53px -71px; } 60% { background-position: -91px -13px; } 80% { background-position: 17px 83px; } 100% { background-position: 0 0; } }
-  .tube.convergence { filter: url(#crt-convergence); }
+  .tube.convergence { filter: url(#crt-convergence) var(--tube-filtre); }
   .filtres-crt { position: absolute; width: 0; height: 0; }
   .crt-grille {
     z-index: 9002;
@@ -960,7 +964,7 @@
   /* L'écran épouse l'appareil, à l'échelle 1 ; le doigt remplace la souris : cibles de 44 px, appui unique. */
   .sonde-sure { position: fixed; inset: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); pointer-events: none; visibility: hidden; }
   .piece.poche { place-items: start; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); background: #15110d; }
-  .ecran.poche { border-radius: 0; box-shadow: none; filter: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .ecran.poche { border-radius: 0; box-shadow: none; --tube-filtre: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .ecran.poche, .ecran.poche * { cursor: default; }
   .ecran.poche .crt-halo, .ecran.poche .crt-grille, .ecran.poche .crt-roulant { display: none; }
   .ecran.poche .crt-grain { animation: none; }
