@@ -34,3 +34,5 @@ Ces fichiers ne viennent pas tous d'OpenGameArt ; licence indiquée pour chacun.
 | chiasse-01 à chiasse-11 | « Gastric distress » (bylfa), https://opengameart.org/content/gastric-distress | CC0 |
 | pet-01 à pet-08 | « farts-pieruja » (Zache, ylearkisto), https://commons.wikimedia.org/wiki/File:425594_ylearkisto_farts-pieruja.wav | CC BY 3.0 : crédit à Zache |
 | pet-mouille, gargouillis | « Wet fart tummy rumbles » (natalie), https://commons.wikimedia.org/wiki/File:Wet_fart_tummy_rumbles.ogg | domaine public |
+
+| friture | « General Household Sound Effects » (fryingpan01, extrait de 32 s), https://opengameart.org/content/general-household-sound-effects | CC0 |

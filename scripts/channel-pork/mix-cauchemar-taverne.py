@@ -152,13 +152,13 @@ def collant(n=3):
     return cuisine(np.concatenate(out))
 
 
-def friteuse(d=6.0):
-    """Huile qui frémit et crépite : bain de friture, éclats aigus."""
-    n = int(d * SR)
-    t = np.arange(n) / SR
-    bain = filtre(_rng.standard_normal(n), "band", [2500, 9000]) * 0.006
-    crep = filtre(_rng.standard_normal(n) * (_rng.random(n) < 0.004), "band", [1800, 8000]) * 0.5
-    return cuisine((bain + crep) * env(n, 0.4, 0.4), 1.4)
+def friteuse(d=30.0):
+    """Vraie friture : huile qui grésille dans la poêle (enregistrement CC0, voir sons/bruitages/LICENCES.md), calée
+    sous les voix ; le haut du spectre seulement, comme à travers une porte de toilettes ouverte."""
+    x = bruitage("friture", 0.5)
+    x = np.tile(x, int(np.ceil(d * SR / len(x))))[: int(d * SR)]
+    x = filtre(x, "high", 350)
+    return cuisine(x * env(len(x), 0.6, 0.6) * 1.6, 0.7)
 
 
 def brouhaha(d=14.0):
