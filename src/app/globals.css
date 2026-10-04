@@ -1430,13 +1430,13 @@
   .ecran.poche .grosses-piste { height: auto; }
 
   /* Choppe livrée : posée devant l'écran, hors de l'OS, à cliquer pour boire. */
-  .choppe { position: fixed; right: max(18px, 3vw); bottom: max(10px, 2.5vh); z-index: 60; padding: 0; border: none; background: none; cursor: pointer; filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.55)); animation: choppe-pose 0.6s ease-out; transform-origin: 70% 90%; }
+  .choppe { position: fixed; right: max(18px, 3vw); bottom: max(10px, 2.5vh); z-index: 60; padding: 0; border: none; background: none; cursor: pointer; filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.55)); animation: choppe-pose 0.6s ease-out; transform-origin: 50% 90%; }
   .choppe:hover { transform: translateY(-3px) rotate(-3deg); }
-  .choppe svg { display: block; }
+  .choppe img { display: block; width: 84px; height: 126px; user-select: none; }
   .choppe-n { position: absolute; top: -6px; left: -8px; min-width: 18px; padding: 1px 4px; border-radius: 9px; background: #6b2a35; color: #f6efdc; font: bold 12px/16px monospace; text-align: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
   .choppe.boit { animation: choppe-boit 1s ease-in-out; }
   @keyframes choppe-pose { from { transform: translateY(-120px); opacity: 0; } 60% { transform: translateY(6px); opacity: 1; } to { transform: none; } }
-  @keyframes choppe-boit { 0% { transform: none; } 25%, 70% { transform: translate(-40px, -70px) rotate(-62deg); } 100% { transform: none; } }
+  @keyframes choppe-boit { 0% { transform: none; } 25%, 70% { transform: translate(-50px, -60px) rotate(-100deg); } 100% { transform: none; } }
   .piece.poche .choppe { right: auto; left: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
   @media (prefers-reduced-motion: reduce) { .choppe, .choppe.boit { animation: none; } }
 

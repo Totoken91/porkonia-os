@@ -312,17 +312,7 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
           aria-label={str("porkomazon.choppe")}
           data-testid="choppe"
         >
-          <svg viewBox="0 0 28 32" width="56" height="64" shapeRendering="crispEdges" aria-hidden="true">
-            <path d="M22 9h3v2h2v10h-2v2h-3z" fill="#d8d0b8" />
-            <path d="M24 11h1v2h-1zM24 19h1v2h-1z" fill="#8a8068" />
-            <path d="M3 8h19v22H3z" fill="#e9e4d2" fillOpacity=".55" />
-            <path d="M4 12h17v17H4z" fill="#e8a820" />
-            <path d="M4 12h17v3H4z" fill="#f4c040" />
-            <path d="M6 16h2v12H6zM11 17h1v6h-1z" fill="#f8d870" fillOpacity=".7" />
-            <path d="M2 4h4v-2h4v2h4v-2h4v2h3v5H2z" fill="#fffaf0" />
-            <path d="M2 8h19v1H2z" fill="#d9d0b6" />
-            <path d="M3 30h19v2H3z" fill="#b8b09a" />
-          </svg>
+          <img src="/brand/biere-douzi.png" alt="" width={84} height={126} draggable={false} />
           <span className="choppe-n">{cave.stock}</span>
         </button>
       )}
