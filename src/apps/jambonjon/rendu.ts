@@ -1,15 +1,15 @@
 /**
- * Rendu de Jambonjon : lanceur de rayons logiciel en basse résolution (224×168), murs, sol et plafond texturés,
- * brouillard de cave épais, monstres et objets en sprites, tramage ordonné et couleurs ramenées sur 15 bits
- * (l'aspect d'une console de salon du début des années 2000). Textures et sprites sont dessinés ici, en pixels.
+ * Rendu logiciel 320×180, caméra à 85°, pierre native 32×32 et sprites 40×40.
+ * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
  */
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import { PALETTE_PROVISIONS, PIXELS_PROVISIONS } from "./provisions-pixels";
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
+import { composerAmbiance, focale, lumiereEn, PLAN_CAMERA } from './ambiance';
 
-export const LARGEUR = 224;
-export const HAUTEUR = 168;
+export const LARGEUR = 320;
+export const HAUTEUR = 180;
 const T = 32; // côté des textures
 
 type Tex = { w: number; h: number; px: Uint8ClampedArray };
@@ -65,8 +65,20 @@ function murPierre(g: CanvasRenderingContext2D, s: number) {
       g.fillRect(x + 1, y + 1, 14, 1);
       g.fillStyle = "#5c4734";
       g.fillRect(x + 1, y + 6, 14, 1);
+      // Creux et éclats en amas : relief irrégulier, sans remplacer le grain ancien.
+      if(t<.4) {
+        g.fillStyle='#68503b';g.fillRect(x+4,y+3,4,2);g.fillRect(x+7,y+2,3,1);
+        g.fillStyle='#8d7253';g.fillRect(x+4,y+2,3,1);
+      } else if(t>.72) {
+        g.fillStyle='#483527';g.fillRect(x+10,y+1,1,2);g.fillRect(x+9,y+3,2,1);g.fillRect(x+8,y+4,2,1);
+        g.fillStyle='#aa8d65';g.fillRect(x+11,y+2,1,2);
+      }
+      if(t>.45&&t<.7) {g.fillStyle='#3b2e24';g.fillRect(x+1,y+1,2,1);g.fillRect(x+13,y+6,2,1);}
     }
   }
+  // Pied du mur sali par l'humidité, relief du rang inférieur conservé.
+  g.fillStyle='#3e3024';g.fillRect(0,30,T,2);
+  g.fillStyle='#54412f';g.fillRect(3,27,5,3);g.fillRect(18,28,7,2);
   grain(g, T, T, 0.35, s);
 }
 
@@ -128,6 +140,43 @@ function texturesMurs(): Tex[] {
     grain(g, T, T, 0.2, 9);
     out.push(lire(g, T, T));
   }
+  // 3 niche, 4 applique, 5 pierre humide, 6 grille, 7 pilastre.
+  for(let variante=3;variante<=9;variante++) {
+    const {g}=toile(T,T); murPierre(g,variante>=8?variante*13:1);
+    if(variante===3 || variante===6) {
+      g.fillStyle='#a88c6c';g.fillRect(5,6,22,23);
+      g.fillStyle='#5c4734';g.fillRect(7,7,18,21);
+      g.fillStyle='#17110e';g.fillRect(8,9,16,18);
+      g.fillStyle='#36291e';g.fillRect(10,11,12,13);
+      g.fillStyle='#897150';g.fillRect(5,27,22,2);
+      if(variante===6) { g.fillStyle='#8b9584'; for(let x=10;x<24;x+=4)g.fillRect(x,9,1,18);g.fillRect(8,17,16,1); }
+      else { g.fillStyle='#90724d';g.fillRect(13,20,7,5);g.fillStyle='#c0b18b';g.fillRect(15,18,3,3); }
+    } else if(variante===4) {
+      g.fillStyle='#443022';g.fillRect(12,2,8,8);g.fillRect(10,3,3,4);g.fillRect(20,4,2,3);
+      g.fillStyle='#29332b';g.fillRect(12,13,8,15);
+      g.fillStyle='#7b8170';g.fillRect(14,19,4,3);
+      g.fillStyle='#a58754';g.fillRect(15,13,2,9);
+      g.fillStyle='#663719';g.fillRect(13,11,6,6);
+      g.fillStyle='#ce6629';g.fillRect(13,7,6,8);
+      g.fillStyle='#ed9a3f';g.fillRect(14,5,3,10);g.fillRect(17,9,2,4);
+      g.fillStyle='#ffe0a1';g.fillRect(15,9,2,5);g.fillRect(15,4,1,4);
+    } else if(variante===5) {
+      for(const [x,y] of [[3,4],[6,11],[19,19],[22,26]]) {g.fillStyle='#2b4935';g.fillRect(x!,y!,7,3);g.fillStyle='#435c3c';g.fillRect(x!+1,y!,4,1);}
+      g.fillStyle='#91a096';g.fillRect(10,15,1,3);g.fillRect(11,19,1,2);
+    } else if(variante===7) {
+      g.fillStyle='#2a2018';g.fillRect(9,0,16,32);
+      g.fillStyle='#715b43';g.fillRect(10,0,12,32);
+      g.fillStyle='#a58a65';g.fillRect(10,0,2,32);
+      g.fillStyle='#8a7051';g.fillRect(12,0,7,32);
+      g.fillStyle='#4b3929';g.fillRect(19,0,3,32);
+      for(const y of [0,5,27,31]) {g.fillStyle='#b0946d';g.fillRect(8,y,16,1);g.fillStyle='#493827';g.fillRect(8,y+1,16,1);}
+      g.fillStyle='#58452f';g.fillRect(15,11,1,5);g.fillRect(16,15,2,1);g.fillRect(12,23,3,2);
+      g.fillStyle='#4b3929';g.fillRect(10,8,2,3);g.fillRect(18,19,2,3);
+      g.fillStyle='#a58a65';g.fillRect(12,9,1,2);g.fillRect(17,21,1,2);
+    }
+    if(variante>=3&&variante<=7) grain(g,T,T,.2,variante*7);
+    out.push(lire(g,T,T));
+  }
   return out;
 }
 
@@ -146,6 +195,9 @@ function textureSol(): Tex {
     g.fillStyle = "#6c5c48";
     g.fillRect(x, y, w, 1);
   }
+  g.fillStyle='#352b21';g.fillRect(7,3,1,3);g.fillRect(8,6,2,1);g.fillRect(10,7,1,3);
+  g.fillStyle='#463726';g.fillRect(21,18,5,3);g.fillRect(24,21,4,2);
+  g.fillStyle='#756046';g.fillRect(7,2,1,1);g.fillRect(20,18,1,2);
   grain(g, T, T, 0.4, 11);
   return lire(g, T, T);
 }
@@ -179,6 +231,26 @@ function textureTrappe(): Tex {
   g.fillRect(4, 4, 1, 24);
   g.fillRect(27, 4, 1, 24);
   return lire(g, T, T);
+}
+
+function texturePassage(): Tex {
+  const {g}=toile(T,T);
+  for(const x of [0,28]) {
+    g.fillStyle='#2a2018';g.fillRect(x,0,4,32);
+    g.fillStyle='#8a7056';g.fillRect(x,0,3,32);
+    g.fillStyle='#ac916d';g.fillRect(x,0,1,32);
+    for(const y of [7,15,23]) {g.fillStyle='#4b3828';g.fillRect(x,y,4,1);}
+  }
+  g.fillStyle='#3e2b1d';g.fillRect(0,0,32,5);
+  g.fillStyle='#b2966d';g.fillRect(0,0,32,1);
+  g.fillStyle='#846b4d';g.fillRect(0,1,32,2);
+  g.fillStyle='#61472f';g.fillRect(2,3,28,1);
+  g.fillStyle='#b09671';g.fillRect(14,1,4,3);
+  g.fillStyle='#59422d';g.fillRect(6,1,1,2);g.fillRect(7,2,2,1);g.fillRect(23,0,2,1);
+  g.fillStyle='#493827';g.fillRect(1,14,2,2);g.fillRect(29,23,2,3);
+  g.fillStyle='#a18a65';g.fillRect(3,15,1,2);g.fillRect(28,23,1,2);
+  grain(g,T,T,.3,17);
+  return lire(g,T,T);
 }
 
 function toileDepuis(t: Tex) {
@@ -314,6 +386,7 @@ const DESSINS_OBJETS: Record<Objet3D, (g: CanvasRenderingContext2D) => number> =
 /* ------------------------------- Préparation ------------------------------- */
 
 export interface Atelier {
+  passage: Tex;
   murs: Tex[];
   sol: Tex;
   plafond: Tex;
@@ -339,7 +412,7 @@ export function preparer(): Atelier {
     const taille = DESSINS_OBJETS[k](g);
     objets[k] = { tex: finirSprite(g), taille };
   }
-  atelier = { murs: texturesMurs(), sol: textureSol(), plafond: texturePlafond(), trappe: textureTrappe(), monstres, objets };
+  atelier = { passage: texturePassage(), murs: texturesMurs(), sol: textureSol(), plafond: texturePlafond(), trappe: textureTrappe(), monstres, objets };
   return atelier;
 }
 
@@ -359,8 +432,8 @@ export const angleDe = (dir: number) => (dir * Math.PI) / 2 - Math.PI / 2;
 
 /* ---------------------------------- Rendu ----------------------------------- */
 
-const BROUILLARD = [66, 58, 50]; // couleur du brouillard : fumée de cave
-const DENSITE = 0.88;
+const BROUILLARD = [31, 26, 22]; // fumée de cave, palette sale du rendu d'origine.
+const DENSITE = 0.34;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v / 16 - 0.5) * 9);
 
 export interface EffetsRendu {
@@ -374,6 +447,7 @@ export interface EffetsRendu {
 }
 
 const zbuf = new Float32Array(LARGEUR);
+const profondeur = new Float32Array(LARGEUR*HAUTEUR);
 
 /** Échantillon filtré (bilinéaire, comme les consoles de salon de l'an 2000), coordonnées en texels, bouclé. */
 const ech = [0, 0, 0];
@@ -404,20 +478,26 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   const W = LARGEUR;
   const H = HAUTEUR;
   const d = out.data;
+  profondeur.fill(Infinity);
   const c = p.carte;
   const dirX = Math.cos(cam.angle);
   const dirY = Math.sin(cam.angle);
-  const k = 0.7;
+  const k = PLAN_CAMERA;
+  const projection = focale(W);
+  const ambiance = composerAmbiance(c);
+  const chaleur = (x: number,y: number) => lumiereEn(c,ambiance,x,y);
   const plX = -dirY * k;
   const plY = dirX * k;
   const flamme = 0.93 + 0.07 * Math.sin(fx.temps * 0.011) * Math.sin(fx.temps * 0.0173 + 1);
   const horizon = H / 2 + cam.bob + cam.secousse;
   const lum = (dist: number) => Math.exp(-dist * DENSITE) * flamme;
 
-  const ecrire = (i: number, r: number, g: number, b: number, f: number) => {
-    d[i] = r * f + BROUILLARD[0]! * (1 - f);
-    d[i + 1] = g * f + BROUILLARD[1]! * (1 - f);
-    d[i + 2] = b * f + BROUILLARD[2]! * (1 - f);
+  const ecrire = (i: number, r: number, g: number, b: number, f: number, chaud = 0) => {
+    f=Math.min(1.2,f);
+    const brume=Math.max(0,1-f);
+    d[i] = r * f * (1+chaud*0.16) + BROUILLARD[0]! * brume;
+    d[i + 1] = g * f * (1+chaud*0.045) + BROUILLARD[1]! * brume;
+    d[i + 2] = b * f * (1-chaud*0.14) + BROUILLARD[2]! * brume;
     d[i + 3] = 255;
   };
 
@@ -429,8 +509,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       for (let x = 0; x < W; x++) ecrire((y * W + x) * 4, 0, 0, 0, 0);
       continue;
     }
-    const dist = (0.5 * H) / p0;
-    const f = lum(dist) * (sol ? 0.95 : 0.7);
+    const dist = (0.5 * projection) / p0;
+    const f = lum(dist) * (sol ? 0.8 : 0.66);
     const rx0 = dirX - plX;
     const ry0 = dirY - plY;
     const pasX = (dist * 2 * plX) / W;
@@ -441,8 +521,12 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const cx = Math.floor(fx0);
       const cy = Math.floor(fy0);
       const tex = !sol ? a.plafond : cx >= 0 && cy >= 0 && cx < c.w && cy < c.h && c.cases[cy * c.w + cx] === ESCALIER ? a.trappe : a.sol;
-      bilin(tex, (fx0 - cx) * T, (fy0 - cy) * T);
-      ecrire((y * W + x) * 4, ech[0]!, ech[1]!, ech[2]!, f);
+      // Les surfaces reprennent le filtrage et le grain d'origine ; les sprites restent nets.
+      bilin(tex,(fx0-cx)*T+(sol?8:0),(fy0-cy)*T);
+      const chaud=chaleur(fx0,fy0);
+      const relief=sol && ((cx+cy)%4===0) ? 0.94 : 1;
+      ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!, f*(0.84+chaud*0.45)*relief,chaud);
+      profondeur[y*W+x]=dist;
       fx0 += pasX;
       fy0 += pasY;
     }
@@ -481,19 +565,23 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     const dist = cote === 0 ? sdx - ddx : sdy - ddy;
     zbuf[x] = touche ? dist : 1e9;
     if (!touche || dist > 9) continue;
-    const hauteur = H / dist;
+    const hauteur = projection / dist;
     const y0 = Math.floor(horizon - hauteur / 2);
     const y1 = Math.floor(horizon + hauteur / 2);
     let wx = cote === 0 ? cam.y + dist * ry : cam.x + dist * rx;
     wx -= Math.floor(wx);
     let tx = wx * T;
     if ((cote === 0 && rx > 0) || (cote === 1 && ry < 0)) tx = T - tx;
-    const decor = mx >= 0 && my >= 0 && mx < c.w && my < c.h ? c.decor[my * c.w + mx]! : 0;
+    const decor = mx >= 0 && my >= 0 && mx < c.w && my < c.h ? ambiance.murs[my * c.w + mx]! : 0;
     const tex = a.murs[decor] ?? a.murs[0]!;
-    const f = lum(dist) * (cote === 1 ? 0.78 : 1);
+    const chaud=chaleur(cam.x+dist*rx,cam.y+dist*ry);
+    const f = lum(dist) * (cote === 1 ? 0.82 : 1) * (0.8+chaud*0.58);
     for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) {
-      bilin(tex, tx, ((y - y0) / (y1 - y0)) * T);
-      ecrire((y * W + x) * 4, ech[0]!, ech[1]!, ech[2]!, f);
+      const ti=((Math.min(31,Math.floor(((y-y0)/(y1-y0))*T))*T)+(Math.floor(tx)&31))*4;
+      bilin(tex,tx,((y-y0)/(y1-y0))*T);
+      const emissif=decor===4 && tex.px[ti]!>180 && tex.px[ti+1]!>80 && tex.px[ti+2]!<170;
+      ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!,emissif ? Math.max(0.85,f)*flamme : f,chaud);
+      profondeur[y*W+x]=dist;
     }
   }
 
@@ -521,12 +609,13 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     .sort((u, v) => v.ty - u.ty);
   for (const { s, tx, ty } of proj) {
     const ecranX = (W / 2) * (1 + tx / ty);
-    const cote = (H / ty) * s.taille;
-    const sol = horizon + H / ty / 2;
-    const yb = sol - (s.flotte * H) / ty;
+    const cote = (projection / ty) * s.taille;
+    const sol = horizon + projection / ty / 2;
+    const yb = sol - (s.flotte * projection) / ty;
     const ya = yb - cote;
     const xa = ecranX - cote / 2;
-    const f = lum(ty);
+    const chaud=chaleur(s.x,s.y);
+    const f = lum(ty)*(0.94+chaud*0.35);
     for (let x = Math.max(0, Math.floor(xa)); x < Math.min(W, Math.ceil(xa + cote)); x++) {
       if (ty >= zbuf[x]!) continue;
       const u = Math.floor(((x - xa) / cote) * s.tex.w);
@@ -537,6 +626,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         const ti = (v * s.tex.w + u) * 4;
         const al = s.tex.px[ti + 3]!;
         if (al < 10) continue;
+        profondeur[y*W+x]=ty;
         const i = (y * W + x) * 4;
         let r = s.tex.px[ti]!;
         let g = s.tex.px[ti + 1]!;
@@ -551,12 +641,32 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
           const pr = d[i]!;
           const pg = d[i + 1]!;
           const pb = d[i + 2]!;
-          ecrire(i, r, g, b, f);
+          ecrire(i, r, g, b, f,chaud);
           d[i] = d[i]! * t + pr * (1 - t);
           d[i + 1] = d[i + 1]! * t + pg * (1 - t);
           d[i + 2] = d[i + 2]! * t + pb * (1 - t);
-        } else ecrire(i, r, g, b, f);
+        } else ecrire(i, r, g, b, f,chaud);
       }
+    }
+  }
+
+  // Cadres orientés dans le monde : l'ouverture reste transparente et traversable.
+  // Le tampon par pixel préserve un ennemi devant le cadre et masque celui qui passe derrière un montant.
+  for(const passage of ambiance.passages) for(let x=0;x<W;x++) {
+    const rx=dirX+plX*(2*x/W-1), ry=dirY+plY*(2*x/W-1);
+    const dist=passage.axe==='y' ? (passage.y+.5-cam.y)/ry : (passage.x+.5-cam.x)/rx;
+    if(!Number.isFinite(dist)||dist<.18||dist>8||dist>=zbuf[x]!) continue;
+    const u=passage.axe==='y' ? cam.x+dist*rx-passage.x : cam.y+dist*ry-passage.y;
+    if(u<0||u>=1) continue;
+    const h=projection/dist, y0=horizon-h/2;
+    const chaud=chaleur(passage.x+.5,passage.y+.5);
+    for(let y=Math.max(0,Math.floor(y0));y<Math.min(H,y0+h);y++) {
+      if(dist>=profondeur[y*W+x]!) continue;
+      const v=Math.max(0,Math.min(31,Math.floor((y-y0)*T/h))), ti=(v*T+Math.floor(u*T))*4;
+      if(!a.passage.px[ti+3]) continue;
+      bilin(a.passage,u*T,(y-y0)*T/h);
+      ecrire((y*W+x)*4,ech[0]!,ech[1]!,ech[2]!,lum(dist)*(0.84+chaud*.58),chaud);
+      profondeur[y*W+x]=dist;
     }
   }
 
@@ -567,7 +677,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const i = (y * W + x) * 4;
       const vx = (x / W - 0.5) * 2;
       const vy = (y / H - 0.5) * 2;
-      const vig = 1 - 0.28 * (vx * vx + vy * vy);
+      const vig = 1 - 0.14 * (vx * vx + vy * vy);
       const t = BAYER[(y & 3) * 4 + (x & 3)]!;
       for (let k2 = 0; k2 < 3; k2++) {
         let v = d[i + k2]! * vig;

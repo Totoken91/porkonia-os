@@ -362,7 +362,7 @@ export const porkosPack: ContentPack = {
     { id: "defrag", kind: "defrag", title: "Défragmenteur de disque", icon: "defrag", size: { w: 470, h: 432 }, single: true, menu: "systeme", blurb: "Remet le porc avec le porc" },
     { id: "paint", kind: "paint", title: "PorkPaint", icon: "paint", size: { w: 470, h: 360 }, menu: "accessoires", blurb: "Dessinez, c'est autorisé" },
     { id: "distinctions", kind: "distinctions", title: "Mes décorations", icon: "medaille", size: { w: 470, h: 420 }, single: true, menu: "accessoires", blurb: "Le mérite, dûment constaté" },
-    { id: "jambonjon", kind: "jambonjon", title: "L’Ordre Cochon : Les Entrailles du Royaume", icon: "jambonjon", size: { w: 640, h: 470 }, single: true, menu: "programmes", installable: true, blurb: "Les caves d'affinage, en trois dimensions" },
+    { id: "jambonjon", kind: "jambonjon", title: "L’Ordre Cochon : Les Entrailles du Royaume", icon: "jambonjon", size: { w: 780, h: 550 }, single: true, menu: "programmes", installable: true, blurb: "Les caves d'affinage, en trois dimensions" },
     { id: "grosses", kind: "grosses", title: "Course de Grosses", icon: "grosses", size: { w: 360, h: 520 }, single: true, menu: "programmes", installable: true, blurb: "Pariez, buvez, perdez, recommencez" },
     { id: "telechargement", kind: "telechargement", title: "Téléchargement de fichier", icon: "telechargement", size: { w: 400, h: 250 } },
     { id: "installeur", kind: "installeur", title: "Installation", icon: "installeur", size: { w: 520, h: 380 }, single: true },

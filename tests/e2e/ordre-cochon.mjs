@@ -176,7 +176,7 @@ try {
       await page.getByTestId(`croix-${sens}`).click({ position: pos });
     };
 
-    const fermer = (app) => page.locator(`[data-testid=window-${app}]:visible [data-testid=window-close]`).first().click();
+    const fermer = async (app) => { const bouton=page.locator(`[data-testid=window-${app}]:visible [data-testid=window-close]`).first();if(await bouton.count())await bouton.click(); };
       // Partagiciel : téléchargement sur PigNet, assistant d'installation, lancement du jeu.
       await open("d-nav");
       await page.getByTestId("nav-url").fill("porko://grenier-partagiciels");
@@ -207,6 +207,36 @@ try {
       if(SHOTS)await page.getByTestId("jbj-chevaliers").screenshot({path:join(SHOTS,`${tag}-choix-chevalier.png`)});
       await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
+
+    // Vues fixes : une salle à piliers reliée à une seconde salle par un couloir étroit.
+    if(SHOTS) {
+      await fermer('jambonjon');
+      await fermer('navigateur');
+      for(const [nom,cy] of [['salle',10],['couloir',7]]) {
+        await page.evaluate(cy=>{
+          const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+          const w=11,h=13,cases=Array(w*h).fill(1);
+          for(let y=2;y<=11;y++)cases[y*w+5]=0;
+          for(const y0 of [3,9])for(let y=y0;y<y0+3;y++)for(let x=2;x<=8;x++)cases[y*w+x]=0;
+          for(const [x,y]of [[3,4],[7,4],[3,10],[7,10]])cases[y*w+x]=1;
+          p.carte={w,h,cases,vu:Array(w*h).fill(true),decor:cases.map((_,i)=>i%11===2?1:i%11===8?2:0)};
+          p.joueur.x=5;p.joueur.y=cy;p.joueur.dir=0;p.joueur.ivresse=0;p.fin=null;
+          p.monstres=[{uid:990,type:'inspecteur',niveau:1,elite:false,boss:false,x:5,y:4,pv:23,pvMax:23,att:6,def:1,xp:10,eveille:false,sonne:0}];
+          p.sol=[{x:4,y:9,butin:{type:'biere'}},{x:6,y:9,butin:{type:'jambon'}}];
+          localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+        },cy);
+        await fermer('jambonjon');await open('f:L’Ordre Cochon');await page.getByTestId('jbj-continuer').click();
+        await page.waitForTimeout(300);
+        await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-donjon-${nom}.png`)});
+        await page.getByTestId('jbj-vue').screenshot({path:join(SHOTS,`${tag}-vue-${nom}.png`)});
+      }
+      // Isoler le cadre : l'inspecteur de la capture s'approche sinon dans le passage.
+      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));p.monstres=[];localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));});
+      await fermer('jambonjon');await open('f:L’Ordre Cochon');await page.getByTestId('jbj-continuer').click();
+      await page.keyboard.press('z');await page.keyboard.press('z');await page.waitForTimeout(700);
+      const passage=await page.evaluate(()=>{const j=JSON.parse(localStorage.getItem('porkos.jambonjon.partie')).joueur;return [j.x,j.y];});
+      if(JSON.stringify(passage)!=='[5,5]')throw new Error(`${tag}: l'encadrement bloque le passage : ${passage}`);
+    }
 
     // Salle de test : la caméra et les collisions doivent suivre exactement les commandes.
     await page.evaluate(() => {
