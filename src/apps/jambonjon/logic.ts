@@ -4,6 +4,8 @@
  * Les textes ne sont pas ici : le journal ne contient que des clés du pack (`jbj.msg.*`) et leurs variables.
  */
 import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/types";
+import { ennemiReference, RARETES_RPG, xpNiveauRpg } from "./equilibrage";
+import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
 
 export const VERSION = 1;
 
@@ -146,6 +148,7 @@ export interface AuSol {
 /* ------------------------------- Monstres --------------------------------- */
 
 export interface Monstre {
+  rpg?: EtatMonstreRpg;
   uid: number;
   type: string;
   niveau: number;
@@ -166,6 +169,7 @@ export interface Monstre {
 /* -------------------------------- Partie ---------------------------------- */
 
 export interface Joueur {
+  rpg?: EtatRpg;
   x: number;
   y: number;
   dir: number;
@@ -189,6 +193,7 @@ export interface Message {
 }
 
 export interface Partie {
+  refuge?: boolean;
   version: number;
   alea: number;
   etage: number;
@@ -215,6 +220,7 @@ export const xpPourNiveau = (n: number) => Math.round(20 * Math.pow(n, 1.5));
 
 /** Caractéristiques totales (base de niveau + équipement + ivresse). */
 export function stats(j: Joueur) {
+  if (j.rpg) return statsClasse(j);
   const eq = Object.values(j.equipe).filter(Boolean) as Objet[];
   const s = (k: "att" | "def" | "pv" | "mousse") => eq.reduce((a, o) => a + o[k], 0);
   return {
@@ -229,10 +235,28 @@ const log = (p: Partie, cle: string, vars?: Message["vars"]) => {
   p.journal = [...p.journal, { cle, vars }].slice(-40);
 };
 
+const hoteRpg: HoteRpg = {
+  alea: tirer, tue: tuer, log, stats, marcher: deplacer,
+  libre: (p, x, y) => passable(p.carte, x, y) && !monstreEn(p, x, y) && (p.joueur.x !== x || p.joueur.y !== y),
+};
+
 function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number): Objet {
   const total = jeu.raretes.reduce((a, r) => a + r.poids, 0);
   let r = tirer(p) * total;
   const rar = jeu.raretes.find((x) => (r -= x.poids) < 0) ?? jeu.raretes[0]!;
+  if (p.joueur.rpg) {
+    const mult = RARETES_RPG[rar.id as keyof typeof RARETES_RPG] ?? 1;
+    const k = niveau - 1;
+    const part = def.emplacement === "armure" ? 0.65 : def.emplacement === "tete" ? 0.25 : 0.1;
+    const v = (n: number) => Math.max(1, Math.round(n * mult));
+    return {
+      uid: p.prochainUid++, base: def.id, niveau, rarete: rar.id,
+      att: def.att ? v(def.emplacement === "arme" ? (2 + 0.55 * k) * (0.85 + Math.min(8, def.att) * 0.04) : 0.5 + 0.08 * k) : 0,
+      def: def.def ? v((2 + 0.4 * k) * part) : 0,
+      pv: def.pv ? v(def.pv * 0.25 + 2 * k * (def.emplacement === "arme" ? 0.15 : part)) : 0,
+      mousse: def.mousse ? v(Math.min(8, def.mousse * 0.4) + k * 0.5) : 0,
+    };
+  }
   const echelle = (1 + 0.25 * (niveau - 1)) * rar.mult;
   const v = (n?: number) => (n ? Math.max(1, Math.round(n * echelle)) : 0);
   return { uid: p.prochainUid++, base: def.id, niveau, rarete: rar.id, att: v(def.att), def: v(def.def), pv: v(def.pv), mousse: v(def.mousse) };
@@ -244,11 +268,11 @@ function objetAuHasard(p: Partie, jeu: JeuJambonjon): Objet {
 }
 
 function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number, y: number, boss = false): Monstre {
-  const elite = !boss && tirer(p) < 0.12;
+  const elite = !boss && (!p.joueur.rpg || p.etage > 1) && tirer(p) < 0.12;
   const niveau = Math.max(1, p.etage + entre(p, -1, 1) + (elite ? 2 : 0) + (boss ? 2 : 0));
   const k = niveau - 1;
   const pvMax = Math.round(def.pv * (1 + 0.35 * k) * (elite ? 1.5 : 1));
-  return {
+  const resultat: Monstre = {
     uid: p.prochainUid++,
     type: def.id,
     niveau,
@@ -264,6 +288,14 @@ function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number
     eveille: boss,
     sonne: 0,
   };
+  if (p.joueur.rpg) {
+    const n = Math.min(20, Math.max(1, p.etage === 1 ? 1 : (p.etage - 1) * 2));
+    const s = ennemiReference(n, boss ? "boss" : elite ? "elite" : def.id === "inspecteur" ? "blinde" : "courant");
+    resultat.niveau = n; resultat.pvMax = s.pvMax; resultat.pv = s.pvMax;
+    resultat.att = s.puissance; resultat.def = s.defense;
+    resultat.xp = Math.round(xpNiveauRpg(n) / (boss ? 2 : 5)) * (elite ? 2 : 1);
+  }
+  return resultat;
 }
 
 export const defMonstre = (jeu: JeuJambonjon, type: string): MonstreDef => (type === jeu.boss.id ? jeu.boss : (jeu.monstres.find((m) => m.id === type) ?? jeu.monstres[0]!));
@@ -307,7 +339,7 @@ function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
     occupe.add(idx(carte, ex + DX[d]!, ey + DY[d]!));
   }
   const candidats = jeu.monstres.filter((m) => p.etage >= m.etages[0] && p.etage <= m.etages[1]);
-  const nb = 4 + Math.round(p.etage * 1.6);
+  const nb = p.joueur.rpg ? 5 + p.etage : 4 + Math.round(p.etage * 1.6);
   for (let k = 0; k < nb; k++) {
     const i = caseLibre(5);
     if (i < 0) break;
@@ -324,7 +356,7 @@ function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
 }
 
 /** Nouvelle partie. */
-export function nouvellePartie(jeu: JeuJambonjon, graine: number): Partie {
+export function nouvellePartie(jeu: JeuJambonjon, graine: number, chevalier?: string): Partie {
   const p: Partie = {
     version: VERSION,
     alea: graine >>> 0,
@@ -340,9 +372,16 @@ export function nouvellePartie(jeu: JeuJambonjon, graine: number): Partie {
     tues: 0,
     evenements: [],
   };
+  if (chevalier && !initialiserRpg(p, jeu, chevalier)) throw new Error("chevalier inconnu");
   // Équipement de départ : l'arme la plus modeste.
   const premiere = jeu.objets.find((o) => o.emplacement === "arme");
   if (premiere) p.joueur.equipe.arme = { uid: p.prochainUid++, base: premiere.id, niveau: 1, rarete: jeu.raretes[0]!.id, att: premiere.att ?? 1, def: 0, pv: 0, mousse: 0 };
+  if (p.joueur.rpg) {
+    const tablier = jeu.objets.find((o) => o.emplacement === "armure");
+    if (tablier) p.joueur.equipe.armure = { uid: p.prochainUid++, base: tablier.id, niveau: 1, rarete: jeu.raretes[0]!.id, att: 0, def: 2, pv: 0, mousse: 0 };
+    const s = stats(p.joueur); p.joueur.pv = s.pvMax; p.joueur.mousse = s.mousseMax;
+    p.joueur.jambons = 2;
+  }
   peuplerEtage(p, jeu);
   log(p, "jbj.msg.entree", { etage: 1 });
   return p;
@@ -386,6 +425,9 @@ export type Action =
   | { type: "manger" }
   | { type: "boire" }
   | { type: "rot" }
+  | { type: "competence"; slot: number; cote?: "gauche" | "droite" }
+  | { type: "apprendre"; competence: number }
+  | { type: "repartir" }
   | { type: "equiper"; uid: number }
   | { type: "retirer"; emplacement: Emplacement }
   | { type: "ramasser" }
@@ -393,8 +435,8 @@ export type Action =
 
 const clone = (p: Partie): Partie => ({
   ...p,
-  joueur: { ...p.joueur, sac: [...p.joueur.sac], equipe: { ...p.joueur.equipe } },
-  monstres: p.monstres.map((m) => ({ ...m })),
+  joueur: { ...p.joueur, sac: [...p.joueur.sac], equipe: { ...p.joueur.equipe }, ...(p.joueur.rpg ? { rpg: { ...p.joueur.rpg, rangs: [...p.joueur.rpg.rangs], delais: [...p.joueur.rpg.delais], ouverture: p.joueur.rpg.ouverture ? { ...p.joueur.rpg.ouverture } : undefined } } : {}) },
+  monstres: p.monstres.map((m) => ({ ...m, ...(m.rpg ? { rpg: { ...m.rpg, annonce: m.rpg.annonce ? { ...m.rpg.annonce } : undefined } } : {}) })),
   sol: [...p.sol],
   evenements: [],
 });
@@ -408,15 +450,16 @@ function degats(p: Partie, att: number, def: number): number {
 function gagnerXp(p: Partie, xp: number) {
   const j = p.joueur;
   j.xp += xp;
-  while (j.xp >= xpPourNiveau(j.niveau)) {
-    j.xp -= xpPourNiveau(j.niveau);
+  while ((!j.rpg || j.niveau < 20) && j.xp >= (j.rpg ? xpNiveauRpg(j.niveau) : xpPourNiveau(j.niveau))) {
+    j.xp -= j.rpg ? xpNiveauRpg(j.niveau) : xpPourNiveau(j.niveau);
     j.niveau += 1;
     const s = stats(j);
-    j.pv = s.pvMax;
-    j.mousse = s.mousseMax;
+    if (j.rpg) { j.rpg.points++; j.pv = Math.min(s.pvMax, j.pv + Math.round(s.pvMax * 0.25)); j.mousse = Math.min(s.mousseMax, j.mousse + Math.round(s.mousseMax * 0.25)); }
+    else { j.pv = s.pvMax; j.mousse = s.mousseMax; }
     log(p, "jbj.msg.niveau", { niveau: j.niveau });
     p.evenements.push("niveau");
   }
+  if (j.rpg && j.niveau === 20) j.xp = 0;
 }
 
 function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
@@ -432,6 +475,9 @@ function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
     return;
   }
   // Butin : provisions ou objet, plus généreux sur une élite.
+  if (p.joueur.rpg && (p.tues === 1 || p.tues % 3 === 0)) {
+    p.sol.push({ x: m.x, y: m.y, butin: { type: "jambon" } });
+  }
   const r = tirer(p);
   const chance = m.elite ? 1 : 0.55;
   if (r < chance) {
@@ -441,6 +487,7 @@ function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
 }
 
 function frapper(p: Partie, jeu: JeuJambonjon, m: Monstre, mult = 1) {
+  if (p.joueur.rpg) { frappeRpg(p, jeu, m, hoteRpg, mult); return; }
   const s = stats(p.joueur);
   const d = Math.round(degats(p, s.att, m.def) * mult);
   m.pv -= d;
@@ -499,6 +546,7 @@ function deplacer(p: Partie, jeu: JeuJambonjon, dir: number): boolean {
   }
   j.x = nx;
   j.y = ny;
+  if (j.rpg) apresPas(p, dir);
   p.evenements.push("pas");
   ramasser(p, jeu);
   if (caseEn(p.carte, nx, ny) === ESCALIER) log(p, "jbj.msg.escalier");
@@ -517,10 +565,16 @@ function tourMonstres(p: Partie, jeu: JeuJambonjon) {
       continue;
     }
     const d = dist[idx(p.carte, m.x, m.y)]!;
-    if (!m.eveille && d >= 0 && d <= 5) m.eveille = true;
+    if (!m.eveille && d >= 0 && d <= 5) {
+      const quota = j.niveau < 3 ? 1 : j.niveau < 7 ? 2 : 3;
+      const tutorielOccupe = j.rpg && p.monstres.filter((n) => n !== m && n.eveille).length >= quota;
+      if (!tutorielOccupe) m.eveille = true;
+    }
     if (!m.eveille) continue;
     const def = defMonstre(jeu, m.type);
+    if (j.rpg && specialEnnemi(p, jeu, m, hoteRpg)) continue;
     if (Math.abs(m.x - j.x) + Math.abs(m.y - j.y) === 1) {
+      if (j.rpg) { recevoir(p, jeu, m, hoteRpg); continue; }
       if (tirer(p) < 0.12) {
         log(p, "jbj.msg.esquive", { nom: def.nom });
         continue;
@@ -551,6 +605,7 @@ function tourMonstres(p: Partie, jeu: JeuJambonjon) {
     if (mieux) {
       m.x = mieux[0];
       m.y = mieux[1];
+      if (j.rpg && Math.abs(m.x - j.x) + Math.abs(m.y - j.y) === 1) etatMonstre(m).contact = p.tour;
     }
   }
 }
@@ -574,7 +629,7 @@ function tempsPasse(p: Partie) {
     j.ivresse -= 1;
     if (j.ivresse === 0) log(p, "jbj.msg.degrise");
   }
-  if (p.tour % 8 === 0) j.mousse = Math.min(stats(j).mousseMax, j.mousse + 1);
+  if (!j.rpg && p.tour % 8 === 0) j.mousse = Math.min(stats(j).mousseMax, j.mousse + 1);
 }
 
 function descendre(p: Partie, jeu: JeuJambonjon) {
@@ -592,6 +647,10 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
   if (avant.fin) return avant;
   const p = clone(avant);
   const j = p.joueur;
+  if (j.rpg) {
+    const gratuit = actionGratuiteRpg(p, a, hoteRpg);
+    if (gratuit !== null) return gratuit ? p : avant;
+  } else if (a.type === "competence" || a.type === "apprendre" || a.type === "repartir") return avant;
   let prendDuTemps = true;
   switch (a.type) {
     case "avancer":
@@ -615,6 +674,7 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
       prendDuTemps = false;
       break;
     case "agir": {
+      if (j.rpg && attaquerSimple(p, jeu, hoteRpg)) break;
       const m = monstreEn(p, j.x + DX[j.dir]!, j.y + DY[j.dir]!);
       if (m) frapper(p, jeu, m);
       else if (caseEn(p.carte, j.x, j.y) === ESCALIER) {
@@ -652,10 +712,12 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
       j.bieres -= 1;
       j.mousse = Math.min(stats(j).mousseMax, j.mousse + 40);
       j.ivresse += 25;
+      if (j.rpg) apresBoire(p);
       log(p, "jbj.msg.boit");
       p.evenements.push("boit");
       break;
     case "rot": {
+      if (j.rpg) { prendDuTemps = j.rpg.classe === "jambonmancien" && competenceRpg(p, jeu, 1, undefined, hoteRpg); break; }
       if (j.mousse < ROT_COUT) {
         log(p, "jbj.msg.pasDeMousse");
         prendDuTemps = false;
@@ -679,6 +741,12 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
       }
       break;
     }
+    case "competence": {
+      prendDuTemps = competenceRpg(p, jeu, a.slot, a.cote, hoteRpg);
+      break;
+    }
+    case "apprendre":
+    case "repartir": return avant;
     case "equiper": {
       const o = j.sac.find((x) => x.uid === a.uid);
       if (!o) return avant;
@@ -728,7 +796,11 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
     }
   }
   if (prendDuTemps && !p.fin) {
+    p.refuge = false;
+    if (j.rpg) effetsAvantEnnemis(p, jeu, hoteRpg);
+    if (p.fin) { voir(p); return p; }
     tourMonstres(p, jeu);
+    if (j.rpg) finirTourRpg(p, p.monstres.some((m) => m.eveille && Math.abs(m.x - j.x) + Math.abs(m.y - j.y) <= 12));
     if (!p.fin) tempsPasse(p);
   }
   voir(p);
@@ -750,5 +822,17 @@ export function relirePartie(v: unknown): Partie | null {
   const c = p.carte;
   if (!c || !Array.isArray(c.cases) || c.cases.length !== c.w * c.h || !Array.isArray(c.vu) || !Array.isArray(c.decor)) return null;
   if (!p.joueur || !Array.isArray(p.joueur.sac) || typeof p.joueur.equipe !== "object" || !Array.isArray(p.monstres) || !Array.isArray(p.sol) || !Array.isArray(p.journal)) return null;
+  if (!etatRpgValide(p.joueur)) return null;
   return { ...p, evenements: [] };
+}
+
+/** Conversion explicite d'une sauvegarde historique : sac et carte conservés. */
+export function convertirRpg(avant: Partie, jeu: JeuJambonjon, chevalier: string): Partie {
+  const p = clone(avant);
+  const ancien = stats(p.joueur);
+  const vie = p.joueur.pv / ancien.pvMax, mousse = p.joueur.mousse / ancien.mousseMax;
+  if (!initialiserRpg(p, jeu, chevalier)) return avant;
+  p.joueur.xp = Math.min(p.joueur.xp, xpNiveauRpg(p.joueur.niveau));
+  const s = stats(p.joueur); p.joueur.pv = Math.max(1, Math.round(s.pvMax * vie)); p.joueur.mousse = Math.round(s.mousseMax * mousse);
+  return p;
 }

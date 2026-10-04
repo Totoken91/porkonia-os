@@ -58,8 +58,10 @@ try {
     { tag: "bureau", viewport: { width: 1366, height: 800 } },
     { tag: "poche-paysage", viewport: { width: 844, height: 390 }, mobile: true },
     { tag: "poche-portrait", viewport: { width: 390, height: 844 }, mobile: true },
+    { tag: "poche-compact", viewport: { width: 360, height: 780 }, mobile: true },
   ];
   for (const { tag, viewport, mobile } of formats) {
+    if (process.env.FORMATS && !process.env.FORMATS.split(",").includes(tag)) continue;
     const poche = !!mobile;
     const ctx = await browser.newContext({ viewport, ...(mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) });
     if (process.env.HTTPS_PROXY)
@@ -194,6 +196,16 @@ try {
       await page.getByTestId("inst-suivant").click();
       await page.getByTestId("window-jambonjon").waitFor();
       await page.getByTestId("jbj-nouvelle").click();
+      await page.getByTestId("jbj-chevaliers").waitFor();
+      for (const classe of ["tank", "dps", "jambonmancien"]) {
+        await page.getByTestId(`jbj-classe-${classe}`).click();
+        if(await page.locator('.jbj-chevalier').count()!==4)throw new Error(`${tag}: quatre chevaliers attendus pour ${classe}`);
+        await page.locator('.jbj-blason').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+        if(SHOTS)await page.getByTestId('jbj-chevaliers').screenshot({path:join(SHOTS,`${tag}-blasons-${classe}.png`)});
+      }
+      await page.getByTestId("jbj-chevalier-ysee").click();
+      if(SHOTS)await page.getByTestId("jbj-chevaliers").screenshot({path:join(SHOTS,`${tag}-choix-chevalier.png`)});
+      await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
 
     // Salle de test : la caméra et les collisions doivent suivre exactement les commandes.
@@ -226,6 +238,8 @@ try {
     await page.keyboard.press("e");
     await page.keyboard.press("z");
     await page.keyboard.press("F2");
+    await page.getByTestId("jbj-chevaliers").waitFor();
+    await page.getByTestId("jbj-partir").click();
     await page.waitForTimeout(600);
     const debut = await position();
     await page.waitForTimeout(500);
@@ -291,6 +305,42 @@ try {
     await page.getByTestId("jbj-sac-fermer").click();
     step(`${tag}: inventaire, comparaison, échange, retrait, sol, provisions et sauvegarde validés`);
     step(`${tag}: déplacements rapides, rotations, murs, ivresse, inventaire et nouvelle partie validés`);
+    // Mage de niveau 10 : points réels, aucun tour pour apprendre ; portée et aperçu avant usage.
+    await page.evaluate(()=>{
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.niveau=10;p.joueur.xp=0;p.joueur.pv=80;p.joueur.mousse=60;p.joueur.ivresse=0;
+      p.joueur.rpg={chevalier:'ysee',classe:'jambonmancien',rangs:[2,1,1,3,0,0],points:3,delais:[0,0,0],protection:0,riposte:0,bouclier:0,perce:false,saigne:-1,encore:false,reduction:0,utilisee:-1};
+      const w=9;p.carte={w,h:w,cases:Array.from({length:w*w},(_,i)=>i%w===0||i%w===w-1||i<w||i>=w*(w-1)?1:0),vu:Array(w*w).fill(true),decor:Array(w*w).fill(0)};
+      p.joueur.equipe.arme={uid:4000,base:'tranchoir',niveau:6,rarete:'commun',att:5,def:0,pv:0,mousse:0};
+      p.monstres=[{uid:5000,type:'inspecteur',niveau:10,elite:true,boss:false,x:4,y:3,pv:180,pvMax:180,att:10,def:3,xp:1,eveille:true,sonne:0}];
+      p.sol=[];p.fin=null;localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+    });
+    await reprendre();await page.getByTestId('jbj-ouvrir-competences').click();
+    await page.getByTestId('jbj-competences').waitFor();
+    const avantPoints=await lire();
+    await page.getByTestId('jbj-apprendre-0').click();
+    const apresPoints=await lire();
+    if(apresPoints.tour!==avantPoints.tour||apresPoints.joueur.rpg.points!==2||apresPoints.joueur.rpg.rangs[0]!==3)throw new Error(`${tag}: amélioration des compétences incorrecte`);
+    const corps=page.locator('.jbj-rpg-panel-corps');
+    const taille=await corps.evaluate(e=>[e.scrollWidth,e.clientWidth]);
+    if(taille[0]>taille[1]+1)throw new Error(`${tag}: compétences débordent horizontalement`);
+    if(SHOTS)await page.getByTestId('jbj-competences').screenshot({path:join(SHOTS,`${tag}-competences.png`)});
+    await page.getByTestId('jbj-fermer-competences').click();
+    const avantSort=await lire();await page.getByTestId('jbj-actif-0').click();
+    if((await lire()).tour!==avantSort.tour)throw new Error(`${tag}: préparer une compétence prend un tour`);
+    if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-apercu-sort.png`)});
+    await page.getByTestId('jbj-confirmer-competence').click();
+    const apresSort=await lire();
+    if(apresSort.tour!==avantSort.tour+1||apresSort.joueur.mousse!==avantSort.joueur.mousse-5||!apresSort.monstres[0].rpg.malediction)throw new Error(`${tag}: sort, coût ou malédiction incorrect`);
+    if(!apresSort.monstres[0].rpg.annonce)throw new Error(`${tag}: attaque lourde non annoncée`);
+    await page.getByTestId('jbj-menace').waitFor();
+    await page.getByTestId('jbj-actif-2').click();
+    if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-combat-rpg.png`)});
+    await page.getByTestId('jbj-confirmer-competence').click();
+    const apresExplosion=await lire();
+    if(apresExplosion.monstres[0].rpg.malediction!==0||apresExplosion.monstres[0].pv>=apresSort.monstres[0].pv)throw new Error(`${tag}: explosion ou consommation de malédiction incorrecte`);
+    await reprendre();if((await lire()).joueur.rpg.chevalier!=='ysee')throw new Error(`${tag}: chevalier perdu à la reprise`);
+    step(`${tag}: douze chevaliers, compétences, points, ciblage, mousse, explosion, menace et sauvegarde validés`);
     if(SHOTS){
       const bases=['couteau','os','tranchoir','crochet','louche','hachoir','tablier','gilet','couennes','manteau','charlotte','bob','casque','couronne','decapsuleur','pork-id','nappe','appeau','jambon','biere'];
       await page.evaluate(async bases=>{
