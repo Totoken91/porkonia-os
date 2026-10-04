@@ -3499,6 +3499,8 @@ export const porkosPack: ContentPack = {
     "jbj.titreAidePoche": "Touchez les flèches pour marcher, ↺ et ↻ pour tourner.",
     "jbj.etage": "Étage {n}/{max}",
     "jbj.niveau": "Niveau {n}",
+    "jbj.fiche": "Fiche du chevalier",
+    "jbj.ficheCourt": "Fiche",
     "jbj.niv": "niv. {n}",
     "jbj.attdef": "ATT {att} · DEF {def}",
     "jbj.stat.att": "ATT",

@@ -216,3 +216,16 @@ Audit strict des 17 sprites du monde passé à une et trois cases, y compris les
 ### Validation de la cohérence globale — 4 octobre 2026
 
 Kenny valide les aperçus et autorise la publication de la passe globale. Les mentions « locale » et « non poussée » de cette section décrivent la revue avant validation. Les onze mobs, quatre objets au sol, deux meubles, particules et transparences partagent maintenant leur règle de projection ; inventaire et blasons sont vérifiés à leurs échelles natives. Build, 296 tests, audit strict et navigation dans les quatre formats réussis. Publication par push de `porkos`, avec déploiement automatique Vercel.
+
+## Interface tactile sans défilement — 4 octobre 2026
+
+- Le donjon et les commandes restent dans la hauteur disponible du Poche, en portrait et paysage.
+- Bloc fixe : résumé niveau/PV/mousse, trois compétences et accès à leur arbre, puis douze commandes en grille 4 × 3, avec cibles de 44 px minimum.
+- Faim, XP, attaque/défense et identité accessibles dans une fiche superposée, gratuite en tours et en aléatoire. Carte superposée avec fermeture explicite.
+- Sur les paysages les moins hauts, le résumé passe au-dessus du donjon pour préserver les 44 px des commandes.
+- E2E vérifie les dimensions avant tout clic susceptible de défiler, les ouvertures gratuites de fiche/carte, l’attente par véritable événement tactile et le changement d’orientation.
+- Publication autorisée par l’utilisateur, via push sur `porkos`.
+
+Validation : build de production, 296 tests unitaires, parcours navigateur sur bureau et cinq formats mobiles (390×844, 360×780, 360×640, 844×390 et 667×375). Refuges 3/6/9 et boss 3/6/9 vérifiés. Rotation portrait/paysage, fiche/carte gratuites et attente tactile vérifiées sur le dernier build.
+
+La barre Partie/Aide du châssis est masquée uniquement pour le jeu sur Poche. Nouvelle partie et Commandes restent accessibles depuis la fiche ; les raccourcis F1/F2 et la barre sur bureau sont conservés. L’aide s’ouvre sur toute la surface du jeu sur téléphone.

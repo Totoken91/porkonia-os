@@ -211,3 +211,53 @@
     .ecran.poche .jbj-jauge:is(.pv,.mousse) b { top:22px; }
   }
 }
+
+@layer components {
+  /* The game itself never scrolls. Only opened information panels may scroll. */
+  .ecran.poche .jbj.jbj-en-partie { display:grid; grid-template-rows:minmax(0,1fr) auto; gap:4px; padding:4px; overflow:hidden; }
+  .ecran.poche .jbj-en-partie .jbj-gauche { width:100%; min-height:0; min-width:0; overflow:hidden; container-type:size; gap:4px; justify-content:flex-end; }
+  .ecran.poche .jbj-en-partie .jbj-vue { flex:1; min-height:0; max-height:none; width:100%; height:auto; aspect-ratio:auto; border:0; background:#101711; display:flex; align-items:center; justify-content:center; }
+  .ecran.poche .jbj-en-partie .jbj-vue canvas { width:100%; height:auto; max-height:100%; object-fit:contain; aspect-ratio:16/9; }
+  .ecran.poche .jbj-en-partie .jbj-journal { flex:none; height:50px; min-height:50px; padding:0 3px; }
+  .ecran.poche .jbj-en-partie .jbj-journal button { min-height:44px; }
+  .ecran.poche .jbj-en-partie .jbj-droite { display:flex; flex-direction:column; width:100%; min-height:0; overflow:hidden; padding:0; gap:2px; }
+  .ecran.poche .jbj-en-partie .jbj-resume { display:flex; align-items:center; justify-content:space-between; gap:4px; height:44px; min-height:44px; padding:2px 4px; color:#eee3c5; }
+  .jbj-resume-pv { color:#eea7a0; }
+  .ecran.poche .jbj-en-partie .jbj-rpg-barre { grid-template-columns:repeat(4,minmax(0,1fr)); gap:2px; }
+  .ecran.poche .jbj-en-partie .jbj-rpg-barre > button { grid-column:auto; height:44px; min-height:44px; min-width:0; padding:1px 2px; line-height:16px; overflow:hidden; }
+  .ecran.poche .jbj-en-partie .jbj-rpg-barre > button span,.ecran.poche .jbj-en-partie .jbj-rpg-barre > button small { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ecran.poche .jbj-en-partie .jbj-preparation { display:none; }
+  .ecran.poche .jbj-en-partie .jbj-pad { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:2px; margin:0; }
+  .ecran.poche .jbj-en-partie .jbj-pad > button { order:0; grid-column:auto; min-width:0; height:44px; min-height:44px; padding:0 2px; touch-action:manipulation; }
+  .ecran.poche .jbj-en-partie .jbj-pad-frapper { color:#ffe3a6; border-color:#c4ab70; }
+  .jbj-carte-mobile > canvas { align-self:center; min-height:0; flex:1; width:100%; object-fit:contain; image-rendering:pixelated; }
+  .jbj-carte-mobile > header,.jbj-fiche-mobile > header { display:flex; align-items:center; justify-content:space-between; gap:4px; flex:none; padding:4px; }
+  .ecran.poche .jbj-en-partie .jbj-refuge button { min-height:44px; }
+  .jbj-carte-mobile > header button,.jbj-fiche-mobile > header button { min-height:44px; }
+  .ecran.poche .jbj-fiche-mobile .jbj-niveau,.ecran.poche .jbj-fiche-mobile .jbj-etage span { display:block; }
+  @media (orientation:landscape) {
+    .ecran.poche .jbj.jbj-en-partie { grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,1fr) minmax(340px,46%); }
+  }
+}
+
+@layer components {
+  @media (orientation:landscape) and (max-height:379px) {
+    .ecran.poche .jbj.jbj-en-partie { grid-template-rows:44px minmax(0,1fr); }
+    .ecran.poche .jbj-en-partie .jbj-droite { display:contents; }
+    .ecran.poche .jbj-en-partie .jbj-gauche { grid-column:1; grid-row:2; }
+    .ecran.poche .jbj-en-partie .jbj-resume { grid-column:1; grid-row:1; flex-wrap:wrap; gap:0 4px; }
+    .ecran.poche .jbj-en-partie .jbj-rpg-barre { grid-column:2; grid-row:1; }
+    .ecran.poche .jbj-en-partie .jbj-pad { grid-column:2; grid-row:2; align-self:start; }
+    .ecran.poche .jbj-en-partie:not(.jbj-rpg) .jbj-pad { grid-row:1 / 3; }
+  }
+}
+
+@layer components {
+  .ecran.poche .pk-window:has(.jbj) > .pk-menubar { display:none; }
+  .jbj-fiche-actions { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .jbj-fiche-actions button { min-height:44px; }
+  .ecran.poche .jbj-en-partie .jbj-vue:has(.jbj-panneau-aide) { position:static; }
+  .ecran.poche .jbj-en-partie .jbj-panneau-aide { inset:4px; z-index:25; }
+  .ecran.poche .jbj-panneau-aide .jbj-aide { white-space:pre-wrap; }
+  .ecran.poche .jbj-panneau-aide > button { position:sticky; top:0; display:block; margin-left:auto; min-height:44px; }
+}

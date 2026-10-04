@@ -118,7 +118,7 @@ function bruit(kind: string) {
 
 /* ------------------------------- Composant -------------------------------- */
 
-type Panneau = null | "sac" | "carte" | "aide" | "competences" | "journal";
+type Panneau = null | "sac" | "carte" | "aide" | "competences" | "journal" | "fiche";
 
 export function Jambonjon() {
   const { pack, str, settings, signal } = useOs();
@@ -481,6 +481,24 @@ export function Jambonjon() {
     </button>
   );
 
+  const fiche = <>
+        <div className="jbj-etage">
+          <b title={str('jbj.etage',{n:partie.etage,max:jeu.etages})}>{str(jeu.campagne?'jbj.acteEtage':'jbj.etage', { acte:Math.ceil(partie.etage/3), n: partie.etage, max: jeu.etages })}</b>
+          <span>{nomEtage}</span>
+        </div>
+        <div className="jbj-niveau">
+          {chevalier && <b className="jbj-identite" title={`${chevalier.nom} · ${str(`jbj.rpg.${chevalier.classe}`)}`}>{chevalier.nom}</b>}
+          {str("jbj.niveau", { n: j.niveau })} <small>{str("jbj.attdef", { att: s.att, def: s.def })}</small>
+        </div>
+        <div className="jbj-vitaux">
+        {jauge(j.pv, s.pvMax, "pv", str("jbj.stat.pv"))}
+        {jauge(j.mousse, s.mousseMax, "mousse", str("jbj.stat.mousse"))}
+        {jauge(j.faim, 100, "faim", str("jbj.faim"))}
+        {j.rpg && j.niveau === 20 ? <span>{str("jbj.rpg.maxNiveau")}</span> : jauge(j.xp, j.rpg ? xpNiveauRpg(j.niveau) : xpPourNiveau(j.niveau), "xp", str("jbj.xp"))}
+        </div>
+        {j.ivresse > 0 && <p className="jbj-ivre">{str("jbj.ivre")}</p>}
+  </>;
+
   if(partie.fin==='victoire') return <div className={`jbj jbj-conclusion ${poche?'jbj-poche':''}`} data-testid="jambonjon">
     <section className="jbj-fin jbj-fin-victoire jbj-conclusion-corps" data-testid="jbj-fin" aria-labelledby="jbj-victoire-titre">
       <header className="jbj-conclusion-entete">
@@ -498,7 +516,7 @@ export function Jambonjon() {
   </div>;
 
   return (
-    <div className={`jbj ${j.rpg ? "jbj-rpg" : ""} ${poche ? "jbj-poche" : ""} ${panneau === "sac" ? "jbj-sac-ouvert" : ""}`} data-testid="jambonjon">
+    <div className={`jbj jbj-en-partie ${j.rpg ? "jbj-rpg" : ""} ${poche ? "jbj-poche" : ""} ${panneau === "sac" ? "jbj-sac-ouvert" : ""}`} data-testid="jambonjon">
       <div className="jbj-gauche">
         <div className="jbj-vue">
           <canvas ref={vue} width={LARGEUR} height={HAUTEUR} data-testid="jbj-vue" />
@@ -527,7 +545,7 @@ export function Jambonjon() {
               <i style={{ width: `${(devant.pv / devant.pvMax) * 100}%` }} />
             </div>
           )}
-          {panneau === "carte" && (
+          {!poche && panneau === "carte" && (
             <div className="jbj-panneau jbj-panneau-carte" onClick={() => setPanneau(null)}>
               <h2>{nomEtage}</h2>
               <canvas ref={carte} width={256} height={256} />
@@ -535,6 +553,7 @@ export function Jambonjon() {
           )}
           {panneau === "aide" && (
             <div className="jbj-panneau jbj-panneau-aide" data-testid="jbj-aide-panneau" onClick={() => setPanneau(null)}>
+              {poche&&<button className="pk-btn" data-testid="jbj-aide-fermer" onClick={()=>setPanneau(null)}>{str('jbj.fermer')}</button>}
               <h2>{str("jbj.commandes")}</h2>
               <p className="jbj-mission">{str('jbj.mission')}</p>
               <pre className="jbj-aide">{str(j.rpg ? "jbj.rpg.aide" : "jbj.aideTexte")}</pre>
@@ -563,20 +582,11 @@ export function Jambonjon() {
         </ol><button className="pk-btn" data-testid="jbj-ouvrir-journal" title={str('jbj.journal.raccourci')} onClick={()=>{setCompetence(null);setPanneau(x=>x==='journal'?null:'journal');}}>{str('jbj.journal.court')}</button></div>
       </div>
       <div className="jbj-droite">
-        <div className="jbj-etage">
-          <b title={str('jbj.etage',{n:partie.etage,max:jeu.etages})}>{str(jeu.campagne?'jbj.acteEtage':'jbj.etage', { acte:Math.ceil(partie.etage/3), n: partie.etage, max: jeu.etages })}</b>
-          <span>{nomEtage}</span>
-        </div>
-        <div className="jbj-niveau">
-          {chevalier && <b className="jbj-identite" title={`${chevalier.nom} · ${str(`jbj.rpg.${chevalier.classe}`)}`}>{chevalier.nom}</b>}
-          {str("jbj.niveau", { n: j.niveau })} <small>{str("jbj.attdef", { att: s.att, def: s.def })}</small>
-        </div>
-        <div className="jbj-vitaux">
-        {jauge(j.pv, s.pvMax, "pv", str("jbj.stat.pv"))}
-        {jauge(j.mousse, s.mousseMax, "mousse", str("jbj.stat.mousse"))}
-        {jauge(j.faim, 100, "faim", str("jbj.faim"))}
-        {j.rpg && j.niveau === 20 ? <span>{str("jbj.rpg.maxNiveau")}</span> : jauge(j.xp, j.rpg ? xpNiveauRpg(j.niveau) : xpPourNiveau(j.niveau), "xp", str("jbj.xp"))}
-        </div>
+        {poche ? <button className="pk-btn jbj-resume" data-testid="jbj-ouvrir-fiche" onClick={()=>setPanneau(x=>x==='fiche'?null:'fiche')} title={str('jbj.fiche')}>
+          <span>{str('jbj.niv',{n:j.niveau})} · {str('jbj.ficheCourt')}</span>
+          <span className="jbj-resume-pv">{str('jbj.stat.pv')} {Math.max(0,Math.round(j.pv))}/{s.pvMax}</span>
+          <span>{str('jbj.stat.mousse')} {Math.max(0,Math.round(j.mousse))}/{s.mousseMax}</span>
+        </button> : <>{fiche}
         <div className="jbj-provisions">
           <button onClick={() => agir({ type: "manger" })} title={str("jbj.manger")} data-testid="jbj-manger">
             <SpriteObjet base="jambon"/>
@@ -587,10 +597,10 @@ export function Jambonjon() {
             {str("jbj.bieres", { n: j.bieres })}
           </button>
         </div>
-        {j.ivresse > 0 && <p className="jbj-ivre">{str("jbj.ivre")}</p>}
+        </>}
         {j.rpg && <div className="jbj-rpg-barre" data-testid="jbj-barre-competences">
           {SLOTS_ACTIFS.map((i, slot) => {const statut=statutCompetence(partie,slot);const texte=str(statut.cle,{n:statut.n??0});return <button className={`pk-btn ${competence === slot ? "choisi" : ""}`} key={i} data-testid={`jbj-actif-${slot}`} onClick={() => lancer(slot)} disabled={statut.bloquee} title={`${texte} · ${jeu.rpg!.competences[j.rpg!.classe][i]!.effet} · ${str(coutCompetence(partie,slot)?'jbj.rpg.cout':'jbj.rpg.physique',{n:coutCompetence(partie,slot)})}`}>
-            <span>{slot + 1} · {jeu.rpg!.competences[j.rpg!.classe][i]!.nom}</span><small>{texte}</small>
+            <span>{!poche&&`${slot + 1} · `}{jeu.rpg!.competences[j.rpg!.classe][i]!.nom}</span><small>{texte}</small>
           </button>;})}
           <button className="pk-btn" data-testid="jbj-ouvrir-competences" onClick={() => { setCompetence(null); setPanneau((p) => p === "competences" ? null : "competences"); }}>{str("jbj.rpg.competences")}{j.rpg.points > 0 ? ` (${j.rpg.points})` : ""}</button>
           {(j.rpg.riposte > 0 || j.rpg.ouverture || j.rpg.perce || j.rpg.reduction > 0) && <small className="jbj-preparation">{str(j.rpg.riposte > 0 ? "jbj.rpg.riposte" : j.rpg.ouverture ? "jbj.rpg.ouverture" : j.rpg.perce ? "jbj.rpg.perce" : "jbj.rpg.lie")}</small>}
@@ -601,18 +611,20 @@ export function Jambonjon() {
             {btn({ type: "tournerG" }, "A ↺", "", "jbj-pad-a")}
             {btn({ type: "avancer" }, "Z ▲", "", "jbj-pad-z")}
             {btn({ type: "tournerD" }, "E ↻", "", "jbj-pad-e")}
-            {btn({ type: "agir" }, str(escalier?'jbj.descendre':"jbj.frapper"), "large jbj-pad-frapper")}
-            {btn({ type: "gauche" }, "Q ◀")}
-            {btn({ type: "reculer" }, "S ▼")}
-            {btn({ type: "droite" }, "D ▶")}
+            {btn({ type: "agir" }, str(escalier?'jbj.descendre':"jbj.frapper"), "large jbj-pad-frapper", "jbj-pad-frapper")}
+            {btn({ type: "gauche" }, "Q ◀", "", "jbj-pad-q")}
+            {btn({ type: "reculer" }, "S ▼", "", "jbj-pad-s")}
+            {btn({ type: "droite" }, "D ▶", "", "jbj-pad-d")}
+            {btn({type:'attendre'},str('jbj.attendre'),'','jbj-pad-w')}
             {!j.rpg && btn({ type: "rot" }, str("jbj.rot"), "jbj-pad-rot")}
             <button className="jbj-pad-b" data-testid="jbj-ouvrir-sac" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>
               {str("jbj.sacCourt")}
             </button>
-            <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "carte" ? null : "carte"))}>
+            <button className="jbj-pad-b" data-testid="jbj-ouvrir-carte" onClick={() => setPanneau((x) => (x === "carte" ? null : "carte"))}>
               {str("jbj.carteCourt")}
             </button>
-            {btn({type:'attendre'},str('jbj.attendre'),'','jbj-pad-w')}
+            <button className="jbj-pad-b" data-testid="jbj-manger" onClick={()=>agir({type:'manger'})} title={str('jbj.manger')}>{str('jbj.mangerCourt')} ×{j.jambons}</button>
+            <button className="jbj-pad-b" data-testid="jbj-boire" onClick={()=>agir({type:'boire'})} title={str('jbj.boire')}>{str('jbj.boireCourt')} ×{j.bieres}</button>
           </div>
         )}
         {!poche && (
@@ -621,6 +633,19 @@ export function Jambonjon() {
           </p></>
         )}
       </div>
+      {poche&&panneau==='carte'&&<section className="jbj-rpg-panel jbj-carte-mobile" aria-labelledby="jbj-carte-titre">
+        <header><h2 id="jbj-carte-titre">{nomEtage}</h2><button className="pk-btn" data-testid="jbj-carte-fermer" onClick={()=>setPanneau(null)}>{str('jbj.fermer')}</button></header>
+        <canvas ref={carte} width={256} height={256}/>
+      </section>}
+      {panneau==='fiche'&&<section className="jbj-rpg-panel jbj-fiche-mobile" data-testid="jbj-fiche" aria-labelledby="jbj-fiche-titre">
+        <header><h2 id="jbj-fiche-titre">{str('jbj.fiche')}</h2><button className="pk-btn" data-testid="jbj-fiche-fermer" onClick={()=>setPanneau(null)}>{str('jbj.fermer')}</button></header>
+        <div className="jbj-rpg-panel-corps">{fiche}
+          <div className="jbj-fiche-actions">
+            <button className="pk-btn" data-testid="jbj-fiche-aide" onClick={()=>setPanneau('aide')}>{str('jbj.commandes')}</button>
+            <button className="pk-btn" data-testid="jbj-fiche-nouvelle" onClick={nouvelle}>{str('jbj.nouvelle')}</button>
+          </div>
+        </div>
+      </section>}
       {panneau === "sac" && <Inventaire partie={partie} agir={agir} fermer={() => setPanneau(null)}/> }
       {panneau === "competences" && j.rpg && <Competences partie={partie} agir={agir} fermer={() => setPanneau(null)}/>}
       {panneau==='journal'&&<section className="jbj-rpg-panel jbj-journal-complet" data-testid="jbj-journal-complet" aria-labelledby="jbj-journal-titre">

@@ -78,6 +78,8 @@ try {
     { tag: "poche-paysage", viewport: { width: 844, height: 390 }, mobile: true },
     { tag: "poche-portrait", viewport: { width: 390, height: 844 }, mobile: true },
     { tag: "poche-compact", viewport: { width: 360, height: 780 }, mobile: true },
+    { tag: "poche-paysage-court", viewport: { width: 667, height: 375 }, mobile: true },
+    { tag: "poche-court", viewport: { width: 360, height: 640 }, mobile: true },
   ];
   for (const { tag, viewport, mobile } of formats) {
     if (process.env.FORMATS && !process.env.FORMATS.split(",").includes(tag)) continue;
@@ -514,10 +516,31 @@ try {
       await reprendre();
       if(!(await page.getByTestId('jbj-actif-0').innerText()).includes('Manque')||!await page.getByTestId('jbj-actif-0').isDisabled())throw Error(`${tag}: mousse insuffisante mal expliquee`);
       if(!(await page.getByTestId('jbj-actif-2').innerText()).includes('À apprendre'))throw Error(`${tag}: niveau deja atteint presente comme verrouille`);
+      if(mobile){
+        if(await page.getByTestId('window-jambonjon').getByRole('menubar').isVisible())throw Error(`${tag}: barre Partie/Aide encore visible`);
+        const verifierCommandes=()=>page.getByTestId('jambonjon').evaluate(root=>{
+          const r=root.getBoundingClientRect(),ids=['jbj-ouvrir-fiche','jbj-pad-a','jbj-pad-z','jbj-pad-e','jbj-pad-q','jbj-pad-s','jbj-pad-d','jbj-pad-frapper','jbj-pad-w','jbj-ouvrir-sac','jbj-ouvrir-carte','jbj-manger','jbj-boire','jbj-actif-0','jbj-actif-1','jbj-actif-2','jbj-ouvrir-competences'];
+          const errors=ids.flatMap(id=>{const e=root.querySelector(`[data-testid="${id}"]`),b=e?.getBoundingClientRect();return !b||b.height<44||b.top<r.top-1||b.bottom>r.bottom+1||b.left<r.left-1||b.right>r.right+1?[{id,rect:b?.toJSON()}]:[];});
+          if(root.scrollHeight>root.clientHeight+1||root.scrollTop)errors.push({scroll:[root.scrollHeight,root.clientHeight,root.scrollTop]});
+          return errors;
+        });
+        const problemes=await verifierCommandes();
+        if(problemes.length)throw Error(`${tag}: commandes hors ecran ${JSON.stringify(problemes)}`);
+        if(tag==='poche-court'){
+          await page.setViewportSize({width:844,height:390});await page.waitForTimeout(250);
+          const rotation=await verifierCommandes();if(rotation.length)throw Error(`${tag}: rotation paysage ${JSON.stringify(rotation)}`);
+          await page.setViewportSize(viewport);await page.waitForTimeout(250);
+          const retour=await verifierCommandes();if(retour.length)throw Error(`${tag}: retour portrait ${JSON.stringify(retour)}`);
+        }
+        const avant=await lire();await page.getByTestId('jbj-ouvrir-fiche').click();await page.getByTestId('jbj-fiche').waitFor();if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-fiche.png`)});await page.getByTestId('jbj-fiche-aide').click();await page.getByTestId('jbj-aide-panneau').waitFor();await page.getByTestId('jbj-aide-fermer').click();
+        await page.getByTestId('jbj-ouvrir-carte').click();await page.getByTestId('jbj-carte-fermer').click();
+        const apres=await lire();if(apres.tour!==avant.tour||apres.alea!==avant.alea)throw Error(`${tag}: fiche consomme un tour`);
+        step(`${tag}: toutes les commandes visibles, cibles tactiles 44px, fiche gratuite`);
+      }
       const avant=await lire();
       const coupe=await page.getByTestId('jbj-journal').evaluate(e=>{const a=e.querySelector('ol').getBoundingClientRect();return [...e.querySelectorAll('li')].some(li=>{const b=li.getBoundingClientRect();return b.top<a.top-1||b.bottom>a.bottom+1;});});
       if(coupe)throw Error(`${tag}: message du journal coupe verticalement`);
-      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-peaufinage.png`)});
+      if(SHOTS){await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-peaufinage.png`)});if(mobile)await page.screenshot({path:join(SHOTS,`${tag}-telephone.png`)});}
       await page.getByTestId('jbj-ouvrir-journal').click();await page.getByTestId('jbj-journal-complet').waitFor();
       const panel=page.getByTestId('jbj-journal-complet');
       if(!(await panel.innerText()).includes('Tranchoir de la Commission'))throw Error(`${tag}: historique incomplet`);
@@ -525,7 +548,7 @@ try {
       if(SHOTS)await panel.screenshot({path:join(SHOTS,`${tag}-journal-complet.png`)});
       await page.getByTestId('jbj-journal-fermer').click();await page.keyboard.press('h');await panel.waitFor();await page.keyboard.press('Escape');
       const apres=await lire();if(apres.tour!==avant.tour||apres.alea!==avant.alea)throw Error(`${tag}: lire le journal modifie la partie`);
-      if(mobile){const avant=await lire();await page.getByTestId('jbj-pad-w').click();const apres=await lire();if(apres.tour!==avant.tour+1||apres.joueur.x!==avant.joueur.x||apres.joueur.y!==avant.joueur.y)throw Error(`${tag}: attente tactile incorrecte`);}
+      if(mobile){const avant=await lire();const cible=await page.getByTestId('jbj-pad-w').boundingBox();await page.touchscreen.tap(cible.x+cible.width/2,cible.y+cible.height/2);const apres=await lire();if(apres.tour!==avant.tour+1||apres.joueur.x!==avant.joueur.x||apres.joueur.y!==avant.joueur.y)throw Error(`${tag}: attente tactile incorrecte`);}
       step(`${tag}: journal lisible et gratuit, statuts de competences et attente tactile valides`);
     }
     for(const fixture of REFUGES){
