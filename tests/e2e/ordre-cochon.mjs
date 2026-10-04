@@ -11,7 +11,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
 
 const server = createServer(async (req, res) => {
   let p = join(ROOT, decodeURIComponent(new URL(req.url, "http://x").pathname));
@@ -134,6 +134,8 @@ try {
     await page.getByTestId("gruik-bulle").waitFor({ timeout: 8000 });
     if (!(await page.getByTestId("gruik-bulle").textContent()).includes("Gruik")) throw new Error("Gruik ne se présente pas");
     await shot(page, `${tag}-05-gruik`);
+    // Le contrôle du jeu et ses captures restent lisibles après le contrôle de l'assistant.
+    await page.addStyleTag({content: ".gruik,.bulles{display:none!important}"});
     step(`${tag} : Gruik, l'assistant, salue`);
 
     if (tag === "bureau") {
@@ -216,6 +218,7 @@ try {
     const avant = await position();
     await page.keyboard.press("i");
     await page.getByTestId("jbj-sac").waitFor();
+    await page.locator(".jbj-sprite-objet").evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
     await page.keyboard.press("z");
     await page.waitForTimeout(300);
     if (JSON.stringify(await position())!==JSON.stringify(avant)) throw new Error(`${tag}: marche pendant l’inventaire`);
@@ -269,7 +272,11 @@ try {
     await page.locator(".jbj-inv-corps").evaluate(e=>{e.scrollTop=0;});
     const dimensions=await page.locator(".jbj-inv-corps").evaluate(e=>[e.scrollWidth,e.clientWidth]);
     if(dimensions[0]>dimensions[1]+1)throw new Error(`${tag}: inventaire déborde horizontalement`);
+    const cadre=await page.getByTestId("jbj-sac").boundingBox();
+    const fermerSac=await page.getByTestId("jbj-sac-fermer").boundingBox();
+    if(!cadre||!fermerSac||fermerSac.y<cadre.y||fermerSac.y+fermerSac.height>cadre.y+cadre.height)throw new Error(`${tag}: entête d’inventaire déplacée hors du panneau`);
     await shot(page,`${tag}-inventaire`);
+    if(SHOTS)await page.getByTestId("jbj-sac").screenshot({path:join(SHOTS,`${tag}-inventaire-detail.png`)});
     await page.getByTestId("jbj-sac-fermer").click();
     await page.evaluate(()=>{
       const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
@@ -284,6 +291,21 @@ try {
     await page.getByTestId("jbj-sac-fermer").click();
     step(`${tag}: inventaire, comparaison, échange, retrait, sol, provisions et sauvegarde validés`);
     step(`${tag}: déplacements rapides, rotations, murs, ivresse, inventaire et nouvelle partie validés`);
+    if(SHOTS){
+      const bases=['couteau','os','tranchoir','crochet','louche','hachoir','tablier','gilet','couennes','manteau','charlotte','bob','casque','couronne','decapsuleur','pork-id','nappe','appeau','jambon','biere'];
+      await page.evaluate(async bases=>{
+        await Promise.all(bases.map(async base=>{const image=new Image();image.src=`/ordre-cochon/items/${base}.png`;await image.decode();}));
+        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+        const objet=(base,uid)=>({base,uid,niveau:1,rarete:'etat',att:0,def:0,pv:0,mousse:0});
+        p.joueur.sac=bases.slice(0,12).map((base,i)=>objet(base,2000+i));
+        p.joueur.equipe={arme:objet('couteau',3000),armure:objet('gilet',3001),tete:objet('charlotte',3002),breloque:objet('decapsuleur',3003)};
+        localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+      },bases);
+      await reprendre();await page.getByTestId('jbj-ouvrir-sac').click();
+      await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+      await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
+      await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
     await ctx.close();
   }
   if(errors.length) throw new Error(errors.join("\n"));
