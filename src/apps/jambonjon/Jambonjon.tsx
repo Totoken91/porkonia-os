@@ -20,6 +20,7 @@ import { convertirRpg, defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
 
 const CLE = "porkos.jambonjon.partie";
+const CLE_CONSEILS = 'porkos.jambonjon.conseils';
 
 /* ----------------------------- Petits bruits ------------------------------ */
 
@@ -141,10 +142,12 @@ export function Jambonjon() {
   const fx = useRef({ touches: new Set<number>(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] as [number, number, number] });
   const file = useRef(new Commandes<Action>());
   const partieRef = useRef<Partie | null>(null);
+  const preferenceConseils = useRef(true);
 
   // Sauvegarde existante.
   useEffect(() => {
     try {
+      preferenceConseils.current = window.localStorage.getItem(CLE_CONSEILS) !== '0';
       const p = relirePartie(JSON.parse(window.localStorage.getItem(CLE) ?? "null"));
       if (p && !p.fin) setSauvegarde(p);
     } catch {
@@ -176,7 +179,11 @@ export function Jambonjon() {
 
   const nouvelle = useCallback(() => { file.current.vider(); setCompetence(null); setChoix(null); }, []);
   const reprendre = useCallback((p: Partie) => { if (p.joueur.rpg) commencer(p); else setChoix(p); }, [commencer]);
-  const choisir = (id: string) => commencer(choix ? convertirRpg(choix, jeu, id) : nouvellePartie(jeu, (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, id));
+  const choisir = (id: string) => {
+    const p=choix?convertirRpg(choix,jeu,id):nouvellePartie(jeu,(Date.now()^Math.floor(Math.random()*1e9))>>>0,id);
+    if(!choix&&p.guide&&!preferenceConseils.current){p.guide.actif=false;p.journal=p.journal.filter(m=>!m.cle.startsWith('jbj.guide.'));}
+    commencer(p);
+  };
 
   /** Une action : nouvel état, animation de la caméra, sons, éclairs. */
   const agir = useCallback(
@@ -422,6 +429,7 @@ export function Jambonjon() {
         <div className="jbj-titre-cadre">
           <h1>{str("jbj.titre")}</h1>
           <p className="jbj-sous-titre">{str("jbj.sousTitre")}</p>
+          <p className="jbj-mission" data-testid="jbj-mission">{str('jbj.mission')}</p>
           <div className="jbj-titre-boutons">
             {sauvegarde && (
               <button className="pk-btn" onClick={() => reprendre(sauvegarde)} data-testid="jbj-continuer">
@@ -451,6 +459,7 @@ export function Jambonjon() {
     </div>
   );
   const devant = j.rpg ? ligne(partie, j.rpg.classe === "jambonmancien" ? 2 : 1)[0] : partie.monstres.find((m) => m.x === j.x + [0, 1, 0, -1][j.dir]! && m.y === j.y + [-1, 0, 1, 0][j.dir]!);
+  const escalier=partie.carte.cases[j.y*partie.carte.w+j.x]===2&&!partie.monstres.some(m=>m.x===j.x+[0,1,0,-1][j.dir]!&&m.y===j.y+[-1,0,1,0][j.dir]!);
   const chevalier = jeu.rpg?.chevaliers.find((c) => c.id === j.rpg?.chevalier);
   const cotes=cotesLibres(partie);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
@@ -508,9 +517,15 @@ export function Jambonjon() {
             </div>
           )}
           {panneau === "aide" && (
-            <div className="jbj-panneau" onClick={() => setPanneau(null)}>
+            <div className="jbj-panneau jbj-panneau-aide" data-testid="jbj-aide-panneau" onClick={() => setPanneau(null)}>
               <h2>{str("jbj.commandes")}</h2>
+              <p className="jbj-mission">{str('jbj.mission')}</p>
               <pre className="jbj-aide">{str(j.rpg ? "jbj.rpg.aide" : "jbj.aideTexte")}</pre>
+              {j.rpg && partie.etage<=3 && <button className="pk-btn" data-testid="jbj-conseils" aria-pressed={partie.guide?.actif??false} onClick={e=>{
+                e.stopPropagation();const actif=!partie.guide?.actif;preferenceConseils.current=actif;
+                try{window.localStorage.setItem(CLE_CONSEILS,actif?'1':'0');}catch{/* préférence locale indisponible */}
+                agir({type:'conseils',actif});
+              }}>{str(partie.guide?.actif?'jbj.guide.masquer':'jbj.guide.afficher')}</button>}
             </div>
           )}
           {partie.fin && (
@@ -526,7 +541,7 @@ export function Jambonjon() {
         {!panneau&&<Refuge partie={partie} agir={agir} competences={()=>{setPromotion(null);setCompetence(null);setPanneau('competences');}}/>}
         <ol className="jbj-journal" data-testid="jbj-journal">
           {journal.map((m, i) => (
-            <li key={partie.journal.length - journal.length + i}>{str(m.cle, m.vars)}</li>
+            <li key={partie.journal.length - journal.length + i} className={m.cle.startsWith('jbj.guide.')?'jbj-conseil':undefined}>{str(m.cle, m.vars)}</li>
           ))}
         </ol>
       </div>
@@ -569,7 +584,7 @@ export function Jambonjon() {
             {btn({ type: "tournerG" }, "A ↺", "", "jbj-pad-a")}
             {btn({ type: "avancer" }, "Z ▲", "", "jbj-pad-z")}
             {btn({ type: "tournerD" }, "E ↻", "", "jbj-pad-e")}
-            {btn({ type: "agir" }, str("jbj.frapper"), "large jbj-pad-frapper")}
+            {btn({ type: "agir" }, str(escalier?'jbj.descendre':"jbj.frapper"), "large jbj-pad-frapper")}
             {btn({ type: "gauche" }, "Q ◀")}
             {btn({ type: "reculer" }, "S ▼")}
             {btn({ type: "droite" }, "D ▶")}

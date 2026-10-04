@@ -1,6 +1,6 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration, les trois élites avec butin garanti et les comportements de l’inspecteur et du tonneau sont poussés. Les choix d’équipement sont en validation locale ; l’introduction, la conclusion et les vérifications humaines restent à approfondir.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration, les trois élites avec butin garanti et les comportements de l’inspecteur et du tonneau sont poussés. Les choix d’équipement sont validés et poussés (`596139f`). L’objectif et les conseils de départ sont en validation locale ; la conclusion et les vérifications humaines restent à approfondir.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
@@ -8,8 +8,8 @@ Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équi
 | 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration poussée (`407df13`) : objectifs, gardiens et 72 parcours ; validation humaine à faire |
-| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`), comportements poussés (`87934d9`) ; compromis d’équipement en validation locale |
-| 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
+| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`), comportements poussés (`87934d9`) ; compromis d’équipement validés et poussés (`596139f`) |
+| 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | Objectif et apprentissage en validation locale ; conclusion et essais humains à faire |
 
 ## Première livraison du chantier 1
 
@@ -97,7 +97,7 @@ Une élite RPG laisse désormais exactement un équipement, de niveau égal à l
 
 Navigation vérifiée en bureau, Poche portrait, paysage et compact : avertissement approprié, esquive sans dégâts, récupération conservée après reprise et attaques des trois boss intermédiaires. Les captures montrent le signal sur le sprite dans le rendu réel. Validé et poussé (`87934d9`).
 
-### Compromis d’équipement — passe locale à valider
+### Compromis d’équipement — validés et poussés
 
 Les profils définis dans le pack modulent uniquement la création des nouveaux objets RPG. Ils conservent les statistiques présentes sur chaque base et la progression par étage et qualité. Les objets déjà sauvegardés gardent exactement leurs valeurs, y compris lorsqu’on les rééquipe ; le mode historique garde ses formules.
 
@@ -110,4 +110,17 @@ La fiche affiche une phrase d’usage en plus des bonus exacts et des écarts av
 
 274 tests passent : compromis chiffrés aux débuts et fins d’actes, progression et qualité monotones, statistiques absentes conservées à zéro, valeurs des anciens objets intactes, profils appliqués au butin généré. Build compilé. Le même pilote garde 36/36 victoires en exploration et 36/36 en trajet direct ; ces résultats sont des régressions automatiques, pas une validation humaine de l’équilibrage.
 
-Fiches et échanges vérifiés en bureau, Poche portrait, paysage et compact : rôle affiché, pertes de défense et gains de réserve corrects, échange sans soin ni tour consommé, bonus identiques après reprise. Captures du manteau contre la cotte et de la charlotte contre le bob. La passe reste locale en attente de validation ; le chantier suivant est l’entrée en campagne, l’objectif et la conclusion.
+Fiches et échanges vérifiés en bureau, Poche portrait, paysage et compact : rôle affiché, pertes de défense et gains de réserve corrects, échange sans soin ni tour consommé, bonus identiques après reprise. Captures du manteau contre la cotte et de la charlotte contre le bob. Passe validée et poussée (`596139f`). Le chantier suivant est l’entrée en campagne, l’objectif et la conclusion.
+
+
+## Entrée en campagne — passe locale à valider
+
+L’écran titre et l’aide indiquent l’objectif : traverser douze étages et vaincre le Grand Affineur. Les refuges après les gardiens des étages 3, 6 et 9 sont annoncés dès le départ.
+
+Pendant le premier acte, le journal donne un conseil court au moment pertinent : soigner des PV bas, riposter après une esquive laissant une ouverture, dépenser les points de niveau, descendre, comparer le butin et lancer directement une compétence disponible. Chaque conseil paraît au plus une fois par partie ; un seul est choisi par action. Pas de tutoriel bloquant ni de confirmation supplémentaire. Ces messages ne modifient ni tours, ni ressources, ni tirages aléatoires.
+
+L’aide permet de masquer ou réactiver ces conseils. La préférence reste après fermeture et sur les nouvelles parties. Les anciennes sauvegardes sont silencieuses jusqu’à activation explicite. Sur Poche, la commande indique « Descendre » lorsque le personnage se tient à l’escalier sans ennemi devant lui. Le gardien conserve son verrou normal.
+
+289 tests passent et le build compile. Les parcours automatiques gardent 36/36 victoires en exploration et 36/36 en trajet direct. Ces parcours vérifient la régression du moteur ; ils ne remplacent pas les essais humains de lisibilité, de plaisir et de difficulté. La conclusion de campagne et les apparences propres aux boss restent à faire.
+
+Navigation validée en bureau, Poche portrait, paysage et compact : objectif visible, aide sans débordement horizontal, masquage gratuit, préférence après reprise et nouvelle partie. Déplacements, équipement et compétences restent fonctionnels dans les quatre formats. Cette passe reste locale avant validation.

@@ -301,7 +301,7 @@ export function specialEnnemi(p: Partie, jeu: JeuJambonjon, m: Monstre, h: HoteR
     if(attaque){e.recuperation=p.tour+1;h.log(p,"jbj.boss.reprise");}
     if(ordinaire){e.recuperation=p.tour+1;h.log(p,'jbj.ennemi.reprise',{nom:def!.nom});}
     if (touche) recevoir(p, jeu, m, h, ordinaire==='verdict'?1:ordinaire==='ecrasement'?1.35:1.8);
-    else { h.log(p, "jbj.rpg.evitespecial"); if (p.joueur.rpg!.chevalier === "agathe") p.joueur.rpg!.saigne = p.tour + 1; }
+    else { h.log(p, "jbj.rpg.evitespecial"); p.evenements.push('esquive'); if (p.joueur.rpg!.chevalier === "agathe") p.joueur.rpg!.saigne = p.tour + 1; }
     return true;
   }
   const portee=attaque === "sceau" ? 3 : attaque === "ligne" ? 4 : 1;

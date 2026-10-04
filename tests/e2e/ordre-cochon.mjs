@@ -15,6 +15,7 @@ const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECT
 const ELITE=process.env.ELITE?JSON.parse(await readFile(process.env.ELITE,'utf8')):null;
 const COMPORTEMENTS=process.env.COMPORTEMENTS?JSON.parse(await readFile(process.env.COMPORTEMENTS,'utf8')):[];
 const EQUIPEMENT=process.env.EQUIPEMENT?JSON.parse(await readFile(process.env.EQUIPEMENT,'utf8')):null;
+const GUIDAGE=process.env.GUIDAGE==='1';
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
@@ -202,6 +203,10 @@ try {
       await page.getByTestId("inst-fin").waitFor({ timeout: 20000 });
       await page.getByTestId("inst-suivant").click();
       await page.getByTestId("window-jambonjon").waitFor();
+      if(GUIDAGE){
+        if(!(await page.getByTestId('jbj-mission').textContent()).includes('douze étages'))throw new Error(`${tag}: objectif absent`);
+        if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-mission-titre.png`)});
+      }
       await page.getByTestId("jbj-nouvelle").click();
       await page.getByTestId("jbj-chevaliers").waitFor();
       for (const classe of ["tank", "dps", "jambonmancien"]) {
@@ -215,6 +220,24 @@ try {
       await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
       const entreeCampagne=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+      if(GUIDAGE){
+        if(!entreeCampagne.guide?.actif||!entreeCampagne.guide.vus.includes('mission'))throw new Error(`${tag}: guide de depart absent`);
+        await page.keyboard.press('F1');await page.getByTestId('jbj-aide-panneau').waitFor();
+        await page.getByTestId('jbj-conseils').click();
+        const muet=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+        if(muet.guide.actif||muet.tour!==entreeCampagne.tour||muet.alea!==entreeCampagne.alea)throw new Error(`${tag}: masquer les conseils modifie le jeu`);
+        const aide=page.getByTestId('jbj-aide-panneau');
+        const dimensions=await aide.evaluate(e=>[e.scrollWidth,e.clientWidth]);if(dimensions[0]>dimensions[1]+1)throw new Error(`${tag}: aide trop large`);
+        if(SHOTS){await aide.evaluate(e=>{e.scrollTop=0;});await aide.screenshot({path:join(SHOTS,`${tag}-aide-mission.png`)});}
+        await page.keyboard.press('Escape');await fermer('jambonjon');await fermer('navigateur');await open('f:L’Ordre Cochon');
+        await page.getByTestId('jbj-continuer').click();await page.keyboard.press('F1');
+        if(await page.getByTestId('jbj-conseils').getAttribute('aria-pressed')!=='false')throw new Error(`${tag}: preference perdue a la reprise`);
+        await page.keyboard.press('Escape');await page.keyboard.press('F2');await page.getByTestId('jbj-classe-jambonmancien').click();await page.getByTestId('jbj-chevalier-ysee').click();await page.getByTestId('jbj-partir').click();
+        const nouvelle=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+        if(nouvelle.guide.actif||nouvelle.journal.some(m=>m.cle.startsWith('jbj.guide.')))throw new Error(`${tag}: nouvelle partie ignore la preference`);
+        await page.keyboard.press('F1');await page.getByTestId('jbj-conseils').click();await page.keyboard.press('Escape');
+        step(`${tag}: mission, conseils gratuits, preference et nouvelle partie valides`);
+      }
       if(entreeCampagne.carte.w!==23||entreeCampagne.carte.h!==19||entreeCampagne.joueur.x!==4||entreeCampagne.joueur.y!==14||!entreeCampagne.carte.zones||entreeCampagne.monstres.length!==6)throw new Error(`${tag}: premier étage conçu non chargé`);
       if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-entree-campagne.png`)});
 

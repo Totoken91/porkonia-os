@@ -7,6 +7,7 @@ import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/
 import { assemblerEtage } from './campagne';
 import { ennemiReference, PART_XP_COMBAT, xpAccomplissement, xpNiveauRpg } from "./equilibrage";
 import { bonusEquipementRpg } from './equipement-rpg';
+import { conseilSuivant, guideValide, type GuideDebut } from './guidage';
 import { estRefuge } from "./refuge";
 import { ligneEntre } from './boss';
 import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
@@ -200,6 +201,7 @@ export interface Message {
 }
 
 export interface Partie {
+  guide?: GuideDebut;
   refuge?: boolean;
   refugesVisites?: number[];
   version: number;
@@ -401,6 +403,7 @@ export function nouvellePartie(jeu: JeuJambonjon, graine: number, chevalier?: st
   }
   peuplerEtage(p, jeu);
   log(p, "jbj.msg.entree", { etage: 1 });
+  if(p.joueur.rpg){p.guide={actif:true,vus:['mission']};log(p,'jbj.guide.mission');}
   return p;
 }
 
@@ -446,6 +449,7 @@ export type Action =
   | { type: "apprendre"; competence: number }
   | { type: "repartir" }
   | { type: "reposer" }
+  | { type: 'conseils'; actif: boolean }
   | { type: "equiper"; uid: number }
   | { type: "retirer"; emplacement: Emplacement }
   | { type: "ramasser" }
@@ -453,6 +457,7 @@ export type Action =
 
 const clone = (p: Partie): Partie => ({
   ...p,
+  ...(p.guide ? {guide:{...p.guide,vus:[...p.guide.vus]}} : {}),
   joueur: { ...p.joueur, sac: [...p.joueur.sac], equipe: { ...p.joueur.equipe }, ...(p.joueur.rpg ? { rpg: { ...p.joueur.rpg, rangs: [...p.joueur.rpg.rangs], delais: [...p.joueur.rpg.delais], ouverture: p.joueur.rpg.ouverture ? { ...p.joueur.rpg.ouverture } : undefined } } : {}) },
   monstres: p.monstres.map((m) => ({ ...m, ...(m.rpg ? { rpg: { ...m.rpg, annonce: m.rpg.annonce ? { ...m.rpg.annonce } : undefined } } : {}) })),
   sol: [...p.sol],
@@ -699,6 +704,10 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
   if (avant.fin) return avant;
   const p = clone(avant);
   const j = p.joueur;
+  if(a.type==='conseils'){
+    if(!j.rpg||typeof a.actif!=='boolean')return avant;
+    p.guide={actif:a.actif,vus:p.guide?.vus??[]};return p;
+  }
   // Mettre à jour seulement l'alcôve des anciennes cartes conçues, sans refaire l'étage.
   const plan=j.rpg&&!p.carte.coinRepos&&p.carte.zones?jeu.campagne?.find(e=>e.etage===p.etage&&e.coinRepos):undefined;
   if(plan&&p.carte.w===plan.w&&p.carte.h===plan.h&&caseEn(p.carte,plan.sortie.x,plan.sortie.y)===ESCALIER) {
@@ -744,6 +753,7 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
           prendDuTemps = false;
         } else {
           descendre(p, jeu);
+          guider(p);
           return p;
         }
       } else log(p, "jbj.msg.rien");
@@ -866,7 +876,13 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
   }
   p.refuge=estRefuge(p);
   voir(p);
+  if(prendDuTemps||p.evenements.includes('ramasse'))guider(p);
   return p;
+}
+
+function guider(p:Partie){
+  const id=conseilSuivant(p,stats(p.joueur).pvMax);
+  if(id){p.guide!.vus.push(id);log(p,`jbj.guide.${id}`);}
 }
 
 /** Comparaison d'un objet du sac avec ce qui est porté au même emplacement (somme des écarts). */
@@ -887,6 +903,7 @@ export function relirePartie(v: unknown): Partie | null {
   if(c.coinRepos!==undefined&&(!c.coinRepos||!Number.isInteger(c.coinRepos.x)||c.coinRepos.x<3||c.coinRepos.x>=c.w-3||c.coinRepos.y!==3||c.cases[3*c.w+c.coinRepos.x]!==ESCALIER))return null;
   if (!p.joueur || !Array.isArray(p.joueur.sac) || typeof p.joueur.equipe !== "object" || !Array.isArray(p.monstres) || !Array.isArray(p.sol) || !Array.isArray(p.journal)) return null;
   if (!etatRpgValide(p.joueur)) return null;
+  if (!guideValide(p.guide)) return null;
   if(p.refugesVisites!==undefined&&(!Array.isArray(p.refugesVisites)||p.refugesVisites.some(n=>![3,6,9].includes(n))||new Set(p.refugesVisites).size!==p.refugesVisites.length))return null;
   return { ...p, evenements: [] };
 }
