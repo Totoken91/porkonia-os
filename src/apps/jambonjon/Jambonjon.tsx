@@ -6,6 +6,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Commandes } from "./commandes";
 import { Inventaire } from "./Inventaire";
+import { SpriteObjet } from "./SpriteObjet";
+import "./old-school.css";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
 import { defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
@@ -384,7 +386,7 @@ export function Jambonjon() {
   const jauge = (v: number, max: number, cls: string, label: string) => (
     <div className={`jbj-jauge ${cls}`} title={`${label} ${Math.max(0, Math.round(v))}/${max}`}>
       <span>{label}</span>
-      <i style={{ width: `${Math.max(0, Math.min(100, (v / max) * 100))}%` }} />
+      <i style={cls === "pv" || cls === "mousse" ? {width:"100%", height:`${Math.max(0,Math.min(100,(v/max)*100))}%`} : { width: `${Math.max(0, Math.min(100, (v / max) * 100))}%` }} />
       <b>
         {Math.max(0, Math.round(v))}/{max}
       </b>
@@ -457,15 +459,19 @@ export function Jambonjon() {
         <div className="jbj-niveau">
           {str("jbj.niveau", { n: j.niveau })} <small>{str("jbj.attdef", { att: s.att, def: s.def })}</small>
         </div>
+        <div className="jbj-vitaux">
         {jauge(j.pv, s.pvMax, "pv", str("jbj.stat.pv"))}
         {jauge(j.mousse, s.mousseMax, "mousse", str("jbj.stat.mousse"))}
         {jauge(j.faim, 100, "faim", str("jbj.faim"))}
         {jauge(j.xp, xpPourNiveau(j.niveau), "xp", str("jbj.xp"))}
+        </div>
         <div className="jbj-provisions">
           <button onClick={() => agir({ type: "manger" })} title={str("jbj.manger")} data-testid="jbj-manger">
+            <SpriteObjet base="jambon"/>
             {str("jbj.jambons", { n: j.jambons })}
           </button>
           <button onClick={() => agir({ type: "boire" })} title={str("jbj.boire")} data-testid="jbj-boire">
+            <SpriteObjet base="biere"/>
             {str("jbj.bieres", { n: j.bieres })}
           </button>
         </div>

@@ -4,6 +4,7 @@
  * (l'aspect d'une console de salon du début des années 2000). Textures et sprites sont dessinés ici, en pixels.
  */
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
+import { PALETTE_PROVISIONS, PIXELS_PROVISIONS } from "./provisions-pixels";
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
 
@@ -279,24 +280,18 @@ const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => n
 };
 
 type Objet3D = "jambon" | "biere" | "tonneau" | "sac";
+function dessinerProvision(g: CanvasRenderingContext2D, type: "jambon" | "biere") {
+  PIXELS_PROVISIONS[type].forEach((ligne,y) => ligne.forEach((p,x) => {
+    if (p) rect(g,PALETTE_PROVISIONS[p]!,x+8,y+14,1,1);
+  }));
+}
 const DESSINS_OBJETS: Record<Objet3D, (g: CanvasRenderingContext2D) => number> = {
   jambon: (g) => {
-    ell(g, "#8c3a2a", 22, 30, 12, 7);
-    ell(g, "#c0604a", 20, 28, 9, 4);
-    rect(g, "#f2e4d0", 6, 26, 8, 3);
-    ell(g, "#f2e4d0", 6, 26, 3, 3);
+    dessinerProvision(g,"jambon");
     return 0.35;
   },
   biere: (g) => {
-    rect(g, "#d8a020", 13, 18, 14, 18);
-    rect(g, "#f0c040", 15, 20, 4, 14);
-    ell(g, "#fffaf0", 20, 17, 9, 4);
-    ell(g, "#fffaf0", 15, 16, 4, 3);
-    g.strokeStyle = "#c8c0a8";
-    g.lineWidth = 3;
-    g.beginPath();
-    g.arc(29, 26, 5, -Math.PI / 2, Math.PI / 2);
-    g.stroke();
+    dessinerProvision(g,"biere");
     return 0.4;
   },
   tonneau: (g) => {
