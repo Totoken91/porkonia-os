@@ -300,19 +300,50 @@ const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => n
     return 0.7;
   },
   inspecteur: (g) => {
-    rect(g, "#2a2a30", 14, 30, 5, 10);
-    rect(g, "#2a2a30", 21, 30, 5, 10);
-    rect(g, "#5a5a66", 11, 16, 18, 16);
-    rect(g, "#e8e8e8", 18, 16, 4, 10);
-    rect(g, "#b3121b", 19, 17, 2, 8);
-    ell(g, "#e0b090", 20, 11, 5, 6);
-    rect(g, "#2a2a40", 13, 4, 14, 4);
-    rect(g, "#2a2a40", 11, 7, 18, 2);
-    rect(g, "#c98a1c", 18, 5, 4, 2);
-    yeux(g, 17, 21, 10, "#101010");
-    rect(g, "#f4f0e0", 26, 19, 8, 10);
-    rect(g, "#8a6a40", 25, 18, 10, 2);
-    for (let y = 22; y < 28; y += 2) rect(g, "#4060a0", 27, y, 6, 1);
+    // Pixel art à coordonnées entières : silhouette asymétrique, palette limitée,
+    // grandes masses lisibles de loin, visage et procès-verbal lisibles de près.
+    const p = { nuit: "#25232d", ombre: "#393744", tissu: "#555463", pli: "#787986",
+      peau: "#c28b71", chair: "#e4b593", clair: "#f3d2aa", rouge: "#922e3b",
+      or: "#ceaa62", papier: "#e9ddbc", encre: "#696678" };
+    const r = (c: string, x: number, y: number, w: number, h: number) => rect(g, c, x, y, w, h);
+    // Bottines, jambes séparées et bas du manteau.
+    r(p.nuit, 12, 32, 6, 6); r(p.nuit, 22, 32, 5, 6);
+    r(p.pli, 13, 33, 2, 3); r(p.tissu, 23, 33, 1, 3);
+    r(p.nuit, 10, 37, 8, 2); r(p.nuit, 22, 37, 8, 2);
+    r(p.ombre, 10, 37, 4, 1); r(p.ombre, 26, 37, 3, 1);
+    r(p.ombre, 11, 17, 16, 17); r(p.tissu, 12, 18, 13, 14);
+    r(p.pli, 12, 19, 2, 11); r(p.nuit, 20, 25, 1, 8);
+    r(p.ombre, 15, 30, 4, 2); r(p.nuit, 11, 33, 8, 1); r(p.nuit, 22, 32, 5, 2);
+    // Épaules tombantes, bras au tampon et bras tenant la planche.
+    r(p.ombre, 8, 19, 4, 9); r(p.tissu, 8, 20, 2, 6);
+    r(p.nuit, 7, 27, 5, 2); r(p.peau, 7, 29, 4, 3); r(p.chair, 7, 29, 2, 2);
+    r(p.ombre, 26, 18, 4, 10); r(p.pli, 27, 19, 2, 3);
+    r(p.papier, 16, 17, 7, 5); r(p.clair, 17, 17, 4, 2);
+    r(p.rouge, 19, 19, 2, 7); r(p.rouge, 18, 24, 3, 2);
+    r(p.nuit, 14, 18, 2, 3); r(p.nuit, 15, 21, 3, 1);
+    r(p.pli, 14, 19, 1, 2); r(p.nuit, 23, 18, 2, 3); r(p.nuit, 22, 21, 2, 1);
+    r(p.or, 14, 24, 2, 2); r(p.or, 21, 28, 1, 1);
+    // Joues creuses, arcade menaçante, nez et moustache stricte.
+    r(p.peau, 15, 8, 10, 8); r(p.chair, 16, 9, 7, 6);
+    r(p.clair, 16, 9, 3, 2); r(p.ombre, 15, 11, 2, 3); r(p.peau, 23, 10, 2, 5);
+    r(p.nuit, 16, 10, 3, 1); r(p.nuit, 21, 10, 3, 1);
+    r(p.nuit, 17, 11, 1, 1); r(p.nuit, 22, 11, 1, 1);
+    r(p.clair, 19, 11, 2, 3); r(p.peau, 21, 13, 1, 1);
+    r(p.nuit, 17, 14, 6, 1); r(p.peau, 18, 15, 4, 1);
+    r(p.peau, 18, 16, 4, 1);
+    // Casquette d'État, visière épaisse et insigne doré.
+    r(p.nuit, 14, 3, 12, 5); r(p.tissu, 15, 3, 9, 2);
+    r(p.pli, 16, 3, 6, 1); r(p.ombre, 13, 5, 14, 2);
+    r(p.or, 18, 5, 4, 2); r(p.clair, 19, 5, 1, 1);
+    r(p.nuit, 12, 7, 16, 2); r(p.tissu, 13, 7, 5, 1);
+    // Procès-verbal : bord épais, pince métallique, lignes et sceau rouge.
+    r(p.nuit, 27, 20, 9, 14); r(p.or, 28, 20, 7, 13);
+    r(p.papier, 29, 22, 5, 10); r(p.clair, 29, 22, 1, 9);
+    r(p.pli, 30, 20, 3, 2); r(p.nuit, 31, 20, 1, 1);
+    r(p.encre, 30, 24, 3, 1); r(p.encre, 30, 26, 3, 1); r(p.encre, 30, 28, 2, 1);
+    r(p.rouge, 32, 30, 2, 2); r(p.peau, 26, 28, 3, 3); r(p.chair, 26, 28, 2, 1);
+    // Tampon serré dans la main gauche.
+    r(p.rouge, 8, 31, 2, 3); r(p.nuit, 6, 34, 6, 2); r(p.or, 7, 34, 4, 1);
     return 0.86;
   },
   tonneau: (g) => {
