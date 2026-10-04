@@ -296,7 +296,7 @@ function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number
     const s = ennemiReference(n, boss ? "boss" : elite ? "elite" : def.id === "inspecteur" ? "blinde" : "courant");
     resultat.niveau = n; resultat.pvMax = s.pvMax; resultat.pv = s.pvMax;
     resultat.att = s.puissance; resultat.def = s.defense;
-    resultat.xp = Math.round(xpNiveauRpg(n) / (boss ? 2 : 5)) * (elite ? 2 : 1);
+    resultat.xp = Math.round(xpNiveauRpg(Math.min(19,n)) / (boss ? 2 : 5)) * (elite ? 2 : 1);
   }
   return resultat;
 }
@@ -310,6 +310,11 @@ function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
     p.carte=assemblerEtage(plan);p.joueur={...p.joueur,...plan.entree};
     p.monstres=plan.rencontres.map(m=>nouveauMonstre(p,jeu,defMonstre(jeu,m.type),m.x,m.y,false,m.elite??false));
     p.sol=plan.reserves.map(r=>({x:r.x,y:r.y,butin:r.type==='objet'?{type:'objet',objet:objetAuHasard(p,jeu)}:{type:r.type},...(r.type==='objet'?{tonneau:true}:{})}));
+    if(p.etage===jeu.etages){
+      const d=[0,1,2,3].find(d=>passable(p.carte,plan.sortie.x+DX[d]!,plan.sortie.y+DY[d]!)&&!p.monstres.some(m=>m.x===plan.sortie.x+DX[d]!&&m.y===plan.sortie.y+DY[d]!))??0;
+      const gardien=plan.gardien??{x:plan.sortie.x+DX[d]!,y:plan.sortie.y+DY[d]!};
+      p.monstres.push(nouveauMonstre(p,jeu,jeu.boss,gardien.x,gardien.y,true));
+    }
     log(p,'jbj.msg.etageConcu',{texte:plan.description});voir(p);return;
   }
   const cellules = Math.min(13, 7 + p.etage);
@@ -478,7 +483,7 @@ function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
   log(p, "jbj.msg.tue", { nom: defMonstre(jeu, m.type).nom, xp: m.xp });
   p.evenements.push("tue");
   gagnerXp(p, m.xp);
-  if (m.boss) {
+  if (m.boss && p.etage>=jeu.etages) {
     p.fin = "victoire";
     log(p, "jbj.msg.victoire");
     p.evenements.push("victoire");

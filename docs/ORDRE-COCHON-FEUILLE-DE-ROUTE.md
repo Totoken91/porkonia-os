@@ -1,13 +1,13 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Le jeu reste une campagne de cinq étages pendant la construction du contenu suivant.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. La campagne est étendue à douze plans conçus ; le jeu complet demande encore les boss intermédiaires, refuges, enrichissements et vérifications humaines ci-dessous.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
-| 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | En cours : plans 1–3 implémentés, 4–12 à faire |
-| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | À faire ; un boss final existe au 5 dans le prototype |
+| 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans implémentés ; nouvelle passe à valider avant push |
+| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | À faire ; le boss final existant est déplacé au 12 |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Réaffectation dans le moteur ; aucun refuge créé |
-| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Modèle calibré ; douze étages à vérifier |
+| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première vérification automatique des douze étages ; calibration humaine à faire |
 | 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Premier bestiaire et équipement présents ; à enrichir |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
 
@@ -19,7 +19,17 @@ Construire les plans des étages 1–3 avec entrée et sortie intentionnelles, p
 - Étage 2, Cellier des Fûts Oubliés : deux circuits autour des celliers, choix entre salles latérales et progression, premiers inspecteurs.
 - Étage 3, Saloir de la Commission : grande salle à piliers, approches latérales et espace réservé au futur premier boss. Le boss sera ajouté au chantier 2.
 
-Les étages 4–12 restent à concevoir. Les pièges, portes, clés et murs secrets interactifs demandent des mécaniques supplémentaires : les détours de cette première livraison sont des alcôves accessibles, pas de faux secrets verrouillés. Ne pas annoncer une campagne de douze étages jouable avant son intégration.
+Les pièges, portes, clés et murs secrets interactifs demandent des mécaniques supplémentaires : les détours actuels sont des alcôves accessibles, pas de faux secrets verrouillés.
+
+## Extension des actes II à IV
+
+- 4–6 : galeries croisées, anneau des fosses et carrefour des pressoirs, premières élites placées.
+- 7–9 : archives en peigne, ailes parallèles de l'abattoir et double approche des cuves.
+- 10–12 : bifurcation des réserves royales, galerie brisée du dernier saloir, deux ailes avant l'antre final.
+
+Le compteur et la descente vont jusqu'au 12 ; le Grand Affineur existant garde cet étage. Les anciennes cartes restent sauvegardées telles quelles et leur ancien boss au 5 ne termine plus prématurément la campagne. Les adversaires de niveau 20 donnent encore de l'XP ; le seuil nul du personnage à son plafond n'est plus utilisé comme récompense ennemie.
+
+Quelques provisions sont accessibles à l'entrée des actes et dans la dernière approche. Ce sont des réserves ordinaires, pas des refuges ni des soins automatiques. Les nouveaux boss et leur repos garanti restent les chantiers 2 et 3.
 
 ## Conditions de validation
 

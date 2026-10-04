@@ -6,7 +6,7 @@
 import type { ActionRef, ContentPack, MenuEntry, MenuSpec, Program } from "../types";
 import { deplierGenerique } from "@/os/generique";
 import { ordreCochon } from "./ordre-cochon";
-import { premierActe } from './ordre-cochon-campagne';
+import { campagneOrdre } from './ordre-cochon-campagne';
 
 // Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
 const P = "/porkopedia/";
@@ -3161,11 +3161,11 @@ export const porkosPack: ContentPack = {
   },
 
   jambonjon: {
-    campagne:premierActe,
+    campagne:campagneOrdre,
     rpg: ordreCochon,
-    etages: 5,
+    etages: 12,
     elite: "élite",
-    nomsEtages: ["Cave des Jambons Crus", "Cellier des Fûts Oubliés", "Saloir de la Commission", "Galerie des Affineurs", "Antre du Grand Affineur"],
+    nomsEtages: ["Cave des Jambons Crus", "Cellier des Fûts Oubliés", "Saloir de la Commission", "Galerie des Affineurs", "Fosses de Fermentation", "Chambre des Pressoirs", "Archives du Sel", "Abattoir des Ombres", "Cuves des Condamnés", "Réserves de la Couronne", "Le Dernier Saloir", "Antre du Grand Affineur"],
     raretes: [
       { id: "commun", suffixe: "", mult: 1, poids: 60, couleur: "#e8dcc0" },
       { id: "garde", suffixe: "de garde", mult: 1.3, poids: 25, couleur: "#9bd06a" },
@@ -3174,14 +3174,14 @@ export const porkosPack: ContentPack = {
     ],
     monstres: [
       { id: "rat", nom: "Rat de cave", sprite: "rat", pv: 8, att: 3, def: 0, xp: 4, etages: [1, 3], description: "Petit, nombreux, syndiqué." },
-      { id: "moisissure", nom: "Moisissure noble", sprite: "moisissure", pv: 15, att: 4, def: 1, xp: 5, etages: [1, 4], lent: true, description: "Lente. Mais elle a le temps." },
-      { id: "gobelin", nom: "Gobelin chapardeur", sprite: "gobelin", pv: 12, att: 5, def: 1, xp: 7, etages: [1, 5], description: "Vole, frappe, revend." },
-      { id: "saucisson", nom: "Saucisson animé", sprite: "saucisson", pv: 16, att: 5, def: 2, xp: 8, etages: [2, 5], description: "Personne ne sait qui l'a animé." },
-      { id: "inspecteur", nom: "Inspecteur des fraudes salées", sprite: "inspecteur", pv: 20, att: 6, def: 3, xp: 11, etages: [2, 5], description: "Verbalise à vue." },
-      { id: "tonneau", nom: "Tonneau mimique", sprite: "tonneau", pv: 24, att: 7, def: 3, xp: 12, etages: [3, 5], lent: true, description: "N'ouvrez pas un tonneau qui vous regarde." },
-      { id: "fantome", nom: "Spectre de l'affinage", sprite: "fantome", pv: 18, att: 8, def: 2, xp: 13, etages: [4, 5], description: "Ce qui reste d'un jambon oublié." },
+      { id: "moisissure", nom: "Moisissure noble", sprite: "moisissure", pv: 15, att: 4, def: 1, xp: 5, etages: [1, 11], lent: true, description: "Lente. Mais elle a le temps." },
+      { id: "gobelin", nom: "Gobelin chapardeur", sprite: "gobelin", pv: 12, att: 5, def: 1, xp: 7, etages: [1, 12], description: "Vole, frappe, revend." },
+      { id: "saucisson", nom: "Saucisson animé", sprite: "saucisson", pv: 16, att: 5, def: 2, xp: 8, etages: [2, 12], description: "Personne ne sait qui l'a animé." },
+      { id: "inspecteur", nom: "Inspecteur des fraudes salées", sprite: "inspecteur", pv: 20, att: 6, def: 3, xp: 11, etages: [2, 12], description: "Verbalise à vue." },
+      { id: "tonneau", nom: "Tonneau mimique", sprite: "tonneau", pv: 24, att: 7, def: 3, xp: 12, etages: [3, 12], lent: true, description: "N'ouvrez pas un tonneau qui vous regarde." },
+      { id: "fantome", nom: "Spectre de l'affinage", sprite: "fantome", pv: 18, att: 8, def: 2, xp: 13, etages: [4, 12], description: "Ce qui reste d'un jambon oublié." },
     ],
-    boss: { id: "affineur", nom: "Le Grand Affineur", sprite: "affineur", pv: 90, att: 11, def: 5, xp: 30, etages: [5, 5], description: "Au fond. Toujours au fond." },
+    boss: { id: "affineur", nom: "Le Grand Affineur", sprite: "affineur", pv: 90, att: 11, def: 5, xp: 30, etages: [12, 12], description: "Au fond. Toujours au fond." },
     objets: [
       { id: "couteau", nom: "Couteau à jambon", emplacement: "arme", att: 2, etage: 1 },
       { id: "os", nom: "Os de jambon", emplacement: "arme", att: 3, pv: 4, etage: 1 },
@@ -3205,6 +3205,7 @@ export const porkosPack: ContentPack = {
   },
 
   strings: {
+    "jbj.acteEtage": "Acte {acte} · {n}/{max}",
     "jbj.msg.etageConcu": "{texte}",
     "jbj.rpg.choix": "Choisir un chevalier",
     "jbj.rpg.impact": "Impact direct : {min}–{max} dégâts",

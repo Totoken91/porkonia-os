@@ -1,6 +1,6 @@
 # L’Ordre Cochon — règles de progression validées
 
-Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; le prototype reste actuellement sur cinq étages, avec les trois classes, leurs compétences et les douze chevaliers implémentés. L'état de l'intégration est décrit dans [ORDRE-COCHON-PROTOTYPE-RPG.md](ORDRE-COCHON-PROTOTYPE-RPG.md).
+Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; les douze plans, les trois classes, leurs compétences et les douze chevaliers sont implémentés. Les boss intermédiaires et les refuges restent à construire. L'état de l'intégration est décrit dans [ORDRE-COCHON-PROTOTYPE-RPG.md](ORDRE-COCHON-PROTOTYPE-RPG.md).
 
 ## Campagne et niveaux
 
@@ -86,6 +86,6 @@ Ces durées sont des objectifs de calibration, pas des statistiques déjà véri
 
 La calibration des trois classes décrite dans [ORDRE-COCHON-EQUILIBRAGE.md](ORDRE-COCHON-EQUILIBRAGE.md) est branchée au prototype, avec les compétences et les douze chevaliers. Le banc abstrait ne valide pas le plaisir de jeu ni une campagne complète.
 
-La suite est suivie dans [ORDRE-COCHON-FEUILLE-DE-ROUTE.md](ORDRE-COCHON-FEUILLE-DE-ROUTE.md) : plans des douze étages, boss, refuges, progression complète, rencontres et récompenses, puis expérience terminée. Les plans des étages 1–3 ouvrent le premier chantier.
+La suite est suivie dans [ORDRE-COCHON-FEUILLE-DE-ROUTE.md](ORDRE-COCHON-FEUILLE-DE-ROUTE.md) : les douze plans ouvrent la campagne ; boss, refuges, calibration complète, rencontres et récompenses, puis expérience terminée restent à finaliser.
 
 Les restrictions de classe ou de niveau sur les équipements restent à décider ; ne pas les introduire implicitement.

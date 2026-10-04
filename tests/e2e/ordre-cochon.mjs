@@ -11,6 +11,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
+const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
 
 const server = createServer(async (req, res) => {
@@ -413,6 +414,16 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    if(FINALE){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),FINALE);
+      await reprendre();
+      if(!(await page.getByTestId('jambonjon').innerText()).includes('Acte 4'))throw new Error(`${tag}: acte final absent du HUD`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-antre-final.png`)});
+      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));p.joueur.x=15;p.joueur.y=6;p.joueur.dir=0;p.monstres=p.monstres.filter(m=>m.boss);p.monstres[0].pv=1;localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));});
+      await reprendre();await page.keyboard.press('1');await page.getByTestId('jbj-fin').waitFor();
+      if(await page.evaluate(()=>localStorage.getItem('porkos.jambonjon.partie'))!==null)throw new Error(`${tag}: victoire finale garde une sauvegarde active`);
+      step(`${tag}: douzième étage, acte final et victoire validés`);
     }
     await ctx.close();
   }

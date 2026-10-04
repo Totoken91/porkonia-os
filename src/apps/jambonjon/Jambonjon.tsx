@@ -526,7 +526,7 @@ export function Jambonjon() {
       </div>
       <div className="jbj-droite">
         <div className="jbj-etage">
-          <b>{str("jbj.etage", { n: partie.etage, max: jeu.etages })}</b>
+          <b title={str('jbj.etage',{n:partie.etage,max:jeu.etages})}>{str(jeu.campagne?'jbj.acteEtage':'jbj.etage', { acte:Math.ceil(partie.etage/3), n: partie.etage, max: jeu.etages })}</b>
           <span>{nomEtage}</span>
         </div>
         <div className="jbj-niveau">

@@ -16,4 +16,4 @@ La première proposition trop nette a été abandonnée : ses joints noirs, ses 
 
 La seconde itération ajoute des creux, fissures et éclats dessinés à la résolution native des textures, des pieds de murs humides et de la suie derrière les torches. Leur teinte chaude est plus discrète. Les volumes de salle sont détectés puis reçoivent un thème commun : saloir, réserve, humidité ou pierre nue. Les couloirs conservent leur décor local. Ces choix restent purement visuels et déterministes.
 
-Cette étape enrichit les cartes existantes. Elle ne réalise pas encore une campagne de douze étages conçus à la main ni une géométrie 3D à étages superposés.
+Cette première étape de rendu est prolongée par douze plans conçus, suivis dans ORDRE-COCHON-FEUILLE-DE-ROUTE.md. Les boss intermédiaires et refuges restent à intégrer ; le moteur conserve une grille plane, sans géométrie 3D à étages superposés.
