@@ -385,3 +385,11 @@ export function jouer(son: Son, volume = 0.7) {
     }
   }
 }
+
+/** Quelques gorgées : une suite de petites notes graves qui glougloutent. */
+export function glouglou(volume = 0.5) {
+  const notes: { f: number; t: number; d: number; g: number; type: OscillatorType }[] = [];
+  for (let k = 0; k < 7; k++) notes.push({ f: 150 + ((k * 53) % 90) + (k % 2) * 40, t: k * 0.11, d: 0.09, g: 0.1, type: "sine" });
+  notes.push({ f: 90, t: 0.85, d: 0.4, g: 0.06, type: "triangle" });
+  jouerNotes(notes, volume);
+}

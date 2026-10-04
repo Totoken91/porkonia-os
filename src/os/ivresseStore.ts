@@ -5,13 +5,14 @@
  * le niveau tant qu'un composant l'écoute.
  */
 import { useSyncExternalStore } from "react";
-import { boire, niveau, sanitize, sobre, type Ebriete } from "./ivresse";
+import { boire, niveau, sanitize, SEUIL_WARP, sobre, type Ebriete } from "./ivresse";
 
 const CLE = "porkos.ivresse";
 let etat: Ebriete = sobre();
 let lu = false;
 let v = 0;
 const abonnes = new Set<() => void>();
+const warps = new Set<() => void>();
 let battement: ReturnType<typeof setInterval> | null = null;
 
 function lire() {
@@ -62,11 +63,19 @@ function abonner(f: () => void) {
 /** Un verre (ou plus) de plus. Rend le nouveau niveau. */
 export function boireVerres(verres = 1): number {
   lire();
+  const avant = niveau(etat, Date.now());
   etat = boire(etat, Date.now(), verres);
   ecrire();
   v = Math.round(niveau(etat, Date.now()) * 100) / 100;
   prevenir();
+  if (avant < SEUIL_WARP && v >= SEUIL_WARP) for (const f of warps) f();
   return v;
+}
+
+/** Abonnement au franchissement du seuil où l'écran se met à déformer franchement. */
+export function surWarp(f: () => void) {
+  warps.add(f);
+  return () => void warps.delete(f);
 }
 
 /** Dégrisement immédiat (pour les tests et le mode secours). */

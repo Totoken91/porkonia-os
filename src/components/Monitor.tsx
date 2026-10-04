@@ -8,11 +8,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { EcranContext, ScaleContext } from "@/os/context";
 import { echelle } from "@/os/echelle";
 import { choisirEcran, choixDansAdresse, MONITEUR, type ChoixEcran } from "@/os/ecran";
-import { ambiance, jouer } from "@/os/sons";
+import { ambiance, glouglou, jouer } from "@/os/sons";
 import { usePleinEcran } from "@/os/pleinEcran";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
-import { useIvresse } from "@/os/ivresseStore";
+import { boireVerres, useIvresse } from "@/os/ivresseStore";
+import { prendreBiere, useCave } from "@/os/biereStore";
 import { intensite, stade } from "@/os/ivresse";
 
 export const SCREEN = MONITEUR;
@@ -56,6 +57,8 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
   const allumeA = useRef(0);
   const [degauss, setDegauss] = useState(false);
   const verres = useIvresse();
+  const cave = useCave();
+  const [gorgee, setGorgee] = useState(false);
   const ivre = intensite(verres);
 
   useEffect(() => {
@@ -292,6 +295,35 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
           <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
             <path d="M3.6 3.2a4 4 0 1 0 4.8 0M6 1.5v4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
+        </button>
+      )}
+      {cave.stock > 0 && tube !== "eteint" && (
+        <button
+          className={`choppe${gorgee ? " boit" : ""}`}
+          onClick={(e) => {
+            e.currentTarget.blur();
+            if (gorgee || !prendreBiere()) return;
+            setGorgee(true);
+            if (sons) glouglou(0.5);
+            boireVerres(1);
+            setTimeout(() => setGorgee(false), 1000);
+          }}
+          title={str("porkomazon.choppe")}
+          aria-label={str("porkomazon.choppe")}
+          data-testid="choppe"
+        >
+          <svg viewBox="0 0 28 32" width="56" height="64" shapeRendering="crispEdges" aria-hidden="true">
+            <path d="M22 9h3v2h2v10h-2v2h-3z" fill="#d8d0b8" />
+            <path d="M24 11h1v2h-1zM24 19h1v2h-1z" fill="#8a8068" />
+            <path d="M3 8h19v22H3z" fill="#e9e4d2" fillOpacity=".55" />
+            <path d="M4 12h17v17H4z" fill="#e8a820" />
+            <path d="M4 12h17v3H4z" fill="#f4c040" />
+            <path d="M6 16h2v12H6zM11 17h1v6h-1z" fill="#f8d870" fillOpacity=".7" />
+            <path d="M2 4h4v-2h4v2h4v-2h4v2h3v5H2z" fill="#fffaf0" />
+            <path d="M2 8h19v1H2z" fill="#d9d0b6" />
+            <path d="M3 30h19v2H3z" fill="#b8b09a" />
+          </svg>
+          <span className="choppe-n">{cave.stock}</span>
         </button>
       )}
       {portrait && !ignore && (

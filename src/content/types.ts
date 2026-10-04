@@ -270,7 +270,9 @@ export type BlocSite =
   /** Lien de téléchargement d'un fichier de `telechargements`. */
   | { t: "telecharger"; fichier: string }
   /** Banque en ligne : connexion, compte, historique, allocation, courtage en bourse. */
-  | { t: "banque" };
+  | { t: "banque" }
+  /** Boutique de bière en ligne, livrée avec délai. */
+  | { t: "porkomazon" };
 
 export interface SitePerso {
   /** Adresse : porko://<hote>/<page>. */
@@ -279,7 +281,7 @@ export interface SitePerso {
   /** Ligne de l'annuaire. */
   description: string;
   categorie: string;
-  theme: "bois" | "ciel" | "nuit" | "papier" | "rouge" | "portail";
+  theme: "bois" | "ciel" | "nuit" | "papier" | "rouge" | "portail" | "banque" | "porkomazon";
   /** Membre de l'Anneau des pages perso (liens précédent / suivant). */
   anneau?: boolean;
   /** Pages : "" est l'accueil. */
@@ -331,11 +333,34 @@ export interface Installeur {
 /** Jeu de paris sur des courses de cochonnes : l'écurie du jour est tirée parmi `cochons`. */
 export interface JeuGrosses {
   cochons: { nom: string; couleur: string }[];
-  /** Prix d'une bière à la buvette de l'hippodrome (Pork$), et d'une tournée de trois. */
-  biere: number;
-  tournee: number;
   /** Commentaires du speaker : départ, mi-course, arrivée (le nom de la gagnante remplace {nom}). */
   speaker: { depart: string[]; milieu: string[]; arrivee: string[] };
+}
+
+/* ------------------------- Banque et Porkomazon ---------------------------- */
+
+/** Habillage et textes de la Caisse Nationale d'Épargne du Porc (le fonctionnement est dans `os/banque.ts`). */
+export interface JeuBanque {
+  nom: string;
+  slogan: string;
+  /** Rubriques de la barre de navigation : « compte » et « bourse » ouvrent les écrans correspondants. */
+  rubriques: { id: "accueil" | "compte" | "bourse" | "epargne" | "contact"; label: string }[];
+  actualites: { date: string; titre: string; texte: string }[];
+  taux: { libelle: string; valeur: string }[];
+  avis: { nom: string; texte: string }[];
+  /** Pour la rubrique Épargne et la rubrique Contact. */
+  epargne: string[];
+  contact: string[];
+  mentions: string[];
+}
+
+/** Boutique en ligne de bière : produits, modes de livraison (délais en secondes réelles). */
+export interface JeuPorkomazon {
+  nom: string;
+  slogan: string;
+  produits: { id: string; nom: string; description: string; qte: number; prix: number }[];
+  livraisons: { id: string; nom: string; description: string; delaiS: number; supplement: number }[];
+  avis: { nom: string; note: number; texte: string }[];
 }
 
 /* ------------------------------- Assistant -------------------------------- */
@@ -575,6 +600,8 @@ export interface ContentPack {
   installeurs: Installeur[];
   jambonjon: JeuJambonjon;
   grosses: JeuGrosses;
+  banque: JeuBanque;
+  porkomazon: JeuPorkomazon;
   assistant: AssistantSpec;
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;

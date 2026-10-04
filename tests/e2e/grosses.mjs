@@ -86,6 +86,8 @@ try {
     // Sans compte, le jeu renvoie vers la banque.
     await page.getByTestId("grosses-banque").click();
     await page.getByTestId("banque").waitFor();
+    await shot(page, `${tag}-banque-accueil`);
+    await page.getByTestId("banque-rub-compte").click();
     if ((await page.getByTestId("banque-numero").inputValue()).trim() === "") throw new Error(`${tag}: numéro de compte non prérempli`);
     await page.getByTestId("banque-code").fill("12");
     await page.getByTestId("banque-ouvrir").click();
@@ -100,7 +102,7 @@ try {
     step(`${tag} : compte ouvert, prime, allocation quotidienne`);
 
     // Courtage : un titre à bas prix (cornichon), achat puis vente.
-    await page.getByTestId("banque-onglet-bourse").click();
+    await page.getByTestId("banque-rub-bourse").click();
     await page.getByTestId("banque-achat-4").click();
     await page.getByTestId("banque-message").waitFor();
     const apres = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")));
@@ -109,6 +111,7 @@ try {
     await page.getByTestId("banque-vente-4").click();
     const vendu = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")));
     if (vendu.portefeuille["Cornichon"]) throw new Error(`${tag}: vente non enregistrée`);
+    await page.getByTestId("banque-rub-compte").click();
     await page.getByTestId("banque-deconnexion").click();
     await page.getByTestId("banque-connexion").waitFor();
     await page.getByTestId("banque-code").fill("0000");
@@ -122,23 +125,35 @@ try {
     await page.getByTestId("grosses-parier").click();
     await page.getByTestId("grosses-pari-pris").waitFor();
     await shot(page, `${tag}-paris`);
-    await page.getByTestId("grosses-lancer").click();
     await page.getByTestId("grosses-speaker").waitFor();
+    if (!(await page.getByTestId("grosses-speaker").textContent()).includes("Départ")) throw new Error(`${tag}: pas de décompte après le pari`);
     await page.getByTestId("grosses-resultat").waitFor({ timeout: 60000 });
     await shot(page, `${tag}-resultat`);
     await page.getByTestId("grosses-suivante").click();
     step(`${tag} : pari, course et résultat`);
 
     if (await page.locator(".tube.ivre").count()) throw new Error(`${tag}: écran penché avant d'avoir bu`);
-    for (let k = 0; k < 4; k++) await page.getByTestId("grosses-biere").click({ force: true });
+    if (await page.getByTestId("choppe").count()) throw new Error(`${tag}: choppe sans bière livrée`);
+    if (await page.getByTestId("grosses-biere").count()) throw new Error(`${tag}: la bière est encore un bouton du jeu`);
+    // La bière se commande sur Porkomazon, par drone (10 s), puis une choppe apparaît devant l'écran.
+    await page.getByTestId("grosses-porkomazon").click();
+    await page.getByTestId("porkomazon").waitFor();
+    await page.getByTestId("pkz-livraison-drone").check();
+    await page.getByTestId("pkz-commander").click();
+    await page.getByTestId("pkz-colis").waitFor();
+    if (await page.getByTestId("choppe").count()) throw new Error(`${tag}: choppe avant la livraison`);
+    const op = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")).historique.some((o) => o.libelle.includes("Porkomazon")));
+    if (!op) throw new Error(`${tag}: commande non débitée`);
+    await page.getByTestId("choppe").waitFor({ timeout: 20000 });
+    await shot(page, `${tag}-choppe`);
+    await page.getByTestId("choppe").click({ force: true });
     await page.locator(".tube.ivre").waitFor();
-    const op = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")).historique.some((o) => o.libelle.includes("bière")));
-    if (!op) throw new Error(`${tag}: bière non débitée`);
     const ivresse = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.ivresse")).v);
-    if (ivresse < 3) throw new Error(`${tag}: ivresse non enregistrée (${ivresse})`);
+    if (ivresse < 0.8) throw new Error(`${tag}: ivresse non enregistrée (${ivresse})`);
+    if (await page.getByTestId("choppe").count()) throw new Error(`${tag}: choppe encore là sans bière`);
     await page.waitForTimeout(500);
     await shot(page, `${tag}-ivre`);
-    step(`${tag} : bière débitée, l'écran tangue`);
+    step(`${tag} : Porkomazon, livraison, choppe, l'écran tangue`);
     await ctx.close();
   }
   if (errors.length) throw new Error(errors.join("\n"));

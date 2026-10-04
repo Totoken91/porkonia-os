@@ -8,8 +8,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useOs } from "@/os/context";
 import { useCompte, operer } from "@/os/banqueStore";
 import { crediter, debiter, formaterPork } from "@/os/banque";
-import { SEUIL_WARP, stade } from "@/os/ivresse";
-import { boireVerres, useIvresse } from "@/os/ivresseStore";
+import { useIvresse } from "@/os/ivresseStore";
+import { useCave } from "@/os/biereStore";
 import { siteUrl } from "@/apps/navigateur/url";
 import { composer, cotes as calculerCotes, etoiles, gain, IMAGES_PAR_SECONDE, LONGUEUR, MISES, simuler, type Pari, type TypePari } from "./course";
 
@@ -24,6 +24,8 @@ export function Grosses() {
   const jeu = pack.grosses;
   const compte = useCompte(user.id);
   const verres = useIvresse();
+  const cave = useCave();
+  const [rebours, setRebours] = useState<number | null>(null);
   const [graine, setGraine] = useState(() => Math.floor(rng() * 1e9));
   const cochons = useMemo(() => composer(jeu.cochons, graine), [jeu.cochons, graine]);
   const cotes = useMemo(() => calculerCotes(cochons), [cochons]);
@@ -95,7 +97,8 @@ export function Grosses() {
     let milieu = false;
     const total = course.positions.length - 1;
     const pas = (t: number) => {
-      const i = Math.min(total, Math.floor(((t - debut) / 1000) * IMAGES_PAR_SECONDE));
+      // Le premier horodatage d'image peut précéder `debut` : sans plancher, l'indice négatif plantait la boucle (course jamais lancée).
+      const i = Math.max(0, Math.min(total, Math.floor(((t - debut) / 1000) * IMAGES_PAR_SECONDE)));
       image.current = i;
       dessiner(i);
       if (!milieu && Math.max(...course.positions[i]!) >= LONGUEUR / 2) {
@@ -135,12 +138,24 @@ export function Grosses() {
     if (!r.ok) return setMessage(str("grosses.pasAssez"));
     setPari({ type, cochon: choix, mise });
     setMessage("");
+    setRebours(3);
   };
 
-  const lancer = () => {
+  const lancer = useCallback(() => {
+    setRebours(null);
     setCommentaire(phrase(jeu.speaker.depart));
     setPhase("course");
-  };
+  }, [phrase, jeu.speaker.depart]);
+
+  // Après le pari : décompte, puis la course part toute seule.
+  useEffect(() => {
+    if (rebours === null) return;
+    if (rebours <= 0) return lancer();
+    setCommentaire(str("grosses.depart", { n: rebours }));
+    const t = setTimeout(() => setRebours(rebours - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rebours]);
 
   const suivante = () => {
     setGraine(Math.floor(rng() * 1e9));
@@ -148,18 +163,6 @@ export function Grosses() {
     setGagne(0);
     setCommentaire("");
     setPhase("paris");
-  };
-
-  const boire = (n: number, prix: number) => {
-    const r = operer(user.id, (c) => debiter(c, prix, n === 1 ? "Buvette de l'hippodrome : une bière" : `Buvette de l'hippodrome : tournée de ${n}`, new Date()));
-    if (!r) return;
-    if (!r.ok) return setMessage(str("grosses.pasAssezBiere"));
-    const avant = verres;
-    const apres = boireVerres(n);
-    playSound("bip");
-    signal("grosses:biere");
-    if (avant < SEUIL_WARP && apres >= SEUIL_WARP) signal("ivresse:warp");
-    setMessage(str(`grosses.stade.${stade(apres)}`));
   };
 
   if (!compte)
@@ -256,21 +259,21 @@ export function Grosses() {
                   </button>
                 </>
               )}
-              <button className="pk-btn" onClick={lancer} data-testid="grosses-lancer">
-                {str(pari ? "grosses.lancer" : "grosses.regarder")}
-              </button>
+              {!pari && (
+                <button className="pk-btn" onClick={lancer} data-testid="grosses-lancer">
+                  {str("grosses.regarder")}
+                </button>
+              )}
             </div>
           )}
         </>
       )}
-      <div className="grosses-buvette" data-testid="grosses-buvette">
-        <b>{str("grosses.buvette")}</b>
-        <button onClick={() => boire(1, jeu.biere)} data-testid="grosses-biere">
-          {str("grosses.biere", { prix: formaterPork(jeu.biere) })}
+      <div className="grosses-buvette" data-testid="grosses-cave">
+        <span>{str("grosses.stock", { n: cave.stock })}</span>
+        <button onClick={() => openApp("navigateur", { url: siteUrl("porkomazon") })} data-testid="grosses-porkomazon">
+          {str("grosses.commander")}
         </button>
-        <button onClick={() => boire(3, jeu.tournee)} data-testid="grosses-tournee">
-          {str("grosses.tournee", { prix: formaterPork(jeu.tournee) })}
-        </button>
+        {cave.stock > 0 && <small>{str("grosses.choppe")}</small>}
       </div>
       {message && (
         <p className="grosses-message" data-testid="grosses-message">

@@ -1428,4 +1428,89 @@
   .grosses-vide { align-items: flex-start; }
   .ecran.poche .grosses { padding-bottom: calc(var(--bas) + 8px); }
   .ecran.poche .grosses-piste { height: auto; }
+
+  /* Choppe livrée : posée devant l'écran, hors de l'OS, à cliquer pour boire. */
+  .choppe { position: fixed; right: max(18px, 3vw); bottom: max(10px, 2.5vh); z-index: 60; padding: 0; border: none; background: none; cursor: pointer; filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.55)); animation: choppe-pose 0.6s ease-out; transform-origin: 70% 90%; }
+  .choppe:hover { transform: translateY(-3px) rotate(-3deg); }
+  .choppe svg { display: block; }
+  .choppe-n { position: absolute; top: -6px; left: -8px; min-width: 18px; padding: 1px 4px; border-radius: 9px; background: #6b2a35; color: #f6efdc; font: bold 12px/16px monospace; text-align: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+  .choppe.boit { animation: choppe-boit 1s ease-in-out; }
+  @keyframes choppe-pose { from { transform: translateY(-120px); opacity: 0; } 60% { transform: translateY(6px); opacity: 1; } to { transform: none; } }
+  @keyframes choppe-boit { 0% { transform: none; } 25%, 70% { transform: translate(-40px, -70px) rotate(-62deg); } 100% { transform: none; } }
+  .piece.poche .choppe { right: auto; left: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
+  @media (prefers-reduced-motion: reduce) { .choppe, .choppe.boit { animation: none; } }
+
+  /* ---- Caisse Nationale d'Épargne du Porc : une banque en ligne de 2002 ---- */
+  .site-banque { padding: 0; background: #d5e0f0; color: #14213a; font: 12px/1.45 Verdana, Tahoma, "DejaVu Sans", sans-serif; }
+  .bq-tete { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; background: linear-gradient(180deg, #1a4a8f 0%, #0b2650 100%); border-bottom: 4px solid #c9a227; color: #fff; }
+  .bq-tete img { background: #fff; border: 2px solid #c9a227; padding: 2px; image-rendering: auto; }
+  .bq-marque { flex: 1 1 200px; min-width: 0; }
+  .bq-marque h1 { margin: 0; font: bold 20px/1.1 Georgia, "Times New Roman", serif; letter-spacing: 0.02em; text-shadow: 1px 1px 0 #061a3a; }
+  .bq-marque p { margin: 3px 0 0; font-style: italic; color: #f1dc8b; }
+  .bq-secu { display: flex; flex-direction: column; gap: 2px; padding: 4px 8px; border: 1px dotted #c9a227; background: #0b2650; font-size: 11px; text-align: right; }
+  .bq-secu b { color: #8fe08f; }
+  .bq-nav { display: flex; flex-wrap: wrap; gap: 2px; padding: 6px 10px 0; background: #a9bddb; border-bottom: 2px solid #5b7bb0; }
+  .bq-nav button { font: bold 12px Verdana, Tahoma, sans-serif; padding: 4px 12px; color: #14336b; background: #dfe8f6; border: 1px solid #5b7bb0; border-bottom: none; border-radius: 4px 4px 0 0; cursor: pointer; }
+  .bq-nav button:hover { background: #f1f5fb; }
+  .bq-nav button.actif { background: #fff; color: #7a1020; position: relative; top: 2px; padding-bottom: 6px; }
+  .bq-corps { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; padding: 12px; }
+  .bq-lateral { flex: 0 0 180px; display: flex; flex-direction: column; gap: 10px; }
+  .bq-principal { flex: 1 1 260px; min-width: 0; padding: 10px 14px; background: #fff; border: 1px solid #7f98c0; box-shadow: 2px 2px 0 #9fb2d2; }
+  .bq-principal h2 { margin: 0 0 6px; padding-bottom: 3px; border-bottom: 2px solid #c9a227; color: #0b2650; font: bold 16px Georgia, serif; }
+  .bq-principal h3 { margin: 12px 0 4px; color: #7a1020; font-size: 13px; }
+  .bq-principal p { margin: 5px 0; }
+  .bq-boite { background: #fff; border: 1px solid #7f98c0; box-shadow: 2px 2px 0 #9fb2d2; }
+  .bq-boite h3 { margin: 0; padding: 3px 8px; background: linear-gradient(180deg, #e8eef9, #bccbe6); color: #0b2650; font-size: 12px; border-bottom: 1px solid #7f98c0; }
+  .bq-boite > :not(h3) { margin-left: 8px; margin-right: 8px; }
+  .bq-boite p { margin-top: 6px; margin-bottom: 6px; }
+  .bq-boite ul { margin-top: 4px; margin-bottom: 6px; padding-left: 14px; }
+  .bq-solde-court { color: #0b5a1f; font-size: 14px; }
+  .bq-bouton { font: bold 11px Verdana, sans-serif; margin-bottom: 8px; padding: 3px 10px; color: #fff; background: linear-gradient(180deg, #2f6bc0, #14408a); border: 2px outset #7fa6e0; cursor: pointer; }
+  .bq-bouton:active { border-style: inset; }
+  .bq-lien { background: none; border: none; padding: 0; color: #1a4a9f; text-decoration: underline; font: inherit; cursor: pointer; }
+  .bq-taux { width: calc(100% - 16px); border-collapse: collapse; margin-bottom: 6px; }
+  .bq-taux td { padding: 2px 0; border-bottom: 1px dotted #9fb2d2; }
+  .bq-taux td:last-child { text-align: right; font-weight: bold; color: #0b5a1f; }
+  .bq-actus { list-style: none; margin: 0; padding: 0; }
+  .bq-actus li { display: flex; gap: 8px; padding: 4px 0; border-bottom: 1px dotted #9fb2d2; }
+  .bq-actus li > span { flex: 0 0 auto; align-self: flex-start; padding: 1px 5px; background: #0b2650; color: #f1dc8b; font-size: 11px; font-weight: bold; }
+  .bq-actus p { margin: 1px 0 0; }
+  .bq-avis { margin: 6px 0; padding: 6px 10px; background: #f3f6fb; border-left: 4px solid #c9a227; font-style: italic; }
+  .bq-avis cite { display: block; margin-top: 2px; font-style: normal; font-weight: bold; color: #0b2650; }
+  .bq-pied { padding: 8px 14px 12px; border-top: 2px solid #5b7bb0; background: #a9bddb; color: #28406b; font-size: 10px; text-align: center; }
+  .bq-pied p { margin: 2px 0; }
+  .bq-principal .banque { margin: 0; padding: 0; background: none; border: none; font-size: 12px; color: inherit; }
+  .bq-principal .banque h2 { font-size: 16px; }
+
+  /* ---- Porkomazon ---- */
+  .site-porkomazon { padding: 0; background: #e8ebed; color: #111; font: 12px/1.4 Verdana, Tahoma, "DejaVu Sans", sans-serif; }
+  .pkz-tete { padding: 10px 14px; background: #232f3e; color: #fff; border-bottom: 3px solid #ff9900; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  .pkz-tete h1 { margin: 0; font: bold 24px Verdana, sans-serif; letter-spacing: -0.5px; color: #ff9900; }
+  .pkz-tete p { margin: 0; flex: 1 1 200px; color: #d5dbdb; font-style: italic; }
+  .pkz-compte { font-size: 11px; color: #fff; padding: 2px 8px; background: #37475a; border: 1px solid #5b6b7d; }
+  .pkz-alerte { margin: 8px 12px 0; padding: 6px 10px; background: #fff4d6; border: 1px solid #e0a400; }
+  .pkz-lien { background: none; border: none; padding: 0; color: #0066c0; text-decoration: underline; font: inherit; cursor: pointer; text-align: left; }
+  .pkz-corps { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px 12px; align-items: flex-start; }
+  .pkz-produits { flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; }
+  .pkz-livraison { flex: 1 1 240px; padding: 8px 10px; background: #fff; border: 1px solid #c9ced3; }
+  .pkz-livraison h3, .pkz-suivi h3, .pkz-avis h3 { margin: 0 0 6px; font-size: 13px; color: #c45500; }
+  .pkz-produit, .pkz-mode { display: flex; gap: 8px; align-items: flex-start; padding: 6px 8px; background: #fff; border: 1px solid #c9ced3; cursor: pointer; }
+  .pkz-produit > span { flex: 1 1 auto; min-width: 0; }
+  .pkz-produit.choisi, .pkz-mode.choisi { border-color: #ff9900; background: #fff8ec; box-shadow: 0 0 0 1px #ff9900; }
+  .pkz-produit b, .pkz-mode b { display: block; color: #0066c0; }
+  .pkz-mode b { display: inline; }
+  .pkz-produit em, .pkz-mode em { display: block; font-style: normal; color: #565959; font-size: 11px; }
+  .pkz-produit strong { flex: 0 0 auto; color: #b12704; font-size: 14px; }
+  .pkz-mode { margin-bottom: 4px; }
+  .pkz-total { margin: 8px 0 4px; font-weight: bold; color: #b12704; font-size: 14px; }
+  .pkz-commander { font: bold 12px Verdana, sans-serif; padding: 5px 14px; color: #111; background: linear-gradient(180deg, #ffd978, #ffa41c); border: 1px solid #a88734; border-radius: 3px; cursor: pointer; }
+  .pkz-commander:active { background: #ffa41c; }
+  .pkz-message { margin: 6px 0 0; padding: 4px 6px; background: #e7f4e4; border: 1px solid #5a9a4a; }
+  .pkz-suivi, .pkz-avis { margin: 0 12px 10px; padding: 8px 10px; background: #fff; border: 1px solid #c9ced3; }
+  .pkz-suivi ul { margin: 0 0 6px; padding-left: 16px; }
+  .pkz-suivi p { margin: 4px 0 0; }
+  .pkz-avis blockquote { margin: 4px 0; padding: 4px 0; border-top: 1px dotted #c9ced3; }
+  .pkz-avis cite { display: block; font-style: normal; font-weight: bold; color: #565959; }
+  .pkz-etoiles { color: #e47911; font-weight: bold; }
+  .pkz-pied { padding: 8px 14px 12px; background: #232f3e; color: #b8c0c8; font-size: 10px; text-align: center; }
 }

@@ -9,15 +9,15 @@ import { useOs } from "@/os/context";
 import { useCompte, enregistrer, operer } from "@/os/banqueStore";
 import { acheter, allocationDisponible, ALLOCATION_JOUR, coutAchat, formaterPork, ouvrir, produitVente, toucherAllocation, valoriser, vendre, verifier, PRIME_BIENVENUE } from "@/os/banque";
 import { coursSeance, PAS_SEANCE } from "./portail";
+import { siteUrl } from "./url";
 
-export function Banque() {
+function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet(o: "compte" | "bourse"): void }) {
   const { pack, user, str, signal, playSound } = useOs();
   const compte = useCompte(user.id);
   const [numero, setNumero] = useState(user.porkId?.numero ?? "");
   const [code, setCode] = useState("");
   const [connecte, setConnecte] = useState(false);
   const [message, setMessage] = useState("");
-  const [onglet, setOnglet] = useState<"compte" | "bourse">("compte");
   const [maintenant, setMaintenant] = useState(() => Date.now());
   const [qtes, setQtes] = useState<Record<string, string>>({});
 
@@ -40,7 +40,7 @@ export function Banque() {
       signal("banque:ouverte");
     };
     return (
-      <div className="banque" data-testid="banque">
+      <div className="banque">
         <h2>{str("banque.ouvrirTitre")}</h2>
         <p>{str("banque.ouvrirTexte", { prime: formaterPork(PRIME_BIENVENUE) })}</p>
         <form className="banque-form" onSubmit={ouvrirCompte}>
@@ -57,7 +57,7 @@ export function Banque() {
           </button>
         </form>
         {message && <p className="banque-message">{message}</p>}
-        <small>{str("banque.mentions")}</small>
+        
       </div>
     );
   }
@@ -71,7 +71,7 @@ export function Banque() {
       setMessage("");
     };
     return (
-      <div className="banque" data-testid="banque">
+      <div className="banque">
         <h2>{str("banque.connexion")}</h2>
         <form className="banque-form" onSubmit={connecter}>
           <p>
@@ -86,7 +86,7 @@ export function Banque() {
           </button>
         </form>
         {message && <p className="banque-message">{message}</p>}
-        <small>{str("banque.mentions")}</small>
+        
       </div>
     );
   }
@@ -110,20 +110,12 @@ export function Banque() {
   };
 
   return (
-    <div className="banque" data-testid="banque">
+    <div className="banque">
       <div className="banque-entete">
         <b>{str("banque.compteN", { numero: compte.numero })}</b>
         <span data-testid="banque-solde">{formaterPork(compte.solde)}</span>
         <button onClick={() => setConnecte(false)} data-testid="banque-deconnexion">
           {str("banque.deconnexion")}
-        </button>
-      </div>
-      <div className="banque-onglets" role="tablist">
-        <button role="tab" aria-selected={onglet === "compte"} onClick={() => setOnglet("compte")} data-testid="banque-onglet-compte">
-          {str("banque.ongletCompte")}
-        </button>
-        <button role="tab" aria-selected={onglet === "bourse"} onClick={() => setOnglet("bourse")} data-testid="banque-onglet-bourse">
-          {str("banque.ongletBourse")}
         </button>
       </div>
       {message && (
@@ -192,7 +184,143 @@ export function Banque() {
           <small>{str("banque.commission")}</small>
         </>
       )}
-      <small>{str("banque.mentions")}</small>
+      
+    </div>
+  );
+}
+
+/** Page d'accueil et rubriques de la Caisse, dans le goût des banques en ligne du début des années 2000. */
+export function Banque({ go }: { go?(u: string): void }) {
+  const { pack, user, str } = useOs();
+  const b = pack.banque;
+  const compte = useCompte(user.id);
+  const [rub, setRub] = useState<"accueil" | "compte" | "bourse" | "epargne" | "contact">("accueil");
+  const date = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return (
+    <div className="bq" data-testid="banque">
+      <header className="bq-tete">
+        <img src="/brand/embleme-64.png" alt="" width={48} height={48} />
+        <div className="bq-marque">
+          <h1>{b.nom}</h1>
+          <p>{b.slogan}</p>
+        </div>
+        <div className="bq-secu">
+          <b>{str("banque.secu")}</b>
+          <span>{date}</span>
+        </div>
+      </header>
+      <nav className="bq-nav" aria-label={b.nom}>
+        {b.rubriques.map((r) => (
+          <button key={r.id} className={rub === r.id ? "actif" : ""} onClick={() => setRub(r.id)} data-testid={`banque-rub-${r.id}`}>
+            {r.label}
+          </button>
+        ))}
+      </nav>
+      <div className="bq-corps">
+        <aside className="bq-lateral">
+          <section className="bq-boite">
+            <h3>{str("banque.espaceClient")}</h3>
+            {compte ? (
+              <>
+                <p>
+                  {str("banque.bonjour", { nom: compte.titulaire })}
+                  <br />
+                  <b className="bq-solde-court">{formaterPork(compte.solde)}</b>
+                </p>
+                <button className="bq-bouton" onClick={() => setRub("compte")}>
+                  {str("banque.accederComptes")}
+                </button>
+              </>
+            ) : (
+              <>
+                <p>{str("banque.pasDeCompte")}</p>
+                <button className="bq-bouton" onClick={() => setRub("compte")} data-testid="banque-ouvrir-cta">
+                  {str("banque.ouvrirTitre")}
+                </button>
+              </>
+            )}
+          </section>
+          <section className="bq-boite">
+            <h3>{str("banque.taux")}</h3>
+            <table className="bq-taux">
+              <tbody>
+                {b.taux.map((t) => (
+                  <tr key={t.libelle}>
+                    <td>{t.libelle}</td>
+                    <td>{t.valeur}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+          <section className="bq-boite">
+            <h3>{str("banque.liensUtiles")}</h3>
+            <ul>
+              <li>
+                <button className="bq-lien" onClick={() => go?.(siteUrl("porkomazon"))}>
+                  Porkomazon
+                </button>
+              </li>
+              <li>
+                <button className="bq-lien" onClick={() => go?.("porko://accueil")}>
+                  {str("banque.portail")}
+                </button>
+              </li>
+            </ul>
+          </section>
+        </aside>
+        <main className="bq-principal">
+          {rub === "accueil" && (
+            <>
+              <h2>{str("banque.bienvenue")}</h2>
+              <p>{str("banque.intro")}</p>
+              <h3>{str("banque.actualites")}</h3>
+              <ul className="bq-actus">
+                {b.actualites.map((a) => (
+                  <li key={a.titre}>
+                    <span>{a.date}</span>
+                    <div>
+                      <b>{a.titre}</b>
+                      <p>{a.texte}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <h3>{str("banque.avis")}</h3>
+              {b.avis.map((a) => (
+                <blockquote key={a.nom} className="bq-avis">
+                  {a.texte}
+                  <cite>{a.nom}</cite>
+                </blockquote>
+              ))}
+            </>
+          )}
+          <div hidden={rub !== "compte" && rub !== "bourse"}>
+            <Guichet onglet={rub === "bourse" ? "bourse" : "compte"} setOnglet={() => {}} />
+          </div>
+          {rub === "epargne" && (
+            <>
+              <h2>{str("banque.epargnerTitre")}</h2>
+              {b.epargne.map((t) => (
+                <p key={t}>{t}</p>
+              ))}
+            </>
+          )}
+          {rub === "contact" && (
+            <>
+              <h2>{str("banque.contactTitre")}</h2>
+              {b.contact.map((t) => (
+                <p key={t}>{t}</p>
+              ))}
+            </>
+          )}
+        </main>
+      </div>
+      <footer className="bq-pied">
+        {b.mentions.map((m) => (
+          <p key={m}>{m}</p>
+        ))}
+      </footer>
     </div>
   );
 }

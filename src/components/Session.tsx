@@ -14,6 +14,8 @@ import { POUBELLE, deplacer, sanitizeDisque, supprimer, type Disque, type Result
 import { resolve as resoudre } from "@/os/fs";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
+import { surLivraison } from "@/os/biereStore";
+import { surWarp } from "@/os/ivresseStore";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
 import { emptyWinState, saveWindows, winReducer, type SavedWin, type Viewport, type WinAction } from "@/os/windows";
 import { filAvec, texteDuCitoyen, trouverCorrespondant } from "@/os/correspondance";
@@ -269,6 +271,20 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       return file.length > 4 ? [file[0]!, ...file.slice(-3)] : file;
     });
   }, []);
+
+  // Livraisons Porkomazon et ivresse : annoncées par la zone de notification et par les signaux du système.
+  useEffect(() => {
+    const a = surLivraison((n) => {
+      pushToast(str("porkomazon.livre.titre"), str("porkomazon.livre", { n }));
+      playSound("ding");
+    });
+    const b = surWarp(() => feed({ kind: "signal", name: "ivresse:warp" }));
+    return () => {
+      a();
+      b();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pushToast]);
 
   const runAction = useCallback(
     (a: ActionRef) => {
