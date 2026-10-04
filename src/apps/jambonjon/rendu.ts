@@ -3,6 +3,7 @@
  * brouillard de cave épais, monstres et objets en sprites, tramage ordonné et couleurs ramenées sur 15 bits
  * (l'aspect d'une console de salon du début des années 2000). Textures et sprites sont dessinés ici, en pixels.
  */
+import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
 
@@ -223,82 +224,10 @@ function rect(g: CanvasRenderingContext2D, c: string, x: number, y: number, w: n
   g.fillStyle = c;
   g.fillRect(x, y, w, h);
 }
-function yeux(g: CanvasRenderingContext2D, x1: number, x2: number, y: number, c = "#ff3020") {
-  rect(g, c, x1, y, 2, 2);
-  rect(g, c, x2, y, 2, 2);
-}
+
 
 const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => number> = {
-  rat: (g) => {
-    g.strokeStyle = "#d88a8a";
-    g.lineWidth = 2;
-    g.beginPath();
-    g.moveTo(8, 34);
-    g.quadraticCurveTo(2, 30, 4, 22);
-    g.stroke();
-    ell(g, "#6e6258", 20, 32, 12, 6);
-    ell(g, "#857869", 20, 30, 10, 4);
-    ell(g, "#6e6258", 31, 29, 6, 5);
-    ell(g, "#d88a8a", 30, 24, 3, 3);
-    ell(g, "#d88a8a", 35, 34, 2, 1.5);
-    yeux(g, 32, 34, 28);
-    rect(g, "#4a3e34", 14, 37, 3, 3);
-    rect(g, "#4a3e34", 25, 37, 3, 3);
-    return 0.45;
-  },
-  gobelin: (g) => {
-    rect(g, "#3a5a24", 13, 30, 5, 9);
-    rect(g, "#3a5a24", 22, 30, 5, 9);
-    ell(g, "#6a4a2a", 20, 25, 9, 9);
-    ell(g, "#5f9a38", 20, 13, 8, 8);
-    g.fillStyle = "#5f9a38";
-    g.beginPath();
-    g.moveTo(12, 12);
-    g.lineTo(2, 6);
-    g.lineTo(13, 16);
-    g.fill();
-    g.beginPath();
-    g.moveTo(28, 12);
-    g.lineTo(38, 6);
-    g.lineTo(27, 16);
-    g.fill();
-    yeux(g, 16, 22, 11, "#ffe040");
-    rect(g, "#2a1a0c", 17, 17, 6, 1);
-    ell(g, "#b08a5a", 32, 26, 5, 6);
-    rect(g, "#5f9a38", 9, 22, 3, 8);
-    return 0.62;
-  },
-  moisissure: (g) => {
-    ell(g, "#7a8a6a", 20, 30, 16, 10);
-    ell(g, "#9aaa86", 20, 26, 13, 9);
-    ell(g, "#c8d0b0", 15, 22, 5, 4);
-    ell(g, "#c8d0b0", 26, 24, 4, 3);
-    ell(g, "#4a5a3a", 22, 31, 3, 2);
-    ell(g, "#4a5a3a", 12, 29, 2, 2);
-    for (let k = 0; k < 9; k++) rect(g, "#e8ecd8", 6 + k * 3.4, 16 + ((k * 7) % 5), 1, 3);
-    yeux(g, 16, 23, 26, "#202010");
-    return 0.5;
-  },
-  saucisson: (g) => {
-    ell(g, "#7a2a22", 20, 22, 8, 15);
-    ell(g, "#9a3a2c", 18, 20, 5, 12);
-    for (const [x, y] of [
-      [16, 14],
-      [22, 19],
-      [17, 25],
-      [23, 28],
-      [19, 32],
-    ])
-      rect(g, "#f0e0d0", x!, y!, 2, 2);
-    rect(g, "#e8e0c8", 19, 3, 2, 5);
-    for (let y = 10; y < 34; y += 6) rect(g, "#d8d0b0", 12, y, 16, 1);
-    rect(g, "#5a2018", 14, 36, 3, 3);
-    rect(g, "#5a2018", 23, 36, 3, 3);
-    yeux(g, 16, 22, 15, "#ffffff");
-    rect(g, "#000000", 17, 16, 1, 1);
-    rect(g, "#000000", 23, 16, 1, 1);
-    return 0.7;
-  },
+  ...DESSINS_ENNEMIS,
   inspecteur: (g) => {
     // Pixel art à coordonnées entières : silhouette asymétrique, palette limitée,
     // grandes masses lisibles de loin, visage et procès-verbal lisibles de près.
@@ -346,52 +275,7 @@ const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => n
     r(p.rouge, 8, 31, 2, 3); r(p.nuit, 6, 34, 6, 2); r(p.or, 7, 34, 4, 1);
     return 0.86;
   },
-  tonneau: (g) => {
-    ell(g, "#6a3e1a", 20, 24, 13, 15);
-    for (let x = 9; x < 32; x += 4) rect(g, "#8a5a2c", x, 10, 2, 28);
-    rect(g, "#7a7a7a", 7, 13, 26, 2);
-    rect(g, "#7a7a7a", 7, 33, 26, 2);
-    rect(g, "#100806", 12, 23, 16, 6);
-    for (let x = 13; x < 28; x += 3) {
-      rect(g, "#f0ead8", x, 23, 2, 2);
-      rect(g, "#f0ead8", x + 1, 27, 2, 2);
-    }
-    yeux(g, 14, 24, 17, "#ffe040");
-    return 0.66;
-  },
-  fantome: (g) => {
-    g.fillStyle = "#d8e8e0";
-    g.beginPath();
-    g.moveTo(8, 36);
-    g.quadraticCurveTo(6, 6, 20, 5);
-    g.quadraticCurveTo(34, 6, 32, 36);
-    for (let x = 32; x > 8; x -= 4) g.quadraticCurveTo(x - 1, 31, x - 4, 36);
-    g.fill();
-    ell(g, "#b8d0c8", 20, 22, 8, 10);
-    ell(g, "#203028", 16, 15, 2.5, 3.5);
-    ell(g, "#203028", 24, 15, 2.5, 3.5);
-    ell(g, "#203028", 20, 24, 3, 4);
-    rect(g, "#f4f0ea", 18, 8, 4, 2);
-    return 0.8;
-  },
-  affineur: (g) => {
-    rect(g, "#1a1a1a", 12, 32, 6, 8);
-    rect(g, "#1a1a1a", 22, 32, 6, 8);
-    ell(g, "#efe8d8", 20, 24, 13, 12);
-    rect(g, "#b3121b", 14, 22, 12, 12);
-    rect(g, "#e8e0cc", 15, 23, 10, 10);
-    ell(g, "#d8a080", 20, 10, 6, 6);
-    rect(g, "#101010", 13, 0, 14, 5);
-    rect(g, "#101010", 10, 4, 20, 2);
-    rect(g, "#c98a1c", 13, 4, 14, 1);
-    yeux(g, 17, 21, 9);
-    rect(g, "#6a2a1a", 16, 13, 8, 2);
-    rect(g, "#c8c8d0", 32, 6, 4, 20);
-    rect(g, "#e8e8f0", 33, 6, 2, 18);
-    rect(g, "#5a3418", 32, 26, 4, 6);
-    rect(g, "#d8a080", 29, 25, 5, 4);
-    return 1.0;
-  },
+
 };
 
 type Objet3D = "jambon" | "biere" | "tonneau" | "sac";
