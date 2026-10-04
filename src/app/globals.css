@@ -1276,7 +1276,7 @@
   .jbj-fin p { margin: 0; }
   .jbj-titre { align-items: center; justify-content: center; background: radial-gradient(ellipse at center, #3a2a1c 0%, #15110d 70%); }
   .jbj-titre-cadre { text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .jbj-titre h1 { margin: 16px 0 22px; font-size: 16px; letter-spacing: 0.25em; color: var(--color-or); transform: scale(3); transform-origin: center; text-shadow: 1px 1px 0 #7a1016; pointer-events: none; }
+  .jbj-titre h1 { margin: 16px 0 22px; font-size: 16px; letter-spacing: 0.25em; color: var(--color-or); transform: scale(2); transform-origin: center; text-shadow: 1px 1px 0 #7a1016; pointer-events: none; }
   .jbj-sous-titre { margin: 0; color: #b8a888; letter-spacing: 0.15em; }
   .jbj-titre-boutons { display: flex; flex-direction: column; gap: 6px; }
   .jbj-titre-aide { margin: 0; color: #8a7a60; max-width: 420px; }

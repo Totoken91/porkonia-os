@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { porkosPack } from "@/content/packs/porkos";
-import { COLONNES, couper, entete, pageTeletexte, pointilles, voisine } from "@/apps/channel-pork/teletexte";
+import { COLONNES, couper, entete, pageTeletexte, pointilles, voisine } from "@/apps/channel-pork/teletexte-logic";
 
 const d = new Date(2026, 8, 27, 17, 5, 32);
 

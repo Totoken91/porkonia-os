@@ -15,7 +15,7 @@ import { useOs, useWin } from "@/os/context";
 import { EcranVhs } from "./EcranVhs";
 import { Teletexte } from "./Teletexte";
 import { Videotheque } from "./Videotheque";
-import { voisine } from "./teletexte";
+import { voisine } from "./teletexte-logic";
 import { useSonTv } from "./sonTv";
 import { DECALAGE, aLaDemande, at, live, sousTitre, voiceAt } from "./timeline";
 

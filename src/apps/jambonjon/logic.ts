@@ -483,11 +483,7 @@ export const emplacementDe = (jeu: JeuJambonjon, o: Objet): Emplacement => jeu.o
 
 function deplacer(p: Partie, jeu: JeuJambonjon, dir: number): boolean {
   const j = p.joueur;
-  // Ivresse : un pas sur sept part de travers.
-  if (j.ivresse > 0 && tirer(p) < 0.15) {
-    dir = (dir + parmi(p, [1, 3])) % 4;
-    log(p, "jbj.msg.titube");
-  }
+  // L’ivresse modifie le combat, jamais la direction demandée par le joueur.
   const nx = j.x + DX[dir]!;
   const ny = j.y + DY[dir]!;
   const m = monstreEn(p, nx, ny);

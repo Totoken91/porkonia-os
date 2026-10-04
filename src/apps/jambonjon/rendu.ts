@@ -606,7 +606,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const dy = s.y - cam.y;
       return { s, tx: inv * (dirY * dx - dirX * dy), ty: inv * (-plY * dx + plX * dy) };
     })
-    .filter((v) => v.ty > 0.2 && v.ty < 8)
+    .filter((v) => v.ty > 0.01 && v.ty < 8)
+    .map((v) => ({ ...v, ty: Math.max(0.12, v.ty) }))
     .sort((u, v) => v.ty - u.ty);
   for (const { s, tx, ty } of proj) {
     const ecranX = (W / 2) * (1 + tx / ty);

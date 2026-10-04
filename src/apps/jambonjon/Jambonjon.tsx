@@ -4,6 +4,7 @@
  * tourner ; au doigt, une manette s'affiche sous la vue. La partie est sauvegardée à chaque tour dans ce navigateur.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Commandes } from "./commandes";
 import type { Emplacement } from "@/content/types";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
 import { comparer, defMonstre, EMPLACEMENTS, emplacementDe, jouer, nomObjet, nouvellePartie, relirePartie, ROT_COUT, SAC_MAX, stats, xpPourNiveau, type Action, type Objet, type Partie } from "./logic";
@@ -119,9 +120,8 @@ export function Jambonjon() {
   const cam = useRef<Camera>({ x: 0, y: 0, angle: 0, bob: 0, secousse: 0 });
   const anim = useRef<{ de: Camera; vers: Camera; debut: number; duree: number; marche: boolean } | null>(null);
   const fx = useRef({ touches: new Set<number>(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] as [number, number, number] });
-  const file = useRef<Action | null>(null);
+  const file = useRef(new Commandes<Action>());
   const partieRef = useRef<Partie | null>(null);
-  partieRef.current = partie;
 
   // Sauvegarde existante.
   useEffect(() => {
@@ -140,8 +140,13 @@ export function Jambonjon() {
   const commencer = useCallback(
     (p: Partie) => {
       preparer();
+      anim.current = null;
+      file.current.vider();
+      fx.current = { touches: new Set(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] };
+      partieRef.current = p;
       placerCamera(p);
       setPartie(p);
+      try { window.localStorage.setItem(CLE, JSON.stringify(p)); } catch { /* sauvegarde impossible */ }
       setPanneau(null);
       signal("jambonjon:partie");
     },
@@ -152,11 +157,11 @@ export function Jambonjon() {
 
   /** Une action : nouvel état, animation de la caméra, sons, éclairs. */
   const agir = useCallback(
-    (a: Action) => {
+    (a: Action, repetition = false) => {
       const avant = partieRef.current;
       if (!avant || avant.fin) return;
       if (anim.current) {
-        file.current = a;
+        if (!repetition) file.current.ajouter(a);
         return;
       }
       const apres = jouer(avant, jeu, a);
@@ -197,6 +202,8 @@ export function Jambonjon() {
         const bouge = de.x !== vers.x || de.y !== vers.y;
         if (bouge || Math.abs(da) > 0.01) anim.current = { de, vers, debut: performance.now(), duree: bouge ? 170 : 140, marche: bouge };
       }
+      partieRef.current = apres;
+      if (apres.fin) file.current.vider();
       if (apres.fin === "victoire") signal("jambonjon:victoire");
       if (apres.fin === "mort") signal("jambonjon:mort");
       setPartie(apres);
@@ -232,9 +239,14 @@ export function Jambonjon() {
           cam.current.bob = an.marche ? Math.sin(k * Math.PI) * 3 : 0;
           if (k >= 1) {
             anim.current = null;
-            const suite = file.current;
-            file.current = null;
-            if (suite) setTimeout(() => agir(suite), 0);
+            // La caméra termine exactement sur la case avant la commande suivante.
+            cam.current = { ...an.vers };
+            let suite = file.current.suivante();
+            while (suite) {
+              agir(suite);
+              if (anim.current) break;
+              suite = file.current.suivante();
+            }
           }
         }
         cam.current.secousse *= 0.8;
@@ -242,7 +254,7 @@ export function Jambonjon() {
         else cam.current.secousse = -cam.current.secousse;
         fx.current.eclair = Math.max(0, fx.current.eclair - 0.06);
         if (t > fx.current.toucheJusqua) fx.current.touches = new Set();
-        rendre(image, p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe });
+        rendre(image, partieRef.current ?? p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe });
         g.putImageData(image, 0, 0);
       }
       id = requestAnimationFrame(boucle);
@@ -250,6 +262,21 @@ export function Jambonjon() {
     id = requestAnimationFrame(boucle);
     return () => cancelAnimationFrame(id);
   }, [partie !== null, jeu, agir]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Une fenêtre inactive ou un panneau ouvert ne garde pas de déplacements en attente.
+  useEffect(() => {
+    if (!focused || panneau) file.current.vider();
+  }, [focused, panneau]);
+
+  useEffect(() => {
+    const vider = () => file.current.vider();
+    window.addEventListener("blur", vider);
+    document.addEventListener("visibilitychange", vider);
+    return () => {
+      window.removeEventListener("blur", vider);
+      document.removeEventListener("visibilitychange", vider);
+    };
+  }, []);
 
   // Carte automatique.
   useEffect(() => {
@@ -307,15 +334,16 @@ export function Jambonjon() {
         nouvelle();
         return;
       }
+      if (panneau) return;
       const a = touches[k];
       if (a) {
         ev.preventDefault();
-        agir(a);
+        agir(a, ev.repeat);
       }
     };
     window.addEventListener("keydown", f);
     return () => window.removeEventListener("keydown", f);
-  }, [focused, agir, nouvelle, commencer, sauvegarde]);
+  }, [focused, agir, nouvelle, commencer, sauvegarde, panneau]);
 
   useMenuCommands(
     {

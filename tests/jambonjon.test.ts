@@ -148,9 +148,9 @@ describe("Assistant d'installation", () => {
     const r = installer(d0, inst, choixParDefaut(inst));
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(resolve(r.disque.racine, "Programmes/Jambonjon/Jambonjon")?.type).toBe("lien");
+    expect(resolve(r.disque.racine, "Programmes/Jambonjon/L’Ordre Cochon")?.type).toBe("lien");
     expect(resolve(r.disque.racine, "Programmes/Jambonjon/LISEZMOI.TXT")?.type).toBe("texte");
-    expect(resolve(r.disque.racine, "Bureau/Jambonjon")?.type).toBe("lien");
+    expect(resolve(r.disque.racine, "Bureau/L’Ordre Cochon")?.type).toBe("lien");
     expect(estInstalle(r.disque, "jambonjon")).toBe(true);
     expect(estInstalle(d0, "jambonjon")).toBe(false);
   });
@@ -159,10 +159,10 @@ describe("Assistant d'installation", () => {
     const r = installer(d0, inst, { ...choixParDefaut(inst), dossier: " Jeux \\ Caves ", composants: [], raccourciBureau: false });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(resolve(r.disque.racine, "Jeux/Caves/Jambonjon")).toBeTruthy();
+    expect(resolve(r.disque.racine, "Jeux/Caves/L’Ordre Cochon")).toBeTruthy();
     expect(resolve(r.disque.racine, "Jeux/Caves/MANUEL.TXT")).toBeNull();
     expect(resolve(r.disque.racine, "Jeux/Caves/LISEZMOI.TXT")).toBeTruthy();
-    expect(resolve(r.disque.racine, "Bureau/Jambonjon")).toBeNull();
+    expect(resolve(r.disque.racine, "Bureau/L’Ordre Cochon")).toBeNull();
     expect(normaliserDossier("a\\\\b//c ")).toBe("a/b/c");
     expect(espaceRequis(inst, [])).toBe(inst.composants.find((c) => c.obligatoire)!.taille);
   });
@@ -217,5 +217,39 @@ describe("Assistant Gruik", () => {
   });
   it("ne commente que des programmes qui existent", () => {
     for (const app of Object.keys(spec.parApp)) expect(porkos.apps.map((a) => a.id)).toContain(app);
+  });
+});
+
+
+describe("Commandes rapides", () => {
+  it("préserve une rotation entre deux pas, sans remplacer les appuis", async () => {
+    const { Commandes } = await import("@/apps/jambonjon/commandes");
+    const file = new Commandes<string>();
+    for (const a of ["avancer", "tournerD", "avancer"]) file.ajouter(a);
+    expect([file.suivante(), file.suivante(), file.suivante()]).toEqual(["avancer", "tournerD", "avancer"]);
+    expect(file.suivante()).toBeUndefined();
+  });
+
+  it("limite les appuis en attente et les annule à la fermeture", async () => {
+    const { Commandes } = await import("@/apps/jambonjon/commandes");
+    const file = new Commandes<number>();
+    for (let n = 0; n < 20; n++) file.ajouter(n);
+    expect(Array.from({ length: 8 }, () => file.suivante())).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(file.suivante()).toBeUndefined();
+    file.ajouter(99);
+    file.vider();
+    expect(file.suivante()).toBeUndefined();
+  });
+
+  it("l’ivresse ne dévie jamais un pas demandé", () => {
+    const p = nouvellePartie(jeu, 42);
+    p.monstres = [];
+    p.carte.cases.fill(0);
+    p.joueur.x = 8; p.joueur.y = 8; p.joueur.dir = 0;
+    p.joueur.ivresse = 100;
+    for (let graine = 0; graine < 100; graine++) {
+      const q = jouer({ ...p, alea: graine }, jeu, { type: "avancer" });
+      expect([q.joueur.x, q.joueur.y, q.joueur.dir]).toEqual([8, 7, 0]);
+    }
   });
 });
