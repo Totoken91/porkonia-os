@@ -228,6 +228,61 @@ try {
     await page.waitForTimeout(500);
     if (JSON.stringify(await position())!==JSON.stringify(debut)) throw new Error(`${tag}: une ancienne commande survit à Nouvelle partie`);
     await shot(page, `${tag}-ordre-cochon`);
+    // Inventaire déterministe : échanges, retrait, sol, provisions et reprise de sauvegarde.
+    await page.evaluate(() => {
+      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
+      p.monstres=[];p.sol=[];p.joueur.pv=7;p.joueur.faim=50;p.joueur.mousse=0;p.joueur.jambons=1;p.joueur.bieres=1;
+      const o=(uid,base,att,def,pv,mousse)=>({uid,base,niveau:1,rarete:"etat",att,def,pv,mousse});
+      p.joueur.sac=[o(901,"couteau",6,0,0,0),o(902,"gilet",0,4,8,0),o(903,"charlotte",0,1,0,10)];
+      localStorage.setItem("porkos.jambonjon.partie",JSON.stringify(p));
+    });
+    const lire=()=>page.evaluate(()=>JSON.parse(localStorage.getItem("porkos.jambonjon.partie")));
+    const reprendre=async()=>{
+      await fermer("jambonjon");await open("f:L’Ordre Cochon");await page.getByTestId("jbj-continuer").click();
+    };
+    await reprendre();await page.getByTestId("jbj-ouvrir-sac").click();
+    await page.getByTestId("jbj-sac").waitFor();
+    if(await page.locator(".jbj-inv-case").count()!==12)throw new Error(`${tag}: grille du sac incorrecte`);
+    const departInv=await lire();
+    await page.getByTestId("jbj-equipe-arme").click();
+    if((await lire()).joueur.equipe.arme.uid!==departInv.joueur.equipe.arme.uid)throw new Error(`${tag}: sélectionner retire l’arme`);
+    await page.getByTestId("jbj-objet-901").click();
+    if(!(await page.getByTestId("jbj-objet-fiche").textContent()).includes("Comparaison avec"))throw new Error(`${tag}: comparaison absente`);
+    await page.getByTestId("jbj-equiper").click();
+    if((await lire()).joueur.equipe.arme.uid!==901)throw new Error(`${tag}: équipement non appliqué`);
+    await page.getByTestId("jbj-equipe-arme").click();await page.getByTestId("jbj-retirer").click();
+    if((await lire()).joueur.equipe.arme)throw new Error(`${tag}: retrait non appliqué`);
+    await page.getByTestId("jbj-objet-901").click();await page.getByTestId("jbj-equiper").click();
+    await page.getByTestId("jbj-objet-902").click();await page.getByTestId("jbj-equiper").click();
+    await page.getByTestId("jbj-objet-903").click();await page.getByTestId("jbj-jeter").click();
+    if((await lire()).joueur.sac.some(o=>o.uid===903))throw new Error(`${tag}: objet posé encore dans le sac`);
+    await page.getByTestId("jbj-ramasser").click();
+    if(!(await lire()).joueur.sac.some(o=>o.uid===903))throw new Error(`${tag}: récupération sur place impossible`);
+    if((await lire()).tour!==departInv.tour)throw new Error(`${tag}: gestion de l’équipement prend un tour`);
+    await page.getByTestId("jbj-sac-manger").click();await page.getByTestId("jbj-sac-boire").click();
+    const consomme=await lire();
+    if(consomme.joueur.jambons!==0||consomme.joueur.bieres!==0||consomme.tour!==departInv.tour+2)throw new Error(`${tag}: provisions ou coût en tours incorrect`);
+    await page.getByTestId("jbj-sac-fermer").click();await reprendre();await page.getByTestId("jbj-ouvrir-sac").click();
+    const recharge=await lire();
+    if(recharge.joueur.equipe.arme.uid!==901||recharge.joueur.equipe.armure.uid!==902)throw new Error(`${tag}: sauvegarde d’équipement perdue`);
+    await page.getByTestId("jbj-objet-903").click();
+    await page.locator(".jbj-inv-corps").evaluate(e=>{e.scrollTop=0;});
+    const dimensions=await page.locator(".jbj-inv-corps").evaluate(e=>[e.scrollWidth,e.clientWidth]);
+    if(dimensions[0]>dimensions[1]+1)throw new Error(`${tag}: inventaire déborde horizontalement`);
+    await shot(page,`${tag}-inventaire`);
+    await page.getByTestId("jbj-sac-fermer").click();
+    await page.evaluate(()=>{
+      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
+      p.joueur.sac=Array.from({length:12},(_,i)=>({uid:1000+i,base:"tablier",niveau:1,rarete:"etat",att:0,def:2,pv:0,mousse:0}));
+      localStorage.setItem("porkos.jambonjon.partie",JSON.stringify(p));
+    });
+    await reprendre();await page.getByTestId("jbj-ouvrir-sac").click();await page.getByTestId("jbj-equipe-arme").click();
+    if(!(await page.getByTestId("jbj-retirer").isDisabled()))throw new Error(`${tag}: retrait permis dans un sac plein`);
+    await page.getByTestId("jbj-objet-1000").click();await page.getByTestId("jbj-equiper").click();
+    const plein=await lire();
+    if(plein.joueur.sac.length!==12||plein.joueur.equipe.armure.uid!==1000||!plein.joueur.sac.some(o=>o.uid===902))throw new Error(`${tag}: échange dans un sac plein perd un objet`);
+    await page.getByTestId("jbj-sac-fermer").click();
+    step(`${tag}: inventaire, comparaison, échange, retrait, sol, provisions et sauvegarde validés`);
     step(`${tag}: déplacements rapides, rotations, murs, ivresse, inventaire et nouvelle partie validés`);
     await ctx.close();
   }

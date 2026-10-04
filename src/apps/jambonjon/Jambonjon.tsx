@@ -5,9 +5,9 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Commandes } from "./commandes";
-import type { Emplacement } from "@/content/types";
+import { Inventaire } from "./Inventaire";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
-import { comparer, defMonstre, EMPLACEMENTS, emplacementDe, jouer, nomObjet, nouvellePartie, relirePartie, ROT_COUT, SAC_MAX, stats, xpPourNiveau, type Action, type Objet, type Partie } from "./logic";
+import { defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
 
 const CLE = "porkos.jambonjon.partie";
@@ -113,7 +113,6 @@ export function Jambonjon() {
   const [partie, setPartie] = useState<Partie | null>(null);
   const [sauvegarde, setSauvegarde] = useState<Partie | null>(null);
   const [panneau, setPanneau] = useState<Panneau>(null);
-  const [choisi, setChoisi] = useState<number | null>(null);
 
   const vue = useRef<HTMLCanvasElement>(null);
   const carte = useRef<HTMLCanvasElement>(null);
@@ -391,12 +390,6 @@ export function Jambonjon() {
       </b>
     </div>
   );
-  const couleur = (o: Objet) => jeu.raretes.find((r) => r.id === o.rarete)?.couleur ?? "#e8dcc0";
-  const bonus = (o: { att: number; def: number; pv: number; mousse: number }, signe = false) =>
-    (["att", "def", "pv", "mousse"] as const)
-      .filter((k) => o[k] !== 0)
-      .map((k) => `${signe && o[k] > 0 ? "+" : ""}${o[k]} ${str(`jbj.stat.${k}`)}`)
-      .join(" · ");
   const devant = partie.monstres.find((m) => m.x === j.x + [0, 1, 0, -1][j.dir]! && m.y === j.y + [-1, 0, 1, 0][j.dir]!);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
   const journal = partie.journal.slice(poche ? -2 : -4);
@@ -414,7 +407,7 @@ export function Jambonjon() {
   );
 
   return (
-    <div className={`jbj ${poche ? "jbj-poche" : ""}`} data-testid="jambonjon">
+    <div className={`jbj ${poche ? "jbj-poche" : ""} ${panneau === "sac" ? "jbj-sac-ouvert" : ""}`} data-testid="jambonjon">
       <div className="jbj-gauche">
         <div className="jbj-vue">
           <canvas ref={vue} width={LARGEUR} height={HAUTEUR} data-testid="jbj-vue" />
@@ -426,56 +419,6 @@ export function Jambonjon() {
               </b>{" "}
               {str("jbj.niv", { n: devant.niveau })}
               <i style={{ width: `${(devant.pv / devant.pvMax) * 100}%` }} />
-            </div>
-          )}
-          {panneau === "sac" && (
-            <div className="jbj-panneau" data-testid="jbj-sac">
-              <h2>{str("jbj.equipement")}</h2>
-              <ul className="jbj-equipe">
-                {EMPLACEMENTS.map((e: Emplacement) => {
-                  const o = j.equipe[e];
-                  return (
-                    <li key={e}>
-                      <span className="jbj-emplacement">{str(`jbj.emplacement.${e}`)}</span>
-                      {o ? (
-                        <button className="jbj-objet" style={{ color: couleur(o) }} onClick={() => agir({ type: "retirer", emplacement: e })} title={str("jbj.retirer")}>
-                          {nomObjet(jeu, o)} <small>{bonus(o)}</small>
-                        </button>
-                      ) : (
-                        <em>{str("jbj.vide")}</em>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              <h2>{str("jbj.sac", { n: j.sac.length, max: SAC_MAX })}</h2>
-              {j.sac.length === 0 && <p className="jbj-vide">{str("jbj.sacVide")}</p>}
-              <ul className="jbj-liste">
-                {j.sac.map((o) => {
-                  const cmp = comparer(jeu, j, o);
-                  return (
-                    <li key={o.uid} className={choisi === o.uid ? "choisi" : ""}>
-                      <button className="jbj-objet" style={{ color: couleur(o) }} onClick={() => setChoisi(o.uid)} onDoubleClick={() => agir({ type: "equiper", uid: o.uid })} data-testid={`jbj-objet-${o.uid}`}>
-                        {nomObjet(jeu, o)} <small>{str("jbj.niv", { n: o.niveau })} · {str(`jbj.emplacement.${emplacementDe(jeu, o)}`)}</small>
-                      </button>
-                      <small className="jbj-cmp">{bonus(cmp, true) || str("jbj.pareil")}</small>
-                      {choisi === o.uid && (
-                        <span className="jbj-actions">
-                          <button className="pk-btn" onClick={() => agir({ type: "equiper", uid: o.uid })} data-testid="jbj-equiper">
-                            {str("jbj.equiper")}
-                          </button>
-                          <button className="pk-btn" onClick={() => agir({ type: "jeter", uid: o.uid })}>
-                            {str("jbj.jeter")}
-                          </button>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              <button className="pk-btn jbj-fermer" onClick={() => setPanneau(null)}>
-                {str("jbj.fermer")}
-              </button>
             </div>
           )}
           {panneau === "carte" && (
@@ -538,7 +481,7 @@ export function Jambonjon() {
             {btn({ type: "reculer" }, "S ▼")}
             {btn({ type: "droite" }, "D ▶")}
             {btn({ type: "rot" }, str("jbj.rot"), "jbj-pad-rot")}
-            <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>
+            <button className="jbj-pad-b" data-testid="jbj-ouvrir-sac" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>
               {str("jbj.sacCourt")}
             </button>
             <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "carte" ? null : "carte"))}>
@@ -547,11 +490,12 @@ export function Jambonjon() {
           </div>
         )}
         {!poche && (
-          <p className="jbj-raccourcis">
+          <><button className="pk-btn" data-testid="jbj-ouvrir-sac" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>{str("jbj.inventaire")}</button><p className="jbj-raccourcis">
             {str("jbj.raccourcis", { cout: ROT_COUT })}
-          </p>
+          </p></>
         )}
       </div>
+      {panneau === "sac" && <Inventaire partie={partie} agir={agir} fermer={() => setPanneau(null)}/> }
     </div>
   );
 }
