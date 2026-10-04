@@ -406,6 +406,7 @@ export interface MonstreDef {
   /** Se déplace un tour sur deux (lent). */
   lent?: boolean;
   attaqueBoss?: 'ligne' | 'pressoir' | 'sceau';
+  attaqueOrdinaire?: 'verdict' | 'ecrasement';
   description: string;
 }
 

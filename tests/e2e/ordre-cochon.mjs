@@ -13,6 +13,7 @@ const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
 const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECTIF,'utf8')):null;
 const ELITE=process.env.ELITE?JSON.parse(await readFile(process.env.ELITE,'utf8')):null;
+const COMPORTEMENTS=process.env.COMPORTEMENTS?JSON.parse(await readFile(process.env.COMPORTEMENTS,'utf8')):[];
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
@@ -454,6 +455,18 @@ try {
       await page.getByTestId('jbj-fermer-competences').click();await page.getByTestId('jbj-refuge-descendre').click();
       const suite=await lire();if(suite.etage!==fixture.etage+1||await page.getByTestId('jbj-refuge').count())throw new Error(`${tag}: sortie du refuge incorrecte`);
       step(`${tag}: refuge ${fixture.etage}, repos unique, points et descente valides`);
+    }
+    for(const fixture of COMPORTEMENTS){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await reprendre();await page.getByTestId('jbj-menace').waitFor();
+      const avant=await lire(),type=avant.monstres[0].type;
+      if(!(await page.getByTestId('jbj-menace').textContent()).includes(type==='inspecteur'?'Verdict':'Écrasement'))throw new Error(`${tag}: alerte incorrecte pour ${type}`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-attaque-${type}.png`)});
+      await page.keyboard.press('q');const esquive=await lire();
+      if(esquive.joueur.pv!==avant.joueur.pv||esquive.monstres[0].rpg.annonce)throw new Error(`${tag}: esquive de ${type} echouee`);
+      await reprendre();await page.keyboard.press('w');const reprise=await lire();
+      if(reprise.tour!==esquive.tour+1||reprise.joueur.pv!==avant.joueur.pv||reprise.monstres[0].x!==avant.monstres[0].x||reprise.monstres[0].y!==avant.monstres[0].y)throw new Error(`${tag}: pause de ${type} absente apres sauvegarde`);
+      step(`${tag}: ${type}, annonce, esquive et recuperation sauvegardee valides`);
     }
     for(const fixture of BOSSES){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);

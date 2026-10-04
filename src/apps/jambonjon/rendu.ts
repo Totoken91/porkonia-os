@@ -603,7 +603,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   }
 
   // Sprites : monstres et objets au sol, du plus loin au plus proche.
-  type Spr = { x: number; y: number; tex: Tex; taille: number; rouge: boolean; flotte: number };
+  type Spr = { x: number; y: number; tex: Tex; taille: number; rouge: boolean; flotte: number; charge?: boolean };
   const sprites: Spr[] = [];
   if(c.coinRepos) {
     sprites.push({x:c.coinRepos.x-.85,y:1.75,tex:a.repos.lit,taille:1.3,rouge:false,flotte:0});
@@ -616,7 +616,9 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   for (const m of p.monstres) {
     const sp = a.monstres[fx.spriteDe(m.type)];
     const echelle = m.boss ? 1.25 : m.elite ? 1.12 : 1;
-    sprites.push({ x: m.x + 0.5, y: m.y + 0.5, tex: sp.tex, taille: sp.taille * echelle, rouge: fx.touches.has(m.uid), flotte: Math.sin(fx.temps * 0.006 + m.uid) * 0.02 });
+    const charge=!!m.rpg?.annonce;
+    const souleve = charge && fx.spriteDe(m.type) === 'tonneau' ? .08 : 0;
+    sprites.push({ x: m.x + 0.5, y: m.y + 0.5, tex: sp.tex, taille: sp.taille * echelle, rouge: fx.touches.has(m.uid), charge, flotte: souleve+Math.sin(fx.temps * 0.006 + m.uid) * 0.02 });
   }
   const inv = 1 / (plX * dirY - dirX * plY);
   const proj = sprites
@@ -652,6 +654,13 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         let r = s.tex.px[ti]!;
         let g = s.tex.px[ti + 1]!;
         let b = s.tex.px[ti + 2]!;
+        // Un seul pixel du contour natif prend la couleur des braises.
+        // Le visage, les matériaux et la silhouette restent ceux du sprite.
+        const bordCharge=s.charge&&!s.rouge&&(
+          u===0||v===0||u===s.tex.w-1||v===s.tex.h-1||
+          s.tex.px[ti-4+3]!<10||s.tex.px[ti+4+3]!<10||
+          s.tex.px[ti-s.tex.w*4+3]!<10||s.tex.px[ti+s.tex.w*4+3]!<10);
+        if(bordCharge){r=190;g=112;b=46;}
         if (s.rouge) {
           r = Math.min(255, r * 0.7 + 100);
           g *= 0.65;
@@ -666,7 +675,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
           d[i] = d[i]! * t + pr * (1 - t);
           d[i + 1] = d[i + 1]! * t + pg * (1 - t);
           d[i + 2] = d[i + 2]! * t + pb * (1 - t);
-        } else ecrire(i, r, g, b, f,chaud);
+        } else ecrire(i, r, g, b, bordCharge?Math.max(.7,f):f,chaud);
       }
     }
   }

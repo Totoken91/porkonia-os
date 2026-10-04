@@ -1,6 +1,6 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss et les refuges sont poussés. La calibration de progression est implémentée localement ; les rencontres, les récompenses et les vérifications humaines restent à approfondir.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration et les trois élites avec butin garanti sont poussés. Les comportements d’ennemis, les choix d’équipement et les vérifications humaines restent à approfondir.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
@@ -8,7 +8,7 @@ Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équi
 | 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration poussée (`407df13`) : objectifs, gardiens et 72 parcours ; validation humaine à faire |
-| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Passe locale : trois élites contournables et équipement garanti ; comportements et choix d’équipement à enrichir |
+| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`) ; verdict à distance et écrasement en validation locale ; choix d’équipement à enrichir |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
 
 ## Première livraison du chantier 1
@@ -77,10 +77,22 @@ Les marques de danger au sol utilisent désormais un sceau de braises irrégulie
 
 Le pilote joue deux styles, avec douze chevaliers et trois graines chacun. Exploration complète : 36 victoires sur 36, niveau 20. Trajet vers les escaliers, sans nettoyage systématique des annexes : 31 victoires sur 36, niveaux 18 (27 parties) et 19 (4 parties). Les cinq morts restantes concernent les mages au 2 et deux DPS au 5 ; pas le premier boss. Le trajet direct est un test de contrainte automatisé, pas une définition de la difficulté humaine. Les 240 tests passent ; les essais humains restent nécessaires avant de déclarer l’équilibrage terminé.
 
-## Rencontres et récompenses — passe locale à valider
+## Rencontres et récompenses — élites validées et poussées
 
 Trois adversaires existants deviennent des élites dans les détours : moisissures aux étages 4 et 8, tonneau au 10. Les plans précédents ne plaçaient en réalité aucune élite. Chaque rencontre peut être contournée sans couper l’accès aux escaliers ; elle reprend le comportement lourd annoncé déjà présent dans le moteur. Les monstres d’un étage déjà sauvegardé sont conservés.
 
 Une élite RPG laisse désormais exactement un équipement, de niveau égal à l’étage, en plus des provisions périodiques existantes. Qualité minimale « de garde », puis « grand cru » à partir du 7 ; un tirage supérieur reste supérieur. Le prix reste au sol, avec une annonce dans le journal : pas d’équipement automatique, pas de perte si le sac est plein, conservation après sauvegarde. Le butin ordinaire et les récompenses fixes des boss suivent leurs règles précédentes.
 
 248 tests passent, compilation et scénario de butin/comparaison/reprise vérifiés dans les quatre formats. Les 72 parcours automatiques conservent 36/36 victoires en exploration et 31/36 en trajet direct. Cette passe commence le chantier 5 ; diversité des comportements et choix plus marqués entre équipements restent à construire.
+
+### Comportements ordinaires — passe locale à valider
+
+- L’inspecteur prépare un verdict à trois pas maximum, en ligne droite et sans traverser de mur. La case visée reste fixe : changer de case évite le coup, même en avançant vers lui. Les dégâts d’un verdict correspondent à un coup normal.
+- Le tonneau prépare un écrasement au contact, de puissance 1,35 fois celle d’un coup normal. Un pas de côté ou un recul permet de l’éviter. Sans case d’esquive libre, il utilise un coup normal.
+- Après chaque impact ou esquive, un tour entier de récupération garantit une occasion d’approcher ou de riposter. Le butoir peut interrompre la préparation ; tuer le lanceur la supprime. Annonce et récupération survivent à la sauvegarde.
+- Les attaques des élites et des boss gardent leurs règles. Le mode historique sans classes conserve son combat classique.
+- L’avertissement précise le geste attendu. Un contour ambré d’un pixel natif indique la préparation sur le sprite ; le tonneau se soulève légèrement. La silhouette, les matériaux et la grille 40×40 sont conservés. La marque sous les pieds est hors du champ de la caméra ; le signal sur l’ennemi complète donc le sceau au sol.
+
+259 tests passent et le build compile. Le pilote omniscient, qui exploite les esquives, gagne 36/36 parcours d’exploration (niveau 20) et 36/36 trajets directs (niveau 18). La meilleure survie vient des ouvertures annoncées ; les statistiques de base n’ont pas été réduites. Ces résultats ne mesurent pas la difficulté ni le plaisir pour un joueur humain.
+
+Navigation vérifiée en bureau, Poche portrait, paysage et compact : avertissement approprié, esquive sans dégâts, récupération conservée après reprise et attaques des trois boss intermédiaires. Les captures montrent le signal sur le sprite dans le rendu réel. Les nouveaux comportements restent locaux en attente de validation visuelle.

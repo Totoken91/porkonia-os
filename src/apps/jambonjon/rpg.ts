@@ -291,19 +291,31 @@ export function effetsAvantEnnemis(p: Partie, jeu: JeuJambonjon, h: HoteRpg) {
 export function specialEnnemi(p: Partie, jeu: JeuJambonjon, m: Monstre, h: HoteRpg): boolean {
   const e = etatMonstre(m);
   const attaque=jeu.bossIntermediaires?.find(b=>b.id===m.type)?.attaqueBoss;
+  const def=jeu.monstres.find(n=>n.id===m.type);
+  const ordinaire=!m.boss&&!m.elite?def?.attaqueOrdinaire:undefined;
   if(e.recuperation && p.tour<=e.recuperation)return true;
   if (e.annonce) {
     const touche = menaceSur(e.annonce,p.joueur);
     e.annonce = undefined; e.prochainSpecial = p.tour + 3;
     e.interrompu = false;
     if(attaque){e.recuperation=p.tour+1;h.log(p,"jbj.boss.reprise");}
-    if (touche) recevoir(p, jeu, m, h, 1.8);
+    if(ordinaire){e.recuperation=p.tour+1;h.log(p,'jbj.ennemi.reprise',{nom:def!.nom});}
+    if (touche) recevoir(p, jeu, m, h, ordinaire==='verdict'?1:ordinaire==='ecrasement'?1.35:1.8);
     else { h.log(p, "jbj.rpg.evitespecial"); if (p.joueur.rpg!.chevalier === "agathe") p.joueur.rpg!.saigne = p.tour + 1; }
     return true;
   }
   const portee=attaque === "sceau" ? 3 : attaque === "ligne" ? 4 : 1;
   const aligne=m.x===p.joueur.x||m.y===p.joueur.y;
   const visible=ligneEntre(p,m,p.joueur);
+  // Le verdict vise une case fixe, pas le joueur après son déplacement.
+  // L'écrasement engage le tonneau : il reste en place jusqu'à la riposte.
+  const porteeOrdinaire=ordinaire==='verdict'?3:1;
+  if(ordinaire&&distance(m,p.joueur)<=porteeOrdinaire&&visible&&
+    (ordinaire!=='verdict'||aligne)&&p.tour>=e.prochainSpecial){
+    const annonce=preparerAttaqueBoss(p,m,undefined);
+    if(!annonce.cases?.length)return false;
+    e.annonce=annonce;h.log(p,`jbj.ennemi.${ordinaire}`);return true;
+  }
   if ((m.boss || m.elite) && distance(m, p.joueur) <= portee && (portee===1||visible) && (attaque!=="ligne"||aligne) && p.tour >= e.prochainSpecial) {
     e.annonce = attaque ? preparerAttaqueBoss(p,m,attaque) : { x: p.joueur.x, y: p.joueur.y };
     h.log(p, attaque ? `jbj.boss.${attaque}` : "jbj.rpg.annonce"); return true;
