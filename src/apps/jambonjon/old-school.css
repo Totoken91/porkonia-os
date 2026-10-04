@@ -72,6 +72,12 @@
   .jbj-cible span { display:block; color:#d1c794; }
   .jbj-rpg-apercu { position:absolute; bottom:4px; left:4px; right:4px; background:#17211af5; border:3px ridge #a39c7c; padding:6px; z-index:4; }
   .jbj-rpg-apercu p { margin:3px 0; line-height:16px; }
+  .jbj-promotion { position:absolute; z-index:5; top:6px; left:6px; right:6px; margin:auto; max-width:380px; background:#241d12f5; border:3px ridge #b79b57; box-shadow:0 0 0 1px #130e08,inset 0 0 0 1px #4d3e26; color:#e6d7b6; padding:6px; display:grid; gap:3px; font-size:16px; line-height:16px; }
+  .jbj-promotion strong { color:#ffe4a0; letter-spacing:1px; }
+  .jbj-promotion div { display:flex; gap:4px; }
+  .jbj-promotion button:first-child { flex:1; }
+  .jbj-promotion button { padding:2px 5px; min-width:28px; }
+  .ecran.poche .jbj-promotion { padding:3px; gap:2px; }
   .jbj-rpg-apercu button { margin-right:5px; padding:3px 8px; }
   .ecran.poche .jbj-rpg-barre { grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); }
   .ecran.poche .jbj-rpg-barre > :nth-child(4),.ecran.poche .jbj-preparation { grid-column:1 / -1; }

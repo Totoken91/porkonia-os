@@ -13,7 +13,7 @@ Modification validée du calendrier initial : active 1 au niveau 1, passive 1 au
 ## Rythme et commandes
 
 - Une active combine ses effets en un seul tour : frappe et protection, frappe et déplacement, ou frappe et malédiction. Pas de préparation obligatoire sans résultat immédiat.
-- Les trois actives sont accessibles directement, sans ouvrir un menu. Le ciblage montre portée, cases affectées et conséquence d’un recul avant confirmation. Une annulation ou une cible invalide ne consomme rien.
+- Les trois actives se lancent directement au clic ou avec 1/2/3. Le coût et l'effet restent consultables dans les boutons et le livre. Seul le Pas de côté demande gauche/droite quand les deux cases sont libres ; choisir un côté lance immédiatement le pas et la frappe. Une annulation ou une cible invalide ne consomme rien.
 - Les rotations restent gratuites comme dans le prototype. Les déplacements prennent un tour. Une compétence qui déplace le joueur vérifie les cases et n’ajoute pas une seconde phase ennemie.
 - Attaques fortes, charges et capacités spéciales ennemies annoncées un tour avant. Les attaques ordinaires sont identifiées par leur portée ; il n’est pas nécessaire de transformer chaque coup en panneau d’avertissement.
 - Les effets promis par une compétence ne dépendent pas d’un jet caché de précision : la poussée fonctionne si la case est libre et la cible déplaçable. Les immunités sont affichées.
@@ -42,7 +42,7 @@ La réduction de dégâts reste bornée. Rancune donne une puissance plafonnée 
 | --- | --- | --- | --- |
 | 1 | Active | Double entaille | Deux coups rapides sur la cible devant soi. Leur total dépasse une attaque simple, mais ne permet pas de changer de cible au milieu. |
 | 2 | Passive | Plaie ouverte | Double entaille applique un saignement court, non cumulable. Les doubles coups des innées ne déclenchent pas deux saignements. |
-| 3 | Active | Pas de côté | Frappe puis déplace le joueur sur une case latérale libre choisie avant confirmation. Si les deux côtés sont bloqués, propose une feinte sur place avec protection réduite. |
+| 3 | Active | Pas de côté | Frappe puis déplace le joueur sur une case latérale libre. Deux côtés libres : choix immédiat Q/D ou bouton. Un seul côté libre : déplacement automatique. Deux côtés bloqués : feinte sur place avec protection réduite. |
 | 7 | Active | Mise à mort | Coup renforcé contre une cible sous un seuil de PV clairement indiqué. Tue : réduit les délais des deux autres actives ; échoue à tuer : reste une vraie frappe. |
 | 11 | Passive | Dans l’ouverture | Pas de côté prépare une frappe renforcée contre sa cible. Fonctionne également après la feinte sur place ; bonus unique et visible. |
 | 17 | Passive | Encore un | Après une Mise à mort réussie, la prochaine attaque simple applique un saignement court à sa nouvelle cible, ou rafraîchit celui qui existe déjà. Le DPS passe d’un ennemi à l’autre sans obtenir une chaîne de tours gratuits. |

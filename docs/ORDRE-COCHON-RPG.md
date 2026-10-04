@@ -1,6 +1,6 @@
 # L’Ordre Cochon — règles de progression validées
 
-Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; le prototype reste actuellement sur cinq étages, avec des statistiques communes et sans classes implémentées.
+Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; le prototype reste actuellement sur cinq étages, avec les trois classes, leurs compétences et les douze chevaliers implémentés. L'état de l'intégration est décrit dans [ORDRE-COCHON-PROTOTYPE-RPG.md](ORDRE-COCHON-PROTOTYPE-RPG.md).
 
 ## Campagne et niveaux
 

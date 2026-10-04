@@ -6,7 +6,8 @@ Cette étape branche le modèle RPG sur le moteur de jeu et les cartes existante
 
 - Choix parmi les douze chevaliers, répartis entre Tank, DPS et Jambonmancien ; une innée distincte par chevalier, renforcée aux niveaux 5, 10 et 15.
 - Trois actives et trois passives par classe, cinq rangs ; déblocages aux niveaux 1, 2, 3, 7, 11 et 17, plafond de niveau 20. Première active offerte, puis un point par niveau.
-- Aperçu avant lancement : cible, coût, dégâts directs estimés, effet et choix du côté pour le Pas de côté. Confirmer dépense un tour ; consulter, tourner et attribuer un point ne dépensent aucun tour.
+- Lancement direct au clic ou avec 1/2/3 ; seul le Pas de côté demande une destination lorsque les deux côtés sont libres. L'action dépense un tour ; consulter, tourner et attribuer un point ne dépensent aucun tour.
+- Effets de combat pixelisés propres aux actives, dégâts flottants, éclats à la mort et annonce de niveau avec gains, points et nouvelles compétences accessibles.
 - Malédictions, saignements, collisions, ripostes, attaques annoncées des élites et du boss, interactions des douze innées, sons et effets brefs.
 - Sauvegarde du build et conversion explicite d'une ancienne partie après choix d'un chevalier, en conservant carte et équipement.
 
@@ -14,7 +15,7 @@ Les objets nouvellement générés suivent les budgets de puissance de l'étage.
 
 ## Validation et limites
 
-185 tests unitaires passent, dont 18 couvrant spécifiquement le RPG : sauvegarde, progression, géométrie des compétences, innées, aperçu sans tour, attaques annoncées et limites de l'interruption du boss. TypeScript et compilation de production passent également.
+193 tests unitaires passent : sauvegarde, progression, géométrie des compétences, innées, commandes directes, retours de combat, ambiance du donjon, attaques annoncées et limites de l'interruption du boss. TypeScript et compilation de production passent également.
 
 Le parcours navigateur vérifie l'installation, les déplacements rapides, les collisions, l'inventaire, les douze choix de chevalier, l'amélioration sans consommation de tour, le ciblage, les coûts, l'explosion et la reprise de sauvegarde sur PC, mobile paysage, portrait à 390 px et portrait compact à 360 px.
 

@@ -10,10 +10,11 @@ import { SpriteObjet } from "./SpriteObjet";
 import { Chevaliers } from "./Chevaliers";
 import { Competences } from "./Competences";
 import { DEBLOCAGES, xpNiveauRpg } from "./equilibrage";
-import { cibleCompetence, coutCompetence, disponible, impactCompetence, ligne, SLOTS_ACTIFS } from "./rpg";
+import { coutCompetence, disponible, ligne, SLOTS_ACTIFS } from "./rpg";
+import { actionRapide, cotesLibres, gainsNiveau, impactsCombat, type ImpactVisuel } from './retours-combat';
 import "./old-school.css";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
-import { convertirRpg, defMonstre, jouer, nouvellePartie, passable, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
+import { convertirRpg, defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
 
 const CLE = "porkos.jambonjon.partie";
@@ -128,7 +129,8 @@ export function Jambonjon() {
   const [panneau, setPanneau] = useState<Panneau>(null);
   const [choix, setChoix] = useState<Partie | null | undefined>(undefined);
   const [competence, setCompetence] = useState<number | null>(null);
-  const [cote, setCote] = useState<"gauche" | "droite">("gauche");
+  const [promotion, setPromotion] = useState<ReturnType<typeof gainsNiveau>>(null);
+  const impacts = useRef<ImpactVisuel[]>([]);
 
   const vue = useRef<HTMLCanvasElement>(null);
   const carte = useRef<HTMLCanvasElement>(null);
@@ -158,6 +160,7 @@ export function Jambonjon() {
       anim.current = null;
       file.current.vider();
       fx.current = { touches: new Set(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] };
+      impacts.current=[];setPromotion(null);
       partieRef.current = p;
       placerCamera(p);
       setPartie(p);
@@ -185,9 +188,16 @@ export function Jambonjon() {
       const apres = jouer(avant, jeu, a);
       if (apres === avant) return;
       const ev = apres.evenements;
+      const maintenant=performance.now(),nouveaux=impactsCombat(avant,apres,a,maintenant);
+      impacts.current=[...impacts.current.filter(e=>maintenant-e.debut<950),...nouveaux].slice(-24);
+      if(nouveaux.length){
+        fx.current.touches=new Set(nouveaux.filter(e=>!e.mort).map(e=>e.uid));
+        fx.current.toucheJusqua=maintenant+240;
+        cam.current.secousse=Math.max(cam.current.secousse,a.type==='competence'?3:1.5);
+      }
       if (apres.tour !== avant.tour || apres.fin) setCompetence(null);
       const son = settings.sons;
-      for (const e of ev) if (son) bruit(e);
+      for (const e of new Set(ev)) if (son) bruit(e);
       if (ev.includes("touche")) {
         fx.current.eclair = 0.45;
         fx.current.eclairCouleur = [170, 10, 10];
@@ -196,6 +206,7 @@ export function Jambonjon() {
       if (ev.includes("niveau")) {
         fx.current.eclair = 0.5;
         fx.current.eclairCouleur = [240, 200, 90];
+        setPromotion(gainsNiveau(avant,apres));
       }
       if (ev.includes("rot") || ev.includes("explosion") || ev.includes("sel")) {
         fx.current.eclair = 0.3;
@@ -236,6 +247,19 @@ export function Jambonjon() {
     [jeu, settings.sons, signal],
   );
 
+  const lancer = useCallback((slot:number)=>{
+    const p=partieRef.current;if(!p)return;
+    const action=actionRapide(p,slot);
+    setPanneau(null);
+    if(action){setCompetence(null);agir(action);}else setCompetence(slot);
+  },[agir]);
+
+  useEffect(()=>{
+    if(!promotion)return;
+    const id=window.setTimeout(()=>setPromotion(null),8000);
+    return ()=>window.clearTimeout(id);
+  },[promotion]);
+
   // Boucle de rendu.
   useEffect(() => {
     if (!partie || choix !== undefined) return;
@@ -273,7 +297,8 @@ export function Jambonjon() {
         else cam.current.secousse = -cam.current.secousse;
         fx.current.eclair = Math.max(0, fx.current.eclair - 0.06);
         if (t > fx.current.toucheJusqua) fx.current.touches = new Set();
-        rendre(image, partieRef.current ?? p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe });
+        impacts.current=impacts.current.filter(e=>t-e.debut<950);
+        rendre(image, partieRef.current ?? p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe, impacts:impacts.current });
         g.putImageData(image, 0, 0);
       }
       id = requestAnimationFrame(boucle);
@@ -357,10 +382,10 @@ export function Jambonjon() {
       }
       if (panneau) return;
       if (partieRef.current.joueur.rpg) {
-        if (["1", "2", "3"].includes(k)) { ev.preventDefault(); if (!ev.repeat) setCompetence(Number(k) - 1); return; }
+        if (["1", "2", "3"].includes(k)) { ev.preventDefault(); if (!ev.repeat) lancer(Number(k) - 1); return; }
         if (k === "k") { ev.preventDefault(); setCompetence(null); setPanneau("competences"); return; }
         if (competence !== null) {
-          if (k === "enter" || k === " ") { ev.preventDefault(); if (!ev.repeat) agir({ type: "competence", slot: competence, cote }); }
+          if(k==='q'||k==='d') {ev.preventDefault();const cote=k==='q'?'gauche':'droite';if(!ev.repeat&&cotesLibres(partieRef.current)[cote])agir({type:'competence',slot:competence,cote});}
           return;
         }
         if (k === "r") return;
@@ -373,7 +398,7 @@ export function Jambonjon() {
     };
     window.addEventListener("keydown", f);
     return () => window.removeEventListener("keydown", f);
-  }, [focused, agir, nouvelle, reprendre, sauvegarde, panneau, choix, competence, cote]);
+  }, [focused, agir, lancer, nouvelle, reprendre, sauvegarde, panneau, choix, competence]);
 
   useMenuCommands(
     {
@@ -425,11 +450,7 @@ export function Jambonjon() {
   );
   const devant = j.rpg ? ligne(partie, j.rpg.classe === "jambonmancien" ? 2 : 1)[0] : partie.monstres.find((m) => m.x === j.x + [0, 1, 0, -1][j.dir]! && m.y === j.y + [-1, 0, 1, 0][j.dir]!);
   const chevalier = jeu.rpg?.chevaliers.find((c) => c.id === j.rpg?.chevalier);
-  const selectionCible = j.rpg && competence !== null ? cibleCompetence(partie, competence) : undefined;
-  const impact = j.rpg && competence !== null ? impactCompetence(partie, competence) : null;
-  const estLibre = (dir: number) => { const x = j.x + [0, 1, 0, -1][dir]!, y = j.y + [-1, 0, 1, 0][dir]!; return passable(partie.carte, x, y) && !partie.monstres.some((m) => m.x === x && m.y === y); };
-  const gaucheLibre = estLibre((j.dir + 3) % 4), droiteLibre = estLibre((j.dir + 1) % 4);
-  const pasChoisiBloque = j.rpg?.classe === "dps" && competence === 1 && (gaucheLibre || droiteLibre) && !(cote === "gauche" ? gaucheLibre : droiteLibre);
+  const cotes=cotesLibres(partie);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
   const journal = partie.journal.slice(poche ? -2 : -4);
   const btn = (a: Action, label: string, cls = "", testid?: string) => (
@@ -450,14 +471,18 @@ export function Jambonjon() {
       <div className="jbj-gauche">
         <div className="jbj-vue">
           <canvas ref={vue} width={LARGEUR} height={HAUTEUR} data-testid="jbj-vue" />
+          {promotion&&!panneau&&<div className="jbj-promotion" data-testid="jbj-promotion" role="status" aria-live="polite">
+            <strong>{str('jbj.rpg.promotion',{n:promotion.niveau})}</strong>
+            <span>{str('jbj.rpg.gains',{pv:promotion.pv,mousse:promotion.mousse,att:promotion.att,def:promotion.def})}</span>
+            {j.rpg&&<span>{str('jbj.rpg.pointsGagnes',{n:promotion.points})}</span>}
+            {j.rpg&&promotion.debloquees.length>0&&<span>{str('jbj.rpg.debloque',{noms:promotion.debloquees.map(i=>jeu.rpg!.competences[j.rpg!.classe][i]!.nom).join(', ')})}</span>}
+            <div>{j.rpg&&<button className="pk-btn" onClick={()=>{setPromotion(null);setPanneau('competences');}}>{str('jbj.rpg.depenser')}</button>}<button className="pk-btn" onClick={()=>setPromotion(null)} aria-label={str('jbj.rpg.fermerPromotion')}>×</button></div>
+          </div>}
           {j.rpg && partie.monstres.some((m) => m.rpg?.annonce?.x === j.x && m.rpg.annonce.y === j.y) && <div className="jbj-menace" data-testid="jbj-menace">{str("jbj.rpg.alerte")}</div>}
           {j.rpg && competence !== null && !panneau && <div className="jbj-rpg-apercu" data-testid="jbj-apercu-competence">
             <b>{jeu.rpg!.competences[j.rpg.classe][SLOTS_ACTIFS[competence]!]!.nom}</b>
-            <p>{jeu.rpg!.competences[j.rpg.classe][SLOTS_ACTIFS[competence]!]!.effet}</p>
-            <p>{selectionCible ? str("jbj.rpg.cible", { nom: defMonstre(jeu, selectionCible.type).nom }) : str("jbj.rpg.sansCible")} · {str(coutCompetence(partie, competence) ? "jbj.rpg.cout" : "jbj.rpg.physique", { n: coutCompetence(partie, competence) })}</p>
-            {impact && <p className="jbj-valeur">{str("jbj.rpg.impact", impact)}</p>}
-            {j.rpg.classe === "dps" && competence === 1 && <div>{gaucheLibre || droiteLibre ? <><button className={`pk-btn ${cote === "gauche" ? "choisi" : ""}`} onClick={() => setCote("gauche")} disabled={!gaucheLibre}>{str("jbj.rpg.gauche")}</button><button className={`pk-btn ${cote === "droite" ? "choisi" : ""}`} onClick={() => setCote("droite")} disabled={!droiteLibre}>{str("jbj.rpg.droite")}</button></> : str("jbj.rpg.feinte")}</div>}
-            <div><button className="pk-btn" data-testid="jbj-confirmer-competence" onClick={() => agir({ type: "competence", slot: competence, cote: j.rpg!.classe === "dps" && competence === 1 && (gaucheLibre || droiteLibre) ? cote : undefined })} disabled={!disponible(partie, competence) || pasChoisiBloque}>{str("jbj.rpg.confirmer")}</button><button className="pk-btn" onClick={() => setCompetence(null)}>{str("jbj.rpg.annuler")}</button></div>
+            <p>{str('jbj.rpg.choisirPas')}</p>
+            <div><button className="pk-btn" data-testid="jbj-pas-gauche" onClick={()=>agir({type:'competence',slot:competence,cote:'gauche'})} disabled={!cotes.gauche||!disponible(partie,competence)}>{str('jbj.rpg.gauche')}</button><button className="pk-btn" data-testid="jbj-pas-droite" onClick={()=>agir({type:'competence',slot:competence,cote:'droite'})} disabled={!cotes.droite||!disponible(partie,competence)}>{str('jbj.rpg.droite')}</button><button className="pk-btn" onClick={()=>setCompetence(null)}>{str('jbj.rpg.annuler')}</button></div>
           </div>}
           {devant && (
             <div className="jbj-cible" data-testid="jbj-cible">
@@ -526,7 +551,7 @@ export function Jambonjon() {
         </div>
         {j.ivresse > 0 && <p className="jbj-ivre">{str("jbj.ivre")}</p>}
         {j.rpg && <div className="jbj-rpg-barre" data-testid="jbj-barre-competences">
-          {SLOTS_ACTIFS.map((i, slot) => <button className={`pk-btn ${competence === slot ? "choisi" : ""}`} key={i} data-testid={`jbj-actif-${slot}`} onClick={() => { setPanneau(null); setCompetence(slot); }} disabled={!j.rpg!.rangs[i] || j.rpg!.delais[slot]! > 0 || j.mousse < coutCompetence(partie, slot)} title={jeu.rpg!.competences[j.rpg!.classe][i]!.effet}>
+          {SLOTS_ACTIFS.map((i, slot) => <button className={`pk-btn ${competence === slot ? "choisi" : ""}`} key={i} data-testid={`jbj-actif-${slot}`} onClick={() => lancer(slot)} disabled={!j.rpg!.rangs[i] || j.rpg!.delais[slot]! > 0 || j.mousse < coutCompetence(partie, slot)} title={`${jeu.rpg!.competences[j.rpg!.classe][i]!.effet} · ${str(coutCompetence(partie,slot)?'jbj.rpg.cout':'jbj.rpg.physique',{n:coutCompetence(partie,slot)})}`}>
             <span>{slot + 1} · {jeu.rpg!.competences[j.rpg!.classe][i]!.nom}</span><small>{j.rpg!.delais[slot]! > 0 ? str("jbj.rpg.delai", { n: j.rpg!.delais[slot]! }) : j.rpg!.rangs[i] ? str("jbj.rpg.pret") : str("jbj.rpg.niveauRequis", { n: DEBLOCAGES[i]! })}</small>
           </button>)}
           <button className="pk-btn" data-testid="jbj-ouvrir-competences" onClick={() => { setCompetence(null); setPanneau((p) => p === "competences" ? null : "competences"); }}>{str("jbj.rpg.competences")}{j.rpg.points > 0 ? ` (${j.rpg.points})` : ""}</button>

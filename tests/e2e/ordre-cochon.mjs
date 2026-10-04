@@ -335,7 +335,7 @@ try {
     await page.getByTestId("jbj-sac-fermer").click();
     step(`${tag}: inventaire, comparaison, échange, retrait, sol, provisions et sauvegarde validés`);
     step(`${tag}: déplacements rapides, rotations, murs, ivresse, inventaire et nouvelle partie validés`);
-    // Mage de niveau 10 : points réels, aucun tour pour apprendre ; portée et aperçu avant usage.
+    // Mage de niveau 10 : points réels, aucun tour pour apprendre ; lancement en un clic.
     await page.evaluate(()=>{
       const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
       p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.niveau=10;p.joueur.xp=0;p.joueur.pv=80;p.joueur.mousse=60;p.joueur.ivresse=0;
@@ -357,19 +357,44 @@ try {
     if(SHOTS)await page.getByTestId('jbj-competences').screenshot({path:join(SHOTS,`${tag}-competences.png`)});
     await page.getByTestId('jbj-fermer-competences').click();
     const avantSort=await lire();await page.getByTestId('jbj-actif-0').click();
-    if((await lire()).tour!==avantSort.tour)throw new Error(`${tag}: préparer une compétence prend un tour`);
-    if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-apercu-sort.png`)});
-    await page.getByTestId('jbj-confirmer-competence').click();
+    if(await page.getByTestId('jbj-confirmer-competence').count())throw new Error(`${tag}: confirmation redondante encore présente`);
+    if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-effet-sel.png`)});
     const apresSort=await lire();
     if(apresSort.tour!==avantSort.tour+1||apresSort.joueur.mousse!==avantSort.joueur.mousse-5||!apresSort.monstres[0].rpg.malediction)throw new Error(`${tag}: sort, coût ou malédiction incorrect`);
     if(!apresSort.monstres[0].rpg.annonce)throw new Error(`${tag}: attaque lourde non annoncée`);
     await page.getByTestId('jbj-menace').waitFor();
     await page.getByTestId('jbj-actif-2').click();
     if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-combat-rpg.png`)});
-    await page.getByTestId('jbj-confirmer-competence').click();
     const apresExplosion=await lire();
     if(apresExplosion.monstres[0].rpg.malediction!==0||apresExplosion.monstres[0].pv>=apresSort.monstres[0].pv)throw new Error(`${tag}: explosion ou consommation de malédiction incorrecte`);
     await reprendre();if((await lire()).joueur.rpg.chevalier!=='ysee')throw new Error(`${tag}: chevalier perdu à la reprise`);
+    // Le clavier lance directement ; la mort franchit un niveau et affiche les gains.
+    await page.evaluate(()=>{
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      p.joueur.rpg.delais=[0,0,0];p.joueur.mousse=60;
+      p.monstres=[{uid:5100,type:'inspecteur',niveau:1,elite:false,boss:false,x:4,y:3,pv:1,pvMax:23,att:1,def:0,xp:10000,eveille:true,sonne:0}];
+      localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+    });
+    await reprendre();const avantNiveau=await lire();await page.keyboard.press('1');
+    await page.getByTestId('jbj-promotion').waitFor();const apresNiveau=await lire();
+    if(apresNiveau.tour!==avantNiveau.tour+1||apresNiveau.joueur.niveau<=avantNiveau.joueur.niveau)throw new Error(`${tag}: raccourci direct ou montée de niveau incorrect`);
+    const bandeau=page.getByTestId('jbj-promotion'),tailleBandeau=await bandeau.evaluate(e=>[e.scrollWidth,e.clientWidth]);
+    if(tailleBandeau[0]>tailleBandeau[1]+1)throw new Error(`${tag}: annonce de niveau déborde`);
+    if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-niveau.png`)});
+    await bandeau.getByRole('button',{name:'Améliorer mes compétences'}).click();
+    await page.getByTestId('jbj-competences').waitFor();await page.getByTestId('jbj-fermer-competences').click();
+    await page.evaluate(()=>{
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      p.joueur.niveau=7;p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.mousse=30;
+      Object.assign(p.joueur.rpg,{chevalier:'colin',classe:'dps',rangs:[1,1,1,1,0,0],points:3,delais:[0,0,0]});
+      p.monstres=[{uid:5200,type:'inspecteur',niveau:1,elite:false,boss:false,x:4,y:3,pv:100,pvMax:100,att:1,def:0,xp:1,eveille:true,sonne:0}];
+      localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+    });
+    await reprendre();const avantPas=await lire();await page.getByTestId('jbj-actif-1').click();
+    await page.getByTestId('jbj-pas-droite').waitFor();
+    if((await lire()).tour!==avantPas.tour)throw new Error(`${tag}: choix du côté consomme un tour`);
+    await page.getByTestId('jbj-pas-droite').click();const apresPas=await lire();
+    if(apresPas.joueur.x!==5||apresPas.tour!==avantPas.tour+1||apresPas.monstres[0].pv>=avantPas.monstres[0].pv)throw new Error(`${tag}: pas et frappe ne partent pas ensemble`);
     step(`${tag}: douze chevaliers, compétences, points, ciblage, mousse, explosion, menace et sauvegarde validés`);
     if(SHOTS){
       const bases=['couteau','os','tranchoir','crochet','louche','hachoir','tablier','gilet','couennes','manteau','charlotte','bob','casque','couronne','decapsuleur','pork-id','nappe','appeau','jambon','biere'];

@@ -1,0 +1,11 @@
+# Combat et progression : retours visuels
+
+Les trois actives se lancent directement au clic ou avec 1/2/3. Le Pas de côté DPS garde un choix gauche/droite uniquement lorsque les deux destinations sont libres ; Q/D ou un bouton déclenchent alors simultanément la frappe et le pas. Un seul côté libre est choisi automatiquement, et deux côtés bloqués donnent la feinte prévue par le moteur. Annuler le choix ne consomme rien. Les ressources, cibles et délais restent vérifiés au moment de l'action, y compris pour une action en attente pendant un déplacement.
+
+Une montée de niveau affiche pendant huit secondes un bandeau refermable avec les gains réels de PV maximum, mousse maximum, attaque, défense et points, ainsi que les compétences désormais accessibles. Il permet d'ouvrir directement le livre pour dépenser les points. Le bouton du livre conserve le nombre de points non dépensés après la disparition du bandeau. Le combat n'est pas suspendu.
+
+Les effets utilisent le framebuffer natif 320 × 180 : entailles, double impact, exécution croisée, contour de bouclier, choc du butoir, revers, cristaux de sel, projection du rot et explosion de braises. Ils durent moins d'une seconde, avec des chiffres de dégâts et un éclatement supplémentaire à la mort. Les coordonnées viennent des ennemis réellement blessés avant l'action ; les chiffres représentent la perte effective de PV, additionnée sur le tour. Les dégâts différés ont un retour distinct d'une entaille volontaire. Le tampon de profondeur masque les effets derrière les murs et les cadres.
+
+Les effets et le bandeau sont transitoires : aucune particule ne rejoint les sauvegardes, aucun tirage aléatoire de partie n'est consommé. Le flash d'impact conserve les détails des sprites et les sons identiques d'un même tour sont regroupés. Les animations ne bloquent pas la commande suivante et ne changent ni la progression ni l'équilibrage.
+
+`scripts/ordre-cochon/apercu-combat.mjs` produit des séquences reproductibles à partir de véritables états avant/après `jouer`, pour les neuf compétences actives. La vérification couvre le clic et le raccourci directs, les coûts et délais, la malédiction puis l'explosion, les gains de plusieurs niveaux et l'ouverture du livre, ainsi que le choix tactique du pas DPS.

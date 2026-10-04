@@ -3,6 +3,8 @@
  * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
  */
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
+import { dessinerImpacts } from './effets-combat';
+import type { ImpactVisuel } from './retours-combat';
 import { PALETTE_PROVISIONS, PIXELS_PROVISIONS } from "./provisions-pixels";
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
@@ -437,6 +439,7 @@ const DENSITE = 0.34;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v / 16 - 0.5) * 9);
 
 export interface EffetsRendu {
+  impacts?: ImpactVisuel[];
   temps: number;
   /** Monstres touchés à l'instant (clignotent en rouge). */
   touches: Set<number>;
@@ -632,9 +635,9 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         let g = s.tex.px[ti + 1]!;
         let b = s.tex.px[ti + 2]!;
         if (s.rouge) {
-          r = Math.min(255, r * 0.5 + 200);
-          g *= 0.4;
-          b *= 0.4;
+          r = Math.min(255, r * 0.7 + 100);
+          g *= 0.65;
+          b *= 0.6;
         }
         if (al < 250) {
           const t = al / 255;
@@ -686,6 +689,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         d[i + k2] = (v >> 3) << 3;
       }
     }
+  if(fx.impacts?.length)dessinerImpacts(out,cam,fx.temps,fx.impacts,profondeur);
 }
 
 /* --------------------------------- Carte 2D --------------------------------- */
