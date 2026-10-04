@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from "react";
 import { useOs } from "@/os/context";
-import { couper, entete, pageTeletexte, type Couleur, type Ligne } from "./teletexte";
+import { couper, entete, pageTeletexte, type Couleur, type Ligne } from "./teletexte-logic";
 
 const PAR_SOUS_PAGE = 16;
 const COULEURS_FASTEXT: Couleur[] = ["r", "g", "y", "c"];

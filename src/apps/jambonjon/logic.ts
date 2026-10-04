@@ -388,6 +388,7 @@ export type Action =
   | { type: "rot" }
   | { type: "equiper"; uid: number }
   | { type: "retirer"; emplacement: Emplacement }
+  | { type: "ramasser" }
   | { type: "jeter"; uid: number };
 
 const clone = (p: Partie): Partie => ({
@@ -483,11 +484,7 @@ export const emplacementDe = (jeu: JeuJambonjon, o: Objet): Emplacement => jeu.o
 
 function deplacer(p: Partie, jeu: JeuJambonjon, dir: number): boolean {
   const j = p.joueur;
-  // Ivresse : un pas sur sept part de travers.
-  if (j.ivresse > 0 && tirer(p) < 0.15) {
-    dir = (dir + parmi(p, [1, 3])) % 4;
-    log(p, "jbj.msg.titube");
-  }
+  // L’ivresse modifie le combat, jamais la direction demandée par le joueur.
   const nx = j.x + DX[dir]!;
   const ny = j.y + DY[dir]!;
   const m = monstreEn(p, nx, ny);
@@ -700,12 +697,23 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
     }
     case "retirer": {
       const o = j.equipe[a.emplacement];
-      if (!o || j.sac.length >= SAC_MAX) return avant;
+      if (!o) return avant;
+      if (j.sac.length >= SAC_MAX) {
+        log(p, "jbj.msg.sacPlein");
+        return p;
+      }
       delete j.equipe[a.emplacement];
       j.sac.push(o);
       const s = stats(j);
       j.pv = Math.min(j.pv, s.pvMax);
       j.mousse = Math.min(j.mousse, s.mousseMax);
+      log(p, "jbj.msg.retire", { nom: nomObjet(jeu, o) });
+      prendDuTemps = false;
+      break;
+    }
+    case "ramasser": {
+      if (!p.sol.some((s) => s.x === j.x && s.y === j.y)) return avant;
+      ramasser(p, jeu);
       prendDuTemps = false;
       break;
     }

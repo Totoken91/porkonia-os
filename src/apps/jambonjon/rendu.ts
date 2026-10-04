@@ -3,6 +3,7 @@
  * brouillard de cave épais, monstres et objets en sprites, tramage ordonné et couleurs ramenées sur 15 bits
  * (l'aspect d'une console de salon du début des années 2000). Textures et sprites sont dessinés ici, en pixels.
  */
+import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
 
@@ -223,144 +224,58 @@ function rect(g: CanvasRenderingContext2D, c: string, x: number, y: number, w: n
   g.fillStyle = c;
   g.fillRect(x, y, w, h);
 }
-function yeux(g: CanvasRenderingContext2D, x1: number, x2: number, y: number, c = "#ff3020") {
-  rect(g, c, x1, y, 2, 2);
-  rect(g, c, x2, y, 2, 2);
-}
+
 
 const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => number> = {
-  rat: (g) => {
-    g.strokeStyle = "#d88a8a";
-    g.lineWidth = 2;
-    g.beginPath();
-    g.moveTo(8, 34);
-    g.quadraticCurveTo(2, 30, 4, 22);
-    g.stroke();
-    ell(g, "#6e6258", 20, 32, 12, 6);
-    ell(g, "#857869", 20, 30, 10, 4);
-    ell(g, "#6e6258", 31, 29, 6, 5);
-    ell(g, "#d88a8a", 30, 24, 3, 3);
-    ell(g, "#d88a8a", 35, 34, 2, 1.5);
-    yeux(g, 32, 34, 28);
-    rect(g, "#4a3e34", 14, 37, 3, 3);
-    rect(g, "#4a3e34", 25, 37, 3, 3);
-    return 0.45;
-  },
-  gobelin: (g) => {
-    rect(g, "#3a5a24", 13, 30, 5, 9);
-    rect(g, "#3a5a24", 22, 30, 5, 9);
-    ell(g, "#6a4a2a", 20, 25, 9, 9);
-    ell(g, "#5f9a38", 20, 13, 8, 8);
-    g.fillStyle = "#5f9a38";
-    g.beginPath();
-    g.moveTo(12, 12);
-    g.lineTo(2, 6);
-    g.lineTo(13, 16);
-    g.fill();
-    g.beginPath();
-    g.moveTo(28, 12);
-    g.lineTo(38, 6);
-    g.lineTo(27, 16);
-    g.fill();
-    yeux(g, 16, 22, 11, "#ffe040");
-    rect(g, "#2a1a0c", 17, 17, 6, 1);
-    ell(g, "#b08a5a", 32, 26, 5, 6);
-    rect(g, "#5f9a38", 9, 22, 3, 8);
-    return 0.62;
-  },
-  moisissure: (g) => {
-    ell(g, "#7a8a6a", 20, 30, 16, 10);
-    ell(g, "#9aaa86", 20, 26, 13, 9);
-    ell(g, "#c8d0b0", 15, 22, 5, 4);
-    ell(g, "#c8d0b0", 26, 24, 4, 3);
-    ell(g, "#4a5a3a", 22, 31, 3, 2);
-    ell(g, "#4a5a3a", 12, 29, 2, 2);
-    for (let k = 0; k < 9; k++) rect(g, "#e8ecd8", 6 + k * 3.4, 16 + ((k * 7) % 5), 1, 3);
-    yeux(g, 16, 23, 26, "#202010");
-    return 0.5;
-  },
-  saucisson: (g) => {
-    ell(g, "#7a2a22", 20, 22, 8, 15);
-    ell(g, "#9a3a2c", 18, 20, 5, 12);
-    for (const [x, y] of [
-      [16, 14],
-      [22, 19],
-      [17, 25],
-      [23, 28],
-      [19, 32],
-    ])
-      rect(g, "#f0e0d0", x!, y!, 2, 2);
-    rect(g, "#e8e0c8", 19, 3, 2, 5);
-    for (let y = 10; y < 34; y += 6) rect(g, "#d8d0b0", 12, y, 16, 1);
-    rect(g, "#5a2018", 14, 36, 3, 3);
-    rect(g, "#5a2018", 23, 36, 3, 3);
-    yeux(g, 16, 22, 15, "#ffffff");
-    rect(g, "#000000", 17, 16, 1, 1);
-    rect(g, "#000000", 23, 16, 1, 1);
-    return 0.7;
-  },
+  ...DESSINS_ENNEMIS,
   inspecteur: (g) => {
-    rect(g, "#2a2a30", 14, 30, 5, 10);
-    rect(g, "#2a2a30", 21, 30, 5, 10);
-    rect(g, "#5a5a66", 11, 16, 18, 16);
-    rect(g, "#e8e8e8", 18, 16, 4, 10);
-    rect(g, "#b3121b", 19, 17, 2, 8);
-    ell(g, "#e0b090", 20, 11, 5, 6);
-    rect(g, "#2a2a40", 13, 4, 14, 4);
-    rect(g, "#2a2a40", 11, 7, 18, 2);
-    rect(g, "#c98a1c", 18, 5, 4, 2);
-    yeux(g, 17, 21, 10, "#101010");
-    rect(g, "#f4f0e0", 26, 19, 8, 10);
-    rect(g, "#8a6a40", 25, 18, 10, 2);
-    for (let y = 22; y < 28; y += 2) rect(g, "#4060a0", 27, y, 6, 1);
+    // Pixel art à coordonnées entières : silhouette asymétrique, palette limitée,
+    // grandes masses lisibles de loin, visage et procès-verbal lisibles de près.
+    const p = { nuit: "#25232d", ombre: "#393744", tissu: "#555463", pli: "#787986",
+      peau: "#c28b71", chair: "#e4b593", clair: "#f3d2aa", rouge: "#922e3b",
+      or: "#ceaa62", papier: "#e9ddbc", encre: "#696678" };
+    const r = (c: string, x: number, y: number, w: number, h: number) => rect(g, c, x, y, w, h);
+    // Bottines, jambes séparées et bas du manteau.
+    r(p.nuit, 12, 32, 6, 6); r(p.nuit, 22, 32, 5, 6);
+    r(p.pli, 13, 33, 2, 3); r(p.tissu, 23, 33, 1, 3);
+    r(p.nuit, 10, 37, 8, 2); r(p.nuit, 22, 37, 8, 2);
+    r(p.ombre, 10, 37, 4, 1); r(p.ombre, 26, 37, 3, 1);
+    r(p.ombre, 11, 17, 16, 17); r(p.tissu, 12, 18, 13, 14);
+    r(p.pli, 12, 19, 2, 11); r(p.nuit, 20, 25, 1, 8);
+    r(p.ombre, 15, 30, 4, 2); r(p.nuit, 11, 33, 8, 1); r(p.nuit, 22, 32, 5, 2);
+    // Épaules tombantes, bras au tampon et bras tenant la planche.
+    r(p.ombre, 8, 19, 4, 9); r(p.tissu, 8, 20, 2, 6);
+    r(p.nuit, 7, 27, 5, 2); r(p.peau, 7, 29, 4, 3); r(p.chair, 7, 29, 2, 2);
+    r(p.ombre, 26, 18, 4, 10); r(p.pli, 27, 19, 2, 3);
+    r(p.papier, 16, 17, 7, 5); r(p.clair, 17, 17, 4, 2);
+    r(p.rouge, 19, 19, 2, 7); r(p.rouge, 18, 24, 3, 2);
+    r(p.nuit, 14, 18, 2, 3); r(p.nuit, 15, 21, 3, 1);
+    r(p.pli, 14, 19, 1, 2); r(p.nuit, 23, 18, 2, 3); r(p.nuit, 22, 21, 2, 1);
+    r(p.or, 14, 24, 2, 2); r(p.or, 21, 28, 1, 1);
+    // Joues creuses, arcade menaçante, nez et moustache stricte.
+    r(p.peau, 15, 8, 10, 8); r(p.chair, 16, 9, 7, 6);
+    r(p.clair, 16, 9, 3, 2); r(p.peau, 15, 11, 2, 3); r(p.peau, 23, 10, 2, 5);
+    r(p.nuit, 16, 10, 3, 1); r(p.nuit, 21, 10, 3, 1);
+    r(p.nuit, 17, 11, 1, 1); r(p.nuit, 22, 11, 1, 1);
+    r(p.clair, 19, 11, 2, 3); r(p.peau, 21, 13, 1, 1);
+    r(p.peau, 17, 14, 6, 1); r(p.peau, 18, 15, 4, 1);
+    r(p.peau, 18, 16, 4, 1);
+    // Casquette d'État, visière épaisse et insigne doré.
+    r(p.nuit, 14, 3, 12, 5); r(p.tissu, 15, 3, 9, 2);
+    r(p.pli, 16, 3, 6, 1); r(p.ombre, 13, 5, 14, 2);
+    r(p.or, 18, 5, 4, 2); r(p.clair, 19, 5, 1, 1);
+    r(p.nuit, 12, 7, 16, 2); r(p.tissu, 13, 7, 5, 1);
+    // Procès-verbal : bord épais, pince métallique, lignes et sceau rouge.
+    r(p.nuit, 27, 20, 9, 14); r(p.or, 28, 20, 7, 13);
+    r(p.papier, 29, 22, 5, 10); r(p.clair, 29, 22, 1, 9);
+    r(p.pli, 30, 20, 3, 2); r(p.nuit, 31, 20, 1, 1);
+    r(p.encre, 30, 24, 3, 1); r(p.encre, 30, 26, 3, 1); r(p.encre, 30, 28, 2, 1);
+    r(p.rouge, 32, 30, 2, 2); r(p.peau, 26, 28, 3, 3); r(p.chair, 26, 28, 2, 1);
+    // Tampon serré dans la main gauche.
+    r(p.rouge, 8, 31, 2, 3); r(p.nuit, 6, 34, 6, 2); r(p.or, 7, 34, 4, 1);
     return 0.86;
   },
-  tonneau: (g) => {
-    ell(g, "#6a3e1a", 20, 24, 13, 15);
-    for (let x = 9; x < 32; x += 4) rect(g, "#8a5a2c", x, 10, 2, 28);
-    rect(g, "#7a7a7a", 7, 13, 26, 2);
-    rect(g, "#7a7a7a", 7, 33, 26, 2);
-    rect(g, "#100806", 12, 23, 16, 6);
-    for (let x = 13; x < 28; x += 3) {
-      rect(g, "#f0ead8", x, 23, 2, 2);
-      rect(g, "#f0ead8", x + 1, 27, 2, 2);
-    }
-    yeux(g, 14, 24, 17, "#ffe040");
-    return 0.66;
-  },
-  fantome: (g) => {
-    g.fillStyle = "#d8e8e0";
-    g.beginPath();
-    g.moveTo(8, 36);
-    g.quadraticCurveTo(6, 6, 20, 5);
-    g.quadraticCurveTo(34, 6, 32, 36);
-    for (let x = 32; x > 8; x -= 4) g.quadraticCurveTo(x - 1, 31, x - 4, 36);
-    g.fill();
-    ell(g, "#b8d0c8", 20, 22, 8, 10);
-    ell(g, "#203028", 16, 15, 2.5, 3.5);
-    ell(g, "#203028", 24, 15, 2.5, 3.5);
-    ell(g, "#203028", 20, 24, 3, 4);
-    rect(g, "#f4f0ea", 18, 8, 4, 2);
-    return 0.8;
-  },
-  affineur: (g) => {
-    rect(g, "#1a1a1a", 12, 32, 6, 8);
-    rect(g, "#1a1a1a", 22, 32, 6, 8);
-    ell(g, "#efe8d8", 20, 24, 13, 12);
-    rect(g, "#b3121b", 14, 22, 12, 12);
-    rect(g, "#e8e0cc", 15, 23, 10, 10);
-    ell(g, "#d8a080", 20, 10, 6, 6);
-    rect(g, "#101010", 13, 0, 14, 5);
-    rect(g, "#101010", 10, 4, 20, 2);
-    rect(g, "#c98a1c", 13, 4, 14, 1);
-    yeux(g, 17, 21, 9);
-    rect(g, "#6a2a1a", 16, 13, 8, 2);
-    rect(g, "#c8c8d0", 32, 6, 4, 20);
-    rect(g, "#e8e8f0", 33, 6, 2, 18);
-    rect(g, "#5a3418", 32, 26, 4, 6);
-    rect(g, "#d8a080", 29, 25, 5, 4);
-    return 1.0;
-  },
+
 };
 
 type Objet3D = "jambon" | "biere" | "tonneau" | "sac";
@@ -606,7 +521,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const dy = s.y - cam.y;
       return { s, tx: inv * (dirY * dx - dirX * dy), ty: inv * (-plY * dx + plX * dy) };
     })
-    .filter((v) => v.ty > 0.2 && v.ty < 8)
+    .filter((v) => v.ty > 0.01 && v.ty < 8)
+    .map((v) => ({ ...v, ty: Math.max(0.12, v.ty) }))
     .sort((u, v) => v.ty - u.ty);
   for (const { s, tx, ty } of proj) {
     const ecranX = (W / 2) * (1 + tx / ty);

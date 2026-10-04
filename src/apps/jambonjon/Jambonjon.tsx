@@ -4,9 +4,10 @@
  * tourner ; au doigt, une manette s'affiche sous la vue. La partie est sauvegardée à chaque tour dans ce navigateur.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Emplacement } from "@/content/types";
+import { Commandes } from "./commandes";
+import { Inventaire } from "./Inventaire";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
-import { comparer, defMonstre, EMPLACEMENTS, emplacementDe, jouer, nomObjet, nouvellePartie, relirePartie, ROT_COUT, SAC_MAX, stats, xpPourNiveau, type Action, type Objet, type Partie } from "./logic";
+import { defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
 
 const CLE = "porkos.jambonjon.partie";
@@ -112,16 +113,14 @@ export function Jambonjon() {
   const [partie, setPartie] = useState<Partie | null>(null);
   const [sauvegarde, setSauvegarde] = useState<Partie | null>(null);
   const [panneau, setPanneau] = useState<Panneau>(null);
-  const [choisi, setChoisi] = useState<number | null>(null);
 
   const vue = useRef<HTMLCanvasElement>(null);
   const carte = useRef<HTMLCanvasElement>(null);
   const cam = useRef<Camera>({ x: 0, y: 0, angle: 0, bob: 0, secousse: 0 });
   const anim = useRef<{ de: Camera; vers: Camera; debut: number; duree: number; marche: boolean } | null>(null);
   const fx = useRef({ touches: new Set<number>(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] as [number, number, number] });
-  const file = useRef<Action | null>(null);
+  const file = useRef(new Commandes<Action>());
   const partieRef = useRef<Partie | null>(null);
-  partieRef.current = partie;
 
   // Sauvegarde existante.
   useEffect(() => {
@@ -140,8 +139,13 @@ export function Jambonjon() {
   const commencer = useCallback(
     (p: Partie) => {
       preparer();
+      anim.current = null;
+      file.current.vider();
+      fx.current = { touches: new Set(), toucheJusqua: 0, eclair: 0, eclairCouleur: [180, 20, 20] };
+      partieRef.current = p;
       placerCamera(p);
       setPartie(p);
+      try { window.localStorage.setItem(CLE, JSON.stringify(p)); } catch { /* sauvegarde impossible */ }
       setPanneau(null);
       signal("jambonjon:partie");
     },
@@ -152,11 +156,11 @@ export function Jambonjon() {
 
   /** Une action : nouvel état, animation de la caméra, sons, éclairs. */
   const agir = useCallback(
-    (a: Action) => {
+    (a: Action, repetition = false) => {
       const avant = partieRef.current;
       if (!avant || avant.fin) return;
       if (anim.current) {
-        file.current = a;
+        if (!repetition) file.current.ajouter(a);
         return;
       }
       const apres = jouer(avant, jeu, a);
@@ -197,6 +201,8 @@ export function Jambonjon() {
         const bouge = de.x !== vers.x || de.y !== vers.y;
         if (bouge || Math.abs(da) > 0.01) anim.current = { de, vers, debut: performance.now(), duree: bouge ? 170 : 140, marche: bouge };
       }
+      partieRef.current = apres;
+      if (apres.fin) file.current.vider();
       if (apres.fin === "victoire") signal("jambonjon:victoire");
       if (apres.fin === "mort") signal("jambonjon:mort");
       setPartie(apres);
@@ -232,9 +238,14 @@ export function Jambonjon() {
           cam.current.bob = an.marche ? Math.sin(k * Math.PI) * 3 : 0;
           if (k >= 1) {
             anim.current = null;
-            const suite = file.current;
-            file.current = null;
-            if (suite) setTimeout(() => agir(suite), 0);
+            // La caméra termine exactement sur la case avant la commande suivante.
+            cam.current = { ...an.vers };
+            let suite = file.current.suivante();
+            while (suite) {
+              agir(suite);
+              if (anim.current) break;
+              suite = file.current.suivante();
+            }
           }
         }
         cam.current.secousse *= 0.8;
@@ -242,7 +253,7 @@ export function Jambonjon() {
         else cam.current.secousse = -cam.current.secousse;
         fx.current.eclair = Math.max(0, fx.current.eclair - 0.06);
         if (t > fx.current.toucheJusqua) fx.current.touches = new Set();
-        rendre(image, p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe });
+        rendre(image, partieRef.current ?? p, cam.current, { temps: t, touches: fx.current.touches, eclair: fx.current.eclair, eclairCouleur: fx.current.eclairCouleur, spriteDe });
         g.putImageData(image, 0, 0);
       }
       id = requestAnimationFrame(boucle);
@@ -250,6 +261,21 @@ export function Jambonjon() {
     id = requestAnimationFrame(boucle);
     return () => cancelAnimationFrame(id);
   }, [partie !== null, jeu, agir]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Une fenêtre inactive ou un panneau ouvert ne garde pas de déplacements en attente.
+  useEffect(() => {
+    if (!focused || panneau) file.current.vider();
+  }, [focused, panneau]);
+
+  useEffect(() => {
+    const vider = () => file.current.vider();
+    window.addEventListener("blur", vider);
+    document.addEventListener("visibilitychange", vider);
+    return () => {
+      window.removeEventListener("blur", vider);
+      document.removeEventListener("visibilitychange", vider);
+    };
+  }, []);
 
   // Carte automatique.
   useEffect(() => {
@@ -307,15 +333,16 @@ export function Jambonjon() {
         nouvelle();
         return;
       }
+      if (panneau) return;
       const a = touches[k];
       if (a) {
         ev.preventDefault();
-        agir(a);
+        agir(a, ev.repeat);
       }
     };
     window.addEventListener("keydown", f);
     return () => window.removeEventListener("keydown", f);
-  }, [focused, agir, nouvelle, commencer, sauvegarde]);
+  }, [focused, agir, nouvelle, commencer, sauvegarde, panneau]);
 
   useMenuCommands(
     {
@@ -363,12 +390,6 @@ export function Jambonjon() {
       </b>
     </div>
   );
-  const couleur = (o: Objet) => jeu.raretes.find((r) => r.id === o.rarete)?.couleur ?? "#e8dcc0";
-  const bonus = (o: { att: number; def: number; pv: number; mousse: number }, signe = false) =>
-    (["att", "def", "pv", "mousse"] as const)
-      .filter((k) => o[k] !== 0)
-      .map((k) => `${signe && o[k] > 0 ? "+" : ""}${o[k]} ${str(`jbj.stat.${k}`)}`)
-      .join(" · ");
   const devant = partie.monstres.find((m) => m.x === j.x + [0, 1, 0, -1][j.dir]! && m.y === j.y + [-1, 0, 1, 0][j.dir]!);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
   const journal = partie.journal.slice(poche ? -2 : -4);
@@ -386,7 +407,7 @@ export function Jambonjon() {
   );
 
   return (
-    <div className={`jbj ${poche ? "jbj-poche" : ""}`} data-testid="jambonjon">
+    <div className={`jbj ${poche ? "jbj-poche" : ""} ${panneau === "sac" ? "jbj-sac-ouvert" : ""}`} data-testid="jambonjon">
       <div className="jbj-gauche">
         <div className="jbj-vue">
           <canvas ref={vue} width={LARGEUR} height={HAUTEUR} data-testid="jbj-vue" />
@@ -398,56 +419,6 @@ export function Jambonjon() {
               </b>{" "}
               {str("jbj.niv", { n: devant.niveau })}
               <i style={{ width: `${(devant.pv / devant.pvMax) * 100}%` }} />
-            </div>
-          )}
-          {panneau === "sac" && (
-            <div className="jbj-panneau" data-testid="jbj-sac">
-              <h2>{str("jbj.equipement")}</h2>
-              <ul className="jbj-equipe">
-                {EMPLACEMENTS.map((e: Emplacement) => {
-                  const o = j.equipe[e];
-                  return (
-                    <li key={e}>
-                      <span className="jbj-emplacement">{str(`jbj.emplacement.${e}`)}</span>
-                      {o ? (
-                        <button className="jbj-objet" style={{ color: couleur(o) }} onClick={() => agir({ type: "retirer", emplacement: e })} title={str("jbj.retirer")}>
-                          {nomObjet(jeu, o)} <small>{bonus(o)}</small>
-                        </button>
-                      ) : (
-                        <em>{str("jbj.vide")}</em>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              <h2>{str("jbj.sac", { n: j.sac.length, max: SAC_MAX })}</h2>
-              {j.sac.length === 0 && <p className="jbj-vide">{str("jbj.sacVide")}</p>}
-              <ul className="jbj-liste">
-                {j.sac.map((o) => {
-                  const cmp = comparer(jeu, j, o);
-                  return (
-                    <li key={o.uid} className={choisi === o.uid ? "choisi" : ""}>
-                      <button className="jbj-objet" style={{ color: couleur(o) }} onClick={() => setChoisi(o.uid)} onDoubleClick={() => agir({ type: "equiper", uid: o.uid })} data-testid={`jbj-objet-${o.uid}`}>
-                        {nomObjet(jeu, o)} <small>{str("jbj.niv", { n: o.niveau })} · {str(`jbj.emplacement.${emplacementDe(jeu, o)}`)}</small>
-                      </button>
-                      <small className="jbj-cmp">{bonus(cmp, true) || str("jbj.pareil")}</small>
-                      {choisi === o.uid && (
-                        <span className="jbj-actions">
-                          <button className="pk-btn" onClick={() => agir({ type: "equiper", uid: o.uid })} data-testid="jbj-equiper">
-                            {str("jbj.equiper")}
-                          </button>
-                          <button className="pk-btn" onClick={() => agir({ type: "jeter", uid: o.uid })}>
-                            {str("jbj.jeter")}
-                          </button>
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-              <button className="pk-btn jbj-fermer" onClick={() => setPanneau(null)}>
-                {str("jbj.fermer")}
-              </button>
             </div>
           )}
           {panneau === "carte" && (
@@ -510,7 +481,7 @@ export function Jambonjon() {
             {btn({ type: "reculer" }, "S ▼")}
             {btn({ type: "droite" }, "D ▶")}
             {btn({ type: "rot" }, str("jbj.rot"), "jbj-pad-rot")}
-            <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>
+            <button className="jbj-pad-b" data-testid="jbj-ouvrir-sac" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>
               {str("jbj.sacCourt")}
             </button>
             <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "carte" ? null : "carte"))}>
@@ -519,11 +490,12 @@ export function Jambonjon() {
           </div>
         )}
         {!poche && (
-          <p className="jbj-raccourcis">
+          <><button className="pk-btn" data-testid="jbj-ouvrir-sac" onClick={() => setPanneau((x) => (x === "sac" ? null : "sac"))}>{str("jbj.inventaire")}</button><p className="jbj-raccourcis">
             {str("jbj.raccourcis", { cout: ROT_COUT })}
-          </p>
+          </p></>
         )}
       </div>
+      {panneau === "sac" && <Inventaire partie={partie} agir={agir} fermer={() => setPanneau(null)}/> }
     </div>
   );
 }

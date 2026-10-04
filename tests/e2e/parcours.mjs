@@ -602,9 +602,16 @@ try {
         await page.waitForTimeout(220);
       }
       if ((await page.getByTestId("jbj-journal").textContent()) === journal) throw new Error("Jambonjon ne réagit pas au clavier");
+      // Quatre rotations sans attendre : aucune ne doit remplacer une autre.
+      const directionAvant = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir);
+      for (let n = 0; n < 4; n++) await page.keyboard.press("e");
+      await page.waitForFunction((dir) => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir === dir, directionAvant);
+      await page.waitForTimeout(700);
+      const directionApres = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir);
+      if (directionApres !== directionAvant) throw new Error("Les rotations rapides ont été perdues ou exécutées dans le désordre");
       await shot(page, `${tag}-26-jambonjon`);
       await fermer("jambonjon");
-      await page.getByTestId("icon-f:Jambonjon").waitFor();
+      await page.getByTestId("icon-f:L’Ordre Cochon").waitFor();
       await fermer("navigateur");
       step(`${tag} : partagiciel téléchargé, installé et lancé (Jambonjon)`);
     }
