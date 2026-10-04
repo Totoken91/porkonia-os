@@ -8,13 +8,17 @@ import { disponible, ligne } from "../../src/apps/jambonjon/rpg";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 const jeu = porkosPack.jambonjon;
+const exploration=process.argv[3]!=="direct";
 const dx = [0, 1, 0, -1], dy = [-1, 0, 1, 0];
 const manhattan = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 function parcours(id: string, graine: number) {
   let p = nouvellePartie(jeu, graine, id), actions = 0;
   const trace: object[] = [];
+  const rencontresBoss: object[]=[];const vusBoss=new Set<number>();
+  const bilansEtages: object[]=[];
   const agir = (a: Action) => { p = jouer(p, jeu, a); actions++; if (a.type !== "tournerD" && a.type !== "apprendre") { trace.push({ a, tour: p.tour, niveau: p.joueur.niveau, pv: p.joueur.pv, jambons: p.joueur.jambons, r: p.joueur.rpg!.rangs, ennemis: p.monstres.filter((m) => m.eveille).map((m) => ({ type: m.type, pv: m.pv, distance: manhattan(m, p.joueur) })) }); if (trace.length > 20) trace.shift(); } };
   while (!p.fin && actions < 6000) {
+    for(const m of p.monstres.filter(m=>m.boss&&m.eveille&&!vusBoss.has(m.uid))){vusBoss.add(m.uid);rencontresBoss.push({etage:p.etage,type:m.type,niveau:p.joueur.niveau,pv:p.joueur.pv,jambons:p.joueur.jambons,mousse:p.joueur.mousse,ennemisRestants:p.monstres.length,tour:p.tour});}
     if(reposDisponible(p)){agir({type:"reposer"});continue;}
     const j = p.joueur, r = j.rpg!;
     if (r.points) {
@@ -58,16 +62,17 @@ function parcours(id: string, graine: number) {
       continue;
     }
     // Laisser venir un adversaire déjà alerté évite de lui offrir une frappe en entrant au contact.
-    if (p.monstres.some((m) => m.eveille && manhattan(m, maintenant) === 2 && (m.x === maintenant.x || m.y === maintenant.y) && passable(p.carte, (m.x + maintenant.x) / 2, (m.y + maintenant.y) / 2))) { agir({ type: "attendre" }); continue; }
+    const garde=jeu.campagne?.find(e=>e.etage===p.etage)?.gardien;
+    if (p.monstres.some((m) => m.eveille && manhattan(m, maintenant) === 2 && (m.x === maintenant.x || m.y === maintenant.y) && (!m.boss||!garde||manhattan({x:(m.x+maintenant.x)/2,y:(m.y+maintenant.y)/2},garde)<=2) && passable(p.carte, (m.x + maintenant.x) / 2, (m.y + maintenant.y) / 2))) { agir({ type: "attendre" }); continue; }
     const dist = distances(p.carte, maintenant.x, maintenant.y);
     const besoin = p.sol.filter((s) => s.butin.type === "jambon" ? maintenant.jambons === 0 : s.butin.type === "biere" && r.classe === "jambonmancien" && maintenant.bieres === 0);
-    const actifs = p.monstres.filter((m) => m.eveille);
-    const candidats = besoin.length ? besoin : actifs.length ? actifs : p.monstres.length ? p.monstres : p.sol.filter((s) => s.butin.type !== "objet" || p.joueur.sac.length < 12);
+    const actifs = p.monstres.filter((m) => m.eveille&&(exploration||m.boss||manhattan(m,maintenant)<=2));
+    const candidats = besoin.length ? besoin : actifs.length ? actifs : exploration ? (p.monstres.length ? p.monstres : p.sol.filter((s) => s.butin.type !== "objet" || p.joueur.sac.length < 12)) : p.carte.cases[maintenant.y*p.carte.w+maintenant.x]===2 ? p.monstres.filter(m=>m.boss) : [];
     const but = [...candidats].sort((a, b) => dist[a.y * p.carte.w + a.x]! - dist[b.y * p.carte.w + b.x]!)[0];
     const escalier = p.carte.cases.indexOf(2);
     const x = but?.x ?? escalier % p.carte.w, y = but?.y ?? Math.floor(escalier / p.carte.w);
     if (x === maintenant.x && y === maintenant.y) {
-      if (!but) agir({ type: "agir" });
+      if (!but) {bilansEtages.push({etage:p.etage,niveau:p.joueur.niveau,xp:p.joueur.xp,pv:p.joueur.pv,jambons:p.joueur.jambons,tour:p.tour});agir({ type: "agir" });}
       else if (p.joueur.sac.length < 12 || but === besoin[0]) agir({ type: "ramasser" });
       else { const objet = p.joueur.sac[0]!; agir({ type: "jeter", uid: objet.uid }); }
       continue;
@@ -77,7 +82,7 @@ function parcours(id: string, graine: number) {
     while (p.joueur.dir !== dirs[0]) agir({ type: "tournerD" });
     agir({ type: "avancer" });
   }
-  return { chevalier: id, graine, fin: p.fin, etage: p.etage, niveau: p.joueur.niveau, tours: p.tour, actions, tues: p.tues, pv: p.joueur.pv, jambons: p.joueur.jambons, bieres: p.joueur.bieres, ...(p.fin !== "victoire" ? { trace } : {}) };
+  return { mode:exploration?"exploration":"direct", chevalier: id, graine, rencontresBoss, bilansEtages, fin: p.fin, etage: p.etage, niveau: p.joueur.niveau, tours: p.tour, actions, tues: p.tues, pv: p.joueur.pv, jambons: p.joueur.jambons, bieres: p.joueur.bieres, ...(p.fin !== "victoire" ? { trace } : {}) };
 }
 const resultats = jeu.rpg!.chevaliers.flatMap((c) => [11, 42, 123].map((graine) => parcours(c.id, graine)));
 const dossier = resolve(process.argv[2] ?? "work/ordre-cochon-equilibrage"); mkdirSync(dossier, { recursive: true });

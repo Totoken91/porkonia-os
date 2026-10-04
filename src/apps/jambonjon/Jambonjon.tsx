@@ -455,6 +455,8 @@ export function Jambonjon() {
   const cotes=cotesLibres(partie);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
   const journal = partie.journal.slice(poche ? -2 : -4);
+  const menace=partie.monstres.find(m=>m.rpg?.annonce&&menaceSur(m.rpg.annonce,j));
+  const attaqueMenace=menace?defMonstre(jeu,menace.type).attaqueBoss:undefined;
   const btn = (a: Action, label: string, cls = "", testid?: string) => (
     <button
       className={`jbj-pad-b ${cls}`}
@@ -480,7 +482,7 @@ export function Jambonjon() {
             {j.rpg&&promotion.debloquees.length>0&&<span>{str('jbj.rpg.debloque',{noms:promotion.debloquees.map(i=>jeu.rpg!.competences[j.rpg!.classe][i]!.nom).join(', ')})}</span>}
             <div>{j.rpg&&<button className="pk-btn" onClick={()=>{setPromotion(null);setPanneau('competences');}}>{str('jbj.rpg.depenser')}</button>}<button className="pk-btn" onClick={()=>setPromotion(null)} aria-label={str('jbj.rpg.fermerPromotion')}>×</button></div>
           </div>}
-          {j.rpg && partie.monstres.some((m) => m.rpg?.annonce && menaceSur(m.rpg.annonce,j)) && <div className="jbj-menace" data-testid="jbj-menace">{str("jbj.rpg.alerte")}</div>}
+          {j.rpg && menace && <div className="jbj-menace" data-testid="jbj-menace">{str(attaqueMenace?`jbj.boss.alerte.${attaqueMenace}`:"jbj.rpg.alerte")}</div>}
           {j.rpg && competence !== null && !panneau && <div className="jbj-rpg-apercu" data-testid="jbj-apercu-competence">
             <b>{jeu.rpg!.competences[j.rpg.classe][SLOTS_ACTIFS[competence]!]!.nom}</b>
             <p>{str('jbj.rpg.choisirPas')}</p>

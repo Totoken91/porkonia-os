@@ -11,6 +11,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
+const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECTIF,'utf8')):null;
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
@@ -416,6 +417,13 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    if(OBJECTIF){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),OBJECTIF);
+      await reprendre();await page.keyboard.press('Space');await page.getByTestId('jbj-promotion').waitFor();
+      const p=await lire();if(p.etage!==2||p.joueur.niveau!==2||p.joueur.rpg.points!==1)throw new Error(`${tag}: progression par objectif incorrecte`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-objectif-niveau.png`)});
+      step(`${tag}: objectif d’etage, niveau et point de competence valides`);
     }
     for(const fixture of REFUGES){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);

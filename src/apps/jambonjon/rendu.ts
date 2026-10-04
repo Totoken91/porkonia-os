@@ -3,6 +3,7 @@
  * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
  */
 import { casesMenace } from "./boss";
+import { MARQUE_SOL, COULEURS_MARQUE } from './marques-sol';
 import { decorRepos } from './repos-decors';
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import { dessinerImpacts } from './effets-combat';
@@ -535,10 +536,12 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const relief=sol && ((cx+cy)%4===0) ? 0.94 : 1;
       ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!, f*(0.84+chaud*0.45)*relief,chaud);
       if(sol&&marques.has(cy*c.w+cx)){
-        const u=fx0-cx,v=fy0-cy;
-        const bord=u<.09||u>.91||v<.09||v>.91;
-        const rune=Math.abs(u-v)<.035||Math.abs(u+v-1)<.035;
-        if(bord||rune)ecrire((y*W+x)*4,210,94,40,Math.max(.5,f));
+        const mx=Math.floor((fx0-cx)*32),my=Math.floor((fy0-cy)*32);
+        const trace=MARQUE_SOL[my*32+mx]!;
+        if(trace){
+          const couleur=COULEURS_MARQUE[trace]!;
+          ecrire((y*W+x)*4,couleur[0],couleur[1],couleur[2],Math.max(.62,f));
+        }
       }
       profondeur[y*W+x]=dist;
       fx0 += pasX;

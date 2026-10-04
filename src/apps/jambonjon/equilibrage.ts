@@ -1,4 +1,4 @@
-/** Cible RPG : coefficients de calibration, pas encore branchés au prototype. */
+/** Coefficients RPG utilisés par le combat et la progression de la campagne. */
 export type ClasseRpg = "tank" | "dps" | "jambonmancien";
 export type Rangs = [number, number, number, number, number, number];
 export const NIVEAU_MAX_RPG = 20;
@@ -6,6 +6,12 @@ export const DEBLOCAGES = [1, 2, 3, 7, 11, 17] as const;
 export const SEUILS_RANGS = [1, 4, 8, 12, 16] as const;
 export const RARETES_RPG = { commun: 1, garde: 1.08, cru: 1.16, etat: 1.25 } as const;
 export const NIVEAUX_FIN_ETAGE = [2, 4, 6, 7, 9, 11, 12, 14, 16, 17, 19, 20] as const;
+/** Combats + objectif : progression viable sans exiger toutes les salles annexes. */
+export const PART_XP_COMBAT = 0.72;
+export function xpAccomplissement(etage:number) {
+  if(!Number.isInteger(etage)||etage<1||etage>=12)return 0;
+  return etage===1?xpNiveauRpg(1):Math.round(budgetsXpEtages()[etage-1]!*0.4);
+}
 
 const profils = {
   tank: { pv: 42, croissancePv: 8, puissance: 5, croissancePuissance: 1.55, defense: 3, croissanceDefense: 0.65, mousse: 30 },

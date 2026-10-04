@@ -1,13 +1,13 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans et les quatre boss sont poussés ; les refuges sont implémentés localement. La suite porte sur l’équilibrage, les rencontres, les récompenses et les vérifications humaines ci-dessous.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss et les refuges sont poussés. La calibration de progression est implémentée localement ; les rencontres, les récompenses et les vérifications humaines restent à approfondir.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
 | 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans validés et poussés (`475fddf`) |
 | 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
-| 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Implémentés localement ; aperçu avant push |
-| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première vérification automatique des douze étages ; calibration humaine à faire |
+| 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
+| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration locale : objectifs, gardiens et 72 parcours ; validation humaine à faire |
 | 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Premier bestiaire et équipement présents ; à enrichir |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
 
@@ -65,3 +65,14 @@ Navigation vérifiée en bureau, Poche paysage, Poche portrait et Poche compact 
 Les haltes ont désormais un volume ouvert devant l’escalier : cheminée en pierre avec lumière chaude, couchette et couverture bordeaux, coffre en bois et tapis tissé usé. Textures natives 32×32, mobilier 40×40, rendu dans la caméra habituelle du donjon. Le mobilier est décoratif ; il n’ajoute pas de collisions invisibles. Le repos et la réaffectation fonctionnent dans toute l’alcôve ; la descente se fait à l’escalier. Les commandes sont placées sous la vue.
 
 Les anciennes cartes conçues compatibles reçoivent uniquement l’alcôve au premier mouvement ou à la première rotation. Carte historique générée aléatoirement : conservée telle quelle. L’ouverture, l’éclairage, la sauvegarde et l’absence de réinitialisation sont testés ; 228 tests au total. Aperçus et contrôles dans les quatre formats d’écran.
+
+## Calibration de la progression — livraison validée
+
+Les marques de danger au sol utilisent désormais un sceau de braises irrégulier natif 32×32, sans cadre carré ni croix. Seul le dessin change : mêmes cases menacées, même délai et même esquive.
+
+- Les gardiens des plans conçus attendent une approche visible à trois pas. Ils restent dans un rayon de deux cases de leur poste. Un boss d’ancienne sauvegarde déjà égaré rejoint son poste case par case ; aucun soin, téléportation ou retrait de dégâts ne lui est accordé.
+- Les PV, puissance et défense des boss sont conservés. Les messages de danger indiquent le geste attendu, plutôt qu’une alerte lourde générique.
+- XP des ennemis : 72 % de l’ancien montant. Accomplissement à la descente : 40 % du budget d’étage prévu ; premier étage, bonus du premier niveau. Les deux sources s’additionnent. Le bonus n’est gagné qu’en descendant réellement ; ni attente, ni rotation, ni escalier gardé ne le donnent. Le plafond reste 20.
+- Une provision supplémentaire au carrefour du 2 et avant la salle du Prévôt au 3 permet de préparer les premiers combats sans parcourir toutes les annexes. Les anciennes cartes conservent leur butin déjà tiré.
+
+Le pilote joue deux styles, avec douze chevaliers et trois graines chacun. Exploration complète : 36 victoires sur 36, niveau 20. Trajet vers les escaliers, sans nettoyage systématique des annexes : 31 victoires sur 36, niveaux 18 (27 parties) et 19 (4 parties). Les cinq morts restantes concernent les mages au 2 et deux DPS au 5 ; pas le premier boss. Le trajet direct est un test de contrainte automatisé, pas une définition de la difficulté humaine. Les 240 tests passent ; les essais humains restent nécessaires avant de déclarer l’équilibrage terminé.

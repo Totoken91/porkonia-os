@@ -5,8 +5,9 @@
  */
 import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/types";
 import { assemblerEtage } from './campagne';
-import { ennemiReference, RARETES_RPG, xpNiveauRpg } from "./equilibrage";
+import { ennemiReference, PART_XP_COMBAT, RARETES_RPG, xpAccomplissement, xpNiveauRpg } from "./equilibrage";
 import { estRefuge } from "./refuge";
+import { ligneEntre } from './boss';
 import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
 
 export const VERSION = 1;
@@ -298,8 +299,9 @@ function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number
     const n = Math.min(20, Math.max(1, p.etage === 1 ? 1 : (p.etage - 1) * 2));
     const s = ennemiReference(n, boss ? "boss" : elite ? "elite" : def.id === "inspecteur" ? "blinde" : "courant");
     resultat.niveau = n; resultat.pvMax = s.pvMax; resultat.pv = s.pvMax;
+    if(boss)resultat.eveille=false;
     resultat.att = s.puissance; resultat.def = s.defense;
-    resultat.xp = Math.round(xpNiveauRpg(Math.min(19,n)) / (boss ? 2 : 5)) * (elite ? 2 : 1);
+    resultat.xp = Math.max(1,Math.round(xpNiveauRpg(Math.min(19,n)) / (boss ? 2 : 5) * PART_XP_COMBAT)) * (elite ? 2 : 1);
   }
   return resultat;
 }
@@ -596,10 +598,22 @@ function tourMonstres(p: Partie, jeu: JeuJambonjon) {
       continue;
     }
     const d = dist[idx(p.carte, m.x, m.y)]!;
+    const gardien=j.rpg&&m.boss?jeu.campagne?.find(e=>e.etage===p.etage&&e.w===p.carte.w&&e.h===p.carte.h)?.gardien:undefined;
+    // Un gardien déjà parti dans une ancienne sauvegarde regagne son poste sans téléportation.
+    if(gardien&&Math.abs(m.x-gardien.x)+Math.abs(m.y-gardien.y)>2) {
+      const retour=distances(p.carte,gardien.x,gardien.y),ici=retour[idx(p.carte,m.x,m.y)]!;
+      for(let k=0;k<4;k++){
+        const x=m.x+DX[k]!,y=m.y+DY[k]!,dRetour=retour[idx(p.carte,x,y)]!;
+        if(passable(p.carte,x,y)&&dRetour>=0&&dRetour<ici&&!monstreEn(p,x,y)&&(x!==j.x||y!==j.y)){m.x=x;m.y=y;break;}
+      }
+      continue;
+    }
+    // Les gardiens attendent une approche visible de leur salle, sans poursuite à travers l'étage.
+    if(gardien&&!m.eveille&&(d>3||d<0||!ligneEntre(p,m,j)))continue;
     if (!m.eveille && d >= 0 && d <= 5) {
       const quota = j.niveau < 3 ? 1 : j.niveau < 7 ? 2 : 3;
       const tutorielOccupe = j.rpg && p.monstres.filter((n) => n !== m && n.eveille).length >= quota;
-      if (!tutorielOccupe) m.eveille = true;
+      if (!tutorielOccupe) {m.eveille = true;if(gardien)log(p,'jbj.boss.entree',{nom:defMonstre(jeu,m.type).nom});}
     }
     if (!m.eveille) continue;
     const def = defMonstre(jeu, m.type);
@@ -629,6 +643,7 @@ function tourMonstres(p: Partie, jeu: JeuJambonjon) {
     for (let k = 0; k < 4; k++) {
       const nx = m.x + DX[k]!;
       const ny = m.y + DY[k]!;
+      if(gardien&&Math.abs(nx-gardien.x)+Math.abs(ny-gardien.y)>2)continue;
       if (!passable(p.carte, nx, ny) || monstreEn(p, nx, ny) || (nx === j.x && ny === j.y)) continue;
       const dn = dist[idx(p.carte, nx, ny)]!;
       if (dn >= 0 && dn < d && (!mieux || dn < dist[idx(p.carte, mieux[0], mieux[1])]!)) mieux = [nx, ny];
@@ -664,11 +679,14 @@ function tempsPasse(p: Partie) {
 }
 
 function descendre(p: Partie, jeu: JeuJambonjon) {
+  const etage=p.etage,xp=p.joueur.rpg&&jeu.campagne?.some(e=>e.etage===etage)?xpAccomplissement(etage):0;
+  if(xp)gagnerXp(p,xp);
   p.refuge = false;
   p.etage += 1;
   peuplerEtage(p, jeu);
   log(p, "jbj.msg.descente", { etage: p.etage });
   p.evenements.push("descente");
+  if(xp)log(p,'jbj.rpg.accomplissement',{etage,xp});
 }
 
 /**
