@@ -7,8 +7,8 @@ Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équi
 | 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans validés et poussés (`475fddf`) |
 | 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
-| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration locale : objectifs, gardiens et 72 parcours ; validation humaine à faire |
-| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Premier bestiaire et équipement présents ; à enrichir |
+| 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration poussée (`407df13`) : objectifs, gardiens et 72 parcours ; validation humaine à faire |
+| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Passe locale : trois élites contournables et équipement garanti ; comportements et choix d’équipement à enrichir |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
 
 ## Première livraison du chantier 1
@@ -23,7 +23,7 @@ Les pièges, portes, clés et murs secrets interactifs demandent des mécaniques
 
 ## Extension des actes II à IV
 
-- 4–6 : galeries croisées, anneau des fosses et carrefour des pressoirs, premières élites placées.
+- 4–6 : galeries croisées, anneau des fosses et carrefour des pressoirs, rencontres placées.
 - 7–9 : archives en peigne, ailes parallèles de l'abattoir et double approche des cuves.
 - 10–12 : bifurcation des réserves royales, galerie brisée du dernier saloir, deux ailes avant l'antre final.
 
@@ -76,3 +76,11 @@ Les marques de danger au sol utilisent désormais un sceau de braises irrégulie
 - Une provision supplémentaire au carrefour du 2 et avant la salle du Prévôt au 3 permet de préparer les premiers combats sans parcourir toutes les annexes. Les anciennes cartes conservent leur butin déjà tiré.
 
 Le pilote joue deux styles, avec douze chevaliers et trois graines chacun. Exploration complète : 36 victoires sur 36, niveau 20. Trajet vers les escaliers, sans nettoyage systématique des annexes : 31 victoires sur 36, niveaux 18 (27 parties) et 19 (4 parties). Les cinq morts restantes concernent les mages au 2 et deux DPS au 5 ; pas le premier boss. Le trajet direct est un test de contrainte automatisé, pas une définition de la difficulté humaine. Les 240 tests passent ; les essais humains restent nécessaires avant de déclarer l’équilibrage terminé.
+
+## Rencontres et récompenses — passe locale à valider
+
+Trois adversaires existants deviennent des élites dans les détours : moisissures aux étages 4 et 8, tonneau au 10. Les plans précédents ne plaçaient en réalité aucune élite. Chaque rencontre peut être contournée sans couper l’accès aux escaliers ; elle reprend le comportement lourd annoncé déjà présent dans le moteur. Les monstres d’un étage déjà sauvegardé sont conservés.
+
+Une élite RPG laisse désormais exactement un équipement, de niveau égal à l’étage, en plus des provisions périodiques existantes. Qualité minimale « de garde », puis « grand cru » à partir du 7 ; un tirage supérieur reste supérieur. Le prix reste au sol, avec une annonce dans le journal : pas d’équipement automatique, pas de perte si le sac est plein, conservation après sauvegarde. Le butin ordinaire et les récompenses fixes des boss suivent leurs règles précédentes.
+
+248 tests passent, compilation et scénario de butin/comparaison/reprise vérifiés dans les quatre formats. Les 72 parcours automatiques conservent 36/36 victoires en exploration et 31/36 en trajet direct. Cette passe commence le chantier 5 ; diversité des comportements et choix plus marqués entre équipements restent à construire.

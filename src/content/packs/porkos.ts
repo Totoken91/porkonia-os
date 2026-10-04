@@ -3566,6 +3566,7 @@ export const porkosPack: ContentPack = {
     "jbj.msg.jambon": "Vous ramassez un jambon.",
     "jbj.msg.biere": "Vous ramassez une bière. Encore fraîche.",
     "jbj.msg.objet": "Vous ramassez : {nom}.",
+    "jbj.msg.butinElite": "L’élite laisse à ses pieds : {nom}.",
     "jbj.msg.tonneau": "Vous ouvrez un tonneau. Dedans : {nom}.",
     "jbj.msg.sacPlein": "Votre sac est plein. Jetez quelque chose, ou renoncez.",
     "jbj.msg.equipe": "Vous équipez : {nom}.",

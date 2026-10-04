@@ -12,6 +12,7 @@ import { chromium } from "playwright";
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
 const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECTIF,'utf8')):null;
+const ELITE=process.env.ELITE?JSON.parse(await readFile(process.env.ELITE,'utf8')):null;
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
@@ -417,6 +418,20 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    if(ELITE){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),ELITE);
+      await reprendre();await page.keyboard.press('Space');
+      const q=await lire(),prix=q.sol.find(s=>s.butin.type==='objet');
+      if(q.monstres.length||!prix||!['garde','cru','etat'].includes(prix.butin.objet.rarete))throw new Error(`${tag}: prix d’elite absent`);
+      if(!q.journal.some(m=>m.cle==='jbj.msg.butinElite'))throw new Error(`${tag}: annonce de butin absente`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-butin-elite.png`)});
+      await page.keyboard.press('ArrowUp');await page.getByTestId('jbj-ouvrir-sac').click();
+      await page.getByTestId(`jbj-objet-${prix.butin.objet.uid}`).click();
+      if(SHOTS)await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-prix-elite.png`)});
+      await page.getByTestId('jbj-sac-fermer').click();await reprendre();
+      if(!(await lire()).joueur.sac.some(o=>o.uid===prix.butin.objet.uid))throw new Error(`${tag}: prix perdu apres reprise`);
+      step(`${tag}: elite, butin garanti, comparaison et sauvegarde valides`);
     }
     if(OBJECTIF){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),OBJECTIF);

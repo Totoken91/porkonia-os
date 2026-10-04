@@ -247,10 +247,12 @@ const hoteRpg: HoteRpg = {
   libre: (p, x, y) => passable(p.carte, x, y) && !monstreEn(p, x, y) && (p.joueur.x !== x || p.joueur.y !== y),
 };
 
-function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number, rareteGarantie?: string): Objet {
+function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number, rareteGarantie?: string, rareteMinimum?: string): Objet {
   const total = jeu.raretes.reduce((a, r) => a + r.poids, 0);
   let r = tirer(p) * total;
-  const rar = jeu.raretes.find(x=>x.id===rareteGarantie) ?? jeu.raretes.find((x) => (r -= x.poids) < 0) ?? jeu.raretes[0]!;
+  const tiree = jeu.raretes.find((x) => (r -= x.poids) < 0) ?? jeu.raretes[0]!;
+  const minimum = jeu.raretes.find(x=>x.id===rareteMinimum);
+  const rar = jeu.raretes.find(x=>x.id===rareteGarantie) ?? (minimum && minimum.mult > tiree.mult ? minimum : tiree);
   if (p.joueur.rpg) {
     const mult = RARETES_RPG[rar.id as keyof typeof RARETES_RPG] ?? 1;
     const k = niveau - 1;
@@ -269,9 +271,9 @@ function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number
   return { uid: p.prochainUid++, base: def.id, niveau, rarete: rar.id, att: v(def.att), def: v(def.def), pv: v(def.pv), mousse: v(def.mousse) };
 }
 
-function objetAuHasard(p: Partie, jeu: JeuJambonjon): Objet {
+function objetAuHasard(p: Partie, jeu: JeuJambonjon, rareteMinimum?: string): Objet {
   const dispo = jeu.objets.filter((o) => o.etage <= p.etage);
-  return nouvelObjet(p, jeu, parmi(p, dispo.length ? dispo : jeu.objets), p.etage);
+  return nouvelObjet(p, jeu, parmi(p, dispo.length ? dispo : jeu.objets), p.etage, undefined, rareteMinimum);
 }
 
 function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number, y: number, boss = false, eliteConcu?:boolean): Monstre {
@@ -511,6 +513,12 @@ function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
   if (p.joueur.rpg && (p.tues === 1 || p.tues % 3 === 0)) {
     p.sol.push({ x: m.x, y: m.y, butin: { type: "jambon" } });
   }
+    if (p.joueur.rpg && m.elite) {
+      const objet = objetAuHasard(p, jeu, p.etage >= 7 ? 'cru' : 'garde');
+      p.sol.push({ x: m.x, y: m.y, butin: { type: 'objet', objet } });
+      log(p, 'jbj.msg.butinElite', { nom: nomObjet(jeu, objet) });
+      return;
+    }
   const r = tirer(p);
   const chance = m.elite ? 1 : 0.55;
   if (r < chance) {
