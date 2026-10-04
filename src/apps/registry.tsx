@@ -15,6 +15,7 @@ import { Calculatrice } from "./calculatrice/Calculatrice";
 import { Defrag } from "./defrag/Defrag";
 import { Paint } from "./paint/Paint";
 import { Jambonjon } from "./jambonjon/Jambonjon";
+import { Grosses } from "./grosses/Grosses";
 import { Installeur } from "./installeur/Installeur";
 import { Telechargement } from "./telechargement/Telechargement";
 
@@ -35,6 +36,7 @@ export const APPS: Record<AppKind, ComponentType> = {
   defrag: Defrag,
   paint: Paint,
   jambonjon: Jambonjon,
+  grosses: Grosses,
   installeur: Installeur,
   telechargement: Telechargement,
 };

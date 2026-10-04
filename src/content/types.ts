@@ -6,9 +6,9 @@
  */
 
 /** Clé d'un composant d'application (voir src/apps/registry.tsx). */
-export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp" | "calculatrice" | "defrag" | "paint" | "telechargement" | "installeur" | "jambonjon";
+export type AppKind = "bienvenue" | "executer" | "mail" | "navigateur" | "channel-pork" | "nappe-vide" | "config" | "fichiers" | "visionneuse" | "texte" | "distinctions" | "porkamp" | "calculatrice" | "defrag" | "paint" | "telechargement" | "installeur" | "jambonjon" | "grosses";
 
-export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique" | "calculatrice" | "defrag" | "paint" | "jambonjon" | "installeur" | "telechargement";
+export type IconKey = "embleme" | "bureau" | "ordinateur" | "executer" | "navigateur" | "tele" | "nappe" | "config" | "dossier" | "poubelle" | "texte" | "image" | "mail" | "carte" | "cadenas" | "medaille" | "musique" | "calculatrice" | "defrag" | "paint" | "jambonjon" | "installeur" | "telechargement" | "grosses";
 
 /**
  * Entrée de menu d'une fenêtre. `&` dans un libellé marque la lettre d'accès (Alt+lettre), soulignée.
@@ -268,7 +268,9 @@ export type BlocSite =
   | { t: "anneau" }
   | { t: "annuaire" }
   /** Lien de téléchargement d'un fichier de `telechargements`. */
-  | { t: "telecharger"; fichier: string };
+  | { t: "telecharger"; fichier: string }
+  /** Banque en ligne : connexion, compte, historique, allocation, courtage en bourse. */
+  | { t: "banque" };
 
 export interface SitePerso {
   /** Adresse : porko://<hote>/<page>. */
@@ -322,6 +324,18 @@ export interface Installeur {
   raccourci: string;
   fin: string;
   desinstallation: { question: string; fin: string };
+}
+
+/* ----------------------------- Course de Grosses --------------------------- */
+
+/** Jeu de paris sur des courses de cochonnes : l'écurie du jour est tirée parmi `cochons`. */
+export interface JeuGrosses {
+  cochons: { nom: string; couleur: string }[];
+  /** Prix d'une bière à la buvette de l'hippodrome (Pork$), et d'une tournée de trois. */
+  biere: number;
+  tournee: number;
+  /** Commentaires du speaker : départ, mi-course, arrivée (le nom de la gagnante remplace {nom}). */
+  speaker: { depart: string[]; milieu: string[]; arrivee: string[] };
 }
 
 /* ------------------------------- Assistant -------------------------------- */
@@ -560,6 +574,7 @@ export interface ContentPack {
   telechargements: Telechargement[];
   installeurs: Installeur[];
   jambonjon: JeuJambonjon;
+  grosses: JeuGrosses;
   assistant: AssistantSpec;
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;

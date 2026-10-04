@@ -600,6 +600,25 @@ export const DESSINS: Record<Nom, Dessin> = {
     t.rect(19, 16, 3, 3, "g");
     t.pts([[18, 19], [19, 19], [18, 20]], "m");
   },
+  /** Course de Grosses : une cochonne au galop devant la ligne d'arrivée à damier. */
+  grosses: (t) => {
+    t.rect(2, 24, 28, 5, "d");
+    t.hline(2, 24, 28, "g");
+    t.dither(2, 26, 28, 3, "D");
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) t.rect(23 + i * 2 - (i > 1 ? 0 : 0), 3 + j * 2, 2, 2, (i + j) % 2 ? "W" : "k");
+    t.vline(22, 3, 21, "z");
+    t.ellipse(12, 16, 8, 6, "m");
+    t.ellipse(19, 14, 4, 4, "m");
+    t.rect(21, 14, 4, 3, "r");
+    t.pts([[22, 15], [23, 15]], "k");
+    t.pts([[19, 12]], "k");
+    t.rect(17, 8, 3, 3, "r");
+    t.vline(7, 21, 4, "m");
+    t.vline(10, 21, 4, "m");
+    t.vline(15, 21, 4, "m");
+    t.vline(18, 21, 4, "m");
+    t.pts([[4, 14], [3, 13], [3, 12]], "r");
+  },
   /** Jambonjon : porte de cave en arc de pierre, jambon pendu dans l'ombre. */
   jambonjon: (t) => {
     t.rect(3, 6, 26, 24, "d");
@@ -938,6 +957,17 @@ export const DESSINS16: Record<Nom, Dessin> = {
     t.pts([[4, 11], [5, 11]], "B");
     t.line(10, 8, 15, 1, "z");
     t.pts([[9, 9], [10, 9]], "m");
+  },
+  grosses: (t) => {
+    t.rect(1, 12, 14, 3, "d");
+    t.ellipse(7, 8, 5, 3, "m");
+    t.ellipse(11, 7, 2, 2, "m");
+    t.rect(12, 7, 2, 2, "r");
+    t.pts([[12, 6]], "k");
+    t.vline(4, 10, 2, "m");
+    t.vline(9, 10, 2, "m");
+    t.rect(11, 1, 4, 4, "W");
+    t.pts([[11, 1], [13, 1], [12, 2], [14, 2], [11, 3], [13, 3], [12, 4], [14, 4]], "k");
   },
   jambonjon: (t) => {
     t.rect(1, 3, 14, 13, "d");

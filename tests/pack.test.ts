@@ -55,7 +55,7 @@ describe("pack PorkOS", () => {
   });
   it("décerne des distinctions atteignables", () => {
     // Signaux émis par le système ; `executer:<alias>` et `tv:integral:<émission>` sont vérifiés contre le pack.
-    const emis = ["session:ouverte", "session:perdue", "systeme:fatal", "courrier:envoye", "economiseur:vu", "porkamp:fin", "defrag:fin", "fichiers:caches", "nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer"];
+    const emis = ["session:ouverte", "session:perdue", "systeme:fatal", "courrier:envoye", "economiseur:vu", "porkamp:fin", "defrag:fin", "fichiers:caches", "nappe:incident", "nappe:conforme", "boot:impatience", "config:rappels-off", "tv:tour", "texte:enregistrer", "pub:cta", "nav:actualiser", "bureau:supprimer", "banque:ouverte", "grosses:gagne", "ivresse:warp"];
     const d = porkosPack.distinctions;
     expect(new Set(d.map((x) => x.id)).size).toBe(d.length);
     for (const x of d) {

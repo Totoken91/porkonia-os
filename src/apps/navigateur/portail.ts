@@ -42,3 +42,28 @@ export function cours(bourse: Portal["bourse"], d: Date): { nom: string; unite: 
 export function meteo(m: Portal["meteo"], d: Date): { ville: string; ciel: string; mousse: string }[] {
   return m.villes.map((ville, k) => ({ ville, ciel: duJour(m.ciels, d, 20 + k), mousse: duJour(m.mousses, d, 40 + k) }));
 }
+
+/** Pas de la séance de bourse : un nouveau cours toutes les vingt secondes, pour que l'on puisse spéculer sans attendre demain. */
+export const PAS_SEANCE = 20_000;
+
+/**
+ * Cours de la séance (déterministe pour un instant donné) : la tendance du jour, modulée par les à-coups de la séance.
+ * `serie` donne les douze derniers cours, du plus ancien au plus récent.
+ */
+export function coursSeance(bourse: Portal["bourse"], maintenant: number): { nom: string; unite: string; valeur: number; variation: number; serie: number[] }[] {
+  const prixAu = (b: Portal["bourse"][number], k: number, t: number) => {
+    const d = new Date(t);
+    const j = jour(d);
+    const m = Math.floor(t / PAS_SEANCE);
+    const tendance = b.base * (1 + 0.25 * Math.sin(j / 9 + k) + 0.12 * (alea(j, k + 7) - 0.5));
+    const seance = 1 + 0.09 * Math.sin(m / 6.5 + k * 1.7) + 0.06 * (alea(m, k + 31) - 0.5);
+    const v = tendance * seance;
+    return Math.max(0.1, Number(v.toFixed(b.base < 10 ? 2 : b.base < 100 ? 1 : 0)));
+  };
+  return bourse.map((b, k) => {
+    const serie = Array.from({ length: 12 }, (_, i) => prixAu(b, k, maintenant - (11 - i) * PAS_SEANCE));
+    const valeur = serie[11]!;
+    const avant = serie[10]!;
+    return { nom: b.nom, unite: b.unite, valeur, variation: Math.round(((valeur - avant) / avant) * 1000) / 10, serie };
+  });
+}

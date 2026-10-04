@@ -9,6 +9,7 @@ import type { BlocSite, SitePerso } from "@/content/types";
 import { useOs } from "@/os/context";
 import { compteur } from "./portail";
 import { anneau, siteUrl } from "./url";
+import { Banque } from "./Banque";
 
 type Message = { nom: string; date: string; message: string };
 const cleLivre = (hote: string) => `porkos.livredor.${hote}`;
@@ -158,6 +159,8 @@ function Bloc({ b, site, go }: { b: BlocSite; site: SitePerso; go(u: string): vo
     }
     case "telecharger":
       return <Telecharger id={b.fichier} />;
+    case "banque":
+      return <Banque />;
     case "annuaire": {
       const categories = [...new Set(pack.sites.filter((x) => x.hote !== site.hote && x.categorie !== "Retirés").map((x) => x.categorie))];
       return (

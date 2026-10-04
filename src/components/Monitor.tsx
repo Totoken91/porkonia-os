@@ -12,6 +12,8 @@ import { ambiance, jouer } from "@/os/sons";
 import { usePleinEcran } from "@/os/pleinEcran";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
+import { useIvresse } from "@/os/ivresseStore";
+import { intensite, stade } from "@/os/ivresse";
 
 export const SCREEN = MONITEUR;
 const COQUE = { x: 58, top: 52, bottom: 82 };
@@ -53,6 +55,8 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
   const premier = useRef(true);
   const allumeA = useRef(0);
   const [degauss, setDegauss] = useState(false);
+  const verres = useIvresse();
+  const ivre = intensite(verres);
 
   useEffect(() => {
     setChoixAdresse(choixDansAdresse(window.location.search));
@@ -190,7 +194,23 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
                     <feBlend in="rv" in2="b3" mode="screen" />
                   </filter>
                 </svg>
-                <div className={`tube${crtEff > 0.12 && !poche ? " convergence" : ""}`}>
+                {ivre > 0 && !poche && (
+                  <svg className="filtres-crt" aria-hidden="true" width="0" height="0">
+                    {/* Ivresse : l'image ondule (déplacement par bruit) et se dédouble, de plus en plus fort. */}
+                    <filter id="ivresse" x="-5%" y="-5%" width="110%" height="110%" colorInterpolationFilters="sRGB">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="2" seed="3" result="bruit">
+                        <animate attributeName="baseFrequency" dur="9s" values="0.006 0.014;0.011 0.008;0.006 0.014" repeatCount="indefinite" />
+                      </feTurbulence>
+                      <feDisplacementMap in="SourceGraphic" in2="bruit" scale={6 + ivre * 64} xChannelSelector="R" yChannelSelector="G" result="ondule" />
+                      <feOffset in="ondule" dx={4 + ivre * 22} dy={ivre * 6} result="fantome" />
+                      <feBlend in="ondule" in2="fantome" mode="lighten" />
+                    </filter>
+                  </svg>
+                )}
+                <div
+                  className={`tube${crtEff > 0.12 && !poche ? " convergence" : ""}${ivre > 0 ? ` ivre ivre-${stade(verres)}${poche ? " ivre-poche" : ""}` : ""}`}
+                  style={ivre > 0 ? ({ "--ivre": ivre.toFixed(3) } as React.CSSProperties) : undefined}
+                >
                   {tube !== "eteint" && (
                     <EcranContext.Provider value={ecran}>
                       <ScaleContext.Provider value={scale}>{children}</ScaleContext.Provider>
