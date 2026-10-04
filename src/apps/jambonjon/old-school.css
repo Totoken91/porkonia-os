@@ -1,5 +1,27 @@
 /* Native tiled stone and engraved metal, scoped to the game inside PorkOS. */
 @layer components {
+  .jbj.jbj-conclusion { align-items:center; justify-content:center; background:url('/ordre-cochon/pierre.png'); }
+  .jbj-conclusion .jbj-conclusion-corps { position:static; flex:none; width:min(100%,560px); max-height:100%; min-height:0; overflow:auto; justify-content:flex-start; gap:12px; padding:16px; background:#252c25f2; box-shadow:inset 0 0 0 1px #12170f,2px 2px #111; }
+  .jbj-conclusion-entete { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; text-align:left; }
+  .jbj-conclusion-entete img { width:64px; height:64px; flex:none; image-rendering:pixelated; }
+  .jbj-conclusion-entete div { min-width:0; }
+  .jbj-conclusion .jbj-conclusion-surtitre { color:#ada68b; margin-bottom:4px; }
+  .jbj-conclusion .jbj-fin h2 { letter-spacing:1px; margin-bottom:4px; }
+  .jbj-conclusion-texte { max-width:460px; line-height:20px; }
+  .jbj-conclusion-bilan { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); width:100%; gap:4px; margin:0; padding:8px 0; border-block:1px solid #77745c; }
+  .jbj-conclusion-bilan div { display:flex; flex-direction:column; gap:4px; }
+  .jbj-conclusion-bilan dt { color:#c0bda2; }
+  .jbj-conclusion-bilan dd { order:-1; margin:0; color:#e4c47e; }
+  .jbj-conclusion .jbj-conclusion-refuges { color:#c0bda2; }
+  .jbj-conclusion footer { display:grid; gap:10px; justify-items:center; }
+  .jbj-conclusion footer p { color:#ada68b; }
+  .jbj-conclusion footer .pk-btn { white-space:normal; }
+  @media (max-height:500px) and (min-width:600px) {
+    .ecran.poche .jbj-conclusion .jbj-conclusion-corps { width:min(100%,740px); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:center; gap:6px 10px; padding:8px; }
+    .ecran.poche .jbj-conclusion-entete { gap:8px; }
+    .ecran.poche .jbj-conclusion-bilan { grid-column:1 / -1; padding:6px 0; }
+    .ecran.poche .jbj-conclusion footer p { display:none; }
+  }
   .jbj-titre-cadre { max-height:100%; overflow:auto; }
   .jbj-titre .jbj-mission { max-width:420px; margin:0; color:#dfd3ad; }
   .jbj-titre h1 { margin:0 0 6px; }

@@ -533,6 +533,17 @@ try {
       await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));p.joueur.x=15;p.joueur.y=6;p.joueur.dir=0;p.monstres=p.monstres.filter(m=>m.boss);p.monstres[0].pv=1;localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));});
       await reprendre();await page.keyboard.press('1');await page.getByTestId('jbj-fin').waitFor();
       if(await page.evaluate(()=>localStorage.getItem('porkos.jambonjon.partie'))!==null)throw new Error(`${tag}: victoire finale garde une sauvegarde active`);
+      const bilan=await page.getByTestId('jbj-bilan-victoire').locator('dd').allTextContents();
+      if(Number(bilan[0])!==12||Number(bilan[2])!==FINALE.tues+1||Number(bilan[3])!==FINALE.tour)throw new Error(`${tag}: bilan de victoire incorrect`);
+      if(!(await page.getByTestId('jbj-vainqueur').innerText()).includes('Ysée'))throw new Error(`${tag}: chevalier vainqueur absent`);
+      const fin=page.getByTestId('jbj-fin');
+      if(await fin.evaluate(e=>e.scrollWidth>e.clientWidth+1))throw new Error(`${tag}: conclusion trop large`);
+      if(tag==='poche-paysage'&&await fin.evaluate(e=>e.scrollHeight>e.clientHeight+1))throw new Error(`${tag}: conclusion nécessite de défiler en paysage`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-conclusion.png`)});
+      await page.getByTestId('jbj-rejouer').click();await page.getByTestId('jbj-chevaliers').waitFor();
+      await page.getByTestId('jbj-classe-tank').click();await page.getByTestId('jbj-chevalier-berthe').click();await page.getByTestId('jbj-partir').click();
+      const frais=await lire();
+      if(frais.fin||frais.etage!==1||frais.tues!==0||frais.tour!==0||frais.joueur.rpg.chevalier!=='berthe')throw new Error(`${tag}: nouvelle expedition conserve la campagne terminee`);
       step(`${tag}: douzième étage, acte final et victoire validés`);
     }
     await ctx.close();

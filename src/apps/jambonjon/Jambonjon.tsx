@@ -271,7 +271,7 @@ export function Jambonjon() {
 
   // Boucle de rendu.
   useEffect(() => {
-    if (!partie || choix !== undefined) return;
+    if (!partie || partie.fin === 'victoire' || choix !== undefined) return;
     const c = vue.current;
     if (!c) return;
     const g = c.getContext("2d")!;
@@ -314,7 +314,7 @@ export function Jambonjon() {
     };
     id = requestAnimationFrame(boucle);
     return () => cancelAnimationFrame(id);
-  }, [partie !== null, choix !== undefined, jeu, agir]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [partie !== null, partie?.fin === 'victoire', choix !== undefined, jeu, agir]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Une fenêtre inactive ou un panneau ouvert ne garde pas de déplacements en attente.
   useEffect(() => {
@@ -479,6 +479,22 @@ export function Jambonjon() {
       {label}
     </button>
   );
+
+  if(partie.fin==='victoire') return <div className={`jbj jbj-conclusion ${poche?'jbj-poche':''}`} data-testid="jambonjon">
+    <section className="jbj-fin jbj-fin-victoire jbj-conclusion-corps" data-testid="jbj-fin" aria-labelledby="jbj-victoire-titre">
+      <header className="jbj-conclusion-entete">
+        {chevalier&&<img src={`/ordre-cochon/blasons/${chevalier.id}.png`} width={64} height={64} alt="" draggable={false}/>}
+        <div><p className="jbj-conclusion-surtitre">{str('jbj.conclusion.surtitre')}</p><h2 id="jbj-victoire-titre">{str('jbj.finVictoire')}</h2>
+          {chevalier&&<p data-testid="jbj-vainqueur">{chevalier.nom} · {str(`jbj.rpg.${chevalier.classe}`)}</p>}</div>
+      </header>
+      <p className="jbj-conclusion-texte">{str('jbj.conclusion.texte')}</p>
+      <dl className="jbj-conclusion-bilan" data-testid="jbj-bilan-victoire">
+        {(['etages','niveau','tues','tours'] as const).map((cle,i)=><div key={cle}><dt>{str(`jbj.conclusion.${cle}`)}</dt><dd>{[partie.etage,j.niveau,partie.tues,partie.tour][i]}</dd></div>)}
+      </dl>
+      {j.rpg&&<p className="jbj-conclusion-refuges">{str('jbj.conclusion.refuges',{n:new Set(partie.refugesVisites??[]).size})}</p>}
+      <footer><p>{str('jbj.conclusion.retour')}</p><button className="pk-btn" onClick={nouvelle} data-testid="jbj-rejouer">{str('jbj.conclusion.rejouer')}</button></footer>
+    </section>
+  </div>;
 
   return (
     <div className={`jbj ${j.rpg ? "jbj-rpg" : ""} ${poche ? "jbj-poche" : ""} ${panneau === "sac" ? "jbj-sac-ouvert" : ""}`} data-testid="jambonjon">
