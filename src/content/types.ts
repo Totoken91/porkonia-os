@@ -391,7 +391,7 @@ export interface AssistantSpec {
 /* ------------------------------- Jambonjon ------------------------------- */
 
 export type Emplacement = "arme" | "armure" | "tete" | "breloque";
-export type SpriteMonstre = "rat" | "gobelin" | "moisissure" | "saucisson" | "inspecteur" | "tonneau" | "affineur" | "fantome";
+export type SpriteMonstre = "rat" | "gobelin" | "moisissure" | "saucisson" | "inspecteur" | "tonneau" | "affineur" | "fantome" | "prevot" | "pressoir" | "spectre";
 
 export interface MonstreDef {
   id: string;

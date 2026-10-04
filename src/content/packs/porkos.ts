@@ -3182,9 +3182,9 @@ export const porkosPack: ContentPack = {
       { id: "fantome", nom: "Spectre de l'affinage", sprite: "fantome", pv: 18, att: 8, def: 2, xp: 13, etages: [4, 12], description: "Ce qui reste d'un jambon oublié." },
     ],
     bossIntermediaires: [
-      { id: "prevot", nom: "Le Prévôt du Sel", sprite: "inspecteur", pv: 55, att: 8, def: 3, xp: 20, etages: [3, 3], attaqueBoss: "ligne", description: "Son verdict traverse la ligne. Un pas de côté suffit." },
-      { id: "pressoir", nom: "Le Maître du Pressoir", sprite: "tonneau", pv: 75, att: 10, def: 4, xp: 25, etages: [6, 6], attaqueBoss: "pressoir", description: "Il écrase les quatre cases autour de lui. Reculez, puis ripostez." },
-      { id: "spectre", nom: "Le Spectre des Cuves", sprite: "fantome", pv: 70, att: 10, def: 3, xp: 25, etages: [9, 9], attaqueBoss: "sceau", description: "Deux sceaux fixes. Quittez les marques avant leur explosion." },
+      { id: "prevot", nom: "Le Prévôt du Sel", sprite: "prevot", pv: 55, att: 8, def: 3, xp: 20, etages: [3, 3], attaqueBoss: "ligne", description: "Son verdict traverse la ligne. Un pas de côté suffit." },
+      { id: "pressoir", nom: "Le Maître du Pressoir", sprite: "pressoir", pv: 75, att: 10, def: 4, xp: 25, etages: [6, 6], attaqueBoss: "pressoir", description: "Il écrase les quatre cases autour de lui. Reculez, puis ripostez." },
+      { id: "spectre", nom: "Le Spectre des Cuves", sprite: "spectre", pv: 70, att: 10, def: 3, xp: 25, etages: [9, 9], attaqueBoss: "sceau", description: "Deux sceaux fixes. Quittez les marques avant leur explosion." },
     ],
     boss: { id: "affineur", nom: "Le Grand Affineur", sprite: "affineur", pv: 90, att: 11, def: 5, xp: 30, etages: [12, 12], description: "Au fond. Toujours au fond." },
     objets: [

@@ -1,15 +1,15 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration, les trois élites avec butin garanti et les comportements de l’inspecteur et du tonneau sont poussés. Les choix d’équipement sont validés et poussés (`596139f`). L’objectif et les conseils de départ sont validés et poussés (`06b384b`). La conclusion est en validation locale ; les apparences propres aux boss et les vérifications humaines restent à approfondir.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration, les trois élites avec butin garanti et les comportements de l’inspecteur et du tonneau sont poussés. Les choix d’équipement sont validés et poussés (`596139f`). L’objectif et les conseils de départ sont validés et poussés (`06b384b`). La conclusion est validée et poussée (`1923801`). Les trois sprites propres aux gardiens sont validés et poussés ; les vérifications humaines restent à approfondir.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
 | 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans validés et poussés (`475fddf`) |
-| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
+| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites natifs des trois gardiens validés et poussés ; Grand Affineur déjà distinct |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration poussée (`407df13`) : objectifs, gardiens et 72 parcours ; validation humaine à faire |
 | 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`), comportements poussés (`87934d9`) ; compromis d’équipement validés et poussés (`596139f`) |
-| 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | Objectif et apprentissage poussés (`06b384b`), conclusion en validation locale ; essais humains à faire |
+| 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | Objectif et apprentissage poussés (`06b384b`), conclusion poussée (`1923801`) ; essais humains à faire |
 
 ## Première livraison du chantier 1
 
@@ -126,7 +126,7 @@ L’aide permet de masquer ou réactiver ces conseils. La préférence reste apr
 Navigation validée en bureau, Poche portrait, paysage et compact : objectif visible, aide sans débordement horizontal, masquage gratuit, préférence après reprise et nouvelle partie. Déplacements, équipement et compétences restent fonctionnels dans les quatre formats. Passe validée et poussée (`06b384b`).
 
 
-## Conclusion de campagne — passe locale à valider
+## Conclusion de campagne — validée et poussée
 
 La victoire ouvre un écran dédié dans le cadre en pierre et métal du jeu. Le blason, le nom et la classe identifient le chevalier qui a vaincu le Grand Affineur. Une courte conclusion rappelle la libération des caves et le retour à la surface ; elle reprend le résultat existant sans ajouter de nouveau canon.
 
@@ -136,4 +136,21 @@ Le bilan utilise les valeurs de la partie : étage atteint, niveau, ennemis vain
 
 289 tests passent ; build et contrôle TypeScript vérifiés. La validation de la conclusion couvre le coup final réel, le bilan, le chevalier, l’absence de sauvegarde active et le redémarrage avec un autre chevalier.
 
-Navigation validée en bureau, Poche portrait, paysage et compact. La disposition paysage utilise deux colonnes pour garder le bilan et le bouton de nouvelle expédition visibles sans défilement. Captures vérifiées ; cette conclusion reste locale avant validation. Les apparences propres aux boss et les essais humains sont les prochains travaux.
+Navigation validée en bureau, Poche portrait, paysage et compact. La disposition paysage utilise deux colonnes pour garder le bilan et le bouton de nouvelle expédition visibles sans défilement. Captures vérifiées ; conclusion validée et poussée (`1923801`). Les apparences propres aux boss et les essais humains sont les prochains travaux.
+
+
+## Apparences des gardiens — validées et poussées
+
+Les gardiens des étages 3, 6 et 9 disposent chacun d’un sprite natif 40×40, construit sur une matrice où chaque caractère représente un pixel. Les sources éditables restent dans `src/apps/jambonjon/gardiens-pixels.ts`. Palette partagée avec les ennemis, lumière en haut à gauche, surfaces par groupes de couleurs : aucun agrandissement de la grille ni illustration réduite.
+
+- Prévôt du Sel : robe bordeaux, étole ivoire, toque claire, sceptre de sel et parchemin. Visage construit à la même échelle que l’inspecteur, yeux séparés et nez clair.
+- Maître du Pressoir : presse de bois avec deux montants, vis centrale et mâchoire de fer. La structure donne une silhouette différente du tonneau ordinaire.
+- Spectre des Cuves : capuchon élancé, manteau froid en plis, col et ceinture de bronze, mains en crochets. Le corps garde l’opacité spectrale du fantôme précédent.
+
+Le Grand Affineur conserve son sprite propre, déjà distinct. Ces costumes sont des visuels de jeu, sans nouvel élément de canon officiel. Les sauvegardes retrouvent les dessins via leurs identifiants de monstres ; les cartes et adversaires ne sont pas recréés. Dimensions projetées, statistiques, zones d’attaque, délais et esquives sont conservés. Le Pressoir garde notamment le léger soulèvement de son ancienne apparence pendant la préparation ; les trois gardiens conservent le contour ambré.
+
+Le script `scripts/ordre-cochon/apercu-gardiens.mjs` vérifie les matrices et exporte les textures réelles. Contrôle à taille native, ×4 sans lissage, en niveaux de gris, en silhouette et dans le moteur à deux et quatre cases ; avant/après sous la même caméra. Palette effective : 14 couleurs pour le Prévôt, 13 pour le Pressoir, 7 pour le Spectre. Alpha 0/255 pour les deux premiers, 0/191 pour le Spectre après finition.
+
+289 tests passent ; build et TypeScript vérifiés. Passe validée par Kenny et poussée.
+
+Navigation validée en bureau, Poche portrait, paysage et compact : préparation visible des trois gardiens, esquive sans dégâts, reprise avec le bon adversaire. Inventaire, commandes et compétences conservent leurs contrôles habituels. Les nouveaux sprites sont validés et poussés.

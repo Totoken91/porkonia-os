@@ -20,7 +20,7 @@ function blocs(g: G, c: string, bs: readonly Bloc[]) {
   for (const [x, y, w, h] of bs) r(g, c, x, y, w, h);
 }
 
-export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur">, (g: G) => number> = {
+export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur" | "prevot" | "pressoir" | "spectre">, (g: G) => number> = {
   rat: (g) => {
     // Queue en marches, croupe, museau effilé : profil compact de rat.
     blocs(g, P.peauOmbre, [[2,25,2,7],[3,31,3,2],[5,32,6,2]]);

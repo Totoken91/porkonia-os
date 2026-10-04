@@ -6,6 +6,7 @@ import { casesMenace } from "./boss";
 import { MARQUE_SOL, COULEURS_MARQUE } from './marques-sol';
 import { decorRepos } from './repos-decors';
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
+import { DESSINS_GARDIENS } from './gardiens-pixels';
 import { dessinerImpacts } from './effets-combat';
 import type { ImpactVisuel } from './retours-combat';
 import { PALETTE_PROVISIONS, PIXELS_PROVISIONS } from "./provisions-pixels";
@@ -306,6 +307,7 @@ function rect(g: CanvasRenderingContext2D, c: string, x: number, y: number, w: n
 
 const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => number> = {
   ...DESSINS_ENNEMIS,
+  ...DESSINS_GARDIENS,
   inspecteur: (g) => {
     // Pixel art à coordonnées entières : silhouette asymétrique, palette limitée,
     // grandes masses lisibles de loin, visage et procès-verbal lisibles de près.
@@ -410,7 +412,7 @@ export function preparer(): Atelier {
   for (const k of Object.keys(DESSINS_MONSTRES) as SpriteMonstre[]) {
     const { g } = toile(S, S);
     const taille = DESSINS_MONSTRES[k](g);
-    monstres[k] = { tex: finirSprite(g, k === "fantome" ? 0.75 : 1), taille };
+    monstres[k] = { tex: finirSprite(g, k === "fantome" || k === "spectre" ? 0.75 : 1), taille };
   }
   const objets = {} as Atelier["objets"];
   for (const k of Object.keys(DESSINS_OBJETS) as Objet3D[]) {
@@ -617,7 +619,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     const sp = a.monstres[fx.spriteDe(m.type)];
     const echelle = m.boss ? 1.25 : m.elite ? 1.12 : 1;
     const charge=!!m.rpg?.annonce;
-    const souleve = charge && fx.spriteDe(m.type) === 'tonneau' ? .08 : 0;
+    const sprite = fx.spriteDe(m.type);
+    const souleve = charge && (sprite === 'tonneau' || sprite === 'pressoir') ? .08 : 0;
     sprites.push({ x: m.x + 0.5, y: m.y + 0.5, tex: sp.tex, taille: sp.taille * echelle, rouge: fx.touches.has(m.uid), charge, flotte: souleve+Math.sin(fx.temps * 0.006 + m.uid) * 0.02 });
   }
   const inv = 1 / (plX * dirY - dirX * plY);
