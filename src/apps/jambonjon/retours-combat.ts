@@ -1,6 +1,6 @@
 /** Retours transitoires : dérivés du résultat réel, sans modifier le moteur ni le hasard. */
 import { passable, stats, type Action, type Partie } from './logic';
-import { disponible } from './rpg';
+import { coutCompetence, disponible, SLOTS_ACTIFS } from './rpg';
 import { DEBLOCAGES } from './equilibrage';
 
 export function cotesLibres(p:Partie) {
@@ -18,6 +18,18 @@ export function actionRapide(p:Partie,slot:number):Action|null {
     return {type:'competence',slot,cote:c.gauche?'gauche':c.droite?'droite':undefined};
   }
   return {type:'competence',slot};
+}
+/** Explique le verrou réel sans interdire les clics de ciblage déjà acceptés par le jeu. */
+export function statutCompetence(p:Partie,slot:number):{cle:string;n?:number;bloquee:boolean} {
+  const r=p.joueur.rpg,i=SLOTS_ACTIFS[slot];
+  if(!r||i===undefined||p.fin)return {cle:'jbj.rpg.terminee',bloquee:true};
+  if(!r.rangs[i])return p.joueur.niveau<DEBLOCAGES[i]!
+    ? {cle:'jbj.rpg.niveauRequis',n:DEBLOCAGES[i]!,bloquee:true}
+    : {cle:'jbj.rpg.aApprendre',bloquee:true};
+  if(r.delais[slot]!>0)return {cle:'jbj.rpg.delai',n:r.delais[slot],bloquee:true};
+  const cout=coutCompetence(p,slot);
+  if(p.joueur.mousse<cout)return {cle:'jbj.rpg.manqueMousse',n:cout-p.joueur.mousse,bloquee:true};
+  return {cle:disponible(p,slot)?'jbj.rpg.pret':'jbj.rpg.horsPortee',bloquee:false};
 }
 export type StyleImpact='frappe'|'garde'|'butoir'|'revers'|'double'|'pas'|'execution'|'sel'|'rot'|'explosion'|'saignement';
 export interface ImpactVisuel { uid:number;x:number;y:number;degats:number;mort:boolean;style:StyleImpact;debut:number }

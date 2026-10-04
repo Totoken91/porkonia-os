@@ -10,10 +10,10 @@ import { SpriteObjet } from "./SpriteObjet";
 import { Chevaliers } from "./Chevaliers";
 import { Competences } from "./Competences";
 import { Refuge } from './Halte';
-import { DEBLOCAGES, xpNiveauRpg } from "./equilibrage";
+import { xpNiveauRpg } from "./equilibrage";
 import { menaceSur } from "./boss";
 import { coutCompetence, disponible, ligne, SLOTS_ACTIFS } from "./rpg";
-import { actionRapide, cotesLibres, gainsNiveau, impactsCombat, type ImpactVisuel } from './retours-combat';
+import { actionRapide, cotesLibres, gainsNiveau, impactsCombat, statutCompetence, type ImpactVisuel } from './retours-combat';
 import "./old-school.css";
 import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
 import { convertirRpg, defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
@@ -118,7 +118,7 @@ function bruit(kind: string) {
 
 /* ------------------------------- Composant -------------------------------- */
 
-type Panneau = null | "sac" | "carte" | "aide" | "competences";
+type Panneau = null | "sac" | "carte" | "aide" | "competences" | "journal";
 
 export function Jambonjon() {
   const { pack, str, settings, signal } = useOs();
@@ -379,6 +379,7 @@ export function Jambonjon() {
         setPanneau((x) => (x === "carte" ? null : "carte"));
         return;
       }
+      if(k==='h'&&!partieRef.current.fin){ev.preventDefault();setCompetence(null);setPanneau(x=>x==='journal'?null:'journal');return;}
       if (k === "escape") {
         setCompetence(null);
         setPanneau(null);
@@ -463,7 +464,7 @@ export function Jambonjon() {
   const chevalier = jeu.rpg?.chevaliers.find((c) => c.id === j.rpg?.chevalier);
   const cotes=cotesLibres(partie);
   const nomEtage = jeu.nomsEtages[(partie.etage - 1) % jeu.nomsEtages.length]!;
-  const journal = partie.journal.slice(poche ? -2 : -4);
+  const journal = partie.journal.slice(poche ? -2 : -1);
   const menace=partie.monstres.find(m=>m.rpg?.annonce&&menaceSur(m.rpg.annonce,j));
   const attaqueMenace=menace?defMonstre(jeu,menace.type).attaqueBoss:undefined;
   const attaqueOrdinaire=menace&&!menace.boss&&!menace.elite?defMonstre(jeu,menace.type).attaqueOrdinaire:undefined;
@@ -555,11 +556,11 @@ export function Jambonjon() {
           )}
         </div>
         {!panneau&&<Refuge partie={partie} agir={agir} competences={()=>{setPromotion(null);setCompetence(null);setPanneau('competences');}}/>}
-        <ol className="jbj-journal" data-testid="jbj-journal">
+        <div className="jbj-journal" data-testid="jbj-journal"><ol>
           {journal.map((m, i) => (
-            <li key={partie.journal.length - journal.length + i} className={m.cle.startsWith('jbj.guide.')?'jbj-conseil':undefined}>{str(m.cle, m.vars)}</li>
+            <li key={partie.journal.length - journal.length + i} title={str(m.cle,m.vars)} className={m.cle.startsWith('jbj.guide.')?'jbj-conseil':undefined}>{str(m.cle, m.vars)}</li>
           ))}
-        </ol>
+        </ol><button className="pk-btn" data-testid="jbj-ouvrir-journal" title={str('jbj.journal.raccourci')} onClick={()=>{setCompetence(null);setPanneau(x=>x==='journal'?null:'journal');}}>{str('jbj.journal.court')}</button></div>
       </div>
       <div className="jbj-droite">
         <div className="jbj-etage">
@@ -588,9 +589,9 @@ export function Jambonjon() {
         </div>
         {j.ivresse > 0 && <p className="jbj-ivre">{str("jbj.ivre")}</p>}
         {j.rpg && <div className="jbj-rpg-barre" data-testid="jbj-barre-competences">
-          {SLOTS_ACTIFS.map((i, slot) => <button className={`pk-btn ${competence === slot ? "choisi" : ""}`} key={i} data-testid={`jbj-actif-${slot}`} onClick={() => lancer(slot)} disabled={!j.rpg!.rangs[i] || j.rpg!.delais[slot]! > 0 || j.mousse < coutCompetence(partie, slot)} title={`${jeu.rpg!.competences[j.rpg!.classe][i]!.effet} · ${str(coutCompetence(partie,slot)?'jbj.rpg.cout':'jbj.rpg.physique',{n:coutCompetence(partie,slot)})}`}>
-            <span>{slot + 1} · {jeu.rpg!.competences[j.rpg!.classe][i]!.nom}</span><small>{j.rpg!.delais[slot]! > 0 ? str("jbj.rpg.delai", { n: j.rpg!.delais[slot]! }) : j.rpg!.rangs[i] ? str("jbj.rpg.pret") : str("jbj.rpg.niveauRequis", { n: DEBLOCAGES[i]! })}</small>
-          </button>)}
+          {SLOTS_ACTIFS.map((i, slot) => {const statut=statutCompetence(partie,slot);const texte=str(statut.cle,{n:statut.n??0});return <button className={`pk-btn ${competence === slot ? "choisi" : ""}`} key={i} data-testid={`jbj-actif-${slot}`} onClick={() => lancer(slot)} disabled={statut.bloquee} title={`${texte} · ${jeu.rpg!.competences[j.rpg!.classe][i]!.effet} · ${str(coutCompetence(partie,slot)?'jbj.rpg.cout':'jbj.rpg.physique',{n:coutCompetence(partie,slot)})}`}>
+            <span>{slot + 1} · {jeu.rpg!.competences[j.rpg!.classe][i]!.nom}</span><small>{texte}</small>
+          </button>;})}
           <button className="pk-btn" data-testid="jbj-ouvrir-competences" onClick={() => { setCompetence(null); setPanneau((p) => p === "competences" ? null : "competences"); }}>{str("jbj.rpg.competences")}{j.rpg.points > 0 ? ` (${j.rpg.points})` : ""}</button>
           {(j.rpg.riposte > 0 || j.rpg.ouverture || j.rpg.perce || j.rpg.reduction > 0) && <small className="jbj-preparation">{str(j.rpg.riposte > 0 ? "jbj.rpg.riposte" : j.rpg.ouverture ? "jbj.rpg.ouverture" : j.rpg.perce ? "jbj.rpg.perce" : "jbj.rpg.lie")}</small>}
         </div>}
@@ -611,6 +612,7 @@ export function Jambonjon() {
             <button className="jbj-pad-b" onClick={() => setPanneau((x) => (x === "carte" ? null : "carte"))}>
               {str("jbj.carteCourt")}
             </button>
+            {btn({type:'attendre'},str('jbj.attendre'),'','jbj-pad-w')}
           </div>
         )}
         {!poche && (
@@ -621,6 +623,10 @@ export function Jambonjon() {
       </div>
       {panneau === "sac" && <Inventaire partie={partie} agir={agir} fermer={() => setPanneau(null)}/> }
       {panneau === "competences" && j.rpg && <Competences partie={partie} agir={agir} fermer={() => setPanneau(null)}/>}
+      {panneau==='journal'&&<section className="jbj-rpg-panel jbj-journal-complet" data-testid="jbj-journal-complet" aria-labelledby="jbj-journal-titre">
+        <header><h2 id="jbj-journal-titre">{str('jbj.journal.titre')}</h2><button className="pk-btn" data-testid="jbj-journal-fermer" onClick={()=>setPanneau(null)}>{str('jbj.fermer')}</button></header>
+        <p>{str('jbj.journal.ordre')}</p><ol>{[...partie.journal].reverse().map((m,i)=><li key={i} className={m.cle.startsWith('jbj.guide.')?'jbj-conseil':undefined}>{str(m.cle,m.vars)}</li>)}</ol>
+      </section>}
     </div>
   );
 }

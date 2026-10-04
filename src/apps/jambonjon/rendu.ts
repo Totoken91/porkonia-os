@@ -267,10 +267,11 @@ function toileDepuis(t: Tex) {
 
 /* --------------------------------- Sprites --------------------------------- */
 
-const S = 40; // côté des sprites
+const S = 40; // côté natif par défaut
 
 /** Rend les bords nets (alpha tout ou rien) et ajoute un contour sombre, comme un sprite d'époque. */
 function finirSprite(g: CanvasRenderingContext2D, transparence = 1): Tex {
+  const S = g.canvas.width; // Finition sur la grille native, y compris le contour.
   const im = g.getImageData(0, 0, S, S);
   const d = im.data;
   const plein = new Uint8Array(S * S);
@@ -293,12 +294,14 @@ function finirSprite(g: CanvasRenderingContext2D, transparence = 1): Tex {
   return { w: S, h: S, px: d };
 }
 
+/** Une ellipse en pixels opaques : aucune couverture partielle de Canvas. */
 function ell(g: CanvasRenderingContext2D, c: string, x: number, y: number, rx: number, ry: number) {
-  g.fillStyle = c;
-  g.beginPath();
-  g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
-  g.fill();
+  g.fillStyle=c;
+  for(let py=Math.floor(y-ry);py<Math.ceil(y+ry);py++)
+    for(let px=Math.floor(x-rx);px<Math.ceil(x+rx);px++)
+      if(((px+.5-x)/rx)**2+((py+.5-y)/ry)**2<=1)g.fillRect(px,py,1,1);
 }
+
 function rect(g: CanvasRenderingContext2D, c: string, x: number, y: number, w: number, h: number) {
   g.fillStyle = c;
   g.fillRect(x, y, w, h);
@@ -410,7 +413,8 @@ export function preparer(): Atelier {
   if (atelier) return atelier;
   const monstres = {} as Atelier["monstres"];
   for (const k of Object.keys(DESSINS_MONSTRES) as SpriteMonstre[]) {
-    const { g } = toile(S, S);
+    const coteNatif = k === "moisissure" ? 20 : S;
+    const { g } = toile(coteNatif, coteNatif);
     const taille = DESSINS_MONSTRES[k](g);
     monstres[k] = { tex: finirSprite(g, k === "fantome" || k === "spectre" ? 0.75 : 1), taille };
   }
@@ -442,7 +446,6 @@ export const angleDe = (dir: number) => (dir * Math.PI) / 2 - Math.PI / 2;
 
 const BROUILLARD = [31, 26, 22]; // fumée de cave, palette sale du rendu d'origine.
 const DENSITE = 0.34;
-const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v / 16 - 0.5) * 9);
 
 export interface EffetsRendu {
   impacts?: ImpactVisuel[];
@@ -457,29 +460,13 @@ export interface EffetsRendu {
 
 const zbuf = new Float32Array(LARGEUR);
 const profondeur = new Float32Array(LARGEUR*HAUTEUR);
+const pixelsSprites = new Uint8Array(LARGEUR*HAUTEUR);
 
-/** Échantillon filtré (bilinéaire, comme les consoles de salon de l'an 2000), coordonnées en texels, bouclé. */
-const ech = [0, 0, 0];
-function bilin(t: Tex, u: number, v: number) {
-  const u0 = Math.floor(u - 0.5);
-  const v0 = Math.floor(v - 0.5);
-  const fu = u - 0.5 - u0;
-  const fv = v - 0.5 - v0;
-  const m = t.w - 1;
-  const x0 = u0 & m;
-  const x1 = (u0 + 1) & m;
-  const y0 = (v0 & m) * t.w;
-  const y1 = ((v0 + 1) & m) * t.w;
-  const a = (y0 + x0) * 4;
-  const b = (y0 + x1) * 4;
-  const c = (y1 + x0) * 4;
-  const d = (y1 + x1) * 4;
-  const p = t.px;
-  for (let k = 0; k < 3; k++) {
-    const h = p[a + k]! + (p[b + k]! - p[a + k]!) * fu;
-    const l = p[c + k]! + (p[d + k]! - p[c + k]!) * fu;
-    ech[k] = h + (l - h) * fv;
-  }
+/** Échantillon natif au plus proche : pas de couleurs ni sous-pixels interpolés. */
+const ech = [0,0,0];
+function echantillon(t:Tex,u:number,v:number) {
+  const x=((Math.floor(u)%t.w)+t.w)%t.w,y=((Math.floor(v)%t.h)+t.h)%t.h,i=(y*t.w+x)*4;
+  for(let k=0;k<3;k++)ech[k]=t.px[i+k]!;
 }
 
 export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) {
@@ -488,6 +475,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   const H = HAUTEUR;
   const d = out.data;
   profondeur.fill(Infinity);
+  pixelsSprites.fill(0);
   const c = p.carte;
   const dirX = Math.cos(cam.angle);
   const dirY = Math.sin(cam.angle);
@@ -532,8 +520,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const cy = Math.floor(fy0);
       const tapis=c.coinRepos&&Math.abs(fx0-(c.coinRepos.x+.5))<1.5&&fy0>1&&fy0<3;
       const tex = !sol ? a.plafond : cx >= 0 && cy >= 0 && cx < c.w && cy < c.h && c.cases[cy * c.w + cx] === ESCALIER ? a.trappe : tapis?a.repos.tapis:a.sol;
-      // Les surfaces reprennent le filtrage et le grain d'origine ; les sprites restent nets.
-      bilin(tex,(fx0-cx)*T+(sol?8:0),(fy0-cy)*T);
+      // Chaque surface reprend ses texels natifs et le grain de son asset.
+      echantillon(tex,(fx0-cx)*T+(sol?8:0),(fy0-cy)*T);
       const chaud=chaleur(fx0,fy0);
       const relief=sol && ((cx+cy)%4===0) ? 0.94 : 1;
       ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!, f*(0.84+chaud*0.45)*relief,chaud);
@@ -546,6 +534,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         }
       }
       profondeur[y*W+x]=dist;
+      pixelsSprites[y*W+x]=0;
       fx0 += pasX;
       fy0 += pasY;
     }
@@ -597,10 +586,11 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     const f = lum(dist) * (cote === 1 ? 0.82 : 1) * (0.8+chaud*0.58);
     for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) {
       const ti=((Math.min(31,Math.floor(((y-y0)/(y1-y0))*T))*T)+(Math.floor(tx)&31))*4;
-      bilin(tex,tx,((y-y0)/(y1-y0))*T);
+      echantillon(tex,tx,((y-y0)/(y1-y0))*T);
       const emissif=(decor===4||decor===10) && tex.px[ti]!>180 && tex.px[ti+1]!>80 && tex.px[ti+2]!<170;
       ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!,emissif ? Math.max(0.85,f)*flamme : f,chaud);
       profondeur[y*W+x]=dist;
+      pixelsSprites[y*W+x]=0;
     }
   }
 
@@ -635,11 +625,17 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     .sort((u, v) => v.ty - u.ty);
   for (const { s, tx, ty } of proj) {
     const ecranX = (W / 2) * (1 + tx / ty);
-    const cote = (projection / ty) * s.taille;
+    const coteProjete = (projection / ty) * s.taille;
+    // Un sprite proche est agrandi par un facteur entier : chaque pixel natif
+    // couvre le même carré, au lieu d'alterner des colonnes de 2 et 3 pixels.
+    // À distance, réduction au plus proche pour conserver la perspective.
+    const cote = coteProjete >= s.tex.w
+      ? Math.max(1, Math.round(coteProjete / s.tex.w)) * s.tex.w
+      : Math.max(1, Math.round(coteProjete));
     const sol = horizon + projection / ty / 2;
-    const yb = sol - (s.flotte * projection) / ty;
+    const yb = Math.round(sol - (s.flotte * projection) / ty);
     const ya = yb - cote;
-    const xa = ecranX - cote / 2;
+    const xa = Math.round(ecranX - cote / 2);
     const chaud=chaleur(s.x,s.y);
     const f = lum(ty)*(0.94+chaud*0.35);
     for (let x = Math.max(0, Math.floor(xa)); x < Math.min(W, Math.ceil(xa + cote)); x++) {
@@ -653,6 +649,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         const al = s.tex.px[ti + 3]!;
         if (al < 10) continue;
         profondeur[y*W+x]=ty;
+        pixelsSprites[y*W+x]=al>=250?1:0;
         const i = (y * W + x) * 4;
         let r = s.tex.px[ti]!;
         let g = s.tex.px[ti + 1]!;
@@ -697,25 +694,25 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       if(dist>=profondeur[y*W+x]!) continue;
       const v=Math.max(0,Math.min(31,Math.floor((y-y0)*T/h))), ti=(v*T+Math.floor(u*T))*4;
       if(!a.passage.px[ti+3]) continue;
-      bilin(a.passage,u*T,(y-y0)*T/h);
+      echantillon(a.passage,u*T,(y-y0)*T/h);
       ecrire((y*W+x)*4,ech[0]!,ech[1]!,ech[2]!,lum(dist)*(0.84+chaud*.58),chaud);
       profondeur[y*W+x]=dist;
+      pixelsSprites[y*W+x]=0;
     }
   }
 
-  // Éclair, tramage ordonné, 15 bits, vignette.
+  // Éclair et palette 15 bits. La vignette reste au décor : un texel opaque de sprite garde une couleur uniforme.
   const [er, eg, eb] = fx.eclairCouleur;
   for (let y = 0; y < H; y++)
     for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4;
       const vx = (x / W - 0.5) * 2;
       const vy = (y / H - 0.5) * 2;
-      const vig = 1 - 0.14 * (vx * vx + vy * vy);
-      const t = BAYER[(y & 3) * 4 + (x & 3)]!;
+      const vig = pixelsSprites[y*W+x] ? 1 : 1 - 0.14 * (vx * vx + vy * vy);
       for (let k2 = 0; k2 < 3; k2++) {
         let v = d[i + k2]! * vig;
         if (fx.eclair > 0) v = v * (1 - fx.eclair) + [er, eg, eb][k2]! * fx.eclair;
-        v = Math.max(0, Math.min(255, v + t));
+        v = Math.max(0, Math.min(255, v));
         d[i + k2] = (v >> 3) << 3;
       }
     }

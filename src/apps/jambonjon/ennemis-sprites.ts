@@ -1,4 +1,4 @@
-/** Sprites natifs 40×40 : mêmes contours et masses de couleur que l’Inspecteur.
+/** Sprites natifs : 40×40 pour les grands, 20×20 pour la moisissure ; mêmes contours et masses de couleur que l’Inspecteur.
  * Coordonnées entières, palette maîtrisée, dessins construits à leur taille réelle.
  */
 import type { SpriteMonstre } from "@/content/types";
@@ -59,17 +59,40 @@ export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur" | "prev
     return .62;
   },
   moisissure: (g) => {
-    // Lobes construits par paliers, spores en petits groupes lisibles.
-    blocs(g,P.vertOmbre,[[5,28,30,8],[8,24,24,12],[11,21,17,14],[14,18,9,7],[5,35,6,3],[13,36,10,2],[27,35,7,3]]);
-    blocs(g,P.vert,[[6,28,27,6],[9,25,21,10],[12,22,15,11],[15,19,6,6]]);
-    blocs(g,P.vertClair,[[10,25,6,3],[13,22,6,3],[16,19,4,2],[23,25,4,2],[8,30,3,2]]);
-    blocs(g,P.papier,[[13,23,3,1],[17,20,2,1],[24,25,2,1]]);
-    blocs(g,P.vertOmbre,[[11,31,4,2],[21,32,5,2],[28,29,2,3],[17,35,3,1]]);
-    blocs(g,P.noir,[[15,27,2,2],[22,27,2,2]]);r(g,P.papier,15,27,1,1);r(g,P.papier,22,27,1,1);
-    r(g,P.vertOmbre,18,31,4,1);
-    blocs(g,P.vert,[[9,18,1,7],[26,18,1,7],[31,22,1,5]]);
-    blocs(g,P.papier,[[8,17,3,2],[25,17,3,2],[30,21,3,2],[20,14,2,2]]);
-    r(g,P.vertClair,20,16,1,3);
+    // 20×20 pour une créature d'une demi-case : même densité que 40×40 sur une case.
+    // Un caractère = un pixel natif ; contour ajouté sur cette même grille.
+    const palette: Record<string, string> = {
+      d: P.vertOmbre, m: P.vert, l: P.vertClair, h: "#8d9d6b",
+      X: P.noir, w: P.papier, i: P.ivoire, t: P.brunOmbre, o: P.bois,
+    };
+    const pixels = [
+      '....................',
+      '....................',
+      '.........ttt........',
+      '........tiwwt.......',
+      '.........ot.........',
+      '....ttt..ot...ttt...',
+      '...tiwwt.ot..tiwwt..',
+      '....ot..ddmd..ot....',
+      '....ot.dlhmmd.ot....',
+      '.....ddllmmmmdod....',
+      '....dllmmmmmmmdd....',
+      '...dllmmmmmmmmmd....',
+      '...dlmmmXmmXmmmmdd..',
+      '..dlmmmmmmmmmmmmmd..',
+      '..dmmmmmmddmmmmmmd..',
+      '..dmmddmmmmmmddmmd..',
+      '...ddmmddddddmmdd...',
+      '....ddddm..mdddd....',
+      '....................',
+      '....................',
+    ];
+    for (const [y, ligne] of pixels.entries()) {
+      for (const [x, signe] of [...ligne].entries()) {
+        const couleur = palette[signe];
+        if (couleur) r(g, couleur, x, y, 1, 1);
+      }
+    }
     return .5;
   },
   saucisson: (g) => {

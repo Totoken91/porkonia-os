@@ -154,3 +154,47 @@ Le script `scripts/ordre-cochon/apercu-gardiens.mjs` vérifie les matrices et ex
 289 tests passent ; build et TypeScript vérifiés. Passe validée par Kenny et poussée.
 
 Navigation validée en bureau, Poche portrait, paysage et compact : préparation visible des trois gardiens, esquive sans dégâts, reprise avec le bon adversaire. Inventaire, commandes et compétences conservent leurs contrôles habituels. Les nouveaux sprites sont validés et poussés.
+
+
+## Peaufinage — passe locale à valider
+
+Priorité donnée à la cohérence des pixels à la demande de Kenny. Le problème observé sur la moisissure était aggravé par le rendu : un tramage à la résolution du framebuffer et la vignette ajoutaient des variations de couleur à l’intérieur des pixels agrandis du sprite. Ces traitements ne viennent pas de sa grille 40×40.
+
+- Suppression du tramage ajouté sur l’écran. Les sprites opaques conservent une couleur uniforme par texel natif ; la vignette reste sur le décor. Lumière chaude, brume, palette 15 bits et palettes grunge sont conservées.
+- Murs, sol, plafond et cadres sont échantillonnés au plus proche sur leurs textures natives 32×32, sans interpolation bilinéaire. Les motifs et leur grain de source sont conservés.
+- Les courbes des sacs et tonneaux au sol sont construites sur la grille native en pixels opaques, sans couverture partielle de Canvas. L’ombre CSS d’un pixel d’écran sous les objets de l’inventaire est retirée : leurs contours restent ceux du PNG.
+- Contrôle des onze textures d’ennemis dans le moteur, avec caméra et temps fixes. Sur les neuf sprites opaques, aucun pixel source échantillonné à l’intérieur de sa cellule n’a plusieurs couleurs de rendu. Les deux spectres gardent leur mélange transparent avec le fond ; ils ne sont pas déclarés opaques. Les vingt PNG d’items sont à leur petite résolution native (24×24, 32×24, 32×40 ou 32×48), avec alpha 0/255.
+
+Le script `scripts/ordre-cochon/controle-pixels.mjs` produit les vues et le rapport machine ; `PIXELS_STRICT=1` rejette des sous-détails dans les cellules opaques. Avant correction, les 623 cellules natives testées sur la moisissure présentaient plusieurs couleurs de sortie ; après correction, aucune. Ce contrôle porte sur la couleur à l’intérieur des cellules, pas sur l’appréciation artistique ni sur une égalité de taille entre un objet proche et un objet lointain.
+
+Deux corrections de lisibilité accompagnent cette passe :
+
+- Journal compact sans lignes coupées verticalement, et bouton « Journal » / touche H pour lire les événements conservés en entier. Les plus récents viennent d’abord, le texte long se replie dans la largeur disponible. Consulter ou fermer le journal ne consomme aucun tour et ne modifie pas le hasard.
+- La barre des compétences explique le verrou réel : niveau requis, compétence à apprendre lorsque le niveau suffit déjà, manque de mousse, récupération, cible hors portée ou compétence prête. La portée n’introduit pas de nouveau verrou de clic ; les règles de ciblage restent celles du moteur.
+
+Sur Poche, un bouton « Attendre » donne accès directement à l’action existante d’un tour, sans se déplacer. Aucun changement des dégâts, de l’XP, des prix, des ressources ou des règles de combat.
+
+291 tests passent ; build et TypeScript vérifiés. Navigation validée en bureau, Poche portrait, paysage et compact : journal sans débordement et gratuit, labels de compétences, attente tactile, équipements, déplacements, sorts, trois refuges et trois esquives de boss. Captures contrôlées. Le rendu et les interfaces restent locaux pour validation visuelle ; les essais humains de difficulté et de plaisir restent distincts de ces vérifications automatiques.
+
+
+### Reprise après rejet de la capture — locale, non poussée
+
+Le contrôle de couleur précédent ne suffisait pas : le dessin rectangulaire de la moisissure et les agrandissements fractionnaires restaient visibles. La moisissure est reconstruite sur une matrice native 40×40, avec lobes arrondis, ombres reliées et trois champignons charnus. La palette olive, bois et ivoire reste partagée avec les autres ennemis ; aucune illustration réduite ni grain ajouté dans les pixels.
+
+Le moteur agrandit désormais tous ses sprites proches (ennemis et objets au sol) par un facteur entier et pose leurs bords sur les coordonnées entières du framebuffer. Les colonnes d'un même pixel natif ne passent plus alternativement de deux à trois pixels. Les sprites lointains sont toujours réduits au plus proche. Ce choix assume des changements de taille par paliers pendant l'approche, à contrôler en jeu ; les positions, collisions et actions ne changent pas. Les textures en perspective et les effets CRT du moniteur restent distincts de la grille native des sprites.
+
+Le contrôle des onze textures réelles passe à nouveau sans variations à l'intérieur des cellules opaques. Aperçus natifs et capture du jeu dans le moniteur produits sous la même caméra que la version rejetée. Build et 291 tests passent ; navigation et interfaces vérifiées dans les quatre formats. Les gardiens ont également été inspectés à deux et quatre cases. Cette reprise reste soumise à validation visuelle, sans push.
+
+
+### Correction de densité — moisissure native 20×20, locale
+
+La version 40×40 de la moisissure est remplacée par un dessin construit directement en 20×20, à la demande de Kenny. Sa taille dans le monde reste une demi-case : 20 pixels sur 0,5 case donnent une densité de référence de 40 pixels par case, comme le Grand Affineur. Les formes et les yeux sont simplifiés sur la petite grille ; il ne s'agit pas d'une réduction automatique du dessin précédent.
+
+La préparation crée une véritable texture 20×20 et ajoute son contour à cette résolution. La finition lit désormais la taille du canvas natif au lieu de supposer 40 partout. Le contrôle de pixels utilise les dimensions réelles des textures et rapporte les pixels par case. La taille projetée reste petite, avec quatre pixels de framebuffer par pixel natif à une case dans la scène de contrôle. Aucun push.
+
+
+### Validation de la passe — 4 octobre 2026
+
+Kenny valide la moisissure 20×20 et autorise le push de la passe de peaufinage : rendu natif sans sous-tramage, projection entière des sprites proches, journal complet, statuts de compétences et attente tactile. Les mentions « locale » et « non poussée » ci-dessus décrivent les étapes de revue précédant cette validation.
+
+Dernière vérification : build réussi, 291 tests passés, contrôle des onze textures réelles et égalité du facteur d'agrandissement entre moisissure et inspecteur à une case. Navigation bureau revalidée avec le sprite 20×20 ; les quatre formats ont passé la navigation lors de la passe de rendu et d'interface précédente. Le push Git déclenche le déploiement automatique ; aucun déploiement manuel.

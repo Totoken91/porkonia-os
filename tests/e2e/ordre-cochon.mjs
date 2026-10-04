@@ -15,6 +15,7 @@ const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECT
 const ELITE=process.env.ELITE?JSON.parse(await readFile(process.env.ELITE,'utf8')):null;
 const COMPORTEMENTS=process.env.COMPORTEMENTS?JSON.parse(await readFile(process.env.COMPORTEMENTS,'utf8')):[];
 const EQUIPEMENT=process.env.EQUIPEMENT?JSON.parse(await readFile(process.env.EQUIPEMENT,'utf8')):null;
+const PEAUFINAGE=process.env.PEAUFINAGE==='1';
 const GUIDAGE=process.env.GUIDAGE==='1';
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
@@ -486,6 +487,33 @@ try {
       const p=await lire();if(p.etage!==2||p.joueur.niveau!==2||p.joueur.rpg.points!==1)throw new Error(`${tag}: progression par objectif incorrecte`);
       if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-objectif-niveau.png`)});
       step(`${tag}: objectif d’etage, niveau et point de competence valides`);
+    }
+    if(PEAUFINAGE){
+      await page.evaluate(()=>{
+        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+        p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.niveau=10;p.joueur.mousse=0;p.joueur.pv=80;p.joueur.ivresse=0;
+        p.joueur.rpg={chevalier:'ysee',classe:'jambonmancien',rangs:[2,1,1,0,0,0],points:6,delais:[0,0,0],protection:0,riposte:0,bouclier:0,perce:false,saigne:-1,encore:false,reduction:0,utilisee:-1};
+        p.carte={w:9,h:9,cases:Array.from({length:81},(_,i)=>i<9||i>=72||i%9===0||i%9===8?1:0),vu:Array(81).fill(true),decor:Array(81).fill(0)};
+        p.monstres=[{uid:7000,type:'moisissure',niveau:1,elite:false,boss:false,x:4,y:3,pv:80,pvMax:80,att:1,def:0,xp:1,eveille:true,sonne:0}];p.sol=[];p.fin=null;
+        p.journal=[...p.journal.slice(-37),{cle:'jbj.refuge.victoire',vars:{nom:'Tranchoir de la Commission'}},{cle:'jbj.msg.frappe',vars:{nom:'Moisissure vivante',degats:12}}];
+        localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+      });
+      await reprendre();
+      if(!(await page.getByTestId('jbj-actif-0').innerText()).includes('Manque')||!await page.getByTestId('jbj-actif-0').isDisabled())throw Error(`${tag}: mousse insuffisante mal expliquee`);
+      if(!(await page.getByTestId('jbj-actif-2').innerText()).includes('À apprendre'))throw Error(`${tag}: niveau deja atteint presente comme verrouille`);
+      const avant=await lire();
+      const coupe=await page.getByTestId('jbj-journal').evaluate(e=>{const a=e.querySelector('ol').getBoundingClientRect();return [...e.querySelectorAll('li')].some(li=>{const b=li.getBoundingClientRect();return b.top<a.top-1||b.bottom>a.bottom+1;});});
+      if(coupe)throw Error(`${tag}: message du journal coupe verticalement`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-peaufinage.png`)});
+      await page.getByTestId('jbj-ouvrir-journal').click();await page.getByTestId('jbj-journal-complet').waitFor();
+      const panel=page.getByTestId('jbj-journal-complet');
+      if(!(await panel.innerText()).includes('Tranchoir de la Commission'))throw Error(`${tag}: historique incomplet`);
+      if(await panel.evaluate(e=>e.scrollWidth>e.clientWidth+1))throw Error(`${tag}: historique deborde`);
+      if(SHOTS)await panel.screenshot({path:join(SHOTS,`${tag}-journal-complet.png`)});
+      await page.getByTestId('jbj-journal-fermer').click();await page.keyboard.press('h');await panel.waitFor();await page.keyboard.press('Escape');
+      const apres=await lire();if(apres.tour!==avant.tour||apres.alea!==avant.alea)throw Error(`${tag}: lire le journal modifie la partie`);
+      if(mobile){const avant=await lire();await page.getByTestId('jbj-pad-w').click();const apres=await lire();if(apres.tour!==avant.tour+1||apres.joueur.x!==avant.joueur.x||apres.joueur.y!==avant.joueur.y)throw Error(`${tag}: attente tactile incorrecte`);}
+      step(`${tag}: journal lisible et gratuit, statuts de competences et attente tactile valides`);
     }
     for(const fixture of REFUGES){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);

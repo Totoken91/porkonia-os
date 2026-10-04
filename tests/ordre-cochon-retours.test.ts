@@ -1,7 +1,7 @@
 import { describe,expect,it } from 'vitest';
 import { porkosPack } from '../src/content/packs/porkos';
 import { jouer,nouvellePartie,type Partie } from '../src/apps/jambonjon/logic';
-import { actionRapide,gainsNiveau,impactsCombat } from '../src/apps/jambonjon/retours-combat';
+import { actionRapide,gainsNiveau,impactsCombat,statutCompetence } from '../src/apps/jambonjon/retours-combat';
 import { xpNiveauRpg } from '../src/apps/jambonjon/equilibrage';
 const jeu=porkosPack.jambonjon;
 function fixture(id='colin') {
@@ -10,6 +10,20 @@ function fixture(id='colin') {
   p.monstres=[{uid:900,type:'inspecteur',niveau:1,elite:false,boss:false,x:3,y:2,pv:100,pvMax:100,att:1,def:0,xp:1,eveille:true,sonne:0}];p.sol=[];return p;
 }
 describe('Retours de combat et commandes directes',()=>{
+  it('distingue un niveau insuffisant d’une compétence non apprise',()=>{
+    const p=fixture('ysee');p.joueur.rpg!.rangs[3]=0;p.joueur.niveau=1;
+    expect(statutCompetence(p,2)).toMatchObject({cle:'jbj.rpg.niveauRequis',n:7,bloquee:true});
+    p.joueur.niveau=7;expect(statutCompetence(p,2)).toEqual({cle:'jbj.rpg.aApprendre',bloquee:true});
+  });
+  it('explique mousse, récupération et portée sans consommer de tour',()=>{
+    const p=fixture('ysee');p.joueur.mousse=0;const avant=JSON.stringify(p);
+    expect(statutCompetence(p,0)).toMatchObject({cle:'jbj.rpg.manqueMousse',bloquee:true});
+    expect(JSON.stringify(p)).toBe(avant);
+    p.joueur.rpg!.delais[0]=2;expect(statutCompetence(p,0)).toEqual({cle:'jbj.rpg.delai',n:2,bloquee:true});
+    p.joueur.rpg!.delais[0]=0;p.joueur.mousse=40;
+    expect(statutCompetence(p,0)).toEqual({cle:'jbj.rpg.pret',bloquee:false});
+    p.carte.cases[2*7+3]=1;expect(statutCompetence(p,0)).toEqual({cle:'jbj.rpg.horsPortee',bloquee:false});
+  });
   it('ne demande un côté que lorsque les deux pas DPS sont possibles',()=>{
     const p=fixture();expect(actionRapide(p,1)).toBeNull();
     p.carte.cases[3*7+2]=1;expect(actionRapide(p,1)).toEqual({type:'competence',slot:1,cote:'droite'});
