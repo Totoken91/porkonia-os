@@ -84,7 +84,9 @@ Ces durées sont des objectifs de calibration, pas des statistiques déjà véri
 
 ## Ordre de travail suivant
 
-1. Fixer les coefficients initiaux et calibrer des combats représentatifs à partir des kits validés.
+Une première calibration reproductible des trois classes est décrite dans [ORDRE-COCHON-EQUILIBRAGE.md](ORDRE-COCHON-EQUILIBRAGE.md). Ses valeurs ne sont pas encore branchées au prototype ; le banc abstrait ne valide pas le plaisir de jeu, les innées ni une campagne complète.
+
+1. Finaliser les améliorations de rang restantes et les coefficients des innées dans les combats du moteur réel.
 2. Implémenter la progression, le choix du chevalier et les compétences.
 3. Étendre et vérifier la campagne sur douze étages.
 
