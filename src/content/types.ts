@@ -422,6 +422,7 @@ export interface ObjetDef {
 
 /** Jeu Jambonjon : bestiaire, objets, raretés et paliers. */
 export interface JeuJambonjon {
+  rpg?: typeof import("./packs/ordre-cochon").ordreCochon;
   /** Nombre d'étages ; le boss garde le dernier. */
   etages: number;
   monstres: MonstreDef[];

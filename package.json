@@ -12,6 +12,7 @@
     "test:e2e": "node tests/e2e/parcours.mjs",
     "test:e2e:ordre-cochon": "node tests/e2e/ordre-cochon.mjs",
     "test:e2e:grosses": "node tests/e2e/grosses.mjs",
+    "rpg:equilibrage": "tsx scripts/ordre-cochon-equilibrage.mts",
     "apercu": "node scripts/apercu/build.mjs",
     "content:porkopedia": "tsx scripts/build-porkopedia.mts"
   },

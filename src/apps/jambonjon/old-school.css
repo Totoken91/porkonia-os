@@ -1,5 +1,66 @@
 /* Native tiled stone and engraved metal, scoped to the game inside PorkOS. */
 @layer components {
+  .jbj :is(h2,h3) { font-size:16px; line-height:20px; }
+  .jbj .choisi { outline:2px solid #d7bd76; outline-offset:-3px; background-color:#565343; }
+  .jbj.jbj-choix,.ecran.poche .jbj.jbj-choix { flex-direction:column; gap:6px; overflow:hidden; }
+  .jbj-choix header,.jbj-rpg-panel header { display:flex; align-items:center; justify-content:space-between; gap:8px; flex:none; border-bottom:3px double #8f927c; padding:4px 6px; }
+  .jbj :is(.jbj-choix header,.jbj-rpg-panel header) h2 { margin:0; color:#e3d29e; }
+  .jbj-classes { display:flex; gap:4px; flex:none; }
+  .jbj-classes button { flex:1; min-width:0; padding:4px; }
+  .jbj-classe-devise { margin:0; color:#cec9a9; }
+  .jbj-choix-corps { display:grid; grid-template-columns:1.1fr 1fr; gap:8px; overflow:auto; min-height:0; flex:1; }
+  .jbj-chevaliers-grille { display:grid; grid-template-columns:1fr 1fr; gap:6px; align-content:start; }
+  .jbj-chevalier { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 5px; color:#d6d2b7; border:3px ridge #929581; background:#18221cf2; min-width:0; font:inherit; cursor:pointer; }
+  .jbj-chevalier b { color:#ead8a3; font-weight:normal; }
+  .jbj-blason { width:64px; height:64px; image-rendering:pixelated; flex:none; }
+  .jbj-blason-innee { float:right; width:32px; height:32px; margin:0 0 4px 8px; image-rendering:pixelated; }
+  .jbj-chevalier span { color:#b5ba9e; line-height:16px; }
+  .jbj-chevalier-fiche { padding:8px; border:3px ridge #929581; background:#141e18; }
+  .jbj-chevalier-fiche h3 { margin:0 0 8px; color:#eddaad; }
+  .jbj-chevalier-fiche p { margin:6px 0; line-height:18px; }
+  .jbj-choix footer { display:flex; justify-content:flex-end; flex:none; border-top:3px double #929581; padding-top:5px; }
+  .jbj-choix footer button { padding:5px 12px; }
+  .jbj-rpg-panel { position:absolute; inset:6px; z-index:20; display:flex; flex-direction:column; background:#414541 url('/ordre-cochon/pierre.png'); border:5px ridge #979984; box-shadow:0 0 0 1px #111; overflow:hidden; }
+  .jbj-rpg-panel header span { color:#bdc3a9; }
+  .jbj-rpg-panel-corps { overflow:auto; min-height:0; padding:8px; }
+  .jbj-innee { padding:6px 8px; border:3px ridge #a29876; background:#1e281f; }
+  .jbj-innee p { margin:3px 0; }
+  .jbj-innee span { color:#b7be9f; }
+  .jbj-points { color:#f0d58a; margin:8px 0; }
+  .jbj-competences-grille { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .jbj-competence { border:3px ridge #8c907d; background:#151e19e8; padding:6px; display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .jbj-competence.verrouillee { color:#9ea493; }
+  .jbj-competence p { margin:0; line-height:16px; min-height:32px; }
+  .jbj-competence-entete { display:flex; justify-content:space-between; gap:6px; color:#ded2ab; }
+  .jbj-competence-entete span { color:#9ca993; }
+  .jbj-competence small { color:#b5bea2; }
+  .jbj-competence button { margin-top:auto; }
+  .jbj-rangs { display:flex; gap:4px; }
+  .jbj-rangs i { width:18px; height:10px; background:#0b110d; border:2px inset #71735f; }
+  .jbj-rangs .plein { background:#b49b4e; border-style:outset; }
+  .jbj-rpg .jbj-droite { overflow:auto; min-height:0; }
+  .jbj-identite { display:block; font-weight:normal; color:#dac691; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .jbj-rpg-barre { display:grid; gap:3px; flex:none; }
+  .jbj-rpg-barre button { display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding:1px 4px; text-align:left; line-height:16px; }
+  .jbj-rpg-barre button span,.jbj-rpg-barre button small { display:block; }
+  .jbj-rpg-barre button small { color:#afb89e; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .jbj-preparation { color:#f2d78b; }
+  .jbj-rpg:not(.jbj-poche) .jbj-minicarte { display:none; }
+  .jbj-valeur { color:#e5ce88!important; }
+  .jbj-menace { position:absolute; top:52px; left:4px; right:4px; padding:3px; color:#ffdfa6; background:#501c17e8; border:2px ridge #aa7661; text-align:center; pointer-events:none; }
+  .jbj-cible span { display:block; color:#d1c794; }
+  .jbj-rpg-apercu { position:absolute; bottom:4px; left:4px; right:4px; background:#17211af5; border:3px ridge #a39c7c; padding:6px; z-index:4; }
+  .jbj-rpg-apercu p { margin:3px 0; line-height:16px; }
+  .jbj-rpg-apercu button { margin-right:5px; padding:3px 8px; }
+  .ecran.poche .jbj-rpg-barre { grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .ecran.poche .jbj-rpg-barre > :nth-child(4),.ecran.poche .jbj-preparation { grid-column:1 / -1; }
+  @media (max-width:480px) {
+    .jbj-choix-corps { grid-template-columns:1fr; }
+    .jbj-competences-grille { grid-template-columns:1fr; }
+    .jbj-rpg-panel header span { display:none; }
+    .jbj-rpg-panel-corps { padding:5px; }
+    .jbj-rpg-barre button { overflow-wrap:anywhere; }
+  }
   .jbj { color: #d3ceb5; background: #414541 url('/ordre-cochon/pierre.png') repeat; border: 3px ridge #7d8173; box-shadow: inset 0 0 0 1px #111716; gap: 8px; padding: 8px; }
   .jbj :is(.pk-btn,.jbj-pad-b,.jbj-provisions button) { color:#dfd9b9; background:#3b403c url('/ordre-cochon/pierre.png'); border:3px ridge #93927a; box-shadow:inset 0 0 0 1px #171d1a,1px 1px #111; text-shadow:1px 1px #101412; border-radius:0; }
   .jbj :is(.pk-btn,.jbj-pad-b,.jbj-provisions button):hover { color:#fff0bc; border-color:#b6aa80; }
