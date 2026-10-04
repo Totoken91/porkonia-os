@@ -301,7 +301,7 @@ function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number
   return resultat;
 }
 
-export const defMonstre = (jeu: JeuJambonjon, type: string): MonstreDef => (type === jeu.boss.id ? jeu.boss : (jeu.monstres.find((m) => m.id === type) ?? jeu.monstres[0]!));
+export const defMonstre = (jeu: JeuJambonjon, type: string): MonstreDef => (type === jeu.boss.id ? jeu.boss : (jeu.bossIntermediaires?.find(m => m.id === type) ?? jeu.monstres.find((m) => m.id === type) ?? jeu.monstres[0]!));
 
 /** Remplit un étage : carte, entrée, escalier (au plus loin), monstres, provisions et tonneaux. */
 function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
@@ -310,10 +310,11 @@ function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
     p.carte=assemblerEtage(plan);p.joueur={...p.joueur,...plan.entree};
     p.monstres=plan.rencontres.map(m=>nouveauMonstre(p,jeu,defMonstre(jeu,m.type),m.x,m.y,false,m.elite??false));
     p.sol=plan.reserves.map(r=>({x:r.x,y:r.y,butin:r.type==='objet'?{type:'objet',objet:objetAuHasard(p,jeu)}:{type:r.type},...(r.type==='objet'?{tonneau:true}:{})}));
-    if(p.etage===jeu.etages){
+    const bossEtage=p.etage===jeu.etages?jeu.boss:jeu.bossIntermediaires?.find(b=>b.etages[0]===p.etage);
+    if(bossEtage){
       const d=[0,1,2,3].find(d=>passable(p.carte,plan.sortie.x+DX[d]!,plan.sortie.y+DY[d]!)&&!p.monstres.some(m=>m.x===plan.sortie.x+DX[d]!&&m.y===plan.sortie.y+DY[d]!))??0;
       const gardien=plan.gardien??{x:plan.sortie.x+DX[d]!,y:plan.sortie.y+DY[d]!};
-      p.monstres.push(nouveauMonstre(p,jeu,jeu.boss,gardien.x,gardien.y,true));
+      p.monstres.push(nouveauMonstre(p,jeu,bossEtage,gardien.x,gardien.y,true));
     }
     log(p,'jbj.msg.etageConcu',{texte:plan.description});voir(p);return;
   }
@@ -694,7 +695,7 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
       if (m) frapper(p, jeu, m);
       else if (caseEn(p.carte, j.x, j.y) === ESCALIER) {
         if (p.monstres.some((x) => x.boss)) {
-          log(p, "jbj.msg.bossGarde");
+          log(p, "jbj.msg.bossGarde", {nom:defMonstre(jeu,p.monstres.find(m=>m.boss)!.type).nom});
           prendDuTemps = false;
         } else {
           descendre(p, jeu);

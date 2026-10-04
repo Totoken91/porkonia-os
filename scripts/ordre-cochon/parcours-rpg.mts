@@ -2,6 +2,7 @@
 import { porkosPack } from "../../src/content/packs/porkos";
 import { distances, emplacementDe, jouer, nouvellePartie, passable, stats, type Action, type Partie } from "../../src/apps/jambonjon/logic";
 import { coefficients, rangMaximum } from "../../src/apps/jambonjon/equilibrage";
+import { menaceSur } from "../../src/apps/jambonjon/boss";
 import { disponible, ligne } from "../../src/apps/jambonjon/rpg";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -24,10 +25,10 @@ function parcours(id: string, graine: number) {
       if (!ancien || poids(o) > poids(ancien)) agir({ type: "equiper", uid: o.uid });
     }
     const maintenant = p.joueur, s = stats(maintenant);
-    const annonce = p.monstres.some((m) => m.rpg?.annonce?.x === maintenant.x && m.rpg.annonce.y === maintenant.y);
+    const annonce = p.monstres.some((m) => m.rpg?.annonce && menaceSur(m.rpg.annonce,maintenant));
     if (annonce && !(r.classe === "tank" && disponible(p, 0))) {
       const possible = [0, 1, 2, 3].filter((dir) => passable(p.carte, maintenant.x + dx[dir]!, maintenant.y + dy[dir]!) && !p.monstres.some((m) => m.x === maintenant.x + dx[dir]! && m.y === maintenant.y + dy[dir]!));
-      if (possible.length) { const dir = possible[0]!; agir({ type: (dir === maintenant.dir ? "avancer" : dir === (maintenant.dir + 2) % 4 ? "reculer" : dir === (maintenant.dir + 1) % 4 ? "droite" : "gauche") }); continue; }
+      if (possible.length) { const dir = possible.find(dir=>!p.monstres.some(m=>m.rpg?.annonce&&menaceSur(m.rpg.annonce,{x:maintenant.x+dx[dir]!,y:maintenant.y+dy[dir]!}))) ?? possible[0]!; agir({ type: (dir === maintenant.dir ? "avancer" : dir === (maintenant.dir + 2) % 4 ? "reculer" : dir === (maintenant.dir + 1) % 4 ? "droite" : "gauche") }); continue; }
     }
     if ((maintenant.pv < s.pvMax * 0.5 || maintenant.faim < 15) && maintenant.jambons > 0) { agir({ type: "manger" }); continue; }
     if (r.classe === "jambonmancien" && maintenant.mousse < 15 && maintenant.bieres > 0) { agir({ type: "boire" }); continue; }
@@ -78,7 +79,7 @@ function parcours(id: string, graine: number) {
 }
 const resultats = jeu.rpg!.chevaliers.flatMap((c) => [11, 42, 123].map((graine) => parcours(c.id, graine)));
 const dossier = resolve(process.argv[2] ?? "work/ordre-cochon-equilibrage"); mkdirSync(dossier, { recursive: true });
-writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Douze plans conçus, boss final existant au 12. Ne prouve pas le plaisir ni la difficulté humaine ; boss intermédiaires et refuges encore absents.", resultats }, null, 2));
+writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Douze plans conçus, quatre boss aux fins d�acte. Ne prouve pas le plaisir ni la difficulté humaine ; boss intermédiaires et refuges encore absents.", resultats }, null, 2));
 console.log(JSON.stringify({ victoires: resultats.filter((r) => r.fin === "victoire").length, total: resultats.length, echecs: resultats.filter((r) => r.fin !== "victoire").map(({ chevalier, graine, etage, niveau, fin }) => ({ chevalier, graine, etage, niveau, fin })) }, null, 2));
 
 

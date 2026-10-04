@@ -42,12 +42,12 @@ describe('Premier acte conçu',()=>{
     const murs=[...a.murs.entries()].filter(([i])=>i%c.w>=17&&i%c.w<=21&&Math.floor(i/c.w)>=9&&Math.floor(i/c.w)<=15&&c.cases[i]===1).map(([,v])=>v);
     expect(murs).toContain(2);expect(murs).not.toContain(1);
   });
-  it('enchaîne douze plans, conserve une XP positive au niveau 20 et place le boss uniquement au fond',()=>{
+  it('enchaîne douze plans, conserve une XP positive au niveau 20 et place quatre gardiens aux fins d’acte',()=>{
     let p=nouvellePartie(jeu,42,'ysee');
     for(let etage=1;etage<=12;etage++){
       expect(p.etage).toBe(etage);expect(p.carte.cases).toEqual(assemblerEtage(campagneOrdre[etage-1]!).cases);
       expect(p.monstres.every(m=>m.xp>0)).toBe(true);
-      expect(p.monstres.filter(m=>m.boss)).toHaveLength(etage===12?1:0);
+      expect(p.monstres.filter(m=>m.boss)).toHaveLength(etage%3===0?1:0);
       if(etage<12){const sortie=p.carte.cases.indexOf(2);p.joueur.x=sortie%p.carte.w;p.joueur.y=Math.floor(sortie/p.carte.w);p.monstres=[];p=jouer(p,jeu,{type:'agir'});}
     }
     expect(p.monstres.find(m=>m.boss)).toMatchObject({x:15,y:5,type:'affineur',niveau:20});

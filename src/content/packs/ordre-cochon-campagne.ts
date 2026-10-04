@@ -25,11 +25,11 @@ export const premierActe:EtageDonjonDef[]=[
   {
     etage:3,w:27,h:23,
     description:'La Commission a bâti large. Les piliers permettent de rompre les lignes ; les salles latérales rejoignent le grand saloir par deux approches.',
-    entree:{x:4,y:18,dir:0},sortie:{x:13,y:3},
+    entree:{x:4,y:18,dir:0},sortie:{x:13,y:3},gardien:{x:13,y:6},
     salles:[{x:2,y:17,w:5,h:3,theme:4},{x:9,y:13,w:9,h:7,theme:1},{x:9,y:3,w:9,h:7,theme:4},{x:2,y:4,w:5,h:5,theme:3},{x:21,y:4,w:4,h:5,theme:1},{x:21,y:14,w:4,h:5,theme:2}],
     passages:[[[4,17],[4,14],[11,14]],[[13,13],[13,9]],[[9,7],[6,7]],[[4,8],[4,11],[10,11],[10,13]],[[17,7],[21,7]],[[17,16],[21,16]],[[22,14],[22,8]]],
     piliers:[[11,16],[15,16],[11,5],[15,5]],
-    rencontres:[{x:4,y:14,type:'rat'},{x:11,y:14,type:'gobelin'},{x:16,y:18,type:'moisissure'},{x:13,y:10,type:'inspecteur'},{x:22,y:16,type:'tonneau'},{x:4,y:7,type:'saucisson'},{x:13,y:6,type:'inspecteur'},{x:22,y:7,type:'saucisson'}],
+    rencontres:[{x:4,y:14,type:'rat'},{x:11,y:14,type:'gobelin'},{x:16,y:18,type:'moisissure'},{x:13,y:10,type:'inspecteur'},{x:22,y:16,type:'tonneau'},{x:4,y:7,type:'saucisson'},{x:22,y:7,type:'saucisson'}],
     reserves:[{x:12,y:18,type:'jambon'},{x:5,y:5,type:'jambon'},{x:23,y:17,type:'biere'},{x:23,y:6,type:'biere'},{x:3,y:5,type:'objet'},{x:23,y:15,type:'objet'}],
   },
 ];
@@ -54,12 +54,12 @@ export const deuxiemeActe:EtageDonjonDef[]=[
     piliers:[[4,6],[6,6],[22,6],[24,6],[13,17],[15,17]],
     rencontres:[m(4,13,'moisissure'),m(7,6,'fantome'),m(14,9,'inspecteur'),m(21,17,'tonneau'),m(23,11,'saucisson'),m(25,6,'fantome')],
     reserves:[r(3,8,'jambon'),r(16,18,'jambon'),r(22,19,'biere'),r(15,5,'biere'),r(3,4,'objet'),r(25,18,'objet')]},
-  {etage:6,w:29,h:25,entree:{x:14,y:21,dir:0},sortie:{x:14,y:3},
+  {etage:6,w:29,h:25,entree:{x:14,y:21,dir:0},sortie:{x:14,y:3},gardien:{x:14,y:6},
     description:'Les pressoirs convergent vers une salle en croix. Les ailes latérales permettent de contourner son centre et cachent les réserves.',
     salles:[s(12,19,5,4,4),s(10,10,9,7,1),s(2,10,5,7,2),s(22,10,5,7,2),s(9,2,11,6,4),s(2,3,5,5,3),s(22,3,5,5,3)],
     passages:[[[14,19],[14,16]],[[10,13],[6,13]],[[18,13],[22,13]],[[14,10],[14,7]],[[4,10],[4,7]],[[24,10],[24,7]],[[6,5],[9,5]],[[19,5],[22,5]]],
     piliers:[[12,12],[16,12],[12,14],[16,14],[11,5],[17,5]],
-    rencontres:[m(14,17,'saucisson'),m(14,13,'inspecteur'),m(4,13,'tonneau'),m(24,13,'tonneau'),m(4,5,'fantome'),m(24,5,'fantome'),m(14,6,'inspecteur',true)],
+    rencontres:[m(14,17,'saucisson'),m(14,13,'inspecteur'),m(4,13,'tonneau'),m(24,13,'tonneau'),m(4,5,'fantome'),m(24,5,'fantome')],
     reserves:[r(3,15,'jambon'),r(25,15,'jambon'),r(3,4,'biere'),r(25,4,'biere'),r(5,6,'objet'),r(23,6,'objet')]},
 ];
 
@@ -79,12 +79,12 @@ export const troisiemeActe:EtageDonjonDef[]=[
     piliers:[[12,8],[12,16],[22,8],[22,16]],
     rencontres:[m(4,17,'saucisson'),m(12,19,'inspecteur'),m(12,11,'fantome'),m(4,5,'moisissure'),m(22,20,'tonneau'),m(22,11,'fantome'),m(26,5,'inspecteur')],
     reserves:[r(3,3,'jambon'),r(13,13,'jambon'),r(21,17,'biere'),r(27,21,'biere'),r(28,3,'objet'),r(28,19,'objet')]},
-  {etage:9,w:31,h:27,entree:{x:4,y:23,dir:0},sortie:{x:15,y:3},
+  {etage:9,w:31,h:27,entree:{x:4,y:23,dir:0},sortie:{x:15,y:3},gardien:{x:15,y:6},
     description:'Un anneau contourne les cuves. Le cœur du saloir dispose de deux entrées ; choisir l’approche évite de se coincer entre les piliers.',
     salles:[s(2,21,5,4,4),s(2,3,5,8,3),s(10,3,11,7,4),s(24,3,5,8,3),s(10,16,11,9,1),s(24,17,5,8,2)],
     passages:[[[4,21],[4,10]],[[6,6],[10,6]],[[20,6],[24,6]],[[26,10],[26,17]],[[24,21],[20,21]],[[10,22],[6,22]],[[15,10],[15,16]],[[4,14],[11,14],[11,16]],[[26,14],[19,14],[19,16]]],
     piliers:[[12,19],[18,19],[12,22],[18,22],[12,6],[18,6]],
-    rencontres:[m(4,19,'fantome'),m(11,17,'inspecteur'),m(15,13,'saucisson'),m(26,20,'tonneau'),m(26,7,'fantome'),m(4,7,'moisissure'),m(15,6,'inspecteur',true)],
+    rencontres:[m(4,19,'fantome'),m(11,17,'inspecteur'),m(15,13,'saucisson'),m(26,20,'tonneau'),m(26,7,'fantome'),m(4,7,'moisissure')],
     reserves:[r(13,23,'jambon'),r(3,4,'jambon'),r(27,23,'biere'),r(27,4,'biere'),r(5,9,'objet'),r(25,9,'objet')]},
 ];
 

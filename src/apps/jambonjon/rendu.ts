@@ -2,6 +2,7 @@
  * Rendu logiciel 320×180, caméra à 85°, pierre native 32×32 et sprites 40×40.
  * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
  */
+import { casesMenace } from "./boss";
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import { dessinerImpacts } from './effets-combat';
 import type { ImpactVisuel } from './retours-combat';
@@ -504,6 +505,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     d[i + 3] = 255;
   };
 
+  const marques=new Set(p.monstres.flatMap(m=>m.rpg?.annonce?casesMenace(m.rpg.annonce).map(c=>c.y*p.carte.w+c.x):[]));
   // Sol et plafond, ligne par ligne.
   for (let y = 0; y < H; y++) {
     const sol = y > horizon;
@@ -529,6 +531,12 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
       const chaud=chaleur(fx0,fy0);
       const relief=sol && ((cx+cy)%4===0) ? 0.94 : 1;
       ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!, f*(0.84+chaud*0.45)*relief,chaud);
+      if(sol&&marques.has(cy*c.w+cx)){
+        const u=fx0-cx,v=fy0-cy;
+        const bord=u<.09||u>.91||v<.09||v>.91;
+        const rune=Math.abs(u-v)<.035||Math.abs(u+v-1)<.035;
+        if(bord||rune)ecrire((y*W+x)*4,210,94,40,Math.max(.5,f));
+      }
       profondeur[y*W+x]=dist;
       fx0 += pasX;
       fy0 += pasY;

@@ -405,6 +405,7 @@ export interface MonstreDef {
   etages: [number, number];
   /** Se déplace un tour sur deux (lent). */
   lent?: boolean;
+  attaqueBoss?: 'ligne' | 'pressoir' | 'sceau';
   description: string;
 }
 
@@ -440,6 +441,7 @@ export interface JeuJambonjon {
   etages: number;
   monstres: MonstreDef[];
   boss: MonstreDef;
+  bossIntermediaires?: MonstreDef[];
   objets: ObjetDef[];
   /** Raretés, de la plus commune à la plus rare : suffixe du nom, multiplicateur des bonus, poids du tirage. */
   raretes: { id: string; suffixe: string; mult: number; poids: number; couleur: string }[];

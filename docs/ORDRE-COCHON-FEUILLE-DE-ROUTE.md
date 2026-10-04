@@ -4,8 +4,8 @@ Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équi
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
-| 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans implémentés ; nouvelle passe à valider avant push |
-| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | À faire ; le boss final existant est déplacé au 12 |
+| 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans validés et poussés (`475fddf`) |
+| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Trois gardiens intermédiaires implémentés localement ; aperçu avant push |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Réaffectation dans le moteur ; aucun refuge créé |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première vérification automatique des douze étages ; calibration humaine à faire |
 | 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Premier bestiaire et équipement présents ; à enrichir |
@@ -34,3 +34,15 @@ Quelques provisions sont accessibles à l'entrée des actes et dans la dernière
 ## Conditions de validation
 
 Entrée sûre, sortie accessible, toutes les cases ouvertes reliées, rencontres et butin sur cases libres distinctes, décor assorti aux salles, sauvegardes compatibles. Vérifier les douze chevaliers sur plusieurs graines avec le pilote, puis vérifier les vues et commandes sur PC et Poche. Les parties automatiques prouvent la faisabilité, pas le plaisir ni la difficulté pour un joueur humain.
+
+## Boss intermédiaires — prochaine livraison
+
+- 3 : Prévôt du Sel, verdict en ligne jusqu’à quatre cases ; esquive latérale.
+
+- 6 : Maître du Pressoir, écrasement des quatre cases voisines ; recul.
+
+- 9 : Spectre des Cuves, deux cases marquées à portée de trois ; quitter les sceaux.
+
+Les marques ne suivent pas le joueur. Si la géométrie supprime toutes les échappatoires, le motif est réduit. Après l’impact, un tour de récupération permet la riposte. Le gardien bloque la descente et sa mort ne termine pas la campagne. Les apparences reprennent temporairement les sprites inspecteur, tonneau et fantôme : portraits et sprites de boss uniques restent à produire.
+
+216 tests unitaires, compilation et navigation vérifiées. Pilote complet : 31 victoires sur 36 ; cinq morts au premier gardien. Les refuges et l’économie de soins sont encore à construire avant calibration humaine.

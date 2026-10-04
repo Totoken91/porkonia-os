@@ -3,8 +3,39 @@ import { porkosPack } from "../src/content/packs/porkos";
 import { convertirRpg, jouer, nouvellePartie, relirePartie, stats, type Monstre, type Partie } from "../src/apps/jambonjon/logic";
 import { buildReference, xpNiveauRpg } from "../src/apps/jambonjon/equilibrage";
 import { etatMonstre, ligne } from "../src/apps/jambonjon/rpg";
+import { casesMenace, ligneEntre, menaceSur, preparerAttaqueBoss } from '../src/apps/jambonjon/boss';
 
 const jeu = porkosPack.jambonjon;
+describe('Gardiens des fins d’acte',()=>{
+  it.each(['ligne','pressoir','sceau'] as const)('%s : annonce fixe, esquive et un tour de récupération',attaque=>{
+    let p=fixture('agathe',5);const def=jeu.bossIntermediaires!.find(b=>b.attaqueBoss===attaque)!;
+    p.monstres[0]!.type=def.id;p.monstres[0]!.boss=true;
+    p=jouer(p,jeu,{type:'attendre'});const m=p.monstres[0]!;
+    expect(casesMenace(m.rpg!.annonce!).length).toBeGreaterThan(1);
+    const pv=p.joueur.pv;
+    p=jouer(p,jeu,{type:attaque==='pressoir'?'reculer':attaque==='sceau'?'gauche':'droite'});
+    expect(p.joueur.pv).toBe(pv);expect(p.monstres[0]!.rpg!.annonce).toBeUndefined();
+    const avant={x:p.monstres[0]!.x,y:p.monstres[0]!.y};p=jouer(p,jeu,{type:'attendre'});
+    expect(p.monstres[0]).toMatchObject(avant);expect(p.joueur.pv).toBe(pv);
+    expect(relirePartie(JSON.parse(JSON.stringify(p)))).not.toBeNull();
+  });
+  it('réduit une ligne à une case si les côtés sont murés et laisse reculer',()=>{
+    const p=fixture();p.carte.cases[3*7+2]=1;p.carte.cases[3*7+4]=1;
+    const a=preparerAttaqueBoss(p,p.monstres[0]!,'ligne');
+    expect(casesMenace(a)).toEqual([{x:3,y:3}]);expect(menaceSur(a,{x:3,y:4})).toBe(false);
+  });
+  it('ne lance pas un sceau à travers un mur',()=>{
+    const p=fixture();p.monstres[0]!.type='spectre';p.monstres[0]!.boss=true;p.monstres[0]!.y=1;p.carte.cases[2*7+3]=1;
+    expect(ligneEntre(p,p.monstres[0]!,p.joueur)).toBe(false);
+    expect(jouer(p,jeu,{type:'attendre'}).monstres[0]!.rpg!.annonce).toBeUndefined();
+  });
+  it('bloque la descente tant que le gardien est vivant puis poursuit sans victoire prématurée',()=>{
+    const p=fixture();p.etage=3;p.carte.cases[3*7+3]=2;p.joueur.dir=2;p.monstres[0]!.type='prevot';p.monstres[0]!.boss=true;
+    expect(jouer(p,jeu,{type:'agir'}).etage).toBe(3);
+    p.joueur.dir=0;p.monstres[0]!.pv=1;const q=jouer(p,jeu,{type:'agir'});expect(q.fin).toBeNull();
+    expect(jouer(q,jeu,{type:'agir'}).etage).toBe(4);
+  });
+});
 function fixture(id = "berthe", niveau = 1): Partie {
   const p = nouvellePartie(jeu, 42, id);
   p.carte = { w: 7, h: 7, cases: Array.from({ length: 49 }, (_, i) => i % 7 === 0 || i % 7 === 6 || i < 7 || i >= 42 ? 1 : 0), vu: Array(49).fill(true), decor: Array(49).fill(0) };

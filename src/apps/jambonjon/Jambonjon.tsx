@@ -10,6 +10,7 @@ import { SpriteObjet } from "./SpriteObjet";
 import { Chevaliers } from "./Chevaliers";
 import { Competences } from "./Competences";
 import { DEBLOCAGES, xpNiveauRpg } from "./equilibrage";
+import { menaceSur } from "./boss";
 import { coutCompetence, disponible, ligne, SLOTS_ACTIFS } from "./rpg";
 import { actionRapide, cotesLibres, gainsNiveau, impactsCombat, type ImpactVisuel } from './retours-combat';
 import "./old-school.css";
@@ -478,7 +479,7 @@ export function Jambonjon() {
             {j.rpg&&promotion.debloquees.length>0&&<span>{str('jbj.rpg.debloque',{noms:promotion.debloquees.map(i=>jeu.rpg!.competences[j.rpg!.classe][i]!.nom).join(', ')})}</span>}
             <div>{j.rpg&&<button className="pk-btn" onClick={()=>{setPromotion(null);setPanneau('competences');}}>{str('jbj.rpg.depenser')}</button>}<button className="pk-btn" onClick={()=>setPromotion(null)} aria-label={str('jbj.rpg.fermerPromotion')}>×</button></div>
           </div>}
-          {j.rpg && partie.monstres.some((m) => m.rpg?.annonce?.x === j.x && m.rpg.annonce.y === j.y) && <div className="jbj-menace" data-testid="jbj-menace">{str("jbj.rpg.alerte")}</div>}
+          {j.rpg && partie.monstres.some((m) => m.rpg?.annonce && menaceSur(m.rpg.annonce,j)) && <div className="jbj-menace" data-testid="jbj-menace">{str("jbj.rpg.alerte")}</div>}
           {j.rpg && competence !== null && !panneau && <div className="jbj-rpg-apercu" data-testid="jbj-apercu-competence">
             <b>{jeu.rpg!.competences[j.rpg.classe][SLOTS_ACTIFS[competence]!]!.nom}</b>
             <p>{str('jbj.rpg.choisirPas')}</p>

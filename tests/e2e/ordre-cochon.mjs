@@ -11,6 +11,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
+const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
 
@@ -414,6 +415,17 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    for(const fixture of BOSSES){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await reprendre();await page.getByTestId('jbj-menace').waitFor();
+      const avant=await lire();
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-boss-${fixture.etage}.png`)});
+      await page.keyboard.press(fixture.etage===6?'s':fixture.etage===9?'q':'d');
+      const apres=await lire();
+      if(apres.joueur.pv!==avant.joueur.pv||apres.monstres[0].rpg.annonce)throw new Error(`${tag}: esquive du boss ${fixture.etage} échouée`);
+      await reprendre();if((await lire()).monstres[0].type!==fixture.monstres[0].type)throw new Error(`${tag}: boss perdu à la sauvegarde`);
+      step(`${tag}: télégraphe et esquive du boss ${fixture.etage} validés`);
     }
     if(FINALE){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),FINALE);

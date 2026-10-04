@@ -1,4 +1,5 @@
 /** Combat RPG sur la carte réelle. Les récompenses et le journal passent par le moteur hôte. */
+import { ligneEntre, menaceSur, preparerAttaqueBoss, type AnnonceBoss } from "./boss";
 import type { Action, Monstre, Partie } from "./logic";
 import type { JeuJambonjon } from "@/content/types";
 import { buildValide, coefficients, DEBLOCAGES, degatsRpg, rangMaximum, statsRpg, type ClasseRpg, type Rangs } from "./equilibrage";
@@ -11,7 +12,7 @@ export interface EtatRpg {
 export interface EtatMonstreRpg {
   malediction: number; puissanceMal: number; saignement: number; puissanceSang: number;
   pousse: boolean; soigne: boolean; renvoi: boolean; reflux: boolean; sale: boolean; contact: number;
-  annonce?: { x: number; y: number }; prochainSpecial: number; interrompu?: boolean;
+  annonce?: AnnonceBoss; recuperation?: number; prochainSpecial: number; interrompu?: boolean;
 }
 export interface HoteRpg {
   alea: (p: Partie) => number;
@@ -116,7 +117,7 @@ export function mesureCompetence(p: Partie, i: number): { cle: string; n: number
 function blessure(p: Partie, jeu: JeuJambonjon, m: Monstre, d: number, h: HoteRpg) {
   if (!p.monstres.includes(m)) return;
   m.pv = Math.max(0, m.pv - d); m.eveille = true;
-  h.log(p, "jbj.msg.frappe", { nom: (m.type === jeu.boss.id ? jeu.boss : jeu.monstres.find((n) => n.id === m.type))?.nom ?? m.type, degats: d });
+  h.log(p, "jbj.msg.frappe", { nom: (m.type === jeu.boss.id ? jeu.boss : jeu.bossIntermediaires?.find(n=>n.id===m.type) ?? jeu.monstres.find((n) => n.id === m.type))?.nom ?? m.type, degats: d });
   p.evenements.push("frappe");
   if (!m.pv) {
     const r = p.joueur.rpg!;
@@ -279,17 +280,23 @@ export function effetsAvantEnnemis(p: Partie, jeu: JeuJambonjon, h: HoteRpg) {
 /** Retour true lorsque l'attaque spéciale remplace le comportement ordinaire. */
 export function specialEnnemi(p: Partie, jeu: JeuJambonjon, m: Monstre, h: HoteRpg): boolean {
   const e = etatMonstre(m);
+  const attaque=jeu.bossIntermediaires?.find(b=>b.id===m.type)?.attaqueBoss;
+  if(e.recuperation && p.tour<=e.recuperation)return true;
   if (e.annonce) {
-    const touche = p.joueur.x === e.annonce.x && p.joueur.y === e.annonce.y;
+    const touche = menaceSur(e.annonce,p.joueur);
     e.annonce = undefined; e.prochainSpecial = p.tour + 3;
     e.interrompu = false;
+    if(attaque){e.recuperation=p.tour+1;h.log(p,"jbj.boss.reprise");}
     if (touche) recevoir(p, jeu, m, h, 1.8);
     else { h.log(p, "jbj.rpg.evitespecial"); if (p.joueur.rpg!.chevalier === "agathe") p.joueur.rpg!.saigne = p.tour + 1; }
     return true;
   }
-  if ((m.boss || m.elite) && distance(m, p.joueur) === 1 && p.tour >= e.prochainSpecial) {
-    e.annonce = { x: p.joueur.x, y: p.joueur.y };
-    h.log(p, "jbj.rpg.annonce"); return true;
+  const portee=attaque === "sceau" ? 3 : attaque === "ligne" ? 4 : 1;
+  const aligne=m.x===p.joueur.x||m.y===p.joueur.y;
+  const visible=ligneEntre(p,m,p.joueur);
+  if ((m.boss || m.elite) && distance(m, p.joueur) <= portee && (portee===1||visible) && (attaque!=="ligne"||aligne) && p.tour >= e.prochainSpecial) {
+    e.annonce = attaque ? preparerAttaqueBoss(p,m,attaque) : { x: p.joueur.x, y: p.joueur.y };
+    h.log(p, attaque ? `jbj.boss.${attaque}` : "jbj.rpg.annonce"); return true;
   }
   return false;
 }
@@ -303,7 +310,7 @@ export function recevoir(p: Partie, jeu: JeuJambonjon, m: Monstre, h: HoteRpg, c
   if (r.classe === "tank" && r.protection && c.rancune) r.riposte = Math.min(c.rancune, (brut - d) * 0.65 / s.att);
   h.log(p, "jbj.rpg.recu", { degats: d, absorbe: brut - d }); p.evenements.push(d ? "touche" : "garde");
   if (r.chevalier === "anselme" && !e.renvoi && distance(m, j) === 1) { e.renvoi = true; blessure(p, jeu, m, Math.max(1, Math.round(s.att * effetInnee(p, 0.12, 0.04))), h); }
-  if (!j.pv) { p.fin = "mort"; h.log(p, "jbj.msg.mort", { nom: (m.type === jeu.boss.id ? jeu.boss : jeu.monstres.find((n) => n.id === m.type))?.nom ?? m.type }); p.evenements.push("mort"); }
+  if (!j.pv) { p.fin = "mort"; h.log(p, "jbj.msg.mort", { nom: (m.type === jeu.boss.id ? jeu.boss : jeu.bossIntermediaires?.find(n=>n.id===m.type) ?? jeu.monstres.find((n) => n.id === m.type))?.nom ?? m.type }); p.evenements.push("mort"); }
 }
 
 export function finirTourRpg(p: Partie, combat: boolean) {

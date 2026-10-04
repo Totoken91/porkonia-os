@@ -37,7 +37,7 @@ try{
       g.fillStyle='#d9dfc2';g.fillRect(ox+p.joueur.x*taille+2,oy+p.joueur.y*taille+2,5,5);cadre.append(plan);
       const infos=document.createElement('p');infos.style.cssText='font-size:12px;line-height:18px;height:36px;margin:8px 0';infos.textContent=`${p.monstres.length} rencontres · ${p.sol.filter(s=>s.butin.type==='objet').length} réserve(s) d’équipement\nBlanc : entrée · Or : sortie · Rouge : ennemis`;cadre.append(infos);
       const vue=document.createElement('canvas');vue.width=320;vue.height=180;vue.style.imageRendering='pixelated';const gv=vue.getContext('2d'),im=gv.createImageData(320,180);
-      r.rendre(im,p,{...cameras[n],angle:-Math.PI/2,bob:0,secousse:0},{temps:1000,touches:new Set(),eclair:0,eclairCouleur:[0,0,0],spriteDe:type=>(type===jeu.boss.id?jeu.boss:jeu.monstres.find(m=>m.id===type)).sprite});
+      r.rendre(im,p,{...cameras[n],angle:-Math.PI/2,bob:0,secousse:0},{temps:1000,touches:new Set(),eclair:0,eclairCouleur:[0,0,0],spriteDe:type=>(type===jeu.boss.id?jeu.boss:jeu.bossIntermediaires?.find(m=>m.id===type)??jeu.monstres.find(m=>m.id===type)).sprite});
       gv.putImageData(im,0,0);cadre.append(vue);document.getElementById('plans').append(cadre);
       if(n<11)descendre();
     }
