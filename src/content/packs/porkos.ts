@@ -6,6 +6,7 @@
 import type { ActionRef, ContentPack, MenuEntry, MenuSpec, Program } from "../types";
 import { deplierGenerique } from "@/os/generique";
 import { ordreCochon } from "./ordre-cochon";
+import { premierActe } from './ordre-cochon-campagne';
 
 // Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
 const P = "/porkopedia/";
@@ -3160,6 +3161,7 @@ export const porkosPack: ContentPack = {
   },
 
   jambonjon: {
+    campagne:premierActe,
     rpg: ordreCochon,
     etages: 5,
     elite: "élite",
@@ -3203,6 +3205,7 @@ export const porkosPack: ContentPack = {
   },
 
   strings: {
+    "jbj.msg.etageConcu": "{texte}",
     "jbj.rpg.choix": "Choisir un chevalier",
     "jbj.rpg.impact": "Impact direct : {min}–{max} dégâts",
     "jbj.rpg.protection": "Absorbe {n} % des dégâts",

@@ -420,8 +420,20 @@ export interface ObjetDef {
   etage: number;
 }
 
+/** Plan conçu : le contenu vit dans le pack, l'assemblage dans le moteur. */
+export interface EtageDonjonDef {
+  etage:number; w:number; h:number; description:string;
+  entree:{x:number;y:number;dir:number}; sortie:{x:number;y:number};
+  salles:{x:number;y:number;w:number;h:number;theme:1|2|3|4}[];
+  passages:[number,number][][];
+  piliers:[number,number][];
+  rencontres:{x:number;y:number;type:string;elite?:boolean}[];
+  reserves:{x:number;y:number;type:'jambon'|'biere'|'objet'}[];
+}
+
 /** Jeu Jambonjon : bestiaire, objets, raretés et paliers. */
 export interface JeuJambonjon {
+  campagne?:EtageDonjonDef[];
   rpg?: typeof import("./packs/ordre-cochon").ordreCochon;
   /** Nombre d'étages ; le boss garde le dernier. */
   etages: number;

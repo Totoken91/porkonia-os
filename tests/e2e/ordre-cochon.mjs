@@ -207,6 +207,9 @@ try {
       if(SHOTS)await page.getByTestId("jbj-chevaliers").screenshot({path:join(SHOTS,`${tag}-choix-chevalier.png`)});
       await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
+      const entreeCampagne=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+      if(entreeCampagne.carte.w!==23||entreeCampagne.carte.h!==19||entreeCampagne.joueur.x!==4||entreeCampagne.joueur.y!==14||!entreeCampagne.carte.zones||entreeCampagne.monstres.length!==6)throw new Error(`${tag}: premier étage conçu non chargé`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-entree-campagne.png`)});
 
     // Vues fixes : une salle à piliers reliée à une seconde salle par un couloir étroit.
     if(SHOTS) {

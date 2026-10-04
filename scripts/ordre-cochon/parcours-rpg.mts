@@ -78,7 +78,7 @@ function parcours(id: string, graine: number) {
 }
 const resultats = jeu.rpg!.chevaliers.flatMap((c) => [11, 42, 123].map((graine) => parcours(c.id, graine)));
 const dossier = resolve(process.argv[2] ?? "work/ordre-cochon-equilibrage"); mkdirSync(dossier, { recursive: true });
-writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Cinq étages actuels. Ne prouve pas la difficulté humaine ni celle des douze étages futurs.", resultats }, null, 2));
+writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Cinq étages actuels, dont les trois premiers conçus. Ne prouve pas la difficulté humaine ni celle des douze étages futurs.", resultats }, null, 2));
 console.log(JSON.stringify({ victoires: resultats.filter((r) => r.fin === "victoire").length, total: resultats.length, echecs: resultats.filter((r) => r.fin !== "victoire").map(({ chevalier, graine, etage, niveau, fin }) => ({ chevalier, graine, etage, niveau, fin })) }, null, 2));
 
 

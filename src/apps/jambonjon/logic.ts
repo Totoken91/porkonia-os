@@ -4,6 +4,7 @@
  * Les textes ne sont pas ici : le journal ne contient que des clés du pack (`jbj.msg.*`) et leurs variables.
  */
 import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/types";
+import { assemblerEtage } from './campagne';
 import { ennemiReference, RARETES_RPG, xpNiveauRpg } from "./equilibrage";
 import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
 
@@ -33,6 +34,8 @@ export const DX = [0, 1, 0, -1] as const;
 export const DY = [-1, 0, 1, 0] as const;
 
 export interface Carte {
+  /** Thèmes de salles conçues (1 saloir, 2 réserve, 3 humidité, 4 pierre), optionnels pour les anciennes cartes. */
+  zones?:number[];
   w: number;
   h: number;
   cases: number[];
@@ -267,8 +270,8 @@ function objetAuHasard(p: Partie, jeu: JeuJambonjon): Objet {
   return nouvelObjet(p, jeu, parmi(p, dispo.length ? dispo : jeu.objets), p.etage);
 }
 
-function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number, y: number, boss = false): Monstre {
-  const elite = !boss && (!p.joueur.rpg || p.etage > 1) && tirer(p) < 0.12;
+function nouveauMonstre(p: Partie, jeu: JeuJambonjon, def: MonstreDef, x: number, y: number, boss = false, eliteConcu?:boolean): Monstre {
+  const elite = eliteConcu ?? (!boss && (!p.joueur.rpg || p.etage > 1) && tirer(p) < 0.12);
   const niveau = Math.max(1, p.etage + entre(p, -1, 1) + (elite ? 2 : 0) + (boss ? 2 : 0));
   const k = niveau - 1;
   const pvMax = Math.round(def.pv * (1 + 0.35 * k) * (elite ? 1.5 : 1));
@@ -302,6 +305,13 @@ export const defMonstre = (jeu: JeuJambonjon, type: string): MonstreDef => (type
 
 /** Remplit un étage : carte, entrée, escalier (au plus loin), monstres, provisions et tonneaux. */
 function peuplerEtage(p: Partie, jeu: JeuJambonjon) {
+  const plan=p.joueur.rpg?jeu.campagne?.find(e=>e.etage===p.etage):undefined;
+  if(plan){
+    p.carte=assemblerEtage(plan);p.joueur={...p.joueur,...plan.entree};
+    p.monstres=plan.rencontres.map(m=>nouveauMonstre(p,jeu,defMonstre(jeu,m.type),m.x,m.y,false,m.elite??false));
+    p.sol=plan.reserves.map(r=>({x:r.x,y:r.y,butin:r.type==='objet'?{type:'objet',objet:objetAuHasard(p,jeu)}:{type:r.type},...(r.type==='objet'?{tonneau:true}:{})}));
+    log(p,'jbj.msg.etageConcu',{texte:plan.description});voir(p);return;
+  }
   const cellules = Math.min(13, 7 + p.etage);
   const carte = genererCarte(p, cellules);
   p.carte = carte;
@@ -821,6 +831,7 @@ export function relirePartie(v: unknown): Partie | null {
   if (p.version !== VERSION || typeof p.alea !== "number" || typeof p.etage !== "number") return null;
   const c = p.carte;
   if (!c || !Array.isArray(c.cases) || c.cases.length !== c.w * c.h || !Array.isArray(c.vu) || !Array.isArray(c.decor)) return null;
+  if(c.zones!==undefined&&(!Array.isArray(c.zones)||c.zones.length!==c.cases.length||c.zones.some(n=>!Number.isInteger(n)||n<0||n>4)))return null;
   if (!p.joueur || !Array.isArray(p.joueur.sac) || typeof p.joueur.equipe !== "object" || !Array.isArray(p.monstres) || !Array.isArray(p.sol) || !Array.isArray(p.journal)) return null;
   if (!etatRpgValide(p.joueur)) return null;
   return { ...p, evenements: [] };

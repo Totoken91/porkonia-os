@@ -84,10 +84,8 @@ Ces durées sont des objectifs de calibration, pas des statistiques déjà véri
 
 ## Ordre de travail suivant
 
-Une première calibration reproductible des trois classes est décrite dans [ORDRE-COCHON-EQUILIBRAGE.md](ORDRE-COCHON-EQUILIBRAGE.md). Ses valeurs ne sont pas encore branchées au prototype ; le banc abstrait ne valide pas le plaisir de jeu, les innées ni une campagne complète.
+La calibration des trois classes décrite dans [ORDRE-COCHON-EQUILIBRAGE.md](ORDRE-COCHON-EQUILIBRAGE.md) est branchée au prototype, avec les compétences et les douze chevaliers. Le banc abstrait ne valide pas le plaisir de jeu ni une campagne complète.
 
-1. Finaliser les améliorations de rang restantes et les coefficients des innées dans les combats du moteur réel.
-2. Implémenter la progression, le choix du chevalier et les compétences.
-3. Étendre et vérifier la campagne sur douze étages.
+La suite est suivie dans [ORDRE-COCHON-FEUILLE-DE-ROUTE.md](ORDRE-COCHON-FEUILLE-DE-ROUTE.md) : plans des douze étages, boss, refuges, progression complète, rencontres et récompenses, puis expérience terminée. Les plans des étages 1–3 ouvrent le premier chantier.
 
 Les restrictions de classe ou de niveau sur les équipements restent à décider ; ne pas les introduire implicitement.

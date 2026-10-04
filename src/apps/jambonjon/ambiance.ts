@@ -15,11 +15,11 @@ export function composerAmbiance(c: Carte): Ambiance {
   const sol = (x: number, y: number) => x >= 0 && y >= 0 && x < c.w && y < c.h && c.cases[y*c.w+x] !== MUR;
   // Regrouper le décor des salles : saloir, réserve, humidité ou pierre nue.
   // Un même volume reçoit un thème ; les croisements étroits restent des couloirs.
-  const coeurs=new Set<number>(), zones=new Uint8Array(c.cases.length);
+  const coeurs=new Set<number>(), zones=c.zones?Uint8Array.from(c.zones):new Uint8Array(c.cases.length);
   for(let y=1;y<c.h-1;y++)for(let x=1;x<c.w-1;x++) {
     let salle=true;
     for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++) if(!sol(x+dx,y+dy))salle=false;
-    if(salle)coeurs.add(y*c.w+x);
+    if(salle&&!c.zones)coeurs.add(y*c.w+x);
   }
   while(coeurs.size) {
     const premier=coeurs.values().next().value!, file=[premier], theme=(premier%c.w*5+Math.floor(premier/c.w)*7)%4;
