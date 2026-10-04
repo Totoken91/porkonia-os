@@ -5,7 +5,8 @@
  */
 import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/types";
 import { assemblerEtage } from './campagne';
-import { ennemiReference, PART_XP_COMBAT, RARETES_RPG, xpAccomplissement, xpNiveauRpg } from "./equilibrage";
+import { ennemiReference, PART_XP_COMBAT, xpAccomplissement, xpNiveauRpg } from "./equilibrage";
+import { bonusEquipementRpg } from './equipement-rpg';
 import { estRefuge } from "./refuge";
 import { ligneEntre } from './boss';
 import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
@@ -254,16 +255,9 @@ function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number
   const minimum = jeu.raretes.find(x=>x.id===rareteMinimum);
   const rar = jeu.raretes.find(x=>x.id===rareteGarantie) ?? (minimum && minimum.mult > tiree.mult ? minimum : tiree);
   if (p.joueur.rpg) {
-    const mult = RARETES_RPG[rar.id as keyof typeof RARETES_RPG] ?? 1;
-    const k = niveau - 1;
-    const part = def.emplacement === "armure" ? 0.65 : def.emplacement === "tete" ? 0.25 : 0.1;
-    const v = (n: number) => Math.max(1, Math.round(n * mult));
     return {
       uid: p.prochainUid++, base: def.id, niveau, rarete: rar.id,
-      att: def.att ? v(def.emplacement === "arme" ? (2 + 0.55 * k) * (0.85 + Math.min(8, def.att) * 0.04) : 0.5 + 0.08 * k) : 0,
-      def: def.def ? v((2 + 0.4 * k) * part) : 0,
-      pv: def.pv ? v(def.pv * 0.25 + 2 * k * (def.emplacement === "arme" ? 0.15 : part)) : 0,
-      mousse: def.mousse ? v(Math.min(8, def.mousse * 0.4) + k * 0.5) : 0,
+      ...bonusEquipementRpg(def, niveau, rar.id),
     };
   }
   const echelle = (1 + 0.25 * (niveau - 1)) * rar.mult;

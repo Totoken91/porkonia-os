@@ -1,6 +1,6 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration et les trois élites avec butin garanti sont poussés. Les comportements d’ennemis, les choix d’équipement et les vérifications humaines restent à approfondir.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans, les quatre boss, les refuges, la calibration, les trois élites avec butin garanti et les comportements de l’inspecteur et du tonneau sont poussés. Les choix d’équipement sont en validation locale ; l’introduction, la conclusion et les vérifications humaines restent à approfondir.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
@@ -8,7 +8,7 @@ Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équi
 | 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
 | 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Haltes cozy validées et poussées (`113540b`) |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première calibration poussée (`407df13`) : objectifs, gardiens et 72 parcours ; validation humaine à faire |
-| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`) ; verdict à distance et écrasement en validation locale ; choix d’équipement à enrichir |
+| 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Élites et butin poussés (`87c4014`), comportements poussés (`87934d9`) ; compromis d’équipement en validation locale |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
 
 ## Première livraison du chantier 1
@@ -85,7 +85,7 @@ Une élite RPG laisse désormais exactement un équipement, de niveau égal à l
 
 248 tests passent, compilation et scénario de butin/comparaison/reprise vérifiés dans les quatre formats. Les 72 parcours automatiques conservent 36/36 victoires en exploration et 31/36 en trajet direct. Cette passe commence le chantier 5 ; diversité des comportements et choix plus marqués entre équipements restent à construire.
 
-### Comportements ordinaires — passe locale à valider
+### Comportements ordinaires — validés et poussés
 
 - L’inspecteur prépare un verdict à trois pas maximum, en ligne droite et sans traverser de mur. La case visée reste fixe : changer de case évite le coup, même en avançant vers lui. Les dégâts d’un verdict correspondent à un coup normal.
 - Le tonneau prépare un écrasement au contact, de puissance 1,35 fois celle d’un coup normal. Un pas de côté ou un recul permet de l’éviter. Sans case d’esquive libre, il utilise un coup normal.
@@ -95,4 +95,19 @@ Une élite RPG laisse désormais exactement un équipement, de niveau égal à l
 
 259 tests passent et le build compile. Le pilote omniscient, qui exploite les esquives, gagne 36/36 parcours d’exploration (niveau 20) et 36/36 trajets directs (niveau 18). La meilleure survie vient des ouvertures annoncées ; les statistiques de base n’ont pas été réduites. Ces résultats ne mesurent pas la difficulté ni le plaisir pour un joueur humain.
 
-Navigation vérifiée en bureau, Poche portrait, paysage et compact : avertissement approprié, esquive sans dégâts, récupération conservée après reprise et attaques des trois boss intermédiaires. Les captures montrent le signal sur le sprite dans le rendu réel. Les nouveaux comportements restent locaux en attente de validation visuelle.
+Navigation vérifiée en bureau, Poche portrait, paysage et compact : avertissement approprié, esquive sans dégâts, récupération conservée après reprise et attaques des trois boss intermédiaires. Les captures montrent le signal sur le sprite dans le rendu réel. Validé et poussé (`87934d9`).
+
+### Compromis d’équipement — passe locale à valider
+
+Les profils définis dans le pack modulent uniquement la création des nouveaux objets RPG. Ils conservent les statistiques présentes sur chaque base et la progression par étage et qualité. Les objets déjà sauvegardés gardent exactement leurs valeurs, y compris lorsqu’on les rééquipe ; le mode historique garde ses formules.
+
+- Armes : hachoir pour la puissance, os pour les PV, louche pour la mousse. Les armes d’entrée conservent leur progression simple.
+- Armures : cotte pour la défense, gilet intermédiaire, manteau pour la réserve de PV au prix de la protection.
+- Coiffes : charlotte pour la mousse, bob intermédiaire, casque pour la défense, couronne pour les PV. Des seuils de défense rendent le choix perceptible dès les premiers étages.
+- Breloques : Pork ID contre nappe pour défense/PV, appeau contre décapsuleur pour puissance/mousse.
+
+La fiche affiche une phrase d’usage en plus des bonus exacts et des écarts avec l’objet porté. Aucun objet n’est équipé automatiquement. Une réserve maximale accrue ne soigne pas lors de l’échange.
+
+274 tests passent : compromis chiffrés aux débuts et fins d’actes, progression et qualité monotones, statistiques absentes conservées à zéro, valeurs des anciens objets intactes, profils appliqués au butin généré. Build compilé. Le même pilote garde 36/36 victoires en exploration et 36/36 en trajet direct ; ces résultats sont des régressions automatiques, pas une validation humaine de l’équilibrage.
+
+Fiches et échanges vérifiés en bureau, Poche portrait, paysage et compact : rôle affiché, pertes de défense et gains de réserve corrects, échange sans soin ni tour consommé, bonus identiques après reprise. Captures du manteau contre la cotte et de la charlotte contre le bob. La passe reste locale en attente de validation ; le chantier suivant est l’entrée en campagne, l’objectif et la conclusion.

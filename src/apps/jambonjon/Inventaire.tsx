@@ -56,6 +56,7 @@ export function Inventaire({ partie, agir, fermer }: { partie: Partie; agir: (a:
   const ici = partie.sol.filter((o) => o.x === j.x && o.y === j.y);
   const cmp = o && !estPorte ? comparer(jeu, j, o) : null;
   const porte = o ? j.equipe[emplacementDe(jeu, o)] : null;
+  const profil = o && j.rpg ? jeu.objets.find(d => d.id === o.base)?.profilRpg : undefined;
   const action = (a: Action) => { agir(a); choisir(null); };
 
   return <section className="jbj-inventaire" data-testid="jbj-sac" aria-label={str("jbj.inventaire")}>
@@ -89,6 +90,7 @@ export function Inventaire({ partie, agir, fermer }: { partie: Partie; agir: (a:
         {o ? <>
           <h3 style={{color:couleur(o)}}>{nomObjet(jeu,o)}</h3>
           <p>{str(`jbj.emplacement.${emplacementDe(jeu,o)}`)} · {str("jbj.niv",{n:o.niveau})} · {rarete(o)}{estPorte ? ` · ${str("jbj.porte")}` : ""}</p>
+          {profil && <p data-testid="jbj-objet-usage">{profil.description}</p>}
           {cmp && <p className="jbj-inv-comparaison">{str("jbj.compareAvec",{nom:porte ? nomObjet(jeu,porte) : str("jbj.vide")})}</p>}
           <div className="jbj-inv-bonus">{(["att","def","pv","mousse"] as const).map(k => <span key={k}>
             <span>{str(`jbj.stat.${k}`)}</span><b>{o[k] > 0 ? "+" : ""}{o[k]}</b>

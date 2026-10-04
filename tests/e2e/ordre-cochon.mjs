@@ -14,6 +14,7 @@ const SHOTS = process.env.SHOTS;
 const OBJECTIF=process.env.OBJECTIF?JSON.parse(await readFile(process.env.OBJECTIF,'utf8')):null;
 const ELITE=process.env.ELITE?JSON.parse(await readFile(process.env.ELITE,'utf8')):null;
 const COMPORTEMENTS=process.env.COMPORTEMENTS?JSON.parse(await readFile(process.env.COMPORTEMENTS,'utf8')):[];
+const EQUIPEMENT=process.env.EQUIPEMENT?JSON.parse(await readFile(process.env.EQUIPEMENT,'utf8')):null;
 const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
@@ -419,6 +420,28 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    if(EQUIPEMENT){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),EQUIPEMENT);
+      await reprendre();await page.getByTestId('jbj-ouvrir-sac').click();
+      const avant=await lire();
+      for(const [uid,place,role] of [[881,'armure','PV'],[882,'tete','mousse']]){
+        await page.getByTestId(`jbj-objet-${uid}`).click();
+        const fiche=page.getByTestId('jbj-objet-fiche');
+        if(!(await page.getByTestId('jbj-objet-usage').textContent()).includes(role))throw new Error(`${tag}: usage d’equipement absent`);
+        const o=avant.joueur.sac.find(o=>o.uid===uid),porte=avant.joueur.equipe[place];
+        if(!(await fiche.locator('.perte').allTextContents()).includes(String(o.def-porte.def)))throw new Error(`${tag}: perte de protection absente`);
+        const stat=role==='PV'?'pv':'mousse';
+        if(!(await fiche.locator('.gain').allTextContents()).includes(`+${o[stat]-porte[stat]}`))throw new Error(`${tag}: gain de reserve absent`);
+        await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+        if(SHOTS)await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-profil-${place}.png`)});
+      }
+      await page.getByTestId('jbj-objet-881').click();await page.getByTestId('jbj-equiper').click();
+      const apres=await lire();
+      if(apres.tour!==avant.tour||apres.joueur.pv!==avant.joueur.pv||apres.joueur.equipe.armure.uid!==881)throw new Error(`${tag}: echange d’equipement incorrect`);
+      await page.getByTestId('jbj-sac-fermer').click();await reprendre();
+      if(JSON.stringify((await lire()).joueur.equipe.armure)!==JSON.stringify(apres.joueur.equipe.armure))throw new Error(`${tag}: bonus recalcules apres reprise`);
+      step(`${tag}: profils, compromis, echange sans soin et sauvegarde valides`);
     }
     if(ELITE){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),ELITE);

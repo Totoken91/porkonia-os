@@ -418,6 +418,12 @@ export interface ObjetDef {
   def?: number;
   pv?: number;
   mousse?: number;
+  /** Compromis des nouveaux objets RPG ; les valeurs sauvegardées restent intactes. */
+  profilRpg?: {
+    description: string;
+    facteurs: Partial<Record<'att' | 'def' | 'pv' | 'mousse', number>>;
+    minimums?: Partial<Record<'att' | 'def' | 'pv' | 'mousse', number>>;
+  };
   /** Premier étage où on le trouve. */
   etage: number;
 }
