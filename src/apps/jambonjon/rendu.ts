@@ -3,6 +3,7 @@
  * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
  */
 import { casesMenace } from "./boss";
+import { decorRepos } from './repos-decors';
 import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import { dessinerImpacts } from './effets-combat';
 import type { ImpactVisuel } from './retours-combat';
@@ -394,6 +395,7 @@ export interface Atelier {
   sol: Tex;
   plafond: Tex;
   trappe: Tex;
+  repos:{lit:Tex;coffre:Tex;tapis:Tex};
   monstres: Record<SpriteMonstre, { tex: Tex; taille: number }>;
   objets: Record<Objet3D, { tex: Tex; taille: number }>;
 }
@@ -415,7 +417,7 @@ export function preparer(): Atelier {
     const taille = DESSINS_OBJETS[k](g);
     objets[k] = { tex: finirSprite(g), taille };
   }
-  atelier = { passage: texturePassage(), murs: texturesMurs(), sol: textureSol(), plafond: texturePlafond(), trappe: textureTrappe(), monstres, objets };
+  atelier = { passage: texturePassage(), murs: [...texturesMurs(),decorRepos('cheminee')], sol: textureSol(), plafond: texturePlafond(), trappe: textureTrappe(), monstres, objets, repos:{lit:decorRepos('lit'),coffre:decorRepos('coffre'),tapis:decorRepos('tapis')} };
   return atelier;
 }
 
@@ -525,7 +527,8 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     for (let x = 0; x < W; x++) {
       const cx = Math.floor(fx0);
       const cy = Math.floor(fy0);
-      const tex = !sol ? a.plafond : cx >= 0 && cy >= 0 && cx < c.w && cy < c.h && c.cases[cy * c.w + cx] === ESCALIER ? a.trappe : a.sol;
+      const tapis=c.coinRepos&&Math.abs(fx0-(c.coinRepos.x+.5))<1.5&&fy0>1&&fy0<3;
+      const tex = !sol ? a.plafond : cx >= 0 && cy >= 0 && cx < c.w && cy < c.h && c.cases[cy * c.w + cx] === ESCALIER ? a.trappe : tapis?a.repos.tapis:a.sol;
       // Les surfaces reprennent le filtrage et le grain d'origine ; les sprites restent nets.
       bilin(tex,(fx0-cx)*T+(sol?8:0),(fy0-cy)*T);
       const chaud=chaleur(fx0,fy0);
@@ -590,7 +593,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) {
       const ti=((Math.min(31,Math.floor(((y-y0)/(y1-y0))*T))*T)+(Math.floor(tx)&31))*4;
       bilin(tex,tx,((y-y0)/(y1-y0))*T);
-      const emissif=decor===4 && tex.px[ti]!>180 && tex.px[ti+1]!>80 && tex.px[ti+2]!<170;
+      const emissif=(decor===4||decor===10) && tex.px[ti]!>180 && tex.px[ti+1]!>80 && tex.px[ti+2]!<170;
       ecrire((y * W + x) * 4, ech[0]!,ech[1]!,ech[2]!,emissif ? Math.max(0.85,f)*flamme : f,chaud);
       profondeur[y*W+x]=dist;
     }
@@ -599,6 +602,10 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   // Sprites : monstres et objets au sol, du plus loin au plus proche.
   type Spr = { x: number; y: number; tex: Tex; taille: number; rouge: boolean; flotte: number };
   const sprites: Spr[] = [];
+  if(c.coinRepos) {
+    sprites.push({x:c.coinRepos.x-.85,y:1.75,tex:a.repos.lit,taille:1.3,rouge:false,flotte:0});
+    sprites.push({x:c.coinRepos.x+1.85,y:1.7,tex:a.repos.coffre,taille:.9,rouge:false,flotte:0});
+  }
   for (const s of p.sol) {
     const o = s.tonneau ? a.objets.tonneau : s.butin.type === "jambon" ? a.objets.jambon : s.butin.type === "biere" ? a.objets.biere : a.objets.sac;
     sprites.push({ x: s.x + 0.5, y: s.y + 0.5, tex: o.tex, taille: o.taille, rouge: false, flotte: 0 });

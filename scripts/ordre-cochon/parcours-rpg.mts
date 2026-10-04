@@ -3,6 +3,7 @@ import { porkosPack } from "../../src/content/packs/porkos";
 import { distances, emplacementDe, jouer, nouvellePartie, passable, stats, type Action, type Partie } from "../../src/apps/jambonjon/logic";
 import { coefficients, rangMaximum } from "../../src/apps/jambonjon/equilibrage";
 import { menaceSur } from "../../src/apps/jambonjon/boss";
+import { reposDisponible } from "../../src/apps/jambonjon/refuge";
 import { disponible, ligne } from "../../src/apps/jambonjon/rpg";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -14,6 +15,7 @@ function parcours(id: string, graine: number) {
   const trace: object[] = [];
   const agir = (a: Action) => { p = jouer(p, jeu, a); actions++; if (a.type !== "tournerD" && a.type !== "apprendre") { trace.push({ a, tour: p.tour, niveau: p.joueur.niveau, pv: p.joueur.pv, jambons: p.joueur.jambons, r: p.joueur.rpg!.rangs, ennemis: p.monstres.filter((m) => m.eveille).map((m) => ({ type: m.type, pv: m.pv, distance: manhattan(m, p.joueur) })) }); if (trace.length > 20) trace.shift(); } };
   while (!p.fin && actions < 6000) {
+    if(reposDisponible(p)){agir({type:"reposer"});continue;}
     const j = p.joueur, r = j.rpg!;
     if (r.points) {
       const ordre = [0, 1, 2, 3, 4, 5].filter((i) => r.rangs[i]! < rangMaximum(j.niveau, i)).sort((a, b) => Number(r.rangs[a]! > 0) - Number(r.rangs[b]! > 0) || r.rangs[a]! - r.rangs[b]!);
@@ -79,7 +81,7 @@ function parcours(id: string, graine: number) {
 }
 const resultats = jeu.rpg!.chevaliers.flatMap((c) => [11, 42, 123].map((graine) => parcours(c.id, graine)));
 const dossier = resolve(process.argv[2] ?? "work/ordre-cochon-equilibrage"); mkdirSync(dossier, { recursive: true });
-writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Douze plans conçus, quatre boss aux fins d�acte. Ne prouve pas le plaisir ni la difficulté humaine ; boss intermédiaires et refuges encore absents.", resultats }, null, 2));
+writeFileSync(resolve(dossier, "parcours-reels.json"), JSON.stringify({ modele: "Pilote omniscient. Douze plans, quatre boss, repos et récompenses de fin d’acte. Ne prouve pas le plaisir ni la difficulté humaine.", resultats }, null, 2));
 console.log(JSON.stringify({ victoires: resultats.filter((r) => r.fin === "victoire").length, total: resultats.length, echecs: resultats.filter((r) => r.fin !== "victoire").map(({ chevalier, graine, etage, niveau, fin }) => ({ chevalier, graine, etage, niveau, fin })) }, null, 2));
 
 

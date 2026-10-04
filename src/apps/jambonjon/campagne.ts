@@ -15,6 +15,7 @@ export function assemblerEtage(def:EtageDonjonDef):Carte {
     for(let k=0;k<=pas;k++)ouvrir(ax+Math.sign(bx-ax)*k,ay+Math.sign(by-ay)*k);
   }
   for(const [x,y]of def.piliers){cases[y*w+x]=1;zones[y*w+x]=0;}
+  if(def.coinRepos)for(let y=1;y<=3;y++)for(let x=def.sortie.x-2;x<=def.sortie.x+2;x++)ouvrir(x,y,4);
   cases[def.sortie.y*w+def.sortie.x]=2;
-  return {w,h,cases,zones,vu:Array(w*h).fill(false),decor:Array(w*h).fill(0)};
+  return {w,h,cases,zones,vu:Array(w*h).fill(false),decor:Array(w*h).fill(0),...(def.coinRepos?{coinRepos:{x:def.sortie.x,y:def.sortie.y}}:{})};
 }

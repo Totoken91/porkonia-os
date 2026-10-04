@@ -1,5 +1,11 @@
 /* Native tiled stone and engraved metal, scoped to the game inside PorkOS. */
 @layer components {
+  .jbj-refuge { flex:none; width:100%; display:grid; gap:3px; padding:4px; color:#e8d9b5; background:#29251ef2; border:3px ridge #9c8660; box-shadow:inset 0 0 0 1px #17130f; font-size:16px; line-height:16px; }
+  .jbj:not(.jbj-poche) .jbj-gauche:has(.jbj-refuge) .jbj-vue { width:min(100cqw,calc((100cqh - 96px)*16/9)); }
+  .jbj-refuge strong { color:#e7c979; }
+  .jbj-refuge-detail { display:none; }
+  .jbj-refuge div { display:flex; flex-wrap:wrap; gap:4px; }
+  .jbj-refuge .pk-btn { flex:1; padding:2px 4px; }
   /* Vue panoramique au-dessus du pupitre ; les sprites gardent leur grille native. */
   .jbj:not(.jbj-poche):not(.jbj-titre):not(.jbj-choix) { flex-direction:column; }
   .jbj:not(.jbj-poche) .jbj-gauche { width:100%; flex:1; min-height:0; container-type:size; align-items:center; }

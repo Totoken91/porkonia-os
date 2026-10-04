@@ -1,6 +1,7 @@
 /** Combat RPG sur la carte réelle. Les récompenses et le journal passent par le moteur hôte. */
 import { ligneEntre, menaceSur, preparerAttaqueBoss, type AnnonceBoss } from "./boss";
 import type { Action, Monstre, Partie } from "./logic";
+import { estRefuge, reposDisponible } from './refuge';
 import type { JeuJambonjon } from "@/content/types";
 import { buildValide, coefficients, DEBLOCAGES, degatsRpg, rangMaximum, statsRpg, type ClasseRpg, type Rangs } from "./equilibrage";
 
@@ -244,13 +245,22 @@ export function competenceRpg(p: Partie, jeu: JeuJambonjon, slot: number, cote: 
 
 export function actionGratuiteRpg(p: Partie, a: Action, h: HoteRpg): boolean | null {
   const r = p.joueur.rpg!;
+  if(a.type==='reposer') {
+    if(!reposDisponible(p))return false;
+    const j=p.joueur,s=h.stats(j);
+    j.pv=s.pvMax;j.mousse=s.mousseMax;j.faim=100;j.ivresse=0;
+    r.delais=[0,0,0];r.protection=0;r.riposte=0;r.ouverture=undefined;r.bouclier=0;
+    r.perce=false;r.saigne=0;r.encore=false;r.reduction=0;
+    p.refugesVisites=[...(p.refugesVisites??[]),p.etage];
+    h.log(p,'jbj.refuge.reposFait');p.evenements.push('repos');return true;
+  }
   if (a.type === "apprendre") {
     const i = a.competence;
     if (!Number.isInteger(i) || i < 0 || i > 5 || !r.points || r.rangs[i]! >= rangMaximum(p.joueur.niveau, i)) return false;
     r.rangs[i]!++; r.points--; h.log(p, "jbj.rpg.appris"); return true;
   }
   if (a.type === "repartir") {
-    if (!p.refuge || p.monstres.some((m) => m.eveille)) return false;
+    if (!estRefuge(p)) return false;
     r.rangs = [1, 0, 0, 0, 0, 0]; r.points = p.joueur.niveau - 1; r.delais = [0, 0, 0];
     r.riposte = 0; r.ouverture = undefined; r.encore = false;
     h.log(p, "jbj.rpg.reparti"); return true;

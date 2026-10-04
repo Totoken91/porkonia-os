@@ -11,6 +11,7 @@ import { chromium } from "playwright";
 
 const ROOT = resolve("out");
 const SHOTS = process.env.SHOTS;
+const REFUGES=process.env.REFUGES?JSON.parse(await readFile(process.env.REFUGES,"utf8")):[];
 const BOSSES=process.env.BOSSES?JSON.parse(await readFile(process.env.BOSSES,'utf8')):[];
 const FINALE=process.env.FINALE?JSON.parse(await readFile(process.env.FINALE,'utf8')):null;
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".json": "application/json", ".txt": "text/plain", ".ico": "image/x-icon", ".mp3": "audio/mpeg" };
@@ -415,6 +416,21 @@ try {
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
+    }
+    for(const fixture of REFUGES){
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await reprendre();await page.getByTestId('jbj-refuge').waitFor();
+      const largeur=await page.getByTestId('jbj-refuge').evaluate(e=>[e.scrollWidth,e.clientWidth]);
+      if(largeur[0]>largeur[1]+1)throw new Error(`${tag}: refuge trop large`);
+      if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-refuge-${fixture.etage}.png`)});
+      const avant=await lire();await page.getByTestId('jbj-reposer').click();const apres=await lire();
+      if(apres.tour!==avant.tour||apres.joueur.pv<=avant.joueur.pv||apres.joueur.faim!==100||!apres.refugesVisites.includes(fixture.etage))throw new Error(`${tag}: repos incorrect`);
+      await reprendre();if(await page.getByTestId('jbj-reposer').isEnabled())throw new Error(`${tag}: repos repetable`);
+      await page.getByTestId('jbj-refuge').getByRole('button',{name:/Comp.tences/}).click();await page.getByTestId('jbj-repartir').click();
+      const reset=await lire();if(reset.joueur.rpg.points!==9||reset.joueur.rpg.rangs.join(',')!=='1,0,0,0,0,0')throw new Error(`${tag}: redistribution incorrecte`);
+      await page.getByTestId('jbj-fermer-competences').click();await page.getByTestId('jbj-refuge-descendre').click();
+      const suite=await lire();if(suite.etage!==fixture.etage+1||await page.getByTestId('jbj-refuge').count())throw new Error(`${tag}: sortie du refuge incorrecte`);
+      step(`${tag}: refuge ${fixture.etage}, repos unique, points et descente valides`);
     }
     for(const fixture of BOSSES){
       await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);

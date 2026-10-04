@@ -1,12 +1,12 @@
 # Feuille de route du jeu complet
 
-Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. La campagne est étendue à douze plans conçus ; le jeu complet demande encore les boss intermédiaires, refuges, enrichissements et vérifications humaines ci-dessous.
+Validée par Kenny le 4 octobre 2026. La base jouable comprend inventaire, équipement, trois classes, douze chevaliers et leurs innées, compétences, progression, sauvegarde et retours de combat. Les douze plans et les quatre boss sont poussés ; les refuges sont implémentés localement. La suite porte sur l’équilibrage, les rencontres, les récompenses et les vérifications humaines ci-dessous.
 
 | Ordre | Chantier | Résultat attendu | État |
 | --- | --- | --- | --- |
 | 1 | Douze étages en quatre actes | Identités visuelles, plans et rencontres distincts, détours récompensés ; pas douze copies d'un labyrinthe | Douze plans validés et poussés (`475fddf`) |
-| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Trois gardiens intermédiaires implémentés localement ; aperçu avant push |
-| 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Réaffectation dans le moteur ; aucun refuge créé |
+| 2 | Quatre boss | Boss aux étages 3, 6, 9 et 12, mécaniques et attaques annoncées distinctes | Gardiens validés et poussés (`6294198`) ; sprites de boss uniques à produire |
+| 3 | Refuges | Repos, équipement garanti et réaffectation après les boss intermédiaires | Implémentés localement ; aperçu avant push |
 | 4 | Progression complète | Niveau 18–19 en parcours normal, 20 en exploration approfondie ; XP, équipement et provisions adaptés aux trois classes | Première vérification automatique des douze étages ; calibration humaine à faire |
 | 5 | Rencontres et récompenses | Comportements complémentaires et butin qui permet des choix de jeu | Premier bestiaire et équipement présents ; à enrichir |
 | 6 | Expérience terminée | Introduction, objectif, apprentissage progressif, conclusion et parties complètes avec les douze chevaliers | À faire sur la campagne complète |
@@ -35,7 +35,7 @@ Quelques provisions sont accessibles à l'entrée des actes et dans la dernière
 
 Entrée sûre, sortie accessible, toutes les cases ouvertes reliées, rencontres et butin sur cases libres distinctes, décor assorti aux salles, sauvegardes compatibles. Vérifier les douze chevaliers sur plusieurs graines avec le pilote, puis vérifier les vues et commandes sur PC et Poche. Les parties automatiques prouvent la faisabilité, pas le plaisir ni la difficulté pour un joueur humain.
 
-## Boss intermédiaires — prochaine livraison
+## Boss intermédiaires — livraison validée
 
 - 3 : Prévôt du Sel, verdict en ligne jusqu’à quatre cases ; esquive latérale.
 
@@ -46,3 +46,22 @@ Entrée sûre, sortie accessible, toutes les cases ouvertes reliées, rencontres
 Les marques ne suivent pas le joueur. Si la géométrie supprime toutes les échappatoires, le motif est réduit. Après l’impact, un tour de récupération permet la riposte. Le gardien bloque la descente et sa mort ne termine pas la campagne. Les apparences reprennent temporairement les sprites inspecteur, tonneau et fantôme : portraits et sprites de boss uniques restent à produire.
 
 216 tests unitaires, compilation et navigation vérifiées. Pilote complet : 31 victoires sur 36 ; cinq morts au premier gardien. Les refuges et l’économie de soins sont encore à construire avant calibration humaine.
+
+## Refuges — prochaine livraison
+
+Aux escaliers des étages 3, 6 et 9, après la mort du gardien et la fin des poursuites :
+
+- Repos complet gratuit, une fois par halte : PV, mousse et faim restaurés ; ivresse et préparations de combat dissipées. Le registre de repos persiste dans les sauvegardes.
+- Redistribution des compétences gratuite au refuge, sans faire avancer le temps ; hors du refuge, elle reste interdite.
+- Un objet garanti à l’escalier : qualité « de garde » au 3, « grand cru » aux 6 et 9, niveau de l’étage. Le choix vise un emplacement équipé ancien. Le joueur décide de l’équiper ; sac plein, l’objet reste au sol.
+- La descente quitte le refuge. Ni l’attente, ni un rechargement, ni un aller-retour ne redonnent un repos consommé.
+
+Les sauvegardes historiques sans registre de repos restent lisibles. Les 224 tests couvrent soins, repos unique, sécurité, réaffectation, butin garanti, sac plein et descente. Le pilote complet gagne 31 parties sur 36 avec les refuges : les cinq échecs restent au premier boss, avant toute halte. La calibration du premier acte et les essais humains constituent la suite du chantier 4.
+
+Navigation vérifiée en bureau, Poche paysage, Poche portrait et Poche compact : les trois haltes s’affichent sans débordement ; repos consommé après reprise, réaffectation des points et descente vers l’acte suivant validés.
+
+### Alcôve de repos
+
+Les haltes ont désormais un volume ouvert devant l’escalier : cheminée en pierre avec lumière chaude, couchette et couverture bordeaux, coffre en bois et tapis tissé usé. Textures natives 32×32, mobilier 40×40, rendu dans la caméra habituelle du donjon. Le mobilier est décoratif ; il n’ajoute pas de collisions invisibles. Le repos et la réaffectation fonctionnent dans toute l’alcôve ; la descente se fait à l’escalier. Les commandes sont placées sous la vue.
+
+Les anciennes cartes conçues compatibles reçoivent uniquement l’alcôve au premier mouvement ou à la première rotation. Carte historique générée aléatoirement : conservée telle quelle. L’ouverture, l’éclairage, la sauvegarde et l’absence de réinitialisation sont testés ; 228 tests au total. Aperçus et contrôles dans les quatre formats d’écran.

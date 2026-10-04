@@ -426,6 +426,7 @@ export interface EtageDonjonDef {
   etage:number; w:number; h:number; description:string;
   entree:{x:number;y:number;dir:number}; sortie:{x:number;y:number};
   gardien?:{x:number;y:number};
+  coinRepos?:boolean;
   salles:{x:number;y:number;w:number;h:number;theme:1|2|3|4}[];
   passages:[number,number][][];
   piliers:[number,number][];

@@ -168,7 +168,7 @@ describe("Ordre Cochon : innées", () => {
   });
   it("réaffecte seulement dans un refuge et rejette les sauvegardes avec des points inventés", () => {
     const p = fixture("berthe", 10); expect(jouer(p, jeu, { type: "repartir" })).toBe(p);
-    p.refuge = true; p.monstres = [];
+    p.refuge = true; p.monstres = [];p.etage=3;p.carte.cases[p.joueur.y*p.carte.w+p.joueur.x]=2;
     const q = jouer(p, jeu, { type: "repartir" }); expect(q.joueur.rpg!.points).toBe(9); expect(q.tour).toBe(p.tour);
     q.joueur.rpg!.chevalier = "inconnu"; expect(relirePartie(q)).toBeNull();
   });

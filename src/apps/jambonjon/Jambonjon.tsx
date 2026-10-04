@@ -9,6 +9,7 @@ import { Inventaire } from "./Inventaire";
 import { SpriteObjet } from "./SpriteObjet";
 import { Chevaliers } from "./Chevaliers";
 import { Competences } from "./Competences";
+import { Refuge } from './Halte';
 import { DEBLOCAGES, xpNiveauRpg } from "./equilibrage";
 import { menaceSur } from "./boss";
 import { coutCompetence, disponible, ligne, SLOTS_ACTIFS } from "./rpg";
@@ -519,6 +520,7 @@ export function Jambonjon() {
             </div>
           )}
         </div>
+        {!panneau&&<Refuge partie={partie} agir={agir} competences={()=>{setPromotion(null);setCompetence(null);setPanneau('competences');}}/>}
         <ol className="jbj-journal" data-testid="jbj-journal">
           {journal.map((m, i) => (
             <li key={partie.journal.length - journal.length + i}>{str(m.cle, m.vars)}</li>

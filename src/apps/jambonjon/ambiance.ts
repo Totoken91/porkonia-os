@@ -61,6 +61,12 @@ export function composerAmbiance(c: Carte): Ambiance {
     murs[i]=4;
   }
   // Diffusion limitée par les murs : aucune source n'éclaire la pièce d'à côté à travers la pierre.
+  if(c.coinRepos) {
+    const foyer=c.coinRepos.x;
+    for(let x=foyer-2;x<=foyer+2;x++)murs[x]=0;
+    murs[foyer]=10;
+    if(!torches.includes(foyer))torches.push(foyer);
+  }
   for(const source of torches) {
     const sx=source%c.w, sy=Math.floor(source/c.w), queue: [number,number,number][]=[];
     for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) if(sol(sx+dx!,sy+dy!)) queue.push([sx+dx!,sy+dy!,0]);

@@ -1,6 +1,7 @@
 "use client";
 import { useOs } from "@/os/context";
 import { coefficients, DEBLOCAGES, rangMaximum, SEUILS_RANGS } from "./equilibrage";
+import { estRefuge } from "./refuge";
 import type { Action, Partie } from "./logic";
 import { mesureCompetence, palierInnee, SLOTS_ACTIFS } from "./rpg";
 
@@ -31,7 +32,7 @@ export function Competences({ partie, agir, fermer }: { partie: Partie; agir: (a
           </article>;
         })}
       </div>
-      <button className="pk-btn" onClick={() => agir({ type: "repartir" })} disabled={!partie.refuge || partie.monstres.some((m) => m.eveille)} title={str("jbj.rpg.refugeRequis")}>{str("jbj.rpg.repartir")}</button>
+      <button className="pk-btn" onClick={() => agir({ type: "repartir" })} data-testid="jbj-repartir" disabled={!estRefuge(partie)} title={str("jbj.rpg.refugeRequis")}>{str("jbj.rpg.repartir")}</button>
     </div>
   </section>;
 }

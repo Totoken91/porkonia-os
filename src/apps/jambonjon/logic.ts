@@ -6,6 +6,7 @@
 import type { Emplacement, JeuJambonjon, MonstreDef, ObjetDef } from "@/content/types";
 import { assemblerEtage } from './campagne';
 import { ennemiReference, RARETES_RPG, xpNiveauRpg } from "./equilibrage";
+import { estRefuge } from "./refuge";
 import { actionGratuiteRpg, apresBoire, apresPas, attaquerSimple, competenceRpg, effetsAvantEnnemis, etatMonstre, etatRpgValide, finirTourRpg, frappeRpg, initialiserRpg, recevoir, specialEnnemi, statsClasse, type EtatMonstreRpg, type EtatRpg, type HoteRpg } from "./rpg";
 
 export const VERSION = 1;
@@ -43,6 +44,7 @@ export interface Carte {
   vu: boolean[];
   /** Variante de décor des murs (0 pierre, 1 jambons pendus, 2 tonneaux), par case. */
   decor: number[];
+  coinRepos?: {x:number;y:number};
 }
 
 export const idx = (c: { w: number }, x: number, y: number) => y * c.w + x;
@@ -197,6 +199,7 @@ export interface Message {
 
 export interface Partie {
   refuge?: boolean;
+  refugesVisites?: number[];
   version: number;
   alea: number;
   etage: number;
@@ -243,10 +246,10 @@ const hoteRpg: HoteRpg = {
   libre: (p, x, y) => passable(p.carte, x, y) && !monstreEn(p, x, y) && (p.joueur.x !== x || p.joueur.y !== y),
 };
 
-function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number): Objet {
+function nouvelObjet(p: Partie, jeu: JeuJambonjon, def: ObjetDef, niveau: number, rareteGarantie?: string): Objet {
   const total = jeu.raretes.reduce((a, r) => a + r.poids, 0);
   let r = tirer(p) * total;
-  const rar = jeu.raretes.find((x) => (r -= x.poids) < 0) ?? jeu.raretes[0]!;
+  const rar = jeu.raretes.find(x=>x.id===rareteGarantie) ?? jeu.raretes.find((x) => (r -= x.poids) < 0) ?? jeu.raretes[0]!;
   if (p.joueur.rpg) {
     const mult = RARETES_RPG[rar.id as keyof typeof RARETES_RPG] ?? 1;
     const k = niveau - 1;
@@ -444,6 +447,7 @@ export type Action =
   | { type: "competence"; slot: number; cote?: "gauche" | "droite" }
   | { type: "apprendre"; competence: number }
   | { type: "repartir" }
+  | { type: "reposer" }
   | { type: "equiper"; uid: number }
   | { type: "retirer"; emplacement: Emplacement }
   | { type: "ramasser" }
@@ -488,6 +492,17 @@ function tuer(p: Partie, jeu: JeuJambonjon, m: Monstre) {
     p.fin = "victoire";
     log(p, "jbj.msg.victoire");
     p.evenements.push("victoire");
+    return;
+  }
+  if(m.boss && p.joueur.rpg && [3,6,9].includes(p.etage)) {
+    const sortie=p.carte.cases.indexOf(ESCALIER);
+    // Renouveler l'emplacement le plus ancien, sans remplacer l'équipement porté.
+    const place=[...EMPLACEMENTS].sort((a,b)=>(p.joueur.equipe[a]?.niveau??0)-(p.joueur.equipe[b]?.niveau??0))[0]!;
+    const disponibles=jeu.objets.filter(o=>o.etage<=p.etage&&o.emplacement===place);
+    const def=parmi(p,disponibles.length?disponibles:jeu.objets);
+    const objet=nouvelObjet(p,jeu,def,p.etage,p.etage>=6?'cru':'garde');
+    p.sol.push({x:sortie%p.carte.w,y:Math.floor(sortie/p.carte.w),butin:{type:'objet',objet}});
+    log(p,'jbj.refuge.victoire',{nom:nomObjet(jeu,objet)});
     return;
   }
   // Butin : provisions ou objet, plus généreux sur une élite.
@@ -649,6 +664,7 @@ function tempsPasse(p: Partie) {
 }
 
 function descendre(p: Partie, jeu: JeuJambonjon) {
+  p.refuge = false;
   p.etage += 1;
   peuplerEtage(p, jeu);
   log(p, "jbj.msg.descente", { etage: p.etage });
@@ -663,10 +679,19 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
   if (avant.fin) return avant;
   const p = clone(avant);
   const j = p.joueur;
+  // Mettre à jour seulement l'alcôve des anciennes cartes conçues, sans refaire l'étage.
+  const plan=j.rpg&&!p.carte.coinRepos&&p.carte.zones?jeu.campagne?.find(e=>e.etage===p.etage&&e.coinRepos):undefined;
+  if(plan&&p.carte.w===plan.w&&p.carte.h===plan.h&&caseEn(p.carte,plan.sortie.x,plan.sortie.y)===ESCALIER) {
+    p.carte={...p.carte,cases:[...p.carte.cases],zones:[...p.carte.zones!],vu:[...p.carte.vu]};
+    for(let y=1;y<=3;y++)for(let x=plan.sortie.x-2;x<=plan.sortie.x+2;x++){const i=y*p.carte.w+x;p.carte.cases[i]=SOL;p.carte.zones![i]=4;}
+    p.carte.cases[plan.sortie.y*p.carte.w+plan.sortie.x]=ESCALIER;
+    p.carte.coinRepos={...plan.sortie};
+  }
+  p.refuge=estRefuge(p);
   if (j.rpg) {
     const gratuit = actionGratuiteRpg(p, a, hoteRpg);
     if (gratuit !== null) return gratuit ? p : avant;
-  } else if (a.type === "competence" || a.type === "apprendre" || a.type === "repartir") return avant;
+  } else if (a.type === "competence" || a.type === "apprendre" || a.type === "repartir" || a.type === "reposer") return avant;
   let prendDuTemps = true;
   switch (a.type) {
     case "avancer":
@@ -819,6 +844,7 @@ export function jouer(avant: Partie, jeu: JeuJambonjon, a: Action): Partie {
     if (j.rpg) finirTourRpg(p, p.monstres.some((m) => m.eveille && Math.abs(m.x - j.x) + Math.abs(m.y - j.y) <= 12));
     if (!p.fin) tempsPasse(p);
   }
+  p.refuge=estRefuge(p);
   voir(p);
   return p;
 }
@@ -838,8 +864,10 @@ export function relirePartie(v: unknown): Partie | null {
   const c = p.carte;
   if (!c || !Array.isArray(c.cases) || c.cases.length !== c.w * c.h || !Array.isArray(c.vu) || !Array.isArray(c.decor)) return null;
   if(c.zones!==undefined&&(!Array.isArray(c.zones)||c.zones.length!==c.cases.length||c.zones.some(n=>!Number.isInteger(n)||n<0||n>4)))return null;
+  if(c.coinRepos!==undefined&&(!c.coinRepos||!Number.isInteger(c.coinRepos.x)||c.coinRepos.x<3||c.coinRepos.x>=c.w-3||c.coinRepos.y!==3||c.cases[3*c.w+c.coinRepos.x]!==ESCALIER))return null;
   if (!p.joueur || !Array.isArray(p.joueur.sac) || typeof p.joueur.equipe !== "object" || !Array.isArray(p.monstres) || !Array.isArray(p.sol) || !Array.isArray(p.journal)) return null;
   if (!etatRpgValide(p.joueur)) return null;
+  if(p.refugesVisites!==undefined&&(!Array.isArray(p.refugesVisites)||p.refugesVisites.some(n=>![3,6,9].includes(n))||new Set(p.refugesVisites).size!==p.refugesVisites.length))return null;
   return { ...p, evenements: [] };
 }
 
