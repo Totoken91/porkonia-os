@@ -1,5 +1,6 @@
 /** Effets dessinés sur le framebuffer natif : aucun filtre ni image redimensionnée. */
 import { focale } from './ambiance';
+import { pasPixelMonde } from './grille-pixels';
 import type { Camera } from './rendu';
 import type { ImpactVisuel } from './retours-combat';
 const CHIFFRES=['111101101101111','010110010010111','111001111100111','111001111001111','101101111001001','111100111001111','111100111101111','111001001001001','111101111101111','111101111001111'];
@@ -15,10 +16,23 @@ export function dessinerImpacts(out:ImageData,cam:Camera,temps:number,impacts:Im
     if(cx<-40||cx>W+40)continue;
     const rayon=Math.min(40,Math.max(9,f/z*.2)),t=age/500;
     const couleur=effet.style==='sel'?SEL:effet.style==='explosion'?BRAISE:effet.style==='rot'?OR:effet.style==='execution'||effet.style==='saignement'?SANG:OS;
-    const pixel=(x:number,y:number,c:Couleur,alpha=1,visible=false)=>{
+    const pas=pasPixelMonde(f,z),cellules=new Set<number>();
+    const point=(x:number,y:number,c:Couleur,alpha:number,visible:boolean)=>{
       x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return;
       if(!visible&&profondeur[y*W+x]!<z-.12)return;
       const i=(y*W+x)*4;for(let k=0;k<3;k++)out.data[i+k]=out.data[i+k]!*(1-alpha)+c[k]!*alpha;
+    };
+    const pixel=(x:number,y:number,c:Couleur,alpha=1,visible=false)=>{
+      // Chiffres : grille d'interface 3×5. Particules : grille du monde,
+      // même taille de cellule que les mobs et sans surimpressions de sous-pixels.
+      if(visible){point(x,y,c,alpha,true);return;}
+      const ox=Math.round(cx)+Math.floor((x-cx)/pas)*pas;
+      const oy=Math.round(cy)+Math.floor((y-cy)/pas)*pas;
+      if(ox+pas<=0||oy+pas<=0||ox>=W||oy>=H)return;
+      const cle=(oy+pas)* (W+pas*2)+ox+pas;
+      if(cellules.has(cle))return;
+      cellules.add(cle);
+      for(let py=oy;py<oy+pas;py++)for(let px=ox;px<ox+pas;px++)point(px,py,c,alpha,false);
     };
     const trait=(x1:number,y1:number,x2:number,y2:number,c:Couleur,alpha:number)=>{
       const n=Math.ceil(Math.max(Math.abs(x2-x1),Math.abs(y2-y1)));

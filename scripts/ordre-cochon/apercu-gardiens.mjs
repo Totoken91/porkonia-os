@@ -20,17 +20,17 @@ const navigateur=await chromium.launch();try{
    let p=r.nouvellePartie(jeu,42,'ysee');
    while(p.etage<etage){const i=p.carte.cases.indexOf(2);p.joueur.x=i%p.carte.w;p.joueur.y=Math.floor(i/p.carte.w);p.monstres=[];p=r.jouer(p,jeu,{type:'agir'});}
    const boss=p.monstres.find(m=>m.boss),def=jeu.bossIntermediaires.find(b=>b.id===boss.type);p.monstres=[boss];p.sol=[];
-   const rows=r.PIXELS_GARDIENS[def.sprite];
-   if(rows.length!==40||rows.some(row=>row.length!==40||[...row].some(v=>v!=='.'&&!r.PALETTE_GARDIENS[v])))throw Error(`Invalid grid: ${def.sprite}`);
+   const rows=r.PIXELS_GARDIENS[def.sprite],n=rows.length;
+   if(rows.some(row=>row.length!==n||[...row].some(v=>v!=='.'&&!r.PALETTE_GARDIENS[v])))throw Error(`Invalid grid: ${def.sprite}`);
    const section=document.createElement('section');section.style.width='320px';section.id=def.sprite;
    const titre=document.createElement('h2');titre.style.cssText='font-size:16px;margin:0 0 10px';titre.textContent=`${etage} · ${def.nom}`;section.append(titre);
-   const tex=r.preparer().monstres[def.sprite].tex,c=document.createElement('canvas');c.width=40;c.height=40;
-   c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(tex.px),40,40),0,0);window.exportsSprites[def.sprite]=c.toDataURL('image/png');
-   const native=document.createElement('div');native.style.cssText='height:174px;display:flex;align-items:center;justify-content:center;gap:16px;background:#29251e';
-   const petit=c.cloneNode();petit.getContext('2d').drawImage(c,0,0);c.style.cssText='width:160px;height:160px;image-rendering:pixelated';native.append(c,petit);section.append(native);
-   const gris=document.createElement('canvas');gris.width=80;gris.height=40;const gc=gris.getContext('2d'),im=gc.createImageData(80,40);
-   for(let y=0;y<40;y++)for(let x=0;x<40;x++){let j=(y*40+x)*4,k=(y*80+x)*4,gray=Math.round(.2126*tex.px[j]+.7152*tex.px[j+1]+.0722*tex.px[j+2]);im.data.set([gray,gray,gray,tex.px[j+3]],k);im.data.set([214,204,177,tex.px[j+3]],k+160);}
-   gc.putImageData(im,0,0);gris.style.cssText='width:160px;height:80px;image-rendering:pixelated;display:block;margin:8px auto';section.append(gris);
+   const tex=r.preparer().monstres[def.sprite].tex,c=document.createElement('canvas');c.width=n;c.height=n;
+   c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(tex.px),n,n),0,0);window.exportsSprites[def.sprite]=c.toDataURL('image/png');
+   const native=document.createElement('div');native.style.cssText=`height:${n*4+12}px;display:flex;align-items:center;justify-content:center;gap:16px;background:#29251e`;
+   const petit=c.cloneNode();petit.getContext('2d').drawImage(c,0,0);c.style.cssText=`width:${n*4}px;height:${n*4}px;image-rendering:pixelated`;native.append(c,petit);section.append(native);
+   const gris=document.createElement('canvas');gris.width=n*2;gris.height=n;const gc=gris.getContext('2d'),im=gc.createImageData(n*2,n);
+   for(let y=0;y<n;y++)for(let x=0;x<n;x++){let j=(y*n+x)*4,k=(y*n*2+x)*4,gray=Math.round(.2126*tex.px[j]+.7152*tex.px[j+1]+.0722*tex.px[j+2]);im.data.set([gray,gray,gray,tex.px[j+3]],k);im.data.set([214,204,177,tex.px[j+3]],k+n*4);}
+   gc.putImageData(im,0,0);gris.style.cssText=`width:${n*4}px;height:${n*2}px;image-rendering:pixelated;display:block;margin:8px auto`;section.append(gris);
    for(const [libelle,sprite,distance] of [['Avant · 2 cases',anciens[idx],2],['Après · 2 cases',def.sprite,2],['Après · 4 cases',def.sprite,4]]){
     const label=document.createElement('p');label.style.cssText='margin:8px 0 4px;font-size:13px';label.textContent=libelle;section.append(label);
     const vue=document.createElement('canvas');vue.width=320;vue.height=180;vue.style.imageRendering='pixelated';const g=vue.getContext('2d'),img=g.createImageData(320,180);
@@ -45,6 +45,6 @@ const navigateur=await chromium.launch();try{
  });
  await page.screenshot({path:join(sortie,'comparaison-gardiens.png')});
  for(const id of ['prevot','pressoir','spectre'])await page.locator(`#${id}`).screenshot({path:join(sortie,`${id}-controle.png`)});
- for(const [id,data] of Object.entries(await page.evaluate(()=>window.exportsSprites)))await writeFile(join(sortie,`${id}-runtime-40.png`),Buffer.from(data.split(',')[1],'base64'));
+ for(const [id,data] of Object.entries(await page.evaluate(()=>window.exportsSprites)))await writeFile(join(sortie,`${id}-runtime-natif.png`),Buffer.from(data.split(',')[1],'base64'));
  await writeFile(join(sortie,'controle-grille.json'),JSON.stringify(rapports,null,2));
 }finally{await navigateur.close();serveur.close();}

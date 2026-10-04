@@ -198,3 +198,21 @@ La préparation crée une véritable texture 20×20 et ajoute son contour à cet
 Kenny valide la moisissure 20×20 et autorise le push de la passe de peaufinage : rendu natif sans sous-tramage, projection entière des sprites proches, journal complet, statuts de compétences et attente tactile. Les mentions « locale » et « non poussée » ci-dessus décrivent les étapes de revue précédant cette validation.
 
 Dernière vérification : build réussi, 291 tests passés, contrôle des onze textures réelles et égalité du facteur d'agrandissement entre moisissure et inspecteur à une case. Navigation bureau revalidée avec le sprite 20×20 ; les quatre formats ont passé la navigation lors de la passe de rendu et d'interface précédente. Le push Git déclenche le déploiement automatique ; aucun déploiement manuel.
+
+
+## Cohérence globale des sprites — nouvelle passe locale
+
+À la demande de Kenny, la règle de la moisissure est appliquée à tous les sprites du monde : résolution native proportionnelle à la taille, à raison de 40 pixels par case. `grille-pixels.ts` fixe les grilles des onze monstres, des quatre objets au sol et des deux meubles du refuge. Les dessins sont adaptés sur ces grilles ; les contours sont ajoutés à leur résolution native. Le renderer projette un même pixel avec un facteur identique pour tous les sprites à une profondeur donnée. Les multiplicateurs de zoom des boss et élites sont retirés ; la taille des boss vient de leurs propres grilles (jusqu’à 50×50 pour le Grand Affineur).
+
+Rat 18×18, gobelin 24×24, moisissure 20×20, saucisson 28×28, tonneau vivant 26×26, fantôme 32×32, inspecteur 34×34, Prévôt 44×44, Pressoir 32×32, Spectre 40×40, Grand Affineur 50×50. Le butin utilise 14×14, 16×16 ou 20×20 ; lit 52×52 et coffre 36×36 pour garder leurs proportions dans la pièce. Aucun changement des statistiques, du hasard ou des actions du jeu.
+
+Les particules de compétences suivent cette grille projetée ; leurs cellules sont composées une fois pour éviter le mélange de sous-pixels. Les chiffres restent une police d’interface. Les spectres gardent leur alpha 191 mais composent le fond par texel, sans micro-détails ni vignette à l’intérieur des cellules.
+
+Les vingt PNG d’inventaire et les douze blasons sont contrôlés à leur petite résolution native (alpha 0/255). Le navigateur vérifie les facteurs entiers et l’absence d’étirement des images d’interface. Les textures 32×32 du donjon gardent leur grain et le filtre CRT du moniteur est conservé.
+
+Audit strict des 17 sprites du monde passé à une et trois cases, y compris les deux spectres ; 296 tests et build réussis. Navigation, inventaire, blasons, trois refuges et esquives des trois boss passent dans les quatre formats après la correction finale de transparence. Captures relues. Passe locale, non poussée pour validation visuelle.
+
+
+### Validation de la cohérence globale — 4 octobre 2026
+
+Kenny valide les aperçus et autorise la publication de la passe globale. Les mentions « locale » et « non poussée » de cette section décrivent la revue avant validation. Les onze mobs, quatre objets au sol, deux meubles, particules et transparences partagent maintenant leur règle de projection ; inventaire et blasons sont vérifiés à leurs échelles natives. Build, 296 tests, audit strict et navigation dans les quatre formats réussis. Publication par push de `porkos`, avec déploiement automatique Vercel.

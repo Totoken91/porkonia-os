@@ -60,6 +60,16 @@ const relay = (url) => {
 };
 const shot = async (page, name) => SHOTS && page.screenshot({ path: join(SHOTS, `${name}.png`) });
 const step = (m) => console.log("✓", m);
+const verifierPixelsUI = async(page,tag)=>{
+  const erreurs=await page.locator('.jbj-sprite-objet,.jbj-blason,.jbj-blason-innee').evaluateAll(async images=>{
+    await Promise.all(images.map(image=>image.decode()));
+    return images.filter(image=>image.offsetWidth>0).flatMap(image=>{
+      const style=getComputedStyle(image),fx=parseFloat(style.width)/image.naturalWidth,fy=parseFloat(style.height)/image.naturalHeight;
+      return Math.abs(fx-fy)>1e-6||!Number.isInteger(fx)||fx<1||style.imageRendering!=='pixelated'?[{src:image.getAttribute('src'),fx,fy}]:[];
+    });
+  });
+  if(erreurs.length)throw Error(`${tag}: sprites UI redimensionnes irregulierement: ${JSON.stringify(erreurs)}`);
+};
 
 try {
   // Bureau (moniteur d'État), puis téléphone en paysage et en portrait (PorkOS Poche, au doigt).
@@ -214,6 +224,7 @@ try {
         await page.getByTestId(`jbj-classe-${classe}`).click();
         if(await page.locator('.jbj-chevalier').count()!==4)throw new Error(`${tag}: quatre chevaliers attendus pour ${classe}`);
         await page.locator('.jbj-blason').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+        await verifierPixelsUI(page,tag);
         if(SHOTS)await page.getByTestId('jbj-chevaliers').screenshot({path:join(SHOTS,`${tag}-blasons-${classe}.png`)});
       }
       await page.getByTestId("jbj-chevalier-ysee").click();
@@ -294,6 +305,7 @@ try {
     const avant = await position();
     await page.keyboard.press("i");
     await page.getByTestId("jbj-sac").waitFor();
+    await verifierPixelsUI(page,tag);
     await page.locator(".jbj-sprite-objet").evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
     await page.keyboard.press("z");
     await page.waitForTimeout(300);
@@ -442,6 +454,7 @@ try {
       },bases);
       await reprendre();await page.getByTestId('jbj-ouvrir-sac').click();
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+      await verifierPixelsUI(page,tag);
       await page.getByTestId('jbj-objet-2002').click();await page.locator('.jbj-inv-corps').evaluate(e=>{e.scrollTop=0;});
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
     }

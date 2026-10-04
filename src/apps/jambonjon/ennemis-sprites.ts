@@ -1,4 +1,4 @@
-/** Sprites natifs : 40×40 pour les grands, 20×20 pour la moisissure ; mêmes contours et masses de couleur que l’Inspecteur.
+/** Sprites dessinés sur leurs grilles natives, proportionnées à leur taille dans le monde.
  * Coordonnées entières, palette maîtrisée, dessins construits à leur taille réelle.
  */
 import type { SpriteMonstre } from "@/content/types";
@@ -20,43 +20,41 @@ function blocs(g: G, c: string, bs: readonly Bloc[]) {
   for (const [x, y, w, h] of bs) r(g, c, x, y, w, h);
 }
 
-export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur" | "prevot" | "pressoir" | "spectre">, (g: G) => number> = {
+export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur" | "prevot" | "pressoir" | "spectre">, (g: G) => void> = {
   rat: (g) => {
     // Queue en marches, croupe, museau effilé : profil compact de rat.
-    blocs(g, P.peauOmbre, [[2,25,2,7],[3,31,3,2],[5,32,6,2]]);
-    blocs(g, P.peau, [[2,25,1,5],[3,30,1,2],[4,31,2,1],[6,32,4,1]]);
-    blocs(g, P.ombre, [[9,29,4,7],[12,26,11,11],[22,28,7,8],[28,27,5,8],[32,30,3,4],[35,32,2,2]]);
-    blocs(g, P.gris, [[10,29,4,5],[13,27,9,8],[21,29,7,5],[28,28,4,5],[31,30,3,3]]);
-    blocs(g, P.clair, [[13,27,7,2],[11,30,2,3],[20,29,5,2],[29,28,2,2]]);
+    blocs(g, P.peauOmbre, [[1,11,1,3],[1,14,2,1],[2,14,3,1]]);
+    blocs(g, P.peau, [[1,11,1,3],[1,14,1,1],[2,14,1,1],[3,14,2,1]]);
+    blocs(g, P.ombre, [[4,13,2,3],[5,12,5,5],[10,13,3,3],[13,12,2,4],[14,14,2,1],[16,14,1,1]]);
+    blocs(g, P.gris, [[5,13,1,2],[6,12,4,4],[9,13,4,2],[13,13,1,2],[14,14,1,1]]);
+    blocs(g, P.clair, [[6,12,3,1],[5,14,1,1],[9,13,2,1],[13,13,1,1]]);
     // Oreille et œil restent séparés ; pattes au sol, incisive à l’avant.
-    r(g,P.peauOmbre,27,23,5,6);r(g,P.peau,28,24,3,3);r(g,P.chair,28,24,1,2);
-    r(g,P.noir,31,29,2,2);r(g,P.rouge,31,29,1,1);
-    r(g,P.peau,35,32,2,1);r(g,P.papier,33,34,1,2);
-    blocs(g,P.noir,[[11,36,5,2],[23,35,4,3],[30,35,3,2]]);
-    blocs(g,P.peau,[[12,37,5,1],[24,37,4,1],[31,36,3,1]]);
-    r(g,P.ombre,15,32,4,1);r(g,P.gris,16,33,2,2);
-    return .45;
+    r(g,P.peauOmbre,12, 10, 2, 3);r(g,P.peau,13, 11, 1, 1);r(g,P.chair,13, 11, 1, 1);
+    r(g,P.noir,14, 13, 1, 1);r(g,P.rouge,14, 13, 1, 1);
+    r(g,P.peau,16, 14, 1, 1);r(g,P.papier,15, 15, 1, 1);
+    blocs(g,P.noir,[[5,16,2,1],[10,16,2,1],[14,16,1,1]]);
+    blocs(g,P.peau,[[5,17,3,1],[11,17,2,1],[14,16,1,1]]);
+    r(g,P.ombre,7, 14, 2, 1);r(g,P.gris,7, 15, 1, 1);
   },
   gobelin: (g) => {
     // Oreilles anguleuses, visage verdâtre, pourpoint et bourse de chapardeur.
-    blocs(g,P.vertOmbre,[[5,7,3,3],[8,9,4,4],[29,7,5,3],[27,10,4,3],[12,7,15,10],[14,17,11,3]]);
-    blocs(g,P.vert,[[6,8,2,1],[8,10,4,2],[29,8,3,1],[27,10,3,2],[13,7,12,8],[15,15,9,3]]);
-    blocs(g,P.vertClair,[[14,7,7,2],[13,10,3,3],[18,11,3,4],[16,16,5,1]]);
-    r(g,P.vertOmbre,15,10,3,1);r(g,P.vertOmbre,22,10,3,1);
-    r(g,P.or,16,11,2,1);r(g,P.or,22,11,2,1);
-    r(g,P.noir,17,11,1,1);r(g,P.noir,23,11,1,1);
-    r(g,P.vertOmbre,18,16,5,1);r(g,P.papier,18,16,1,1);
-    blocs(g,P.brunOmbre,[[12,20,15,11],[14,30,5,2],[22,30,4,2]]);
-    blocs(g,P.brun,[[13,20,12,9],[14,29,5,2],[22,29,3,2]]);
-    r(g,P.bois,14,21,3,5);r(g,P.papier,17,20,5,2);r(g,P.or,19,26,2,2);
-    r(g,P.noir,13,28,13,2);r(g,P.or,19,28,2,2);
-    blocs(g,P.vertOmbre,[[9,21,4,10],[14,32,4,4],[22,32,4,4],[26,21,3,6]]);
-    blocs(g,P.vert,[[9,22,2,7],[14,32,2,4],[22,32,2,4],[26,21,2,4]]);
-    blocs(g,P.noir,[[12,36,6,3],[22,36,6,3]]);r(g,P.brun,12,36,3,1);r(g,P.brun,23,36,3,1);
-    blocs(g,P.brunOmbre,[[29,24,5,2],[28,26,7,8],[29,34,5,2]]);
-    r(g,P.bois,29,27,4,6);r(g,P.boisClair,29,27,2,3);
-    r(g,P.noir,29,25,5,1);r(g,P.or,30,30,2,2);r(g,P.vert,27,26,2,3);
-    return .62;
+    blocs(g,P.vertOmbre,[[3,4,2,2],[5,5,2,3],[17,4,3,2],[16,6,3,2],[7,4,9,6],[8,10,7,2]]);
+    blocs(g,P.vert,[[4,5,1,1],[5,6,2,1],[17,5,2,1],[16,6,2,1],[8,4,7,5],[9,9,5,2]]);
+    blocs(g,P.vertClair,[[8,4,5,1],[8,6,2,2],[11,7,2,2],[10,10,3,1]]);
+    r(g,P.vertOmbre,9, 6, 2, 1);r(g,P.vertOmbre,13, 6, 2, 1);
+    r(g,P.or,10, 7, 1, 1);r(g,P.or,13, 7, 1, 1);
+    r(g,P.noir,10, 7, 1, 1);r(g,P.noir,14, 7, 1, 1);
+    r(g,P.vertOmbre,11, 10, 3, 1);r(g,P.papier,11, 10, 1, 1);
+    blocs(g,P.brunOmbre,[[7,12,9,7],[8,18,3,1],[13,18,3,1]]);
+    blocs(g,P.brun,[[8,12,7,5],[8,17,3,2],[13,17,2,2]]);
+    r(g,P.bois,8, 13, 2, 3);r(g,P.papier,10, 12, 3, 1);r(g,P.or,11, 16, 2, 1);
+    r(g,P.noir,8, 17, 8, 1);r(g,P.or,11, 17, 2, 1);
+    blocs(g,P.vertOmbre,[[5,13,3,6],[8,19,3,3],[13,19,3,3],[16,13,1,3]]);
+    blocs(g,P.vert,[[5,13,2,4],[8,19,2,3],[13,19,1,3],[16,13,1,2]]);
+    blocs(g,P.noir,[[7,22,4,1],[13,22,4,1]]);r(g,P.brun,7, 22, 2, 1);r(g,P.brun,14, 22, 2, 1);
+    blocs(g,P.brunOmbre,[[17,14,3,2],[17,16,4,4],[17,20,3,2]]);
+    r(g,P.bois,17, 16, 3, 4);r(g,P.boisClair,17, 16, 2, 2);
+    r(g,P.noir,17, 15, 3, 1);r(g,P.or,18, 18, 1, 1);r(g,P.vert,16, 16, 1, 1);
   },
   moisissure: (g) => {
     // 20×20 pour une créature d'une demi-case : même densité que 40×40 sur une case.
@@ -93,72 +91,68 @@ export const DESSINS_ENNEMIS: Record<Exclude<SpriteMonstre, "inspecteur" | "prev
         if (couleur) r(g, couleur, x, y, 1, 1);
       }
     }
-    return .5;
+
   },
   saucisson: (g) => {
     // Boyau rouge, ficelle et marbrures organisées ; deux pieds pour la silhouette.
-    blocs(g,P.sang,[[17,8,7,2],[14,10,13,3],[12,13,16,19],[14,32,12,4],[17,36,6,1]]);
-    blocs(g,P.rouge,[[16,10,8,3],[13,13,12,18],[15,31,9,4]]);
-    blocs(g,"#b46355",[[16,11,3,2],[14,14,3,13],[16,28,3,4]]);
-    blocs(g,P.ivoire,[[19,3,2,5],[17,5,2,1],[21,5,2,1]]);
-    r(g,P.bois,18,8,4,1);
-    blocs(g,P.papier,[[13,12,13,1],[12,22,16,1],[14,32,12,1]]);
-    blocs(g,P.chair,[[16,14,2,2],[22,20,2,1],[18,25,2,2],[23,28,2,2],[16,30,1,1]]);
-    r(g,P.sang,15,16,4,1);r(g,P.sang,21,16,4,1);
-    r(g,P.papier,16,17,2,2);r(g,P.papier,22,17,2,2);
-    r(g,P.noir,17,18,1,1);r(g,P.noir,23,18,1,1);r(g,P.sang,18,20,4,1);
-    blocs(g,P.noir,[[13,36,5,3],[23,36,5,3]]);r(g,P.sang,14,36,2,1);r(g,P.sang,24,36,2,1);
-    return .7;
+    blocs(g,P.sang,[[12,6,5,1],[10,7,9,2],[8,9,12,13],[10,22,8,3],[12,25,4,1]]);
+    blocs(g,P.rouge,[[11,7,6,2],[9,9,9,13],[11,22,6,3]]);
+    blocs(g,"#b46355",[[11,8,2,1],[10,10,2,9],[11,20,2,2]]);
+    blocs(g,P.ivoire,[[13,2,2,4],[12,4,1,1],[15,4,1,1]]);
+    r(g,P.bois,13, 6, 2, 1);
+    blocs(g,P.papier,[[9,8,9,1],[8,15,12,1],[10,22,8,1]]);
+    blocs(g,P.chair,[[11,10,2,1],[15,14,2,1],[13,18,1,1],[16,20,2,1],[11,21,1,1]]);
+    r(g,P.sang,11, 11, 2, 1);r(g,P.sang,15, 11, 3, 1);
+    r(g,P.papier,11, 12, 2, 1);r(g,P.papier,15, 12, 2, 1);
+    r(g,P.noir,12, 13, 1, 1);r(g,P.noir,16, 13, 1, 1);r(g,P.sang,13, 14, 2, 1);
+    blocs(g,P.noir,[[9,25,4,2],[16,25,4,2]]);r(g,P.sang,10, 25, 1, 1);r(g,P.sang,17, 25, 1, 1);
   },
   tonneau: (g) => {
     // Douves, cerclages métalliques et gueule crénelée.
-    blocs(g,P.brunOmbre,[[12,8,16,2],[9,10,22,4],[7,14,26,18],[9,32,22,4],[12,36,16,2]]);
-    blocs(g,P.brun,[[12,9,14,2],[10,11,19,4],[8,15,23,16],[10,31,19,4],[13,35,14,2]]);
-    blocs(g,P.bois,[[10,15,3,15],[15,11,3,24],[20,11,3,24],[25,15,3,15]]);
-    blocs(g,P.boisClair,[[10,16,1,12],[15,11,1,10],[20,11,1,8],[25,16,1,6]]);
-    r(g,P.brunOmbre,13,9,13,1);r(g,P.boisClair,14,8,11,1);
-    blocs(g,P.ombre,[[8,13,24,3],[8,31,24,3]]);
-    blocs(g,P.clair,[[9,13,22,1],[9,31,22,1]]);r(g,P.gris,9,32,22,1);
-    blocs(g,P.or,[[10,14,1,1],[28,14,1,1],[10,32,1,1],[28,32,1,1]]);
-    r(g,P.brunOmbre,12,18,5,1);r(g,P.brunOmbre,23,18,5,1);
-    r(g,P.or,13,19,3,2);r(g,P.or,24,19,3,2);r(g,P.noir,14,20,1,1);r(g,P.noir,25,20,1,1);
-    r(g,P.noir,11,24,18,5);r(g,P.noir,13,23,14,1);r(g,P.sang,14,28,12,1);
-    blocs(g,P.papier,[[12,24,2,2],[17,24,2,2],[23,24,2,2],[27,24,1,2],[15,27,2,2],[21,27,2,2],[26,27,2,2]]);
-    return .66;
+    blocs(g,P.brunOmbre,[[8,5,10,2],[6,7,14,2],[5,9,16,12],[6,21,14,2],[8,23,10,2]]);
+    blocs(g,P.brun,[[8,6,9,1],[7,7,12,3],[5,10,15,10],[7,20,12,3],[8,23,10,1]]);
+    blocs(g,P.bois,[[7,10,1,10],[10,7,2,16],[13,7,2,16],[16,10,2,10]]);
+    blocs(g,P.boisClair,[[7,10,1,8],[10,7,1,7],[13,7,1,5],[16,10,1,4]]);
+    r(g,P.brunOmbre,8, 6, 9, 1);r(g,P.boisClair,9, 5, 7, 1);
+    blocs(g,P.ombre,[[5,8,16,2],[5,20,16,2]]);
+    blocs(g,P.clair,[[6,8,14,1],[6,20,14,1]]);r(g,P.gris,6, 21, 14, 1);
+    blocs(g,P.or,[[7,9,1,1],[18,9,1,1],[7,21,1,1],[18,21,1,1]]);
+    r(g,P.brunOmbre,8, 12, 3, 1);r(g,P.brunOmbre,15, 12, 3, 1);
+    r(g,P.or,8, 12, 2, 2);r(g,P.or,16, 12, 2, 2);r(g,P.noir,9, 13, 1, 1);r(g,P.noir,16, 13, 1, 1);
+    r(g,P.noir,7, 16, 12, 3);r(g,P.noir,8, 15, 10, 1);r(g,P.sang,9, 18, 8, 1);
+    blocs(g,P.papier,[[8,16,1,1],[11,16,1,1],[15,16,1,1],[18,16,1,1],[10,18,1,1],[14,18,1,1],[17,18,1,1]]);
   },
   fantome: (g) => {
     // Drap spectral en plans froids, bras écartés et plis continus.
     const ombre="#697e7e", drap="#9eb5ac", lumiere="#d4e0cb";
-    blocs(g,ombre,[[17,4,7,2],[14,6,13,3],[12,9,17,10],[10,18,20,14],[8,29,24,6],[9,35,5,3],[17,34,5,4],[26,34,5,3],[5,20,6,4],[3,24,6,5],[30,20,5,4],[32,24,4,4]]);
-    blocs(g,drap,[[17,5,6,2],[15,7,10,3],[13,10,13,9],[11,19,16,12],[9,30,20,4],[10,34,3,2],[18,34,3,2],[27,34,2,1],[6,21,5,2],[4,24,4,3],[30,21,3,2],[33,24,2,2]]);
-    blocs(g,lumiere,[[17,6,4,1],[15,9,3,3],[13,13,2,7],[12,21,2,9],[10,30,2,3],[19,21,2,9],[6,22,3,1]]);
-    r(g,ombre,22,21,2,10);r(g,ombre,15,30,2,5);r(g,ombre,25,29,1,5);
-    r(g,P.ombre,16,13,3,3);r(g,P.ombre,23,13,3,3);r(g,P.noir,17,14,1,1);r(g,P.noir,24,14,1,1);
-    r(g,ombre,19,18,4,4);r(g,P.ombre,20,19,2,2);
-    return .8;
+    blocs(g,ombre,[[14,3,5,2],[11,5,11,2],[10,7,13,8],[8,14,16,12],[6,23,20,5],[7,28,4,2],[14,27,4,3],[21,27,4,3],[4,16,5,3],[2,19,5,4],[24,16,4,3],[26,19,3,3]]);
+    blocs(g,drap,[[14,4,4,2],[12,6,8,2],[10,8,11,7],[9,15,13,10],[7,24,16,3],[8,27,2,2],[14,27,3,2],[22,27,1,1],[5,17,4,1],[3,19,3,3],[24,17,2,1],[26,19,2,2]]);
+    blocs(g,lumiere,[[14,5,3,1],[12,7,2,3],[10,10,2,6],[10,17,1,7],[8,24,2,2],[15,17,2,7],[5,18,2,1]]);
+    r(g,ombre,18, 17, 1, 8);r(g,ombre,12, 24, 2, 4);r(g,ombre,20, 23, 1, 4);
+    r(g,P.ombre,13, 10, 2, 3);r(g,P.ombre,18, 10, 3, 3);r(g,P.noir,14, 11, 1, 1);r(g,P.noir,19, 11, 1, 1);
+    r(g,ombre,15, 14, 3, 4);r(g,P.ombre,16, 15, 2, 2);
   },
   affineur: (g) => {
     // Même anatomie et vêtement en blocs que l’Inspecteur, tablier et grand tranchoir.
-    blocs(g,P.noir,[[11,31,7,8],[23,31,6,8],[9,37,9,2],[23,37,8,2]]);
-    r(g,P.gris,12,33,2,3);r(g,P.ombre,24,33,2,3);
-    blocs(g,P.gris,[[10,18,19,14],[8,19,4,10],[28,19,4,8]]);
-    blocs(g,P.papier,[[12,17,14,4],[10,21,19,10],[12,31,15,4]]);
-    blocs(g,P.ivoire,[[12,19,3,10],[15,17,6,2],[13,31,3,2]]);
-    blocs(g,"#b2a78b",[[25,22,3,9],[22,31,4,2],[17,29,3,2]]);
-    r(g,P.rouge,17,18,4,6);r(g,P.sang,18,22,2,3);
-    r(g,P.rouge,12,24,15,1);r(g,P.sang,13,25,2,7);
-    r(g,"#b2a78b",16,27,7,1);r(g,P.papier,17,28,5,2);
-    blocs(g,P.peau,[[15,7,10,8],[17,15,6,2],[7,29,4,3],[29,25,5,4]]);
-    r(g,P.chair,16,8,7,6);r(g,P.ivoire,16,8,3,2);r(g,P.peauOmbre,23,10,2,4);
-    r(g,P.noir,16,10,3,1);r(g,P.noir,21,10,3,1);
-    r(g,P.rouge,17,11,1,1);r(g,P.rouge,22,11,1,1);
-    r(g,P.ivoire,19,11,2,2);r(g,P.peauOmbre,18,14,4,1);
-    r(g,P.noir,13,1,14,5);r(g,P.ombre,14,2,10,2);r(g,P.gris,15,2,7,1);
-    r(g,P.noir,11,5,18,2);r(g,P.or,13,5,13,1);
+    blocs(g,P.noir,[[14,39,9,10],[29,39,7,10],[11,46,12,3],[29,46,10,3]]);
+    r(g,P.gris,15, 41, 3, 4);r(g,P.ombre,30, 41, 3, 4);
+    blocs(g,P.gris,[[13,23,23,17],[10,24,5,12],[35,24,5,10]]);
+    blocs(g,P.papier,[[15,21,18,5],[13,26,23,13],[15,39,19,5]]);
+    blocs(g,P.ivoire,[[15,24,4,12],[19,21,7,3],[16,39,4,2]]);
+    blocs(g,"#b2a78b",[[31,28,4,11],[28,39,5,2],[21,36,4,3]]);
+    r(g,P.rouge,21, 23, 5, 7);r(g,P.sang,23, 28, 2, 3);
+    r(g,P.rouge,15, 30, 19, 1);r(g,P.sang,16, 31, 3, 9);
+    r(g,"#b2a78b",20, 34, 9, 1);r(g,P.papier,21, 35, 7, 3);
+    blocs(g,P.peau,[[19,9,12,10],[21,19,8,2],[9,36,5,4],[36,31,7,5]]);
+    r(g,P.chair,20, 10, 9, 8);r(g,P.ivoire,20, 10, 4, 3);r(g,P.peauOmbre,29, 13, 2, 5);
+    r(g,P.noir,20, 13, 4, 1);r(g,P.noir,26, 13, 4, 1);
+    r(g,P.rouge,21, 14, 2, 1);r(g,P.rouge,28, 14, 1, 1);
+    r(g,P.ivoire,24, 14, 2, 2);r(g,P.peauOmbre,23, 18, 5, 1);
+    r(g,P.noir,16, 1, 18, 7);r(g,P.ombre,18, 3, 12, 2);r(g,P.gris,19, 3, 9, 1);
+    r(g,P.noir,14, 6, 22, 3);r(g,P.or,16, 6, 17, 2);
     // Acier en deux valeurs, dos épais, manche en bois et main distincte.
-    r(g,P.ombre,32,7,5,17);r(g,P.clair,32,8,4,14);r(g,P.papier,33,8,2,12);
-    r(g,P.gris,32,21,3,2);r(g,P.or,32,24,4,1);r(g,P.brunOmbre,33,25,3,8);
-    r(g,P.bois,33,26,1,5);r(g,P.chair,29,25,4,2);
-    return 1;
+    r(g,P.ombre,40, 9, 6, 21);r(g,P.clair,40, 10, 5, 18);r(g,P.papier,41, 10, 3, 15);
+    r(g,P.gris,40, 26, 4, 3);r(g,P.or,40, 30, 5, 1);r(g,P.brunOmbre,41, 31, 4, 10);
+    r(g,P.bois,41, 33, 2, 6);r(g,P.chair,36, 31, 5, 3);
   },
 };

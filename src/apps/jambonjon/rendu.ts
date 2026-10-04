@@ -1,6 +1,6 @@
 /**
- * Rendu logiciel 320×180, caméra à 85°, pierre native 32×32 et sprites 40×40.
- * Passages encadrés, appliques et lumière locale ; tramage discret et couleurs sur 15 bits.
+ * Rendu logiciel 320×180, caméra à 85°, pierre native 32×32 et sprites à densité partagée.
+ * Passages encadrés, appliques et lumière locale ; pixels natifs et couleurs sur 15 bits.
  */
 import { casesMenace } from "./boss";
 import { MARQUE_SOL, COULEURS_MARQUE } from './marques-sol';
@@ -9,7 +9,8 @@ import { DESSINS_ENNEMIS } from "./ennemis-sprites";
 import { DESSINS_GARDIENS } from './gardiens-pixels';
 import { dessinerImpacts } from './effets-combat';
 import type { ImpactVisuel } from './retours-combat';
-import { PALETTE_PROVISIONS, PIXELS_PROVISIONS } from "./provisions-pixels";
+import { GRILLES_MONSTRES, GRILLES_OBJETS, PIXELS_PAR_CASE, coteSprite, type Objet3D } from './grille-pixels';
+import { dessinerObjetSol } from './objets-sol-pixels';
 import type { SpriteMonstre } from "@/content/types";
 import { ESCALIER, MUR, type Partie } from "./logic";
 import { composerAmbiance, focale, lumiereEn, PLAN_CAMERA } from './ambiance';
@@ -267,8 +268,6 @@ function toileDepuis(t: Tex) {
 
 /* --------------------------------- Sprites --------------------------------- */
 
-const S = 40; // côté natif par défaut
-
 /** Rend les bords nets (alpha tout ou rien) et ajoute un contour sombre, comme un sprite d'époque. */
 function finirSprite(g: CanvasRenderingContext2D, transparence = 1): Tex {
   const S = g.canvas.width; // Finition sur la grille native, y compris le contour.
@@ -294,21 +293,13 @@ function finirSprite(g: CanvasRenderingContext2D, transparence = 1): Tex {
   return { w: S, h: S, px: d };
 }
 
-/** Une ellipse en pixels opaques : aucune couverture partielle de Canvas. */
-function ell(g: CanvasRenderingContext2D, c: string, x: number, y: number, rx: number, ry: number) {
-  g.fillStyle=c;
-  for(let py=Math.floor(y-ry);py<Math.ceil(y+ry);py++)
-    for(let px=Math.floor(x-rx);px<Math.ceil(x+rx);px++)
-      if(((px+.5-x)/rx)**2+((py+.5-y)/ry)**2<=1)g.fillRect(px,py,1,1);
-}
-
 function rect(g: CanvasRenderingContext2D, c: string, x: number, y: number, w: number, h: number) {
   g.fillStyle = c;
   g.fillRect(x, y, w, h);
 }
 
 
-const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => number> = {
+const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => void> = {
   ...DESSINS_ENNEMIS,
   ...DESSINS_GARDIENS,
   inspecteur: (g) => {
@@ -319,78 +310,45 @@ const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => n
       or: "#ceaa62", papier: "#e9ddbc", encre: "#696678" };
     const r = (c: string, x: number, y: number, w: number, h: number) => rect(g, c, x, y, w, h);
     // Bottines, jambes séparées et bas du manteau.
-    r(p.nuit, 12, 32, 6, 6); r(p.nuit, 22, 32, 5, 6);
-    r(p.pli, 13, 33, 2, 3); r(p.tissu, 23, 33, 1, 3);
-    r(p.nuit, 10, 37, 8, 2); r(p.nuit, 22, 37, 8, 2);
-    r(p.ombre, 10, 37, 4, 1); r(p.ombre, 26, 37, 3, 1);
-    r(p.ombre, 11, 17, 16, 17); r(p.tissu, 12, 18, 13, 14);
-    r(p.pli, 12, 19, 2, 11); r(p.nuit, 20, 25, 1, 8);
-    r(p.ombre, 15, 30, 4, 2); r(p.nuit, 11, 33, 8, 1); r(p.nuit, 22, 32, 5, 2);
+    r(p.nuit, 10, 27, 5, 5); r(p.nuit, 19, 27, 4, 5);
+    r(p.pli, 11, 28, 2, 3); r(p.tissu, 20, 28, 1, 3);
+    r(p.nuit, 9, 31, 6, 2); r(p.nuit, 19, 31, 7, 2);
+    r(p.ombre, 9, 31, 3, 1); r(p.ombre, 22, 31, 3, 1);
+    r(p.ombre, 9, 14, 14, 15); r(p.tissu, 10, 15, 11, 12);
+    r(p.pli, 10, 16, 2, 10); r(p.nuit, 17, 21, 1, 7);
+    r(p.ombre, 13, 26, 3, 1); r(p.nuit, 9, 28, 7, 1); r(p.nuit, 19, 27, 4, 2);
     // Épaules tombantes, bras au tampon et bras tenant la planche.
-    r(p.ombre, 8, 19, 4, 9); r(p.tissu, 8, 20, 2, 6);
-    r(p.nuit, 7, 27, 5, 2); r(p.peau, 7, 29, 4, 3); r(p.chair, 7, 29, 2, 2);
-    r(p.ombre, 26, 18, 4, 10); r(p.pli, 27, 19, 2, 3);
-    r(p.papier, 16, 17, 7, 5); r(p.clair, 17, 17, 4, 2);
-    r(p.rouge, 19, 19, 2, 7); r(p.rouge, 18, 24, 3, 2);
-    r(p.nuit, 14, 18, 2, 3); r(p.nuit, 15, 21, 3, 1);
-    r(p.pli, 14, 19, 1, 2); r(p.nuit, 23, 18, 2, 3); r(p.nuit, 22, 21, 2, 1);
-    r(p.or, 14, 24, 2, 2); r(p.or, 21, 28, 1, 1);
+    r(p.ombre, 7, 16, 3, 8); r(p.tissu, 7, 17, 2, 5);
+    r(p.nuit, 6, 23, 4, 2); r(p.peau, 6, 25, 3, 2); r(p.chair, 6, 25, 2, 1);
+    r(p.ombre, 22, 15, 4, 9); r(p.pli, 23, 16, 2, 3);
+    r(p.papier, 14, 14, 6, 5); r(p.clair, 14, 14, 4, 2);
+    r(p.rouge, 16, 16, 2, 6); r(p.rouge, 15, 20, 3, 2);
+    r(p.nuit, 12, 15, 2, 3); r(p.nuit, 13, 18, 2, 1);
+    r(p.pli, 12, 16, 1, 2); r(p.nuit, 20, 15, 1, 3); r(p.nuit, 19, 18, 1, 1);
+    r(p.or, 12, 20, 2, 2); r(p.or, 18, 24, 1, 1);
     // Joues creuses, arcade menaçante, nez et moustache stricte.
-    r(p.peau, 15, 8, 10, 8); r(p.chair, 16, 9, 7, 6);
-    r(p.clair, 16, 9, 3, 2); r(p.peau, 15, 11, 2, 3); r(p.peau, 23, 10, 2, 5);
-    r(p.nuit, 16, 10, 3, 1); r(p.nuit, 21, 10, 3, 1);
-    r(p.nuit, 17, 11, 1, 1); r(p.nuit, 22, 11, 1, 1);
-    r(p.clair, 19, 11, 2, 3); r(p.peau, 21, 13, 1, 1);
-    r(p.peau, 17, 14, 6, 1); r(p.peau, 18, 15, 4, 1);
-    r(p.peau, 18, 16, 4, 1);
+    r(p.peau, 13, 7, 8, 7); r(p.chair, 14, 8, 6, 5);
+    r(p.clair, 14, 8, 2, 1); r(p.peau, 13, 9, 1, 3); r(p.peau, 20, 9, 1, 4);
+    r(p.nuit, 14, 9, 2, 1); r(p.nuit, 18, 9, 2, 1);
+    r(p.nuit, 14, 9, 1, 1); r(p.nuit, 19, 9, 1, 1);
+    r(p.clair, 16, 9, 2, 3); r(p.peau, 18, 11, 1, 1);
+    r(p.peau, 14, 12, 6, 1); r(p.peau, 15, 13, 4, 1);
+    r(p.peau, 15, 14, 4, 1);
     // Casquette d'État, visière épaisse et insigne doré.
-    r(p.nuit, 14, 3, 12, 5); r(p.tissu, 15, 3, 9, 2);
-    r(p.pli, 16, 3, 6, 1); r(p.ombre, 13, 5, 14, 2);
-    r(p.or, 18, 5, 4, 2); r(p.clair, 19, 5, 1, 1);
-    r(p.nuit, 12, 7, 16, 2); r(p.tissu, 13, 7, 5, 1);
+    r(p.nuit, 12, 3, 10, 4); r(p.tissu, 13, 3, 7, 1);
+    r(p.pli, 14, 3, 5, 1); r(p.ombre, 11, 4, 12, 2);
+    r(p.or, 15, 4, 4, 2); r(p.clair, 16, 4, 1, 1);
+    r(p.nuit, 10, 6, 14, 2); r(p.tissu, 11, 6, 4, 1);
     // Procès-verbal : bord épais, pince métallique, lignes et sceau rouge.
-    r(p.nuit, 27, 20, 9, 14); r(p.or, 28, 20, 7, 13);
-    r(p.papier, 29, 22, 5, 10); r(p.clair, 29, 22, 1, 9);
-    r(p.pli, 30, 20, 3, 2); r(p.nuit, 31, 20, 1, 1);
-    r(p.encre, 30, 24, 3, 1); r(p.encre, 30, 26, 3, 1); r(p.encre, 30, 28, 2, 1);
-    r(p.rouge, 32, 30, 2, 2); r(p.peau, 26, 28, 3, 3); r(p.chair, 26, 28, 2, 1);
+    r(p.nuit, 23, 17, 8, 12); r(p.or, 24, 17, 6, 11);
+    r(p.papier, 25, 19, 4, 8); r(p.clair, 25, 19, 1, 7);
+    r(p.pli, 26, 17, 2, 2); r(p.nuit, 26, 17, 1, 1);
+    r(p.encre, 26, 20, 2, 1); r(p.encre, 26, 22, 2, 1); r(p.encre, 26, 24, 1, 1);
+    r(p.rouge, 27, 26, 2, 1); r(p.peau, 22, 24, 3, 2); r(p.chair, 22, 24, 2, 1);
     // Tampon serré dans la main gauche.
-    r(p.rouge, 8, 31, 2, 3); r(p.nuit, 6, 34, 6, 2); r(p.or, 7, 34, 4, 1);
-    return 0.86;
+    r(p.rouge, 7, 26, 2, 3); r(p.nuit, 5, 29, 5, 2); r(p.or, 6, 29, 3, 1);
   },
 
-};
-
-type Objet3D = "jambon" | "biere" | "tonneau" | "sac";
-function dessinerProvision(g: CanvasRenderingContext2D, type: "jambon" | "biere") {
-  PIXELS_PROVISIONS[type].forEach((ligne,y) => ligne.forEach((p,x) => {
-    if (p) rect(g,PALETTE_PROVISIONS[p]!,x+8,y+14,1,1);
-  }));
-}
-const DESSINS_OBJETS: Record<Objet3D, (g: CanvasRenderingContext2D) => number> = {
-  jambon: (g) => {
-    dessinerProvision(g,"jambon");
-    return 0.35;
-  },
-  biere: (g) => {
-    dessinerProvision(g,"biere");
-    return 0.4;
-  },
-  tonneau: (g) => {
-    ell(g, "#6a3e1a", 20, 27, 11, 12);
-    for (let x = 11; x < 30; x += 4) rect(g, "#8a5a2c", x, 16, 2, 22);
-    rect(g, "#a8a8a8", 9, 19, 22, 2);
-    rect(g, "#a8a8a8", 9, 33, 22, 2);
-    rect(g, "#c98a1c", 18, 24, 4, 4);
-    return 0.5;
-  },
-  sac: (g) => {
-    ell(g, "#8a7048", 20, 30, 11, 8);
-    ell(g, "#a08458", 20, 22, 6, 5);
-    rect(g, "#5a4024", 15, 20, 10, 2);
-    rect(g, "#c98a1c", 18, 28, 4, 4);
-    return 0.38;
-  },
 };
 
 /* ------------------------------- Préparation ------------------------------- */
@@ -413,15 +371,18 @@ export function preparer(): Atelier {
   if (atelier) return atelier;
   const monstres = {} as Atelier["monstres"];
   for (const k of Object.keys(DESSINS_MONSTRES) as SpriteMonstre[]) {
-    const coteNatif = k === "moisissure" ? 20 : S;
+    const coteNatif = GRILLES_MONSTRES[k];
     const { g } = toile(coteNatif, coteNatif);
-    const taille = DESSINS_MONSTRES[k](g);
+    DESSINS_MONSTRES[k](g);
+    const taille = coteNatif / PIXELS_PAR_CASE;
     monstres[k] = { tex: finirSprite(g, k === "fantome" || k === "spectre" ? 0.75 : 1), taille };
   }
   const objets = {} as Atelier["objets"];
-  for (const k of Object.keys(DESSINS_OBJETS) as Objet3D[]) {
-    const { g } = toile(S, S);
-    const taille = DESSINS_OBJETS[k](g);
+  for (const k of Object.keys(GRILLES_OBJETS) as Objet3D[]) {
+    const coteNatif = GRILLES_OBJETS[k];
+    const { g } = toile(coteNatif, coteNatif);
+    dessinerObjetSol(g,k);
+    const taille = coteNatif / PIXELS_PAR_CASE;
     objets[k] = { tex: finirSprite(g), taille };
   }
   atelier = { passage: texturePassage(), murs: [...texturesMurs(),decorRepos('cheminee')], sol: textureSol(), plafond: texturePlafond(), trappe: textureTrappe(), monstres, objets, repos:{lit:decorRepos('lit'),coffre:decorRepos('coffre'),tapis:decorRepos('tapis')} };
@@ -595,23 +556,22 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
   }
 
   // Sprites : monstres et objets au sol, du plus loin au plus proche.
-  type Spr = { x: number; y: number; tex: Tex; taille: number; rouge: boolean; flotte: number; charge?: boolean };
+  type Spr = { x: number; y: number; tex: Tex; rouge: boolean; flotte: number; charge?: boolean };
   const sprites: Spr[] = [];
   if(c.coinRepos) {
-    sprites.push({x:c.coinRepos.x-.85,y:1.75,tex:a.repos.lit,taille:1.3,rouge:false,flotte:0});
-    sprites.push({x:c.coinRepos.x+1.85,y:1.7,tex:a.repos.coffre,taille:.9,rouge:false,flotte:0});
+    sprites.push({x:c.coinRepos.x-.85,y:1.75,tex:a.repos.lit,rouge:false,flotte:0});
+    sprites.push({x:c.coinRepos.x+1.85,y:1.7,tex:a.repos.coffre,rouge:false,flotte:0});
   }
   for (const s of p.sol) {
     const o = s.tonneau ? a.objets.tonneau : s.butin.type === "jambon" ? a.objets.jambon : s.butin.type === "biere" ? a.objets.biere : a.objets.sac;
-    sprites.push({ x: s.x + 0.5, y: s.y + 0.5, tex: o.tex, taille: o.taille, rouge: false, flotte: 0 });
+    sprites.push({ x: s.x + 0.5, y: s.y + 0.5, tex: o.tex, rouge: false, flotte: 0 });
   }
   for (const m of p.monstres) {
     const sp = a.monstres[fx.spriteDe(m.type)];
-    const echelle = m.boss ? 1.25 : m.elite ? 1.12 : 1;
     const charge=!!m.rpg?.annonce;
     const sprite = fx.spriteDe(m.type);
     const souleve = charge && (sprite === 'tonneau' || sprite === 'pressoir') ? .08 : 0;
-    sprites.push({ x: m.x + 0.5, y: m.y + 0.5, tex: sp.tex, taille: sp.taille * echelle, rouge: fx.touches.has(m.uid), charge, flotte: souleve+Math.sin(fx.temps * 0.006 + m.uid) * 0.02 });
+    sprites.push({ x: m.x + 0.5, y: m.y + 0.5, tex: sp.tex, rouge: fx.touches.has(m.uid), charge, flotte: souleve+Math.sin(fx.temps * 0.006 + m.uid) * 0.02 });
   }
   const inv = 1 / (plX * dirY - dirX * plY);
   const proj = sprites
@@ -625,19 +585,15 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     .sort((u, v) => v.ty - u.ty);
   for (const { s, tx, ty } of proj) {
     const ecranX = (W / 2) * (1 + tx / ty);
-    const coteProjete = (projection / ty) * s.taille;
-    // Un sprite proche est agrandi par un facteur entier : chaque pixel natif
-    // couvre le même carré, au lieu d'alterner des colonnes de 2 et 3 pixels.
-    // À distance, réduction au plus proche pour conserver la perspective.
-    const cote = coteProjete >= s.tex.w
-      ? Math.max(1, Math.round(coteProjete / s.tex.w)) * s.tex.w
-      : Math.max(1, Math.round(coteProjete));
+    // La taille du dessin est portée par sa grille, pas par un zoom propre au mob.
+    const cote = coteSprite(s.tex.w, projection, ty);
     const sol = horizon + projection / ty / 2;
     const yb = Math.round(sol - (s.flotte * projection) / ty);
     const ya = yb - cote;
     const xa = Math.round(ecranX - cote / 2);
     const chaud=chaleur(s.x,s.y);
     const f = lum(ty)*(0.94+chaud*0.35);
+    let transparents: Map<number, readonly [number,number,number]> | undefined;
     for (let x = Math.max(0, Math.floor(xa)); x < Math.min(W, Math.ceil(xa + cote)); x++) {
       if (ty >= zbuf[x]!) continue;
       const u = Math.floor(((x - xa) / cote) * s.tex.w);
@@ -649,7 +605,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
         const al = s.tex.px[ti + 3]!;
         if (al < 10) continue;
         profondeur[y*W+x]=ty;
-        pixelsSprites[y*W+x]=al>=250?1:0;
+        pixelsSprites[y*W+x]=1;
         const i = (y * W + x) * 4;
         let r = s.tex.px[ti]!;
         let g = s.tex.px[ti + 1]!;
@@ -667,14 +623,19 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
           b *= 0.6;
         }
         if (al < 250) {
-          const t = al / 255;
-          const pr = d[i]!;
-          const pg = d[i + 1]!;
-          const pb = d[i + 2]!;
-          ecrire(i, r, g, b, f,chaud);
-          d[i] = d[i]! * t + pr * (1 - t);
-          d[i + 1] = d[i + 1]! * t + pg * (1 - t);
-          d[i + 2] = d[i + 2]! * t + pb * (1 - t);
+          // La transparence se compose une fois par texel : les spectres restent
+          // translucides sans laisser le décor découper leurs gros pixels.
+          transparents ??= new Map();
+          let couleur = transparents.get(ti);
+          if (!couleur) {
+            const bx=Math.max(0,Math.min(W-1,Math.floor(xa+(u+.5)*cote/s.tex.w)));
+            const by=Math.max(0,Math.min(H-1,Math.floor(ya+(v+.5)*cote/s.tex.h)));
+            const fond=(by*W+bx)*4,pr=d[fond]!,pg=d[fond+1]!,pb=d[fond+2]!,t=al/255;
+            ecrire(i,r,g,b,bordCharge?Math.max(.7,f):f,chaud);
+            couleur=[d[i]!*t+pr*(1-t),d[i+1]!*t+pg*(1-t),d[i+2]!*t+pb*(1-t)];
+            transparents.set(ti,couleur);
+          }
+          d[i]=couleur[0];d[i+1]=couleur[1];d[i+2]=couleur[2];
         } else ecrire(i, r, g, b, bordCharge?Math.max(.7,f):f,chaud);
       }
     }
@@ -701,7 +662,7 @@ export function rendre(out: ImageData, p: Partie, cam: Camera, fx: EffetsRendu) 
     }
   }
 
-  // Éclair et palette 15 bits. La vignette reste au décor : un texel opaque de sprite garde une couleur uniforme.
+  // Éclair et palette 15 bits. La vignette reste au décor : un texel de sprite garde une couleur uniforme.
   const [er, eg, eb] = fx.eclairCouleur;
   for (let y = 0; y < H; y++)
     for (let x = 0; x < W; x++) {
