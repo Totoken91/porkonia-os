@@ -325,11 +325,11 @@ const DESSINS_MONSTRES: Record<SpriteMonstre, (g: CanvasRenderingContext2D) => n
     r(p.or, 14, 24, 2, 2); r(p.or, 21, 28, 1, 1);
     // Joues creuses, arcade menaçante, nez et moustache stricte.
     r(p.peau, 15, 8, 10, 8); r(p.chair, 16, 9, 7, 6);
-    r(p.clair, 16, 9, 3, 2); r(p.ombre, 15, 11, 2, 3); r(p.peau, 23, 10, 2, 5);
+    r(p.clair, 16, 9, 3, 2); r(p.peau, 15, 11, 2, 3); r(p.peau, 23, 10, 2, 5);
     r(p.nuit, 16, 10, 3, 1); r(p.nuit, 21, 10, 3, 1);
     r(p.nuit, 17, 11, 1, 1); r(p.nuit, 22, 11, 1, 1);
     r(p.clair, 19, 11, 2, 3); r(p.peau, 21, 13, 1, 1);
-    r(p.nuit, 17, 14, 6, 1); r(p.peau, 18, 15, 4, 1);
+    r(p.peau, 17, 14, 6, 1); r(p.peau, 18, 15, 4, 1);
     r(p.peau, 18, 16, 4, 1);
     // Casquette d'État, visière épaisse et insigne doré.
     r(p.nuit, 14, 3, 12, 5); r(p.tissu, 15, 3, 9, 2);
