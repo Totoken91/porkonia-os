@@ -19,7 +19,7 @@ Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence co
 
 ## Classes et chevaliers
 
-Trois classes : **Tank**, **DPS** et **Jambonmancien**. Chaque chevalier a une classe définie et une compétence innée unique, disponible dès le départ. Leur attribution doit respecter la personnalité des douze chevaliers dans le lore ; aucune répartition ni identité nouvelle n’est fixée ici.
+Trois classes : **Tank**, **DPS** et **Jambonmancien**, avec quatre chevaliers par classe. Les douze chevaliers sont des créations originales pour le jeu, autorisées puis validées par Kenny ; ils ne sont pas présentés comme des personnages déjà établis dans Porkopédia. Tous sont disponibles dès le départ et possèdent une innée passive unique. Leurs identités, personnalités et compétences figurent dans [le document de conception validé](ORDRE-COCHON-COMPETENCES.md).
 
 | Classe | Manière de jouer | Équilibrage |
 | --- | --- | --- |
@@ -30,21 +30,24 @@ Trois classes : **Tank**, **DPS** et **Jambonmancien**. Chaque chevalier a une c
 ## Compétences
 
 - Chaque classe possède trois compétences actives et trois passives, chacune avec cinq rangs.
-- La première active est disponible au niveau 1. Un point est gagné à chaque montée de niveau ; le budget permet plusieurs spécialisations mais ne suffit pas pour tout maximiser.
-- Les rangs supérieurs ont des exigences de niveau. Leurs seuils précis restent à définir.
+- La première active est offerte au rang 1 au niveau 1. Un point est gagné à chaque montée de niveau : 20 rangs au total, dont le rang offert, sur 30 possibles. Les autres compétences demandent un point pour être apprises après leur déblocage.
+- Les rangs 2 à 5 exigent respectivement les niveaux 4, 8, 12 et 16, ainsi que le niveau de déblocage de la compétence. Les effets chiffrés de chaque rang restent à calibrer.
 - Les délais de récupération sont comptés en tours.
-- L’innée du chevalier ne consomme pas de points de compétence. Elle évolue automatiquement à des paliers qui restent à définir.
+- L’innée du chevalier ne consomme pas de points de compétence. Elle évolue automatiquement aux niveaux 5, 10 et 15.
+- Réaffectation gratuite des points aux refuges après les boss, hors combat.
 
 | Niveau | Déblocage |
 | --- | --- |
 | 1 | Première active et innée du chevalier |
 | 2 | Première passive |
-| 5 | Deuxième active |
-| 9 | Deuxième passive |
-| 13 | Troisième active |
+| 3 | Deuxième active |
+| 7 | Troisième active |
+| 11 | Deuxième passive |
 | 17 | Troisième passive |
 
-Les six compétences précises de chaque classe et les douze innées constituent la prochaine décision de conception. Les exemples discutés (garde, double frappe, projectile, etc.) sont des pistes de travail, pas des compétences ou des noms canoniques validés.
+Les dix-huit compétences et les douze innées sont validées dans [ORDRE-COCHON-COMPETENCES.md](ORDRE-COCHON-COMPETENCES.md). Ce calendrier remplace celui de la première validation : le kit actif complet arrive au deuxième acte.
+
+Une active consomme un seul tour, même si elle combine attaque et déplacement. Les rotations restent gratuites. Les actives physiques ne coûtent pas de mousse ; le Jambonmancien possède une attaque magique simple gratuite. Le rot d’État devient son active de classe et remplace le pouvoir universel actuel. Les actions invalides et les annulations ne consomment rien. Les délais progressent en combat et se réinitialisent à sa fin, sans récupération par rotation ou exploration d’une cave vide. Les attaques spéciales ennemies sont annoncées ; déplacements, collisions et résistances sont lisibles avant l’action.
 
 ## Puissance et difficulté
 
@@ -81,9 +84,8 @@ Ces durées sont des objectifs de calibration, pas des statistiques déjà véri
 
 ## Ordre de travail suivant
 
-1. Définir les six compétences de chaque classe et les douze innées à partir du lore.
-2. Fixer les coefficients initiaux et calibrer des combats représentatifs.
-3. Implémenter la progression, le choix du chevalier et les compétences.
-4. Étendre et vérifier la campagne sur douze étages.
+1. Fixer les coefficients initiaux et calibrer des combats représentatifs à partir des kits validés.
+2. Implémenter la progression, le choix du chevalier et les compétences.
+3. Étendre et vérifier la campagne sur douze étages.
 
 Les restrictions de classe ou de niveau sur les équipements restent à décider ; ne pas les introduire implicitement.
