@@ -2,7 +2,7 @@
 
 Porkomazon propose un saucisson à 8 Pork$ et un lot de trois à 22 Pork$, avec les trois transports existants. Paiement fictif, suivi et notification de livraison. La planche apparaît après livraison à côté de la bouteille, avec compteur et clic pour manger un saucisson. Le stock persiste et ne modifie ni les bières ni l’ivresse.
 
-Image : générée avec l’outil intégré imagegen, fond transparent conservé. Asset projet : `public/brand/saucisson-planche.png`.
+Image : générée avec l’outil intégré imagegen, fond transparent conservé. Asset projet : `public/brand/saucisson-planche.webp` (compression sans perte, pixels identiques au PNG original).
 
 Prompt final :
 

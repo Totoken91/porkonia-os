@@ -324,7 +324,7 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
         data-testid="saucisson-table" title={str("porkomazon.mangerSaucisson")} aria-label={str("porkomazon.mangerSaucisson")}
         onClick={e=>{e.currentTarget.blur();if(bouchee||!prendreSaucisson())return;setBouchee(true);setTimeout(()=>setBouchee(false),700);}}
       >
-        <img src="/brand/saucisson-planche.png" alt="" width={148} height={96} draggable={false}/>
+        <img src="/brand/saucisson-planche.webp" alt="" width={148} height={96} draggable={false}/>
         <span className="choppe-n">{gardeManger.stock}</span>
       </button>}
       {portrait && !ignore && (

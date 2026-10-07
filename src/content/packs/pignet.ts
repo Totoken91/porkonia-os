@@ -1,7 +1,7 @@
 import type { Portal, SitePerso } from '../types';
 
 /** Extensions originales de PigNet pour PorkOS ; ces pages ne prétendent pas être des notices canoniques. */
-const image = (id: string) => `/pignet/${id}-1999.png`;
+const image = (id: string) => `/pignet/${id}-1999.webp`;
 const vitrine = (titre: string, sousTitre: string, _id: string, badge: string, navigation: {texte:string;url:string}[]) => ({t:'entete' as const,titre,sousTitre,badge,navigation});
 const nav = (hote:string, pages: [string,string][]) => pages.map(([texte,page])=>({texte,url:`porko://${hote}${page?`/${page}`:''}`}));
 const donjonNav=nav('donjonbon',[['Le jeu',''],['Les 12 chevaliers','chevaliers'],['Guide de survie','guide'],['Téléchargement','telechargement']]);
@@ -28,7 +28,7 @@ export const nouveauxSitesPigNet: SitePerso[] = [
     '':{blocs:[vitrine('DONJONBON','L’Ordre Cochon : Les Entrailles du Royaume','donjonbon','PARTAGICIEL · PORKOS',donjonNav),
       {t:'texte',texte:'Douze étages sous le royaume. Choisissez l’un des douze chevaliers de l’Ordre Cochon, fouillez les caves et remontez avec autre chose qu’un certificat de décès. Donjonbon, c’est le petit nom de votre prochaine mauvaise idée.'},
       {t:'programme',id:'jambonjon'},
-      {t:'image',src:'/pignet/donjonbon-capture.png',legende:'Une vraie vue du jeu sur PorkOS.'},
+      {t:'image',src:'/pignet/donjonbon-capture.webp',legende:'Une vraie vue du jeu sur PorkOS.'},
       {t:'titre',texte:'UNE DESCENTE QUI SE MÉRITE'},
       {t:'liste',items:['Tank, DPS ou Jambonmancien : trois manières de faire regretter une rencontre.','Chaque chevalier possède une compétence innée unique.','Équipement, butin, niveaux et compétences : choisissez votre façon de survivre.','Douze étages, des haltes pour souffler et le Grand Affineur tout au fond.']},
       {t:'liens',liens:[{texte:'Choisir mon chevalier',url:'porko://donjonbon/chevaliers'},{texte:'Lire le guide avant de mourir',url:'porko://donjonbon/guide'}]},

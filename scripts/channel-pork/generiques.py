@@ -21,7 +21,7 @@ from commun import ICI, SORTIE, SR, encoder_mp3, lire
 RACINE = os.path.abspath(os.path.join(ICI, "..", ".."))
 CARTONS = os.path.join(RACINE, "public", "tv", "generiques")
 AUDIO = os.path.join(RACINE, "public", "audio", "channel-pork")
-EMBLEME = os.path.join(RACINE, "public", "brand", "embleme-original.png")
+EMBLEME = os.path.join(RACINE, "scripts", "channel-pork", "assets", "embleme-original.png")
 F = {
     "serif": "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
     "serif2": "/usr/share/fonts/truetype/freefont/FreeSerifBold.ttf",

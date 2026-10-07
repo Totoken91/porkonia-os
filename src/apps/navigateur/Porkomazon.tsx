@@ -48,7 +48,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
   return (
     <div className="pkz" data-testid="porkomazon">
       <header className="pkz-tete">
-        <div className="pkz-enseigne"><img src="/brand/porkomazon-logo.png" alt="" width={48} height={48}/><div><h1>{p.nom}</h1><b>{str('porkomazon.catalogueWeb')}</b></div></div>
+        <div className="pkz-enseigne"><img src="/brand/porkomazon-logo.webp" alt="" width={48} height={48}/><div><h1>{p.nom}</h1><b>{str('porkomazon.catalogueWeb')}</b></div></div>
         <p>{p.slogan}</p>
         <span className="pkz-compte">
           {compte ? `${str("banque.compteN", { numero: compte.numero })} · ${formaterPork(compte.solde)}` : str("porkomazon.sansCompte")}
@@ -75,7 +75,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
             <thead><tr><th scope="col" className="pkz-col-choix"><span className="pkz-sr">{str('porkomazon.choix')}</span></th><th scope="col" className="pkz-col-image"><span className="pkz-sr">{str('porkomazon.apercu')}</span></th><th scope="col">{str('porkomazon.article')}</th><th scope="col" className="pkz-col-prix">{str('porkomazon.prix')}</th></tr></thead>
             <tbody>{p.produits.map(x=><tr key={x.id} className={`pkz-produit${produit===x.id?' choisi':''}`}>
               <td><input id={`${ids}-${x.id}`} type="radio" name={`${ids}-produit`} checked={produit===x.id} onChange={()=>setProduit(x.id)} aria-label={x.nom} data-testid={`pkz-produit-${x.id}`}/></td>
-              <td className="pkz-col-image"><label htmlFor={`${ids}-${x.id}`}><img src={x.type==='saucisson'?'/brand/saucisson-planche.png':'/brand/biere-douzi.png'} alt="" width={40} height={44}/></label></td>
+              <td className="pkz-col-image"><label htmlFor={`${ids}-${x.id}`}><img src={x.type==='saucisson'?'/brand/saucisson-planche.webp':'/brand/biere-douzi.png'} alt="" width={40} height={44}/></label></td>
               <td><label htmlFor={`${ids}-${x.id}`}><b>{x.nom}</b><em>{x.description}</em></label></td>
               <td className="pkz-col-prix"><label htmlFor={`${ids}-${x.id}`}><strong>{formaterPork(x.prix)}</strong></label></td>
             </tr>)}</tbody>
