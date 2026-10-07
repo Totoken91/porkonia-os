@@ -41,7 +41,7 @@ export const textesVivants:Record<string,string>={
 };
 const site=(hote:string,titre:string,description:string,theme:SitePerso['theme'],blocs:SitePerso['pages'][string]['blocs'],cache=false):SitePerso=>({hote,titre,description,categorie:cache?'Retirés':'Vie locale',theme,pages:{'':{blocs:[{t:'entete',titre,sousTitre:description,badge:cache?'PAGE PERSONNELLE · ARCHIVES':'PIGNET · LE COIN DES CITOYENS',navigation:[{texte:'Accueil PigNet',url:'porko://accueil'},...(!cache?rubriquesVivantes.map(r=>({texte:r.titre,url:r.url})):[])]},...blocs]}}});
 export const sitesVivants:SitePerso[]=[
-  site('petites-annonces','LE PETIT GROIN','Les occasions ne manquent pas. Les garanties, si.','papier',[{t:'vieLocale',mode:'annonces'}]),
+  site('petites-annonces','LE BON GROIN','Les occasions ne manquent pas. Les garanties, si.','papier',[{t:'vieLocale',mode:'annonces'}]),
   site('horoscope-porcin','LES ASTRES DU SALOIR','Prédictions quotidiennes, sans engagement des planètes.','nuit',[{t:'vieLocale',mode:'horoscope'}]),
   site('courrier-lecteurs','LA RÉDACTION VOUS LIT','Écrivez. Nous avons le temps de mal comprendre.','papier',[{t:'vieLocale',mode:'courrier'}]),
   site('modem-libre','MODEM LIBRE / CANAL 12','Vous avez trouvé la prise de service. Fermez la porte en entrant.','nuit',[{t:'texte',texte:'Pas de crack miraculeux ici. Juste les jeux du poste, des liens qui fonctionnent et une page que le webmaster a oublié de ranger.'},{t:'liens',liens:[{texte:'Le forum du modem',url:'porko://forum-56k'},{texte:'La page oubliée de RatDuModem',url:'porko://chez-rat'}]},{t:'programme',id:'jambonjon'},{t:'telecharger',fichier:'jambonjon'}],true),
