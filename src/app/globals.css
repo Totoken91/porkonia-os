@@ -1681,7 +1681,7 @@
   .nouvelles-locales li { margin-bottom:7px; }
   .nouvelles-locales p { padding:8px; }
   .portail-diagnostic { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
-  .vie-publications,.vie-horoscope,.vie-webcam { font-size:16px; overflow-wrap:anywhere; }
+  .vie-publications,.vie-horoscope { font-size:16px; overflow-wrap:anywhere; }
   .vie-note { border:1px dashed #938269; padding:8px; }
   .vie-form { display:flex; flex-direction:column; gap:5px; padding:10px; border:2px inset #b4a88e; margin:12px 0; }
   .vie-form textarea,.vie-publications select,.vie-horoscope select { font:inherit; background:#f9f3df; color:#31251c; border:2px inset #b9ad97; padding:5px; max-width:100%; }
@@ -1691,25 +1691,5 @@
   .vie-publication blockquote { margin:8px 0 0; padding:8px; background:#d8cfb4; border-left:4px solid #7c2924; }
   .vie-horoscope { padding:12px; border:2px ridge #bab88c; background:#1e292d; color:#e8dfb1; }
   .vie-horoscope li { margin:8px 0; }
-  .webcam-moniteur { background:#161e1b; color:#d6dbc6; padding:5px; border:3px ridge #a6a48b; overflow:hidden; }
-  .webcam-vue { position:relative; overflow:hidden; background:#090c09; }
-  .webcam-incrustation { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; gap:6px; flex-wrap:wrap; color:#fafafa; text-shadow:1px 1px #000,-1px -1px #000; pointer-events:none; }
-  .webcam-enr { animation:cctv-enr 2s steps(1) infinite; }
-  @keyframes cctv-enr { 50% { opacity:.3; } }
-  .vie-webcam.pause .webcam-enr { animation-play-state:paused; }
-  .webcam-moniteur footer { text-align:center; padding:5px; }
-  .webcam-scene { position:relative; overflow:hidden; width:100%; max-width:480px; margin:auto; }
-  .webcam-scene img { width:100%; height:auto; display:block; filter:saturate(.8) contrast(.94); }
-  .vie-webcam.vue-large .webcam-scene { width:135%; max-width:none; margin-left:-17.5%; }
-  .webcam-hotspot { position:absolute; background:transparent; border:1px solid transparent; min-width:24px; min-height:24px; cursor:pointer; }
-  .webcam-hotspot:hover,.webcam-hotspot:focus-visible { border:2px dashed #f7d66c; outline:none; background:#efce6322; }
-  .webcam-horloge { left:16%; top:1%; width:8%; height:11%; }
-  .webcam-plaque { right:2%; top:35%; width:9%; height:13%; }
-  .webcam-affiche { left:49%; top:20%; width:10%; height:12%; }
-  .webcam-reflet { position:absolute; left:31%; top:49%; width:19%; height:8%; border-radius:50%; background:repeating-radial-gradient(ellipse at center,transparent 0 4px,#c7d4b633 5px 6px,transparent 7px 11px); mix-blend-mode:screen; opacity:.2; pointer-events:none; animation:place-eau 2s ease-in-out infinite alternate; }
-  .vie-webcam.pause .webcam-scene * { animation-play-state:paused; }
-  .webcam-commandes { display:flex; flex-wrap:wrap; gap:5px; }
-  @keyframes place-eau { to { opacity:.45; transform:scale(1.06); } }
-  @media (prefers-reduced-motion:reduce) { .webcam-scene * { animation:none!important; } }
   @media(max-width:560px) { .coin-citoyens > div { grid-template-columns:1fr; } }
 }

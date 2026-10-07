@@ -24,8 +24,7 @@ export function NouvellesLocales({go}:{go(u:string):void}) {
   const nonLus=mail.boite.messages.filter(m=>m.folder==='reception'&&!m.read).length;
   return <section className="cadre nouvelles-locales" data-testid="nouvelles-locales"><h3>{str('vie.nouvelles')}</h3>{nouvelles.length||nonLus?<ul>{nouvelles.map(n=><li key={n.texte}><button className="lien" onClick={()=>go(n.url)}>{n.texte}</button></li>)}{nonLus>0&&<li><button className="lien" onClick={()=>openApp('mail')}>{str('vie.mail',{n:nonLus})}</button></li>}</ul>:<p>{str('vie.calme')}</p>}</section>;
 }
-export function VieLocale({mode,go}:{mode:'annonces'|'courrier'|'horoscope'|'webcam';go(u:string):void}) {
-  if(mode==='webcam')return <Webcam go={go}/>;
+export function VieLocale({mode}:{mode:'annonces'|'courrier'|'horoscope'}) {
   if(mode==='horoscope')return <Horoscope/>;
   return <Publications key={mode} mode={mode}/>;
 }
@@ -64,13 +63,4 @@ function Horoscope() {
     <button className="site-action" disabled={vie.favoris.includes(entree)} onClick={()=>{modifierVie(user.id,v=>({...v,favoris:[entree,...v.favoris].slice(0,30)}));setMessage(str('vie.garde'));}}>{str('vie.garder')}</button><p role="status">{message}</p>
     {vie.favoris.length>0&&<section><h2>{str('vie.carnet')}</h2><ul>{vie.favoris.map(f=><li key={f}>{f}</li>)}</ul></section>}
   </section>;
-}
-function Webcam({go}:{go(u:string):void}) {
-  const {str}=useOs();
-  const [pause,setPause]=useState(false),[zoom,setZoom]=useState(false),[heure,setHeure]=useState(()=>new Date().toLocaleTimeString('fr-FR'));
-  useEffect(()=>{if(pause)return;const t=setInterval(()=>setHeure(new Date().toLocaleTimeString('fr-FR')),1000);return()=>clearInterval(t);},[pause]);
-  return <section className={`vie-webcam ${pause?'pause':''} ${zoom?'vue-large':''}`} data-testid="vie-webcam"><p>{str('vie.simule')}</p><div className="webcam-moniteur"><div className="webcam-vue">
-    <div className="webcam-scene"><img src="/pignet/webcam-place-cctv.png" alt={str('vie.scene')} width={1448} height={1086}/><div className="webcam-reflet" aria-hidden="true"/><button className="webcam-hotspot webcam-horloge" aria-label={str('vie.horloge')} title={str('vie.horloge')} onClick={()=>go('porko://horoscope-porcin')}/><button className="webcam-hotspot webcam-plaque" aria-label={str('vie.plaque')} title={str('vie.plaque')} onClick={()=>go('porko://modem-libre')}/><button className="webcam-hotspot webcam-affiche" aria-label={str('vie.affiche')} title={str('vie.affiche')} onClick={()=>go('porko://chez-rat')}/></div>
-    <div className="webcam-incrustation"><b>{str('vie.camera')}</b><span className="webcam-enr">{str('vie.enr')}</span><span>{heure}</span></div></div>
-    <footer>{str('vie.direct')}</footer></div><div className="webcam-commandes"><button className="site-action" aria-pressed={pause} onClick={()=>setPause(!pause)}>{str(pause?'vie.reprise':'vie.pause')}</button><button className="site-action" aria-pressed={zoom} onClick={()=>setZoom(!zoom)}>{str(zoom?'vie.normal':'vie.zoom')}</button></div></section>;
 }

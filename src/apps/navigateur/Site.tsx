@@ -114,7 +114,7 @@ function Telecharger({ id }: { id: string }) {
 function Bloc({ b, site, page, go }: { b: BlocSite; site: SitePerso; page:string; go(u: string): void }) {
   const { pack, str, runAction } = useOs();
   switch (b.t) {
-    case 'vieLocale': return <VieLocale mode={b.mode} go={go}/>;
+    case 'vieLocale': return <VieLocale mode={b.mode}/>;
     case "entete":
       return <header className="pignet-site-entete">
         <span>{b.badge}</span><h1>{b.titre}</h1><p>{b.sousTitre}</p>

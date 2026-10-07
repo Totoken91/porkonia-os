@@ -176,14 +176,9 @@ try {
     await page.locator('.vie-publication').filter({hasText:'Ma chaise est jalouse de mon ordinateur.'}).locator('blockquote').waitFor();
     await capture('courrier-lecteurs');
     await visiter('porko://horoscope-porcin');await page.getByText('Votre carnet astral',{exact:true}).waitFor();await capture('horoscope');
-    await visiter('porko://webcam-place');await largeur();
-    await imageOk(page.getByTestId('vie-webcam'));
-    if(SHOTS)await page.locator('.webcam-vue').screenshot({path:join(SHOTS,`${tag}-cctv.png`),style:'.bulles,.gruik{visibility:hidden!important}'});
-    await page.getByRole('button',{name:'Mettre en pause'}).click();
-    if(!await page.getByTestId('vie-webcam').evaluate(e=>e.classList.contains('pause')))throw Error('Webcam non arrêtée');
-    await page.getByRole('button',{name:'Agrandir la vue'}).click();await largeur();await capture('webcam');
-    await page.getByRole('button',{name:'Vue normale'}).click();
-    await page.getByRole('button',{name:'Plaque du central téléphonique'}).click();await page.getByTestId('site-modem-libre').waitFor();await largeur();
+    await visiter('porko://accueil');
+    if(await page.getByRole('button',{name:/Webcam/}).count())throw Error('Webcam toujours présente');
+    await page.getByRole('button',{name:'Prise de diagnostic du portail'}).click();await page.getByTestId('site-modem-libre').waitFor();await largeur();
     await page.getByRole('button',{name:'Le forum du modem',exact:true}).click();
     await page.getByTestId('site-livre-message').fill('Le central fonctionne encore !');await page.getByTestId('site-livre-signer').click();
     await page.getByText('Le central fonctionne encore !',{exact:true}).waitFor();
@@ -191,7 +186,7 @@ try {
     await visiter('porko://porkomazon');await page.getByTestId('pkz-commander').click();
     await visiter('porko://accueil');await nouvelles.getByText(/colis en livraison/).waitFor();await largeur();
     await page.getByRole('button',{name:'Prise de diagnostic du portail'}).click();await page.getByTestId('site-modem-libre').waitFor();
-    step(`${tag}: publications, brouillon, horoscope conservé, webcam, secrets et nouvelles réelles valides`);
+    step(`${tag}: publications, brouillon, horoscope conservé, secrets et nouvelles réelles valides`);
     await ctx.close();
   }
   if (errors.length) throw new Error(errors.join("\n"));

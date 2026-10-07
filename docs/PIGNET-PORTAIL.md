@@ -14,12 +14,12 @@ Ces cinq nouveaux sites comptent treize pages. Contenu, publicités et textes so
 
 ## Le coin des citoyens
 
-Quatre rubriques supplémentaires : `petites-annonces` (filtre, publication, retrait, réponse dans un vrai brouillon de Courrier), `horoscope-porcin` (douze signes, prédiction stable par jour, carnet), `webcam-place` (décor généré, reflet animé, pause et zoom) et `courrier-lecteurs` (lettres et réponses de la rédaction). Les contributions restent sur le poste, séparées par utilisateur, avec un maximum de trente entrées par rubrique.
+Trois rubriques supplémentaires : `petites-annonces` (filtre, publication, retrait, réponse dans un vrai brouillon de Courrier), `horoscope-porcin` (douze signes, prédiction stable par jour, carnet) et `courrier-lecteurs` (lettres et réponses de la rédaction). Les contributions restent sur le poste, séparées par utilisateur, avec un maximum de trente entrées par rubrique.
 
 Le journal d’accueil suit le meilleur étage et la victoire de Donjonbon, les stocks et colis réels, la dernière opération bancaire et le courrier non lu. Il n’invente pas de livraisons ni d’exploits. La progression reste conservée après la fermeture du jeu et une nouvelle partie.
 
-Trois pages secrètes sont accessibles par la prise de diagnostic du portail et les détails de la webcam : canal libre, forum 56K signable et page personnelle oubliée. Elles ne sont pas affichées dans l’annuaire. Tout le contenu fictif ajouté reste dans `pignet-vivant.ts`.
+Trois pages secrètes sont accessibles par la prise de diagnostic du portail : canal libre, forum 56K signable et page personnelle oubliée. Elles ne sont pas affichées dans l’annuaire. Tout le contenu fictif ajouté reste dans `pignet-vivant.ts`.
 
 ## Validation
 
-`node tests/e2e/pignet.mjs` après build vérifie les publicités, liens, installation et relance de Donjonbon, blasons, accès aux applis, versement à Éric et refus du dépassement de solde, puis les quatre rubriques, brouillons, publications persistantes, carnet, webcam et liens secrets. `FORMATS` sélectionne les formats ; `SHOTS` active les captures. Les tests de pack vérifient les routes et les images. Les sites sont accessibles sur bureau et Poche, y compris 360 px de large et paysage.
+`node tests/e2e/pignet.mjs` après build vérifie les publicités, liens, installation et relance de Donjonbon, blasons, accès aux applis, versement à Éric et refus du dépassement de solde, puis les trois rubriques, brouillons, publications persistantes, carnet et liens secrets. `FORMATS` sélectionne les formats ; `SHOTS` active les captures. Les tests de pack vérifient les routes et les images. Les sites sont accessibles sur bureau et Poche, y compris 360 px de large et paysage.
