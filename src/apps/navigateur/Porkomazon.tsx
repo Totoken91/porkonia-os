@@ -48,7 +48,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
   return (
     <div className="pkz" data-testid="porkomazon">
       <header className="pkz-tete">
-        <div className="pkz-enseigne"><img src="/brand/embleme-64.png" alt="" width={32} height={32}/><div><h1>{p.nom}</h1><b>{str('porkomazon.catalogueWeb')}</b></div></div>
+        <div className="pkz-enseigne"><img src="/brand/porkomazon-logo.png" alt="" width={48} height={48}/><div><h1>{p.nom}</h1><b>{str('porkomazon.catalogueWeb')}</b></div></div>
         <p>{p.slogan}</p>
         <span className="pkz-compte">
           {compte ? `${str("banque.compteN", { numero: compte.numero })} · ${formaterPork(compte.solde)}` : str("porkomazon.sansCompte")}

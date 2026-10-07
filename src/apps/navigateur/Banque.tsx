@@ -201,7 +201,7 @@ export function Banque({ go }: { go?(u: string): void }) {
   return (
     <div className="bq" data-testid="banque">
       <header className="bq-tete">
-        <img src="/brand/embleme-64.png" alt="" width={32} height={32} />
+        <img src="/brand/banque-logo.png" alt="" width={48} height={48} />
         <div className="bq-marque">
           <h1>{b.nom}</h1>
           <p>{b.slogan}</p>

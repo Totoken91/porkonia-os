@@ -1444,7 +1444,7 @@
   .site-banque { padding:0; background:#f2eddb; color:#292719; font:16px/18px var(--font-sans); }
   .bq { padding:6px; }
   .bq-tete { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:8px; background:#304a39; color:#f6edcf; border:3px double #bca46c; }
-  .bq-tete img { image-rendering:pixelated; flex:none; }
+  .bq-tete img { object-fit:contain; flex:none; }
   .bq-marque { flex:1 1 220px; min-width:0; }
   .bq-marque h1 { margin:0; font:16px/18px var(--font-sans); font-weight:bold; color:#ffdf8d; text-transform:uppercase; }
   .bq-marque p { margin:4px 0 0; font-style:italic; }
@@ -1521,7 +1521,7 @@
   .pkz { padding:6px; }
   .pkz-tete { padding:8px; border:3px double #b29d6a; background:#652630; color:#f7edca; text-align:center; }
   .pkz-enseigne { display:flex; align-items:center; justify-content:center; gap:8px; }
-  .pkz-enseigne img { image-rendering:pixelated; }
+  .pkz-enseigne img { object-fit:contain; flex:none; }
   .pkz-tete h1 { margin:0 0 4px; font:16px/18px var(--font-sans); font-weight:bold; letter-spacing:3px; text-transform:uppercase; color:#ffdf85; }
   .pkz-tete p { margin:6px 0; font-style:italic; }
   .pkz-compte { display:block; padding:3px; background:#f5e7b9; color:#38231b; border:2px inset #b29d6a; }
