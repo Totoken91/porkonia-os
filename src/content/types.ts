@@ -255,6 +255,7 @@ export interface Channel {
 /** Portail officiel PigNet (page d'accueil du navigateur). */
 /** Bloc d'une page perso de PigNet (pages de citoyens façon années 2000). */
 export type BlocSite =
+  | { t: "vieLocale"; mode: "annonces" | "courrier" | "horoscope" | "webcam" }
   | { t: "entete"; titre: string; sousTitre: string; badge: string; navigation: { texte: string; url: string }[] }
   | { t: "action"; texte: string; action: ActionRef }
   | { t: "programme"; id: string }

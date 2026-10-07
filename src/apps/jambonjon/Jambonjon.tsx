@@ -5,6 +5,8 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Commandes } from "./commandes";
+import {modifierVie} from '@/apps/navigateur/vieStore';
+import {progression} from '@/apps/navigateur/vie-locale';
 import { Inventaire } from "./Inventaire";
 import { SpriteObjet } from "./SpriteObjet";
 import { Chevaliers } from "./Chevaliers";
@@ -121,7 +123,7 @@ function bruit(kind: string) {
 type Panneau = null | "sac" | "carte" | "aide" | "competences" | "journal" | "fiche";
 
 export function Jambonjon() {
-  const { pack, str, settings, signal } = useOs();
+  const { pack, str, settings, signal, user } = useOs();
   const { focused } = useWin();
   const ecran = useEcran();
   const jeu = pack.jambonjon;
@@ -169,12 +171,13 @@ export function Jambonjon() {
       partieRef.current = p;
       placerCamera(p);
       setPartie(p);
+      modifierVie(user.id,v=>progression(v,p.etage,p.fin==='victoire'));
       try { window.localStorage.setItem(CLE, JSON.stringify(p)); } catch { /* sauvegarde impossible */ }
       setPanneau(null);
       setChoix(undefined); setCompetence(null);
       signal("jambonjon:partie");
     },
-    [signal],
+    [signal, user.id],
   );
 
   const nouvelle = useCallback(() => { file.current.vider(); setCompetence(null); setChoix(null); }, []);
@@ -246,6 +249,7 @@ export function Jambonjon() {
       if (apres.fin === "victoire") signal("jambonjon:victoire");
       if (apres.fin === "mort") signal("jambonjon:mort");
       setPartie(apres);
+      if(apres.etage!==avant.etage||apres.fin)modifierVie(user.id,v=>progression(v,apres.etage,apres.fin==='victoire'));
       try {
         if (apres.fin) window.localStorage.removeItem(CLE);
         else window.localStorage.setItem(CLE, JSON.stringify(apres));
@@ -253,7 +257,7 @@ export function Jambonjon() {
         /* sauvegarde impossible */
       }
     },
-    [jeu, settings.sons, signal],
+    [jeu, settings.sons, signal, user.id],
   );
 
   const lancer = useCallback((slot:number)=>{

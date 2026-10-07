@@ -14,7 +14,7 @@ type Redaction = Brouillon & { draftId?: string };
 
 export function Mail() {
   const { pack, str, mail, openApp, runAction } = useOs();
-  const { setTitle } = useWin();
+  const { setTitle, win } = useWin();
   const { boite } = mail;
   const [dossier, setDossier] = useState<Dossier>("reception");
   const [sel, setSel] = useState<string | null>(null);
@@ -23,6 +23,16 @@ export function Mail() {
   const liste = inFolder(boite, dossier);
   const courant = liste.find((m) => m.id === sel) ?? null;
   const releve = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ouvert = useRef<string | null>(null);
+  useEffect(() => {
+    const id=win.args.draft;
+    if(!id||ouvert.current===id)return;
+    const m=boite.messages.find(m=>m.id===id&&m.folder==='brouillons');
+    if(!m)return;
+    ouvert.current=id;
+    setDossier('brouillons');setSel(id);
+    setRedac({to:m.to,subject:m.subject,body:m.body,draftId:id});
+  },[win.args.draft,boite.messages]);
 
   useEffect(() => setTitle(redac ? `${redac.subject || "Nouveau message"} — Courrier d'État` : `${str(`courrier.dossier.${dossier}`)} — Courrier d'État`), [redac, dossier, str, setTitle]);
   useEffect(() => () => void (releve.current && clearTimeout(releve.current)), []);

@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { porkosPack } from '../src/content/packs/porkos';
 import { parseUrl } from '../src/apps/navigateur/url';
 import { nouveauxSitesPigNet } from '../src/content/packs/pignet';
+import {sitesVivants} from '../src/content/packs/pignet-vivant';
 
 describe('PigNet : toutes les pubs conduisent à du contenu utilisable',()=>{
   const hotes=porkosPack.sites.map(s=>s.hote);
@@ -16,7 +17,7 @@ describe('PigNet : toutes les pubs conduisent à du contenu utilisable',()=>{
     for(const lien of porkosPack.portal.raccourcis)verifier(lien.url);
   });
   it('ne laisse ni sous-page, ni programme, ni image de vitrine orphelin',()=>{
-    for(const site of nouveauxSitesPigNet)for(const page of Object.values(site.pages))for(const b of page.blocs){
+    for(const site of [...nouveauxSitesPigNet,...sitesVivants])for(const page of Object.values(site.pages))for(const b of page.blocs){
       if(b.t==='entete'){b.navigation.forEach(n=>verifier(n.url));}
       if(b.t==='liens')b.liens.forEach(l=>verifier(l.url));
       if(b.t==='programme')expect(porkosPack.installeurs.some(i=>i.programme===b.id)).toBe(true);

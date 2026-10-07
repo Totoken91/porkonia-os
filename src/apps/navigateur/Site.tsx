@@ -14,6 +14,7 @@ import { estInstalle } from "@/apps/installeur/logic";
 import { useCompte, operer } from "@/os/banqueStore";
 import { debiter, formaterPork } from "@/os/banque";
 import { Porkomazon } from "./Porkomazon";
+import {VieLocale} from './VieLocale';
 
 type Message = { nom: string; date: string; message: string };
 const cleLivre = (hote: string) => `porkos.livredor.${hote}`;
@@ -113,6 +114,7 @@ function Telecharger({ id }: { id: string }) {
 function Bloc({ b, site, page, go }: { b: BlocSite; site: SitePerso; page:string; go(u: string): void }) {
   const { pack, str, runAction } = useOs();
   switch (b.t) {
+    case 'vieLocale': return <VieLocale mode={b.mode} go={go}/>;
     case "entete":
       return <header className="pignet-site-entete">
         <span>{b.badge}</span><h1>{b.titre}</h1><p>{b.sousTitre}</p>

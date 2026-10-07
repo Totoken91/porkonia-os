@@ -7,6 +7,7 @@ import { DECALAGE, live } from "@/apps/channel-pork/timeline";
 import { compteur, cours, duJour, jour, meteo } from "./portail";
 import { HOME, articleUrl, parseUrl, rubriqueUrl, search, searchUrl } from "./url";
 import { Site } from "./Site";
+import {CoinCitoyens,NouvellesLocales} from './VieLocale';
 
 interface Article {
   id: string;
@@ -191,6 +192,8 @@ function Accueil({ go }: { go(u: string): void }) {
         </aside>
 
         <main>
+          <CoinCitoyens go={go}/>
+          <NouvellesLocales go={go}/>
           <section className="cadre portail-jeux">
             <h3>{str('portail.siteJeu')}</h3>
             <button className="portail-jeu-vedette" onClick={()=>go('porko://donjonbon')}>
@@ -340,6 +343,7 @@ function Accueil({ go }: { go(u: string): void }) {
           {str("portail.maj")} · <button className="lien" onClick={() => go("porko://porkopedia")}>{str("nav.index")}</button> · {CATALOG.length} notices recensées · Source : {porkopedia.source}
         </p>
         <p>{portail.pied}</p>
+        <p className="portail-diagnostic"><span>{str('vie.secretIndice')}</span> <button className="lien" aria-label={str('vie.secretBouton')} title={str('vie.secretBouton')} onClick={()=>go('porko://modem-libre')}>[ : : ]</button></p>
       </footer>
     </div>
   );

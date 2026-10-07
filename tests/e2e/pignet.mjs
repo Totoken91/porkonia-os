@@ -3,7 +3,7 @@
  * Usage : npm run build && node tests/e2e/pignet.mjs (SHOTS facultatif).
  */
 import { createServer } from "node:http";
-import { readFile, stat, copyFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { chromium } from "playwright";
 
@@ -112,13 +112,11 @@ try {
     await page.getByTestId('inst-fin').waitFor({timeout:20000});
     await page.getByTestId('inst-suivant').click();
     await page.getByTestId('window-jambonjon').waitFor();
-    if(tag==='bureau'){
+    {
       await page.getByTestId('jbj-nouvelle').click();
       await page.getByTestId('jbj-classe-tank').click();await page.getByTestId('jbj-chevalier-berthe').click();await page.getByTestId('jbj-partir').click();
       await page.getByTestId('jbj-vue').waitFor();await page.waitForTimeout(400);
-      await page.getByTestId('jbj-vue').screenshot({path:'public/pignet/donjonbon-capture.png'});
-      await copyFile('public/pignet/donjonbon-capture.png','out/pignet/donjonbon-capture.png');
-      await copyFile('public/pignet/donjonbon-capture.png',join(SHOTS,'donjonbon-capture.png'));
+      if(SHOTS&&tag==='bureau')await page.getByTestId('jbj-vue').screenshot({path:join(SHOTS,'donjonbon-capture.png')});
     }
     await fermer('jambonjon');
     if(!await page.getByTestId('site-jouer-jambonjon').innerText().then(t=>t.includes('Jouer')&&!t.includes('Installer')))throw Error('Accès Jouer non actualisé');
@@ -153,6 +151,47 @@ try {
       }
     }
     step(`${tag}: bannières cliquables, boutique, courrier et musique valides`);
+    await visiter('porko://accueil');
+    const nouvelles=page.getByTestId('nouvelles-locales');
+    await nouvelles.getByText(/étage 1/).waitFor();
+    await nouvelles.getByText(/versement personnel à Éric/).waitFor();
+    await page.getByTestId('rubrique-petites-annonces').click();await largeur();
+    await page.getByTestId('vie-texte').fill('Échange un modem contre un silence de qualité.');
+    await page.getByRole('button',{name:'Publier mon annonce',exact:true}).click();
+    await page.getByText('Échange un modem contre un silence de qualité.',{exact:true}).waitFor();
+    await visiter('porko://accueil');await page.getByTestId('rubrique-petites-annonces').click();
+    const annonce=page.locator('.vie-publication').filter({hasText:'Échange un modem contre un silence de qualité.'});
+    await annonce.getByRole('button',{name:'Répondre',exact:true}).click();
+    await page.getByTestId('courrier-objet').waitFor();
+    if(await page.getByTestId('courrier-objet').inputValue()!=='À propos de votre annonce')throw Error('Brouillon non ouvert');
+    await fermer('mail');await capture('annonces');
+    await annonce.getByRole('button',{name:'Retirer mon annonce'}).click();
+    if(await annonce.count())throw Error('Annonce non retirée');
+    await visiter('porko://horoscope-porcin');await largeur();
+    await page.getByTestId('vie-horoscope').locator('select').selectOption('6');
+    await page.getByRole('button',{name:'Garder cette prédiction'}).click();
+    await visiter('porko://courrier-lecteurs');await largeur();
+    await page.getByTestId('vie-texte').fill('Ma chaise est jalouse de mon ordinateur.');
+    await page.getByRole('button',{name:'Écrire à la rédaction'}).click();
+    await page.locator('.vie-publication').filter({hasText:'Ma chaise est jalouse de mon ordinateur.'}).locator('blockquote').waitFor();
+    await capture('courrier-lecteurs');
+    await visiter('porko://horoscope-porcin');await page.getByText('Votre carnet astral',{exact:true}).waitFor();await capture('horoscope');
+    await visiter('porko://webcam-place');await largeur();
+    await imageOk(page.getByTestId('vie-webcam'));
+    if(SHOTS)await page.locator('.webcam-vue').screenshot({path:join(SHOTS,`${tag}-cctv.png`),style:'.bulles,.gruik{visibility:hidden!important}'});
+    await page.getByRole('button',{name:'Mettre en pause'}).click();
+    if(!await page.getByTestId('vie-webcam').evaluate(e=>e.classList.contains('pause')))throw Error('Webcam non arrêtée');
+    await page.getByRole('button',{name:'Agrandir la vue'}).click();await largeur();await capture('webcam');
+    await page.getByRole('button',{name:'Vue normale'}).click();
+    await page.getByRole('button',{name:'Plaque du central téléphonique'}).click();await page.getByTestId('site-modem-libre').waitFor();await largeur();
+    await page.getByRole('button',{name:'Le forum du modem',exact:true}).click();
+    await page.getByTestId('site-livre-message').fill('Le central fonctionne encore !');await page.getByTestId('site-livre-signer').click();
+    await page.getByText('Le central fonctionne encore !',{exact:true}).waitFor();
+    await page.getByRole('button',{name:'La page perso de l’administrateur'}).click();await page.getByTestId('site-chez-rat').waitFor();await largeur();await capture('secret');
+    await visiter('porko://porkomazon');await page.getByTestId('pkz-commander').click();
+    await visiter('porko://accueil');await nouvelles.getByText(/colis en livraison/).waitFor();await largeur();
+    await page.getByRole('button',{name:'Prise de diagnostic du portail'}).click();await page.getByTestId('site-modem-libre').waitFor();
+    step(`${tag}: publications, brouillon, horoscope conservé, webcam, secrets et nouvelles réelles valides`);
     await ctx.close();
   }
   if (errors.length) throw new Error(errors.join("\n"));

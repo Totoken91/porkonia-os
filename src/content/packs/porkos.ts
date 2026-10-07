@@ -7,6 +7,7 @@ import type { ActionRef, ContentPack, MenuEntry, MenuSpec, Program } from "../ty
 import { deplierGenerique } from "@/os/generique";
 import { ordreCochon } from "./ordre-cochon";
 import { accesPigNet, pubsPigNet, nouveauxSitesPigNet } from './pignet';
+import {sitesVivants,textesVivants} from './pignet-vivant';
 import { campagneOrdre } from './ordre-cochon-campagne';
 
 // Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
@@ -2622,6 +2623,7 @@ export const porkosPack: ContentPack = {
   // PigNet : pages perso de citoyens et annuaire (porko://…). Personnages et sites inventés pour PorkOS.
   sites: [
     ...nouveauxSitesPigNet,
+    ...sitesVivants,
     {
       hote: "annuaire",
       titre: "Annuaire PigNet des sites homologués",
@@ -3217,6 +3219,7 @@ export const porkosPack: ContentPack = {
   },
 
   strings: {
+    ...textesVivants,
     "portail.acces": "Accès directs PigNet",
     "portail.partenaires": "Publicités PigNet",
     "portail.decouvrir": "À découvrir sur PigNet",
