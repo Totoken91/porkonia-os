@@ -1,15 +1,13 @@
 "use client";
-/**
- * Porkomazon : boutique en ligne de bière. On paie avec le compte de la Caisse Nationale d'Épargne du Porc ; le colis
- * voyage pendant un délai de livraison réel (secondes), puis la bière attend dans la cave, à boire à la choppe posée
- * devant l'écran. La logique est dans `os/biere.ts` ; l'argent est fictif.
- */
+/** Porkomazon : bière et saucisson, payés en Pork$ fictifs et livrés après un délai réel.
+ * Les provisions livrées se consomment devant l'écran. */
 import { useEffect, useState } from "react";
 import { useOs } from "@/os/context";
 import { useCompte, operer } from "@/os/banqueStore";
 import { debiter, formaterPork } from "@/os/banque";
 import { secondesRestantes } from "@/os/biere";
 import { commanderBieres, useCave } from "@/os/biereStore";
+import { commanderSaucissons, useGardeManger } from "@/os/saucissonStore";
 import { siteUrl } from "./url";
 
 export function Porkomazon({ go }: { go?(u: string): void }) {
@@ -17,6 +15,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
   const p = pack.porkomazon;
   const compte = useCompte(user.id);
   const cave = useCave();
+  const gardeManger=useGardeManger();
   const [produit, setProduit] = useState(p.produits[0]!.id);
   const [mode, setMode] = useState(p.livraisons[0]!.id);
   const [message, setMessage] = useState("");
@@ -28,18 +27,21 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
 
   const article = p.produits.find((x) => x.id === produit)!;
   const livraison = p.livraisons.find((x) => x.id === mode)!;
+  const stock=article.type==="saucisson"?gardeManger:cave;
+  const colis=[...cave.enRoute.map(k=>({...k,type:"biere" as const})),...gardeManger.enRoute.map(k=>({...k,type:"saucisson" as const}))];
   const total = article.prix + livraison.supplement;
 
   const commander = () => {
     if (!compte) return setMessage(str("porkomazon.err.compte"));
-    if (cave.enRoute.length >= 20) return setMessage(str("porkomazon.err.plein"));
+    if (stock.enRoute.length >= 20) return setMessage(str("porkomazon.err.plein"));
     const r = operer(user.id, (c) => debiter(c, total, `Porkomazon : ${article.nom} (${livraison.nom})`, new Date()));
     if (!r) return setMessage(str("porkomazon.err.compte"));
     if (!r.ok) return setMessage(str("porkomazon.err.solde"));
-    commanderBieres(article.qte, livraison.id, livraison.delaiS * 1000);
+    const expedier=article.type==="saucisson"?commanderSaucissons:commanderBieres;
+    expedier(article.qte, livraison.id, livraison.delaiS * 1000);
     playSound("ding");
     signal("porkomazon:commande");
-    setMessage(str("porkomazon.commande", { id: cave.prochainId, delai: livraison.delaiS }));
+    setMessage(str("porkomazon.commande", { id: stock.prochainId, delai: livraison.delaiS }));
   };
 
   return (
@@ -95,17 +97,18 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
       </div>
       <section className="pkz-suivi">
         <h3>{str("porkomazon.enRoute")}</h3>
-        {cave.enRoute.length ? (
+        {colis.length ? (
           <ul data-testid="pkz-colis">
-            {cave.enRoute.map((k) => (
-              <li key={k.id}>
-                <b>n° {k.id}</b> — {k.qte} × {str("porkomazon.bouteille")} — {p.livraisons.find((l) => l.id === k.mode)?.nom ?? k.mode} — {str("porkomazon.arrive", { s: secondesRestantes(k, maintenant) })}
+            {colis.map((k) => (
+              <li key={`${k.type}-${k.id}`}>
+                <b>n° {k.id}</b> — {k.qte} × {str(k.type==="saucisson"?"porkomazon.saucisson":"porkomazon.bouteille")} — {p.livraisons.find((l) => l.id === k.mode)?.nom ?? k.mode} — {str("porkomazon.arrive", { s: secondesRestantes(k, maintenant) })}
               </li>
             ))}
           </ul>
         ) : (
           <p>{str("porkomazon.aucun")}</p>
         )}
+        <p data-testid="pkz-garde-manger">{str("porkomazon.gardeManger", { n: gardeManger.stock })}</p>
         <p data-testid="pkz-cave">{str("porkomazon.cave", { n: cave.stock })}</p>
       </section>
       <section className="pkz-avis">

@@ -13,6 +13,7 @@ import { usePleinEcran } from "@/os/pleinEcran";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
 import { boireVerres, useIvresse } from "@/os/ivresseStore";
+import { prendreSaucisson, useGardeManger } from "@/os/saucissonStore";
 import { prendreBiere, useCave } from "@/os/biereStore";
 import { intensite, stade } from "@/os/ivresse";
 
@@ -58,6 +59,8 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
   const [degauss, setDegauss] = useState(false);
   const verres = useIvresse();
   const cave = useCave();
+  const gardeManger=useGardeManger();
+  const [bouchee,setBouchee]=useState(false);
   const [gorgee, setGorgee] = useState(false);
   const ivre = intensite(verres);
 
@@ -316,6 +319,14 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
           <span className="choppe-n">{cave.stock}</span>
         </button>
       )}
+      {gardeManger.stock > 0 && tube !== "eteint" && <button
+        className={`saucisson-table${bouchee?" mange":""}`}
+        data-testid="saucisson-table" title={str("porkomazon.mangerSaucisson")} aria-label={str("porkomazon.mangerSaucisson")}
+        onClick={e=>{e.currentTarget.blur();if(bouchee||!prendreSaucisson())return;setBouchee(true);setTimeout(()=>setBouchee(false),700);}}
+      >
+        <img src="/brand/saucisson-planche.png" alt="" width={148} height={96} draggable={false}/>
+        <span className="choppe-n">{gardeManger.stock}</span>
+      </button>}
       {portrait && !ignore && (
         <div className="rotation">
           <p>{str("ecran.rotation")}</p>

@@ -1514,3 +1514,13 @@
   .pkz-etoiles { color: #e47911; font-weight: bold; }
   .pkz-pied { padding: 8px 14px 12px; background: #232f3e; color: #b8c0c8; font-size: 10px; text-align: center; }
 }
+
+@layer components {
+  .saucisson-table { position:fixed; right:calc(max(18px,3vw) + 104px); bottom:max(10px,2.5vh); z-index:60; padding:0; border:0; background:none; cursor:pointer; filter:drop-shadow(0 6px 5px #0008); animation:choppe-pose .6s ease-out; }
+  .saucisson-table img { display:block; width:148px; height:96px; object-fit:contain; user-select:none; }
+  .saucisson-table:hover { transform:translateY(-3px); }
+  .saucisson-table.mange { animation:saucisson-bouchee .7s ease-in-out; }
+  .piece.poche .saucisson-table { right:auto; left:104px; bottom:calc(env(safe-area-inset-bottom,0px) + 96px); }
+  @keyframes saucisson-bouchee { 50% { transform:translateY(-18px) rotate(-5deg); } }
+  @media (prefers-reduced-motion:reduce) { .saucisson-table,.saucisson-table.mange { animation:none; } }
+}

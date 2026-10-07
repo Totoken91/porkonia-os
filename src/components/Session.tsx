@@ -14,6 +14,7 @@ import { POUBELLE, deplacer, sanitizeDisque, supprimer, type Disque, type Result
 import { resolve as resoudre } from "@/os/fs";
 import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
+import { surLivraisonSaucisson } from "@/os/saucissonStore";
 import { surLivraison } from "@/os/biereStore";
 import { surWarp } from "@/os/ivresseStore";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
@@ -278,9 +279,14 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       pushToast(str("porkomazon.livre.titre"), str("porkomazon.livre", { n }));
       playSound("ding");
     });
+    const saucisson = surLivraisonSaucisson((n) => {
+      pushToast(str("porkomazon.livre.titre"), str("porkomazon.livre.saucisson", { n }));
+      playSound("ding");
+    });
     const b = surWarp(() => feed({ kind: "signal", name: "ivresse:warp" }));
     return () => {
       a();
+      saucisson();
       b();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

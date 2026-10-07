@@ -3107,12 +3107,14 @@ export const porkosPack: ContentPack = {
 
   porkomazon: {
     nom: "Porkomazon",
-    slogan: "Livré chez vous. À peu près. Un jour ou l'autre. Surtout la bière.",
+    slogan: "Livré chez vous. À peu près. Un jour ou l'autre. La bière et le saucisson.",
     produits: [
       { id: "biere", nom: "Bière blonde du Terroir, 33 cl", description: "La bière. Elle est blonde, elle est froide dans le catalogue.", qte: 1, prix: 4 },
       { id: "pack6", nom: "Pack de 6 « Mousse de Comité »", description: "Six chopes pour une réunion qui n'aura pas lieu.", qte: 6, prix: 22 },
       { id: "caisse24", nom: "Caisse de 24 « Réserve du Fondateur »", description: "Vingt-quatre raisons de ne pas comprendre l'économie.", qte: 24, prix: 80 },
       { id: "fut", nom: "Fût de 12 L « Banquet Imprévu »", description: "Livré avec un banquet que vous n'avez pas déclaré.", qte: 36, prix: 110 },
+      { id: "saucisson", type: "saucisson", nom: "Saucisson sec", description: "Un saucisson à poser devant l'écran. Le clavier attendra.", qte: 1, prix: 8 },
+      { id: "saucissons3", type: "saucisson", nom: "Lot de 3 saucissons", description: "Trois raisons de prolonger la pause.", qte: 3, prix: 22 },
     ],
     livraisons: [
       { id: "colis", nom: "Colis recommandé", description: "Confié au Service des Postes. Il arrive, ou il est remplacé par un avis de passage.", delaiS: 90, supplement: 0 },
@@ -3450,6 +3452,10 @@ export const porkosPack: ContentPack = {
     "grosses.choppe": "Pour boire, cliquez sur la bouteille, devant l'écran.",
     "porkomazon.livre.titre": "Colis Porkomazon",
     "porkomazon.livre": "Votre colis est arrivé : {n} bière(s). Une Douzi Ambrée vous attend devant l'écran. Cliquez dessus pour boire.",
+    "porkomazon.saucisson": "saucisson(s)",
+    "porkomazon.gardeManger": "Dans votre garde-manger : {n} saucisson(s), livrés et prêts à manger.",
+    "porkomazon.mangerSaucisson": "Manger un saucisson",
+    "porkomazon.livre.saucisson": "Votre colis est arrivé : {n} saucisson(s). Une planche vous attend devant l'écran. Cliquez dessus pour manger.",
     "porkomazon.choppe": "Boire une bière",
     "porkomazon.err.compte": "Il vous faut un compte à la Caisse Nationale d'Épargne du Porc pour commander. Ouvrez-en un, c'est gratuit.",
     "porkomazon.err.solde": "Solde insuffisant. Porkomazon ne livre pas à crédit, sauf à la Commission.",
@@ -3463,7 +3469,7 @@ export const porkosPack: ContentPack = {
     "porkomazon.total": "Total : {somme}",
     "porkomazon.sansCompte": "Compte bancaire : ouvrez-en un à la Caisse Nationale d'Épargne du Porc",
     "porkomazon.cave": "Dans votre cave : {n} bière(s), livrées et prêtes à boire.",
-    "porkomazon.mentions": "Boutique fictive. Les bières sont imaginaires, la gueule de bois du jeu aussi, le paiement vient de votre compte en Pork$ fictifs.",
+    "porkomazon.mentions": "Boutique fictive. La bière et les saucissons sont imaginaires, la gueule de bois du jeu aussi, le paiement vient de votre compte en Pork$ fictifs.",
     "porkomazon.avis": "Avis de nos clients",
     "banque.secu": "Connexion sécurisée par la bienveillance",
     "banque.espaceClient": "Espace client",

@@ -34,6 +34,7 @@ try {
     { tag: "poche-portrait", viewport: { width: 390, height: 844 }, mobile: true },
   ];
   for (const { tag, viewport, mobile } of formats) {
+    if(process.env.FORMATS&&!process.env.FORMATS.split(",").includes(tag))continue;
     const poche = !!mobile;
     const ctx = await browser.newContext({ viewport, ...(mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) });
     const page = await ctx.newPage();
@@ -142,9 +143,28 @@ try {
     await page.getByTestId("pkz-commander").click();
     await page.getByTestId("pkz-colis").waitFor();
     if (await page.getByTestId("choppe").count()) throw new Error(`${tag}: choppe avant la livraison`);
+    await page.getByTestId("pkz-produit-saucissons3").check();
+    await page.getByTestId("pkz-commander").click();
+    if(await page.getByTestId("saucisson-table").count())throw Error(`${tag}: saucisson avant livraison`);
+    const suivi=await page.getByTestId("pkz-colis").innerText();
+    if(!suivi.includes('saucisson')||!suivi.includes('bière'))throw Error(`${tag}: commandes mixtes confondues : ${suivi}`);
     const op = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")).historique.some((o) => o.libelle.includes("Porkomazon")));
     if (!op) throw new Error(`${tag}: commande non débitée`);
     await page.getByTestId("choppe").waitFor({ timeout: 20000 });
+    await page.getByTestId("saucisson-table").waitFor({timeout:20000});
+    await page.getByTestId("saucisson-table").locator('img').evaluate(async image=>{await image.decode();if(!image.naturalWidth)throw Error('image saucisson absente');});
+    await shot(page, `${tag}-biere-saucisson`);
+    const chevauche=await page.evaluate(()=>{const a=document.querySelector('[data-testid=choppe]').getBoundingClientRect(),b=document.querySelector('[data-testid=saucisson-table]').getBoundingClientRect();return a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom;});
+    if(chevauche)throw Error(`${tag}: bouteille et saucisson se chevauchent`);
+    for(let i=0;i<3;i++){
+      await page.getByTestId("saucisson-table").click({force:true});
+      const stock=await page.evaluate(()=>({s:JSON.parse(localStorage.getItem('porkos.saucisson')).stock,b:JSON.parse(localStorage.getItem('porkos.biere')).stock}));
+      if(stock.s!==2-i||stock.b!==1)throw Error(`${tag}: mauvais stock consommé`);
+      await page.waitForTimeout(750);
+    }
+    if(await page.getByTestId('saucisson-table').count())throw Error(`${tag}: planche encore présente sans saucisson`);
+    if(await page.locator('.tube.ivre').count())throw Error(`${tag}: le saucisson rend ivre`);
+    step(`${tag}: livraison de saucissons, stocks distincts, planche et consommation valides`);
     await shot(page, `${tag}-choppe`);
     await page.getByTestId("choppe").click({ force: true });
     await page.locator(".tube.ivre").waitFor();

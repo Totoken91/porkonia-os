@@ -358,7 +358,7 @@ export interface JeuBanque {
 export interface JeuPorkomazon {
   nom: string;
   slogan: string;
-  produits: { id: string; nom: string; description: string; qte: number; prix: number }[];
+  produits: { id: string; nom: string; description: string; qte: number; prix: number; type?: "biere" | "saucisson" }[];
   livraisons: { id: string; nom: string; description: string; delaiS: number; supplement: number }[];
   avis: { nom: string; note: number; texte: string }[];
 }
