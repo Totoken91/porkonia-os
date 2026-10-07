@@ -36,9 +36,9 @@ export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille
 
 const KEY = "porkos.reglages";
 
-export function loadSettings(): Settings {
+export function loadSettings(user?:string): Settings {
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = window.localStorage.getItem(user?`${KEY}.${user}`:KEY);
     if (!raw) return DEFAULT_SETTINGS;
     return sanitizeSettings(JSON.parse(raw));
   } catch {
@@ -46,9 +46,9 @@ export function loadSettings(): Settings {
   }
 }
 
-export function saveSettings(s: Settings): void {
+export function saveSettings(s: Settings,user?:string): void {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(s));
+    window.localStorage.setItem(user?`${KEY}.${user}`:KEY, JSON.stringify(s));
   } catch {
     /* navigation privée : les réglages restent en mémoire */
   }

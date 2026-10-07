@@ -3,6 +3,7 @@
  * de colis sert à la bière et au saucisson, avec une clé et des abonnements distincts. */
 import { useSyncExternalStore } from "react";
 import { cave, expedier, livrer, sanitize, servir, type Cave } from "./biere";
+import {profilActif,surProfil,cleProfil} from './profilActif';
 
 export function creerStock(CLE: string) {
   let etat: Cave = cave();
@@ -13,7 +14,7 @@ export function creerStock(CLE: string) {
 
   function ecrire() {
     try {
-      window.localStorage.setItem(CLE, JSON.stringify(etat));
+      const id=profilActif();if(id)window.localStorage.setItem(cleProfil(CLE,id), JSON.stringify(etat));
     } catch {
       /* stock non retenu */
     }
@@ -24,6 +25,7 @@ export function creerStock(CLE: string) {
   }
 
   function relever() {
+    if(!profilActif())return;
     const r = livrer(etat, Date.now());
     if (!r.arrives) return;
     etat = r.cave;
@@ -35,8 +37,9 @@ export function creerStock(CLE: string) {
   function lire() {
     if (lu || typeof window === "undefined") return;
     lu = true;
+    const id=profilActif();if(!id){etat=cave();return;}
     try {
-      etat = sanitize(JSON.parse(window.localStorage.getItem(CLE) ?? "null"));
+      etat = sanitize(JSON.parse(window.localStorage.getItem(cleProfil(CLE,id)) ?? "null"));
     } catch {
       etat = cave();
     }
@@ -60,6 +63,7 @@ export function creerStock(CLE: string) {
 
   /** Commande : le colis part, il arrivera dans `delaiMs`. Rend false si la commande est refusée. */
   function commander(qte: number, mode: string, delaiMs: number): boolean {
+    if(!profilActif())return false;
     lire();
     const c = expedier(etat, qte, mode, delaiMs, Date.now());
     if (!c) return false;
@@ -71,6 +75,7 @@ export function creerStock(CLE: string) {
 
   /** Prend une provision livrée dans le stock. */
   function prendre(): boolean {
+    if(!profilActif())return false;
     lire();
     const c = servir(etat);
     if (!c) return false;
@@ -87,6 +92,7 @@ export function creerStock(CLE: string) {
   }
 
   const cave_vide = cave();
+  surProfil(()=>{lu=false;etat=cave();lire();prevenir();});
   const useStock = (): Cave =>
     useSyncExternalStore(
       abonner,

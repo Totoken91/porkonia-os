@@ -1693,3 +1693,24 @@
   .vie-horoscope li { margin:8px 0; }
   @media(max-width:560px) { .coin-citoyens > div { grid-template-columns:1fr; } }
 }
+
+@layer components {
+  .comptes-fenetre { max-height:calc(100% - 12px); display:flex; flex-direction:column; }
+  .comptes-fenetre .connexion-corps { min-height:0; overflow:auto; }
+  .comptes-fenetre .connexion-profils { max-height:180px; overflow:auto; flex-shrink:0; }
+  .comptes-fenetre .champ { grid-template-columns:112px minmax(0,1fr); gap:6px; }
+  .comptes-fenetre .pk-input { min-width:0; width:100%; }
+  .comptes-fenetre .user-tile { min-height:44px; flex-shrink:0; }
+  .comptes-fenetre .user-tile[aria-pressed="true"] { background:var(--color-rouge-sombre); color:#fff4d5; }
+  .comptes-fenetre .user-tile[aria-pressed="true"] b { color:#fff4d5; }
+  .comptes-fenetre .user-tile:focus-visible { outline:1px dotted #ad893d; outline-offset:-4px; }
+  .comptes-fenetre .user-tile span { min-width:0; overflow-wrap:anywhere; }
+  .compte-local { color:#695b43; }
+  .compte-heritage { align-items:flex-start; }
+  .comptes-fenetre .actions { flex-wrap:wrap; flex-shrink:0; }
+  .comptes-fenetre .actions button { min-height:36px; }
+  .ecran.poche .connexion { inset:var(--haut,0) 0 var(--bas,0); }
+  .ecran.poche .comptes-fenetre { width:calc(100% - 12px); }
+  .ecran.poche .comptes-fenetre .pk-btn { min-height:44px; }
+  @media(max-height:450px) { .comptes-fenetre .connexion-bandeau { display:none; } .comptes-fenetre .connexion-corps { gap:4px; } }
+}

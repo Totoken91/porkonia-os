@@ -9,6 +9,8 @@ les icônes se rangent sur une grille, le clic droit, « Exécuter… », les so
 Sur téléphone, il devient le **PorkOS Poche** : écran à la taille de l'appareil, lanceur au doigt, barre de navigation, fenêtres et
 PorkTV en plein écran, installable sur l'écran d'accueil.
 
+Créez votre compte, choisissez votre profil et connectez-vous avec votre mot de passe. Progression, documents, courrier et réglages sont sauvegardés séparément pour chaque profil dans ce navigateur. Le premier compte peut récupérer les sauvegardes de l'ancienne démo. Détails : [comptes locaux](docs/COMPTES-LOCAUX.md).
+
 Le **Courrier d'État** permet d'écrire aux personnalités de Porkonia (Sofiane Douzi, DJ Viteau, Stanley Ferret, Luis Fontanillas,
 Tonton Marcel, Tonio, John Pork, Éric de Saucissignal) : elles répondent en personnage, rédigées par un modèle ouvert hébergé par Groq.
 

@@ -1,3 +1,4 @@
+import {creerProfil} from "./comptes-helper.mjs";
 /**
  * Parcours de bout en bout sur l'export statique (out/) : démarrage → connexion → bureau → applis → mise à jour.
  * Usage : npm run build && npm run test:e2e   (captures dans $SHOTS si défini)
@@ -113,6 +114,7 @@ try {
     }
     await page.keyboard.press("Space");
     await page.getByTestId("login").waitFor();
+    await creerProfil(page);
     step(`${tag} : démarrage passé`);
 
     await page.getByTestId("login-submit").click();
@@ -120,7 +122,7 @@ try {
     if (!(await page.getByTestId("login-message").textContent()).includes("silence")) throw new Error("mot de passe vide accepté");
     await page.getByTestId("login-password").fill("12");
     await page.getByTestId("login-submit").click();
-    await page.getByText("patriotique").waitFor();
+
     await shot(page, `${tag}-03-connexion`);
     await page.getByTestId("start").waitFor({ timeout: 6000 });
     await page.getByTestId("window-bienvenue").waitFor();
@@ -464,7 +466,7 @@ try {
       await page.waitForTimeout(2500);
       await shot(page, `${tag}-13-scandisk`);
       await page.keyboard.press("Escape");
-      await page.getByTestId("login-password").fill("douzi");
+      await page.getByTestId("login-password").fill("12");
       await page.getByTestId("login-submit").click();
       await page.getByTestId("start").waitFor({ timeout: 8000 });
       step(`${tag} : ScanDisque après arrêt brutal`);
@@ -595,19 +597,23 @@ try {
       await page.getByTestId("inst-suivant").click();
       await page.getByTestId("window-jambonjon").waitFor();
       await page.getByTestId("jbj-nouvelle").click();
+      await page.getByTestId("jbj-classe-tank").click();
+      await page.getByTestId("jbj-chevalier-berthe").click();
+      await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
-      const journal = await page.getByTestId("jbj-journal").textContent();
+      const position = () => page.evaluate(() => { const j=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen')).joueur;return [j.x,j.y,j.dir]; });
+      const avantMouvement = await position();
       for (const k of ["e", "z", "e", "z", "a", "z"]) {
         await page.keyboard.press(k);
         await page.waitForTimeout(220);
       }
-      if ((await page.getByTestId("jbj-journal").textContent()) === journal) throw new Error("Jambonjon ne réagit pas au clavier");
+      if (JSON.stringify(await position()) === JSON.stringify(avantMouvement)) throw new Error("Jambonjon ne réagit pas au clavier");
       // Quatre rotations sans attendre : aucune ne doit remplacer une autre.
-      const directionAvant = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir);
+      const directionAvant = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen")).joueur.dir);
       for (let n = 0; n < 4; n++) await page.keyboard.press("e");
-      await page.waitForFunction((dir) => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir === dir, directionAvant);
+      await page.waitForFunction((dir) => JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen")).joueur.dir === dir, directionAvant);
       await page.waitForTimeout(700);
-      const directionApres = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur.dir);
+      const directionApres = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen")).joueur.dir);
       if (directionApres !== directionAvant) throw new Error("Les rotations rapides ont été perdues ou exécutées dans le désordre");
       await shot(page, `${tag}-26-jambonjon`);
       await fermer("jambonjon");

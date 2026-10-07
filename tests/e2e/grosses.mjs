@@ -1,3 +1,4 @@
+import {creerProfil} from "./comptes-helper.mjs";
 /**
  * Régressions Course de Grosses : téléchargement et installation, ouverture du compte en banque en ligne, allocation,
  * courtage en bourse, pari, course, buvette et ivresse de l'écran, sur bureau et Poche paysage / portrait.
@@ -62,6 +63,7 @@ try {
     await page.getByTestId("boot-bios").waitFor();
     await page.keyboard.press("Space");
     await page.getByTestId("login").waitFor();
+    await creerProfil(page);
     await page.getByTestId("login-password").fill("12");
     await page.getByTestId("login-submit").click();
     await page.getByTestId("start").waitFor({ timeout: 8000 });
@@ -175,7 +177,7 @@ try {
     if(chevauche)throw Error(`${tag}: bouteille et saucisson se chevauchent`);
     for(let i=0;i<3;i++){
       await page.getByTestId("saucisson-table").click({force:true});
-      const stock=await page.evaluate(()=>({s:JSON.parse(localStorage.getItem('porkos.saucisson')).stock,b:JSON.parse(localStorage.getItem('porkos.biere')).stock}));
+      const stock=await page.evaluate(()=>({s:JSON.parse(localStorage.getItem('porkos.saucisson.citoyen')).stock,b:JSON.parse(localStorage.getItem('porkos.biere.citoyen')).stock}));
       if(stock.s!==2-i||stock.b!==1)throw Error(`${tag}: mauvais stock consommé`);
       await page.waitForTimeout(750);
     }
@@ -185,7 +187,7 @@ try {
     await shot(page, `${tag}-choppe`);
     await page.getByTestId("choppe").click({ force: true });
     await page.locator(".tube.ivre").waitFor();
-    const ivresse = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.ivresse")).v);
+    const ivresse = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.ivresse.citoyen")).v);
     if (ivresse < 0.8) throw new Error(`${tag}: ivresse non enregistrée (${ivresse})`);
     if (await page.getByTestId("choppe").count()) throw new Error(`${tag}: choppe encore là sans bière`);
     await page.waitForTimeout(500);

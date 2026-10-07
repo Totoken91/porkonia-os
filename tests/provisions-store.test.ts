@@ -1,12 +1,14 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 vi.mock('react',()=>({useSyncExternalStore:(subscribe:(f:()=>void)=>()=>void,get:()=>unknown)=>{subscribe(()=>{});return get();}}));
 import {creerStock} from '../src/os/provisionsStore';
+import {activerProfil} from '../src/os/profilActif';
 beforeEach(()=>{
   vi.useFakeTimers();vi.setSystemTime(1000);
   const values=new Map<string,string>();
   vi.stubGlobal('window',{localStorage:{getItem:(k:string)=>values.get(k)??null,setItem:(k:string,v:string)=>values.set(k,v)}});
+  activerProfil('citoyen');
 });
-afterEach(()=>{vi.clearAllTimers();vi.useRealTimers();vi.unstubAllGlobals();});
+afterEach(()=>{activerProfil(null);vi.clearAllTimers();vi.useRealTimers();vi.unstubAllGlobals();});
 describe('Stocks de provisions indépendants',()=>{
   it('livre à la bonne échéance et consomme uniquement le produit choisi',()=>{
     const b=creerStock('porkos.biere'),s=creerStock('porkos.saucisson');
@@ -18,7 +20,7 @@ describe('Stocks de provisions indépendants',()=>{
     expect(s.useStock().stock).toBe(2);expect(b.useStock().stock).toBe(6);expect(avisS).toHaveBeenCalledExactlyOnceWith(3);
   });
   it('retrouve les stocks et livre une commande arrivée pendant une absence',()=>{
-    window.localStorage.setItem('porkos.biere',JSON.stringify({stock:4,enRoute:[],prochainId:9}));
+    window.localStorage.setItem('porkos.biere.citoyen',JSON.stringify({stock:4,enRoute:[],prochainId:9}));
     const s=creerStock('porkos.saucisson');s.commander(3,'drone',10000);
     vi.advanceTimersByTime(15000);
     const relu=creerStock('porkos.saucisson');expect(relu.useStock().stock).toBe(3);expect(relu.useStock().enRoute).toHaveLength(0);

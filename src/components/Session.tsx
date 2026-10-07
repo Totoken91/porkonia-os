@@ -80,7 +80,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const [ctxMenu, setCtxMenu] = useState<MenuState | null>(null);
   const [gele, setGele] = useState<Record<string, boolean>>({});
   const [fatal, setFatal] = useState(false);
-  const cleCourrier = `porkos.courrier.${pack.id}`;
+  const cleCourrier = `porkos.courrier.${pack.id}.${user.id}`;
   const [boite, setBoiteState] = useState<Boite>(() => initBoite(pack.mails));
   const boiteRef = useRef(boite);
   const setBoite = useCallback(
@@ -407,9 +407,9 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   useEffect(() => {
     loginAt.current = Date.now();
     playSound("demarrage");
-    setTimeout(() => feed({ kind: "signal", name: "session:ouverte" }), 6000);
-    if (!restaurer) setTimeout(() => feed({ kind: "signal", name: "session:perdue" }), 7000);
-    if (impatient) setTimeout(() => runRef.current({ type: "signal", name: "boot:impatience" }), 4000);
+    const demarrage = [setTimeout(() => feed({ kind: "signal", name: "session:ouverte" }), 6000)];
+    if (!restaurer) demarrage.push(setTimeout(() => feed({ kind: "signal", name: "session:perdue" }), 7000));
+    if (impatient) demarrage.push(setTimeout(() => runRef.current({ type: "signal", name: "boot:impatience" }), 4000));
     const id = setInterval(() => {
       // En veille ou sous l'économiseur, l'horloge des règles s'arrête : rien ne surgit dessous ni au réveil.
       if (live.current.veille || live.current.saver) {
@@ -426,6 +426,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     window.addEventListener("keydown", actif);
     return () => {
       clearInterval(id);
+      demarrage.forEach(clearTimeout);
       window.removeEventListener("pointermove", actif);
       window.removeEventListener("pointerdown", actif);
       window.removeEventListener("keydown", actif);
@@ -573,7 +574,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   );
 
   // Session : on retrouve ses fenêtres, sauf après un arrêt brutal.
-  const cleFenetres = `porkos.fenetres.${pack.id}`;
+  const cleFenetres = `porkos.fenetres.${pack.id}.${user.id}`;
   const restaurationFaite = useRef(false);
   useEffect(() => {
     let saved: SavedWin[] = [];

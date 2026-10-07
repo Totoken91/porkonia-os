@@ -17,10 +17,10 @@ export function resolveCommand(cmd: string, aliases: Record<string, Cible>, apps
   return app ? { app: app.id } : null;
 }
 
-const CLE_HISTORIQUE = "porkos.executer.historique";
 
 export function Executer() {
-  const { pack, str, openApp, runAction, signal } = useOs();
+  const { pack, str, openApp, runAction, signal, user } = useOs();
+  const CLE_HISTORIQUE=`porkos.executer.historique.${user.id}`;
   const { close } = useWin();
   const [cmd, setCmd] = useState("");
   // Historique des commandes tapées (comme la liste d'Exécuter d'époque) : c'est là que réapparaissent les secrets trouvés.

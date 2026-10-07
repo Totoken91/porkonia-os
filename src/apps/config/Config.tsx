@@ -173,7 +173,7 @@ export function Config() {
                 </button>
               </fieldset>
             ) : (
-              <p className="note">{pack.login.guestNotice}</p>
+              <p className="note">{str('compte.local')}</p>
             )}
             <fieldset className="pk-fieldset">
               <legend>{str("config.langue")}</legend>

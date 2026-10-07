@@ -45,7 +45,7 @@ const ICONE = { w: 74, h: 66 };
 const idFichier = (nom: string) => `f:${nom}`;
 
 export function Desktop({ area, onLaunch }: Props) {
-  const { pack, str, signal, openApp, runAction, fs, settings } = useOs();
+  const { pack, str, signal, openApp, runAction, fs, settings, user } = useOs();
   const bureau = fs.disque.racine.children.find((c) => c.name === BUREAU && c.type === "dossier") as Extract<FsNode, { type: "dossier" }> | undefined;
   const elements = useMemo<Element[]>(
     () => [
@@ -71,7 +71,7 @@ export function Desktop({ area, onLaunch }: Props) {
   const cleIds = ids.join("|");
   const parId = useMemo(() => new Map(elements.map((d) => [d.id, d])), [elements]);
   const dims = useMemo(() => dimsFor(area.w, area.h), [area.w, area.h]);
-  const cle = `porkos.bureau.${pack.id}`;
+  const cle = `porkos.bureau.${pack.id}.${user.id}`;
   const zone = useRef<HTMLDivElement>(null);
 
   const [layout, setLayout] = useState<Layout>(() => defaultLayout(ids, dims));

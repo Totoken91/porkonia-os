@@ -17,21 +17,21 @@ import { Porkomazon } from "./Porkomazon";
 import {VieLocale} from './VieLocale';
 
 type Message = { nom: string; date: string; message: string };
-const cleLivre = (hote: string) => `porkos.livredor.${hote}`;
+const cleLivre = (hote: string,user:string) => `porkos.livredor.${hote}.${user}`;
 
 function LivreDor({ site }: { site: SitePerso }) {
-  const { str, signal } = useOs();
+  const { str, signal, user } = useOs();
   const [ajouts, setAjouts] = useState<Message[]>([]);
   const [nom, setNom] = useState("");
   const [message, setMessage] = useState("");
   useEffect(() => {
     try {
-      const v = JSON.parse(window.localStorage.getItem(cleLivre(site.hote)) ?? "[]");
+      const v = JSON.parse(window.localStorage.getItem(cleLivre(site.hote,user.id)) ?? "[]");
       if (Array.isArray(v)) setAjouts(v.filter((m) => m && typeof m.nom === "string" && typeof m.message === "string" && typeof m.date === "string").slice(-50));
     } catch {
       /* livre neuf */
     }
-  }, [site.hote]);
+  }, [site.hote,user.id]);
   const signer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -40,7 +40,7 @@ function LivreDor({ site }: { site: SitePerso }) {
     setAjouts(tout);
     setMessage("");
     try {
-      window.localStorage.setItem(cleLivre(site.hote), JSON.stringify(tout));
+      window.localStorage.setItem(cleLivre(site.hote,user.id), JSON.stringify(tout));
     } catch {
       /* livre d'or non retenu */
     }

@@ -8,6 +8,7 @@ import type { ContentPack, UserProfile } from "@/content/types";
 import { makeStr, useEcran } from "@/os/context";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from "@/os/settings";
 import { jouer } from "@/os/sons";
+import {activerProfil,profilActif} from '@/os/profilActif';
 import { Boot } from "./Boot";
 import { Login } from "./Login";
 import { Monitor } from "./Monitor";
@@ -53,18 +54,19 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
   }, []);
   const setSettings = useCallback((s: Settings) => {
     setSettingsState(s);
-    saveSettings(s);
+    saveSettings(s,profilActif()??undefined);
   }, []);
 
   const bootDone = useCallback((skipped: boolean) => {
     poserMarque(true);
     setPhase({ kind: "login", impatient: skipped });
   }, []);
-  const lock = useCallback(() => setPhase({ kind: "login", impatient: false }), []);
+  const lock = useCallback(() => {activerProfil(null);setPhase({ kind: "login", impatient: false });}, []);
   const sleep = useCallback(() => setPhase((p) => (p.kind === "session" ? { ...p, sleeping: true } : p)), []);
   const fermer = useCallback(
     (then: "arret" | "redemarrage") => {
       if (settings.sons) jouer("arret", settings.hymne / 100);
+      activerProfil(null);
       setPhase({ kind: "fermeture", then });
     },
     [settings.sons, settings.hymne],
@@ -85,7 +87,7 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
   }, [phase]);
 
   const togglePower = () => {
-    if (power) setPower(false);
+    if (power) {activerProfil(null);setPower(false);setPhase({kind:'boot'});}
     else {
       setBrutal(lireMarque());
       setBootId((n) => n + 1);
@@ -98,11 +100,12 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
     <Monitor crt={settings.crt} power={power} onPower={togglePower} sons={settings.sons} nette={settings.pixelsNets} affichage={settings.affichage} str={str}>
       {phase.kind === "boot" && brutal !== null && <Boot key={bootId} pack={pack} brutal={brutal} sons={settings.sons} onDone={bootDone} />}
       {phase.kind === "login" && (
-        <Login pack={pack} fond={settings.fond} onLogin={(user) => setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false })} />
+        <Login pack={pack} fond={settings.fond} onLogin={(user) => {activerProfil(user.id);setSettingsState(loadSettings(user.id));setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false });}} />
       )}
       {phase.kind === "session" && (
         <>
           <Session
+            key={phase.user.id}
             pack={pack}
             user={phase.user}
             settings={settings}

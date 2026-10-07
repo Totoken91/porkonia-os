@@ -1,3 +1,4 @@
+import {creerProfil} from "./comptes-helper.mjs";
 /**
  * Régressions L’Ordre Cochon : installation, commandes rapides, collisions, ivresse,
  * inventaire et redémarrage de partie, sur bureau et Poche paysage / portrait.
@@ -137,6 +138,7 @@ try {
     }
     await page.keyboard.press("Space");
     await page.getByTestId("login").waitFor();
+    await creerProfil(page);
     step(`${tag} : démarrage passé`);
 
     await page.getByTestId("login-submit").click();
@@ -144,7 +146,7 @@ try {
     if (!(await page.getByTestId("login-message").textContent()).includes("silence")) throw new Error("mot de passe vide accepté");
     await page.getByTestId("login-password").fill("12");
     await page.getByTestId("login-submit").click();
-    await page.getByText("patriotique").waitFor();
+
     await shot(page, `${tag}-03-connexion`);
     await page.getByTestId("start").waitFor({ timeout: 6000 });
     await page.getByTestId("window-bienvenue").waitFor();
@@ -233,12 +235,12 @@ try {
       if(SHOTS)await page.getByTestId("jbj-chevaliers").screenshot({path:join(SHOTS,`${tag}-choix-chevalier.png`)});
       await page.getByTestId("jbj-partir").click();
       await page.getByTestId("jbj-vue").waitFor();
-      const entreeCampagne=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+      const entreeCampagne=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen')));
       if(GUIDAGE){
         if(!entreeCampagne.guide?.actif||!entreeCampagne.guide.vus.includes('mission'))throw new Error(`${tag}: guide de depart absent`);
         await page.keyboard.press('F1');await page.getByTestId('jbj-aide-panneau').waitFor();
         await page.getByTestId('jbj-conseils').click();
-        const muet=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+        const muet=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen')));
         if(muet.guide.actif||muet.tour!==entreeCampagne.tour||muet.alea!==entreeCampagne.alea)throw new Error(`${tag}: masquer les conseils modifie le jeu`);
         const aide=page.getByTestId('jbj-aide-panneau');
         const dimensions=await aide.evaluate(e=>[e.scrollWidth,e.clientWidth]);if(dimensions[0]>dimensions[1]+1)throw new Error(`${tag}: aide trop large`);
@@ -247,7 +249,7 @@ try {
         await page.getByTestId('jbj-continuer').click();await page.keyboard.press('F1');
         if(await page.getByTestId('jbj-conseils').getAttribute('aria-pressed')!=='false')throw new Error(`${tag}: preference perdue a la reprise`);
         await page.keyboard.press('Escape');await page.keyboard.press('F2');await page.getByTestId('jbj-classe-jambonmancien').click();await page.getByTestId('jbj-chevalier-ysee').click();await page.getByTestId('jbj-partir').click();
-        const nouvelle=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie')));
+        const nouvelle=await page.evaluate(()=>JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen')));
         if(nouvelle.guide.actif||nouvelle.journal.some(m=>m.cle.startsWith('jbj.guide.')))throw new Error(`${tag}: nouvelle partie ignore la preference`);
         await page.keyboard.press('F1');await page.getByTestId('jbj-conseils').click();await page.keyboard.press('Escape');
         step(`${tag}: mission, conseils gratuits, preference et nouvelle partie valides`);
@@ -261,7 +263,7 @@ try {
       await fermer('navigateur');
       for(const [nom,cy] of [['salle',10],['couloir',7]]) {
         await page.evaluate(cy=>{
-          const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+          const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
           const w=11,h=13,cases=Array(w*h).fill(1);
           for(let y=2;y<=11;y++)cases[y*w+5]=0;
           for(const y0 of [3,9])for(let y=y0;y<y0+3;y++)for(let x=2;x<=8;x++)cases[y*w+x]=0;
@@ -270,7 +272,7 @@ try {
           p.joueur.x=5;p.joueur.y=cy;p.joueur.dir=0;p.joueur.ivresse=0;p.fin=null;
           p.monstres=[{uid:990,type:'inspecteur',niveau:1,elite:false,boss:false,x:5,y:4,pv:23,pvMax:23,att:6,def:1,xp:10,eveille:false,sonne:0}];
           p.sol=[{x:4,y:9,butin:{type:'biere'}},{x:6,y:9,butin:{type:'jambon'}}];
-          localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+          localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
         },cy);
         await fermer('jambonjon');await open('f:L’Ordre Cochon');await page.getByTestId('jbj-continuer').click();
         await page.waitForTimeout(300);
@@ -278,26 +280,26 @@ try {
         await page.getByTestId('jbj-vue').screenshot({path:join(SHOTS,`${tag}-vue-${nom}.png`)});
       }
       // Isoler le cadre : l'inspecteur de la capture s'approche sinon dans le passage.
-      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));p.monstres=[];localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));});
+      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));p.monstres=[];localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));});
       await fermer('jambonjon');await open('f:L’Ordre Cochon');await page.getByTestId('jbj-continuer').click();
       await page.keyboard.press('z');await page.keyboard.press('z');await page.waitForTimeout(700);
-      const passage=await page.evaluate(()=>{const j=JSON.parse(localStorage.getItem('porkos.jambonjon.partie')).joueur;return [j.x,j.y];});
+      const passage=await page.evaluate(()=>{const j=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen')).joueur;return [j.x,j.y];});
       if(JSON.stringify(passage)!=='[5,5]')throw new Error(`${tag}: l'encadrement bloque le passage : ${passage}`);
     }
 
     // Salle de test : la caméra et les collisions doivent suivre exactement les commandes.
     await page.evaluate(() => {
-      const p = JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
+      const p = JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen"));
       const w = 9;
       p.carte = { w, h: w, cases: Array.from({length:w*w}, (_,i) => i%w===0 || i%w===w-1 || i<w || i>=w*(w-1) ? 1 : 0), vu: Array(w*w).fill(true), decor: Array(w*w).fill(0) };
       p.monstres=[]; p.sol=[]; p.joueur.x=4; p.joueur.y=6; p.joueur.dir=0; p.joueur.ivresse=100; p.fin=null;
-      localStorage.setItem("porkos.jambonjon.partie",JSON.stringify(p));
+      localStorage.setItem("porkos.jambonjon.partie.citoyen",JSON.stringify(p));
     });
     await fermer("jambonjon");
     await fermer("navigateur");
     await open("f:L’Ordre Cochon");
     await page.getByTestId("jbj-continuer").click();
-    const position = () => page.evaluate(() => { const j=JSON.parse(localStorage.getItem("porkos.jambonjon.partie")).joueur; return [j.x,j.y,j.dir]; });
+    const position = () => page.evaluate(() => { const j=JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen")).joueur; return [j.x,j.y,j.dir]; });
     for (let n=0;n<7;n++) await page.keyboard.press("z");
     await page.waitForTimeout(1600);
     if (JSON.stringify(await position())!=="[4,1,0]") throw new Error(`${tag}: mur invisible ou déplacement dévié : ${await position()}`);
@@ -325,13 +327,13 @@ try {
     await shot(page, `${tag}-ordre-cochon`);
     // Inventaire déterministe : échanges, retrait, sol, provisions et reprise de sauvegarde.
     await page.evaluate(() => {
-      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
+      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen"));
       p.monstres=[];p.sol=[];p.joueur.pv=7;p.joueur.faim=50;p.joueur.mousse=0;p.joueur.jambons=1;p.joueur.bieres=1;
       const o=(uid,base,att,def,pv,mousse)=>({uid,base,niveau:1,rarete:"etat",att,def,pv,mousse});
       p.joueur.sac=[o(901,"couteau",6,0,0,0),o(902,"gilet",0,4,8,0),o(903,"charlotte",0,1,0,10)];
-      localStorage.setItem("porkos.jambonjon.partie",JSON.stringify(p));
+      localStorage.setItem("porkos.jambonjon.partie.citoyen",JSON.stringify(p));
     });
-    const lire=()=>page.evaluate(()=>JSON.parse(localStorage.getItem("porkos.jambonjon.partie")));
+    const lire=()=>page.evaluate(()=>JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen")));
     const reprendre=async()=>{
       await fermer("jambonjon");await open("f:L’Ordre Cochon");await page.getByTestId("jbj-continuer").click();
     };
@@ -371,9 +373,9 @@ try {
     if(SHOTS)await page.getByTestId("jbj-sac").screenshot({path:join(SHOTS,`${tag}-inventaire-detail.png`)});
     await page.getByTestId("jbj-sac-fermer").click();
     await page.evaluate(()=>{
-      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie"));
+      const p=JSON.parse(localStorage.getItem("porkos.jambonjon.partie.citoyen"));
       p.joueur.sac=Array.from({length:12},(_,i)=>({uid:1000+i,base:"tablier",niveau:1,rarete:"etat",att:0,def:2,pv:0,mousse:0}));
-      localStorage.setItem("porkos.jambonjon.partie",JSON.stringify(p));
+      localStorage.setItem("porkos.jambonjon.partie.citoyen",JSON.stringify(p));
     });
     await reprendre();await page.getByTestId("jbj-ouvrir-sac").click();await page.getByTestId("jbj-equipe-arme").click();
     if(!(await page.getByTestId("jbj-retirer").isDisabled()))throw new Error(`${tag}: retrait permis dans un sac plein`);
@@ -385,13 +387,13 @@ try {
     step(`${tag}: déplacements rapides, rotations, murs, ivresse, inventaire et nouvelle partie validés`);
     // Mage de niveau 10 : points réels, aucun tour pour apprendre ; lancement en un clic.
     await page.evaluate(()=>{
-      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
       p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.niveau=10;p.joueur.xp=0;p.joueur.pv=80;p.joueur.mousse=60;p.joueur.ivresse=0;
       p.joueur.rpg={chevalier:'ysee',classe:'jambonmancien',rangs:[2,1,1,3,0,0],points:3,delais:[0,0,0],protection:0,riposte:0,bouclier:0,perce:false,saigne:-1,encore:false,reduction:0,utilisee:-1};
       const w=9;p.carte={w,h:w,cases:Array.from({length:w*w},(_,i)=>i%w===0||i%w===w-1||i<w||i>=w*(w-1)?1:0),vu:Array(w*w).fill(true),decor:Array(w*w).fill(0)};
       p.joueur.equipe.arme={uid:4000,base:'tranchoir',niveau:6,rarete:'commun',att:5,def:0,pv:0,mousse:0};
       p.monstres=[{uid:5000,type:'inspecteur',niveau:10,elite:true,boss:false,x:4,y:3,pv:180,pvMax:180,att:10,def:3,xp:1,eveille:true,sonne:0}];
-      p.sol=[];p.fin=null;localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+      p.sol=[];p.fin=null;localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
     });
     await reprendre();await page.getByTestId('jbj-ouvrir-competences').click();
     await page.getByTestId('jbj-competences').waitFor();
@@ -418,10 +420,10 @@ try {
     await reprendre();if((await lire()).joueur.rpg.chevalier!=='ysee')throw new Error(`${tag}: chevalier perdu à la reprise`);
     // Le clavier lance directement ; la mort franchit un niveau et affiche les gains.
     await page.evaluate(()=>{
-      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
       p.joueur.rpg.delais=[0,0,0];p.joueur.mousse=60;
       p.monstres=[{uid:5100,type:'inspecteur',niveau:1,elite:false,boss:false,x:4,y:3,pv:1,pvMax:23,att:1,def:0,xp:10000,eveille:true,sonne:0}];
-      localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+      localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
     });
     await reprendre();const avantNiveau=await lire();await page.keyboard.press('1');
     await page.getByTestId('jbj-promotion').waitFor();const apresNiveau=await lire();
@@ -432,11 +434,11 @@ try {
     await bandeau.getByRole('button',{name:'Améliorer mes compétences'}).click();
     await page.getByTestId('jbj-competences').waitFor();await page.getByTestId('jbj-fermer-competences').click();
     await page.evaluate(()=>{
-      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+      const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
       p.joueur.niveau=7;p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.mousse=30;
       Object.assign(p.joueur.rpg,{chevalier:'colin',classe:'dps',rangs:[1,1,1,1,0,0],points:3,delais:[0,0,0]});
       p.monstres=[{uid:5200,type:'inspecteur',niveau:1,elite:false,boss:false,x:4,y:3,pv:100,pvMax:100,att:1,def:0,xp:1,eveille:true,sonne:0}];
-      localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+      localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
     });
     await reprendre();const avantPas=await lire();await page.getByTestId('jbj-actif-1').click();
     await page.getByTestId('jbj-pas-droite').waitFor();
@@ -448,11 +450,11 @@ try {
       const bases=['couteau','os','tranchoir','crochet','louche','hachoir','tablier','gilet','couennes','manteau','charlotte','bob','casque','couronne','decapsuleur','pork-id','nappe','appeau','jambon','biere'];
       await page.evaluate(async bases=>{
         await Promise.all(bases.map(async base=>{const image=new Image();image.src=`/ordre-cochon/items/${base}.png`;await image.decode();}));
-        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
         const objet=(base,uid)=>({base,uid,niveau:1,rarete:'etat',att:0,def:0,pv:0,mousse:0});
         p.joueur.sac=bases.slice(0,12).map((base,i)=>objet(base,2000+i));
         p.joueur.equipe={arme:objet('couteau',3000),armure:objet('gilet',3001),tete:objet('charlotte',3002),breloque:objet('decapsuleur',3003)};
-        localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+        localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
       },bases);
       await reprendre();await page.getByTestId('jbj-ouvrir-sac').click();
       await page.locator('.jbj-sprite-objet').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
@@ -461,7 +463,7 @@ try {
       await page.getByTestId('jbj-sac').screenshot({path:join(SHOTS,`${tag}-items-inventaire.png`)});
     }
     if(EQUIPEMENT){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),EQUIPEMENT);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),EQUIPEMENT);
       await reprendre();await page.getByTestId('jbj-ouvrir-sac').click();
       const avant=await lire();
       for(const [uid,place,role] of [[881,'armure','PV'],[882,'tete','mousse']]){
@@ -483,7 +485,7 @@ try {
       step(`${tag}: profils, compromis, echange sans soin et sauvegarde valides`);
     }
     if(ELITE){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),ELITE);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),ELITE);
       await reprendre();await page.keyboard.press('Space');
       const q=await lire(),prix=q.sol.find(s=>s.butin.type==='objet');
       if(q.monstres.length||!prix||!['garde','cru','etat'].includes(prix.butin.objet.rarete))throw new Error(`${tag}: prix d’elite absent`);
@@ -497,7 +499,7 @@ try {
       step(`${tag}: elite, butin garanti, comparaison et sauvegarde valides`);
     }
     if(OBJECTIF){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),OBJECTIF);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),OBJECTIF);
       await reprendre();await page.keyboard.press('Space');await page.getByTestId('jbj-promotion').waitFor();
       const p=await lire();if(p.etage!==2||p.joueur.niveau!==2||p.joueur.rpg.points!==1)throw new Error(`${tag}: progression par objectif incorrecte`);
       if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-objectif-niveau.png`)});
@@ -505,13 +507,13 @@ try {
     }
     if(PEAUFINAGE){
       await page.evaluate(()=>{
-        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));
+        const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));
         p.joueur.x=4;p.joueur.y=4;p.joueur.dir=0;p.joueur.niveau=10;p.joueur.mousse=0;p.joueur.pv=80;p.joueur.ivresse=0;
         p.joueur.rpg={chevalier:'ysee',classe:'jambonmancien',rangs:[2,1,1,0,0,0],points:6,delais:[0,0,0],protection:0,riposte:0,bouclier:0,perce:false,saigne:-1,encore:false,reduction:0,utilisee:-1};
         p.carte={w:9,h:9,cases:Array.from({length:81},(_,i)=>i<9||i>=72||i%9===0||i%9===8?1:0),vu:Array(81).fill(true),decor:Array(81).fill(0)};
         p.monstres=[{uid:7000,type:'moisissure',niveau:1,elite:false,boss:false,x:4,y:3,pv:80,pvMax:80,att:1,def:0,xp:1,eveille:true,sonne:0}];p.sol=[];p.fin=null;
         p.journal=[...p.journal.slice(-37),{cle:'jbj.refuge.victoire',vars:{nom:'Tranchoir de la Commission'}},{cle:'jbj.msg.frappe',vars:{nom:'Moisissure vivante',degats:12}}];
-        localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));
+        localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));
       });
       await reprendre();
       if(!(await page.getByTestId('jbj-actif-0').innerText()).includes('Manque')||!await page.getByTestId('jbj-actif-0').isDisabled())throw Error(`${tag}: mousse insuffisante mal expliquee`);
@@ -552,7 +554,7 @@ try {
       step(`${tag}: journal lisible et gratuit, statuts de competences et attente tactile valides`);
     }
     for(const fixture of REFUGES){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),fixture);
       await reprendre();await page.getByTestId('jbj-refuge').waitFor();
       const largeur=await page.getByTestId('jbj-refuge').evaluate(e=>[e.scrollWidth,e.clientWidth]);
       if(largeur[0]>largeur[1]+1)throw new Error(`${tag}: refuge trop large`);
@@ -567,7 +569,7 @@ try {
       step(`${tag}: refuge ${fixture.etage}, repos unique, points et descente valides`);
     }
     for(const fixture of COMPORTEMENTS){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),fixture);
       await reprendre();await page.getByTestId('jbj-menace').waitFor();
       const avant=await lire(),type=avant.monstres[0].type;
       if(!(await page.getByTestId('jbj-menace').textContent()).includes(type==='inspecteur'?'Verdict':'Écrasement'))throw new Error(`${tag}: alerte incorrecte pour ${type}`);
@@ -579,7 +581,7 @@ try {
       step(`${tag}: ${type}, annonce, esquive et recuperation sauvegardee valides`);
     }
     for(const fixture of BOSSES){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),fixture);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),fixture);
       await reprendre();await page.getByTestId('jbj-menace').waitFor();
       const avant=await lire();
       if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-boss-${fixture.etage}.png`)});
@@ -590,13 +592,13 @@ try {
       step(`${tag}: télégraphe et esquive du boss ${fixture.etage} validés`);
     }
     if(FINALE){
-      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p)),FINALE);
+      await page.evaluate(p=>localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p)),FINALE);
       await reprendre();
       if(!(await page.getByTestId('jambonjon').innerText()).includes('Acte 4'))throw new Error(`${tag}: acte final absent du HUD`);
       if(SHOTS)await page.getByTestId('jambonjon').screenshot({path:join(SHOTS,`${tag}-antre-final.png`)});
-      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie'));p.joueur.x=15;p.joueur.y=6;p.joueur.dir=0;p.monstres=p.monstres.filter(m=>m.boss);p.monstres[0].pv=1;localStorage.setItem('porkos.jambonjon.partie',JSON.stringify(p));});
+      await page.evaluate(()=>{const p=JSON.parse(localStorage.getItem('porkos.jambonjon.partie.citoyen'));p.joueur.x=15;p.joueur.y=6;p.joueur.dir=0;p.monstres=p.monstres.filter(m=>m.boss);p.monstres[0].pv=1;localStorage.setItem('porkos.jambonjon.partie.citoyen',JSON.stringify(p));});
       await reprendre();await page.keyboard.press('1');await page.getByTestId('jbj-fin').waitFor();
-      if(await page.evaluate(()=>localStorage.getItem('porkos.jambonjon.partie'))!==null)throw new Error(`${tag}: victoire finale garde une sauvegarde active`);
+      if(await page.evaluate(()=>localStorage.getItem('porkos.jambonjon.partie.citoyen'))!==null)throw new Error(`${tag}: victoire finale garde une sauvegarde active`);
       const bilan=await page.getByTestId('jbj-bilan-victoire').locator('dd').allTextContents();
       if(Number(bilan[0])!==12||Number(bilan[2])!==FINALE.tues+1||Number(bilan[3])!==FINALE.tour)throw new Error(`${tag}: bilan de victoire incorrect`);
       if(!(await page.getByTestId('jbj-vainqueur').innerText()).includes('Ysée'))throw new Error(`${tag}: chevalier vainqueur absent`);

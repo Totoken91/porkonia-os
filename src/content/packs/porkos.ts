@@ -347,7 +347,6 @@ export const porkosPack: ContentPack = {
       passwordHint: "Indice : un nombre que vous connaissez déjà.",
       porkId: { numero: "PK-0012-4471-B", niveauBanquet: "II — plat principal, dessert non garanti", profession: "Contribuable enthousiaste", delivrance: "12/12/2012" },
     },
-    { id: "invite", displayName: "Invité", caption: "Session surveillée · aucune Pork ID", password: null, passwordHint: "", guest: true },
   ],
 
   apps: [
@@ -1008,7 +1007,7 @@ export const porkosPack: ContentPack = {
       "Mot de passe accepté. Par souci d'équité, c'est désormais aussi celui de votre voisin.",
     ],
     patriotic: "Mot de passe patriotique détecté. Votre niveau de banquet a été examiné avec bienveillance, puis laissé tel quel.",
-    wrongPassword: "Mot de passe incorrect. Il a néanmoins été conservé.",
+    wrongPassword: "Mot de passe incorrect. Vérifiez le profil choisi et réessayez.",
     guestNotice: "Session invité : vos clics seront comptés un par un, à la main, par un agent qui n'a rien demandé.",
   },
 
@@ -3219,6 +3218,26 @@ export const porkosPack: ContentPack = {
   },
 
   strings: {
+    'compte.creation':'Créer un compte PorkOS',
+    'compte.bienvenue':'Choisissez votre nom et votre mot de passe pour créer votre profil.',
+    'compte.choisir':'Choisissez votre profil et entrez votre mot de passe.',
+    'compte.profils':'Profils de ce navigateur',
+    'compte.profil':'Compte local · progression personnelle',
+    'compte.nom':'Nom du profil',
+    'compte.confirmer':'Confirmation',
+    'compte.heritage':'Récupérer mes anciennes sauvegardes dans ce premier compte',
+    'compte.local':'Compte et sauvegardes conservés dans ce navigateur. Effacer ses données les supprime.',
+    'compte.creer':'Créer mon compte',
+    'compte.nouveau':'Nouveau profil',
+    'compte.retour':'Mes profils',
+    'compte.cree':'Compte créé. Entrez votre mot de passe pour vous connecter.',
+    'compte.attendre':'Veuillez patienter…',
+    'compte.erreur.nom':'Choisissez un nom de 2 à 32 caractères.',
+    'compte.erreur.doublon':'Ce nom est déjà utilisé sur ce navigateur.',
+    'compte.erreur.motdepasse':'Le mot de passe doit contenir de 2 à 128 caractères.',
+    'compte.erreur.confirmation':'Les deux mots de passe ne correspondent pas.',
+    'compte.erreur.limite':'Ce navigateur contient déjà 24 profils.',
+    'compte.erreur.stockage':'Impossible de lire ou enregistrer le compte. Vérifiez que le stockage du navigateur est disponible.',
     ...textesVivants,
     "portail.acces": "Accès directs PigNet",
     "portail.partenaires": "Publicités PigNet",

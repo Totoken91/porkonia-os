@@ -1,3 +1,4 @@
+import {creerProfil} from "./comptes-helper.mjs";
 /**
  * Parcours PigNet Y2K : bannières, liens, installation de Donjonbon et investissement Saucissignal, sur bureau et Poche paysage / portrait.
  * Usage : npm run build && node tests/e2e/pignet.mjs (SHOTS facultatif).
@@ -61,6 +62,7 @@ try {
     await page.getByTestId("boot-bios").waitFor();
     await page.keyboard.press("Space");
     await page.getByTestId("login").waitFor();
+    await creerProfil(page);
     await page.getByTestId("login-password").fill("12");
     await page.getByTestId("login-submit").click();
     await page.getByTestId("start").waitFor({ timeout: 8000 });

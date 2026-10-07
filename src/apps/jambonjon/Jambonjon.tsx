@@ -21,8 +21,6 @@ import { useEcran, useMenuCommands, useOs, useWin } from "@/os/context";
 import { convertirRpg, defMonstre, jouer, nouvellePartie, relirePartie, ROT_COUT, stats, xpPourNiveau, type Action, type Partie } from "./logic";
 import { angleDe, dessinerCarte, HAUTEUR, LARGEUR, preparer, rendre, type Camera } from "./rendu";
 
-const CLE = "porkos.jambonjon.partie";
-const CLE_CONSEILS = 'porkos.jambonjon.conseils';
 
 /* ----------------------------- Petits bruits ------------------------------ */
 
@@ -124,6 +122,8 @@ type Panneau = null | "sac" | "carte" | "aide" | "competences" | "journal" | "fi
 
 export function Jambonjon() {
   const { pack, str, settings, signal, user } = useOs();
+  const CLE=`porkos.jambonjon.partie.${user.id}`;
+  const CLE_CONSEILS=`porkos.jambonjon.conseils.${user.id}`;
   const { focused } = useWin();
   const ecran = useEcran();
   const jeu = pack.jambonjon;

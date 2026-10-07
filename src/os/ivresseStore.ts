@@ -6,6 +6,7 @@
  */
 import { useSyncExternalStore } from "react";
 import { boire, niveau, sanitize, SEUIL_WARP, sobre, type Ebriete } from "./ivresse";
+import {profilActif,surProfil,cleProfil} from './profilActif';
 
 const CLE = "porkos.ivresse";
 let etat: Ebriete = sobre();
@@ -18,8 +19,9 @@ let battement: ReturnType<typeof setInterval> | null = null;
 function lire() {
   if (lu || typeof window === "undefined") return;
   lu = true;
+  const id=profilActif();if(!id){etat=sobre();v=0;return;}
   try {
-    etat = sanitize(JSON.parse(window.localStorage.getItem(CLE) ?? "null"), Date.now());
+    etat = sanitize(JSON.parse(window.localStorage.getItem(cleProfil(CLE,id)) ?? "null"), Date.now());
   } catch {
     etat = sobre();
   }
@@ -28,7 +30,7 @@ function lire() {
 
 function ecrire() {
   try {
-    window.localStorage.setItem(CLE, JSON.stringify(etat));
+    const id=profilActif();if(id)window.localStorage.setItem(cleProfil(CLE,id), JSON.stringify(etat));
   } catch {
     /* ivresse non retenue */
   }
@@ -62,6 +64,7 @@ function abonner(f: () => void) {
 
 /** Un verre (ou plus) de plus. Rend le nouveau niveau. */
 export function boireVerres(verres = 1): number {
+  if(!profilActif())return 0;
   lire();
   const avant = niveau(etat, Date.now());
   etat = boire(etat, Date.now(), verres);
@@ -95,3 +98,4 @@ export const niveauActuel = () => {
 export function useIvresse(): number {
   return useSyncExternalStore(abonner, () => (lu ? v : (lire(), v)), () => 0);
 }
+surProfil(()=>{lu=false;etat=sobre();v=0;lire();prevenir();});

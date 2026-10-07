@@ -7,7 +7,6 @@ import { anneau, parseUrl, search } from "@/apps/navigateur/url";
 import { compteur, cours, duJour, jour, meteo } from "@/apps/navigateur/portail";
 import { at, decouper, gridOf, live, loopLength, programLength, sousTitre, voiceAt } from "@/apps/channel-pork/timeline";
 import { existsSync } from "node:fs";
-import { checkPassword } from "@/components/Login";
 import { makeRng } from "@/os/rng";
 import { resolve, childPath, parentPath } from "@/os/fs";
 import { DEFAULT_SETTINGS, sanitizeSettings } from "@/os/settings";
@@ -187,23 +186,6 @@ describe("Channel Pork", () => {
       for (const s of p.subtitles) expect(s.at).toBeLessThan(programLength(p));
       for (const s of p.slides) if (s.image.startsWith("/")) expect(existsSync(`public${s.image}`), s.image).toBe(true);
     }
-  });
-});
-
-describe("connexion", () => {
-  const citoyen = porkosPack.users[0]!;
-  const rnd = makeRng(1);
-  it("refuse le silence, accepte le reste en le commentant", () => {
-    expect(checkPassword(citoyen, "  ", porkosPack, rnd)).toEqual({ ok: false, message: porkosPack.login.emptyPassword });
-    expect(checkPassword(citoyen, "12", porkosPack, rnd)).toEqual({ ok: true, message: porkosPack.login.patriotic });
-    const r = checkPassword(citoyen, "motdepasse", porkosPack, rnd);
-    expect(r.ok).toBe(true);
-    expect(porkosPack.login.acceptedAny).toContain(r.message);
-  });
-  it("vérifie un mot de passe exigé", () => {
-    const strict = { ...citoyen, password: "rôti" };
-    expect(checkPassword(strict, "bœuf", porkosPack, rnd).ok).toBe(false);
-    expect(checkPassword(strict, "rôti", porkosPack, rnd).ok).toBe(true);
   });
 });
 
