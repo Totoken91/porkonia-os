@@ -26,6 +26,15 @@ const errors = [];
 const browser = await chromium.launch();
 const shot = async (page, name) => SHOTS && page.screenshot({ path: join(SHOTS, `${name}.png`) });
 const step = (m) => console.log("✓", m);
+const verifierBanque=async(page,tag,vue)=>{
+  const erreur=await page.getByTestId('banque').evaluate(root=>{
+    const b=root.getBoundingClientRect();
+    const tropLarge=[...root.querySelectorAll('.bq-principal,.banque-table,.banque-form')].some(e=>e.getBoundingClientRect().right>b.right+1||e.scrollWidth>e.clientWidth+1);
+    return root.scrollWidth>root.clientWidth+1||tropLarge||getComputedStyle(root).fontSize!=='16px';
+  });
+  if(erreur)throw Error(`${tag}: banque deborde ou police hors taille native (${vue})`);
+  if(SHOTS)await page.screenshot({path:join(SHOTS,`${tag}-banque-retro-${vue}.png`),style:'.gruik,.bulles{visibility:hidden!important}'});
+};
 
 try {
   const formats = [
@@ -88,6 +97,7 @@ try {
     // Sans compte, le jeu renvoie vers la banque.
     await page.getByTestId("grosses-banque").click();
     await page.getByTestId("banque").waitFor();
+    await verifierBanque(page,tag,"accueil");
     await shot(page, `${tag}-banque-accueil`);
     await page.getByTestId("banque-rub-compte").click();
     if ((await page.getByTestId("banque-numero").inputValue()).trim() === "") throw new Error(`${tag}: numéro de compte non prérempli`);
@@ -98,6 +108,7 @@ try {
     await page.getByTestId("banque-ouvrir").click();
     await page.getByTestId("banque-solde").waitFor();
     if (!(await page.getByTestId("banque-solde").textContent()).includes("100")) throw new Error(`${tag}: prime de bienvenue absente`);
+    await verifierBanque(page,tag,"compte");
     await page.getByTestId("banque-allocation").click();
     await page.waitForFunction(() => document.querySelector("[data-testid=banque-solde]")?.textContent?.includes("125"));
     if (!(await page.getByTestId("banque-allocation").isDisabled())) throw new Error(`${tag}: allocation versée deux fois`);
@@ -105,6 +116,7 @@ try {
 
     // Courtage : un titre à bas prix (cornichon), achat puis vente.
     await page.getByTestId("banque-rub-bourse").click();
+    await verifierBanque(page,tag,"bourse");
     await page.getByTestId("banque-achat-4").click();
     await page.getByTestId("banque-message").waitFor();
     const apres = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.banque.citoyen")));

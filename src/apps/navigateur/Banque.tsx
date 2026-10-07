@@ -130,7 +130,9 @@ function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet
               {str("banque.allocation", { somme: formaterPork(ALLOCATION_JOUR) })}
             </button>
           </p>
-          <table className="banque-table">
+          <table className="banque-table banque-historique" data-testid="banque-historique">
+            <caption>{str('banque.releve')}</caption>
+            <thead><tr><th scope="col">{str('banque.dateOperation')}</th><th scope="col">{str('banque.libelleOperation')}</th><th scope="col">{str('banque.montantOperation')}</th></tr></thead>
             <tbody>
               {compte.historique.slice(0, 12).map((o) => (
                 <tr key={o.id}>
@@ -147,13 +149,13 @@ function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet
           <p className="banque-portefeuille">
             {str("banque.portefeuille", { valeur: formaterPork(val.valeur), plus: `${val.plusValue >= 0 ? "+" : ""}${formaterPork(val.plusValue)}` })}
           </p>
-          <table className="banque-table" data-testid="banque-cours">
+          <table className="banque-table banque-bourse" data-testid="banque-cours">
             <thead>
               <tr>
-                <th>{str("banque.titre")}</th>
-                <th>{str("banque.cours")}</th>
-                <th>{str("banque.detenus")}</th>
-                <th>{str("banque.ordre")}</th>
+                <th scope="col">{str("banque.titre")}</th>
+                <th scope="col">{str("banque.cours")}</th>
+                <th scope="col">{str("banque.detenus")}</th>
+                <th scope="col">{str("banque.ordre")}</th>
               </tr>
             </thead>
             <tbody>
@@ -189,7 +191,7 @@ function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet
   );
 }
 
-/** Page d'accueil et rubriques de la Caisse, dans le goût des banques en ligne du début des années 2000. */
+/** Page d'accueil et rubriques de la Caisse, guichet de banque en ligne dans le goût de 1998. */
 export function Banque({ go }: { go?(u: string): void }) {
   const { pack, user, str } = useOs();
   const b = pack.banque;
@@ -199,7 +201,7 @@ export function Banque({ go }: { go?(u: string): void }) {
   return (
     <div className="bq" data-testid="banque">
       <header className="bq-tete">
-        <img src="/brand/embleme-64.png" alt="" width={48} height={48} />
+        <img src="/brand/embleme-64.png" alt="" width={32} height={32} />
         <div className="bq-marque">
           <h1>{b.nom}</h1>
           <p>{b.slogan}</p>
@@ -211,7 +213,7 @@ export function Banque({ go }: { go?(u: string): void }) {
       </header>
       <nav className="bq-nav" aria-label={b.nom}>
         {b.rubriques.map((r) => (
-          <button key={r.id} className={rub === r.id ? "actif" : ""} onClick={() => setRub(r.id)} data-testid={`banque-rub-${r.id}`}>
+          <button key={r.id} className={rub === r.id ? "actif" : ""} onClick={() => setRub(r.id)} aria-current={rub===r.id?"page":undefined} data-testid={`banque-rub-${r.id}`}>
             {r.label}
           </button>
         ))}
