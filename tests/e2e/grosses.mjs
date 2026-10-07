@@ -32,6 +32,7 @@ try {
     { tag: "bureau", viewport: { width: 1366, height: 800 } },
     { tag: "poche-paysage", viewport: { width: 844, height: 390 }, mobile: true },
     { tag: "poche-portrait", viewport: { width: 390, height: 844 }, mobile: true },
+    { tag: "poche-compact", viewport: { width: 360, height: 780 }, mobile: true },
   ];
   for (const { tag, viewport, mobile } of formats) {
     if(process.env.FORMATS&&!process.env.FORMATS.split(",").includes(tag))continue;
@@ -139,6 +140,10 @@ try {
     // La bière se commande sur Porkomazon, par drone (10 s), puis une choppe apparaît devant l'écran.
     await page.getByTestId("grosses-porkomazon").click();
     await page.getByTestId("porkomazon").waitFor();
+    const deborde=await page.getByTestId('porkomazon').evaluate(e=>e.scrollWidth>e.clientWidth+1);
+    if(deborde)throw Error(`${tag}: catalogue deborde horizontalement`);
+    await page.getByTestId('porkomazon').locator('h1').scrollIntoViewIfNeeded();
+    await shot(page,`${tag}-catalogue-retro`);
     await page.getByTestId("pkz-livraison-drone").check();
     await page.getByTestId("pkz-commander").click();
     await page.getByTestId("pkz-colis").waitFor();

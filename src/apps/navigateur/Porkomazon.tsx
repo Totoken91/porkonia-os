@@ -1,7 +1,7 @@
 "use client";
 /** Porkomazon : bière et saucisson, payés en Pork$ fictifs et livrés après un délai réel.
  * Les provisions livrées se consomment devant l'écran. */
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useOs } from "@/os/context";
 import { useCompte, operer } from "@/os/banqueStore";
 import { debiter, formaterPork } from "@/os/banque";
@@ -13,6 +13,7 @@ import { siteUrl } from "./url";
 export function Porkomazon({ go }: { go?(u: string): void }) {
   const { pack, user, str, signal, playSound } = useOs();
   const p = pack.porkomazon;
+  const ids=useId();
   const compte = useCompte(user.id);
   const cave = useCave();
   const gardeManger=useGardeManger();
@@ -47,12 +48,18 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
   return (
     <div className="pkz" data-testid="porkomazon">
       <header className="pkz-tete">
-        <h1>{p.nom}</h1>
+        <div className="pkz-enseigne"><img src="/brand/embleme-64.png" alt="" width={32} height={32}/><div><h1>{p.nom}</h1><b>{str('porkomazon.catalogueWeb')}</b></div></div>
         <p>{p.slogan}</p>
         <span className="pkz-compte">
           {compte ? `${str("banque.compteN", { numero: compte.numero })} · ${formaterPork(compte.solde)}` : str("porkomazon.sansCompte")}
         </span>
       </header>
+      <nav className="pkz-navigation" aria-label={str('porkomazon.rubriques')}>
+        <a href={`#${ids}-catalogue`}>{str('porkomazon.catalogue')}</a><span>|</span>
+        <a href={`#${ids}-bon`}>{str('porkomazon.bon')}</a><span>|</span>
+        <a href={`#${ids}-suivi`}>{str('porkomazon.enRoute')}</a><span>|</span>
+        <a href={`#${ids}-avis`}>{str('porkomazon.avis')}</a>
+      </nav>
       {!compte && (
         <p className="pkz-alerte">
           <button className="pkz-lien" onClick={() => go?.(siteUrl("banque-porc"))}>
@@ -61,23 +68,26 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
         </p>
       )}
       <div className="pkz-corps">
-        <section className="pkz-produits">
-          {p.produits.map((x) => (
-            <label key={x.id} className={`pkz-produit${produit === x.id ? " choisi" : ""}`}>
-              <input type="radio" name="produit" checked={produit === x.id} onChange={() => setProduit(x.id)} data-testid={`pkz-produit-${x.id}`} />
-              <span>
-                <b>{x.nom}</b>
-                <em>{x.description}</em>
-              </span>
-              <strong>{formaterPork(x.prix)}</strong>
-            </label>
-          ))}
+        <section className="pkz-produits" id={`${ids}-catalogue`}>
+          <h2>{str('porkomazon.catalogue')}</h2>
+          <table className="pkz-table">
+            <caption>{str('porkomazon.selection')}</caption>
+            <thead><tr><th scope="col" className="pkz-col-choix"><span className="pkz-sr">{str('porkomazon.choix')}</span></th><th scope="col" className="pkz-col-image"><span className="pkz-sr">{str('porkomazon.apercu')}</span></th><th scope="col">{str('porkomazon.article')}</th><th scope="col" className="pkz-col-prix">{str('porkomazon.prix')}</th></tr></thead>
+            <tbody>{p.produits.map(x=><tr key={x.id} className={`pkz-produit${produit===x.id?' choisi':''}`}>
+              <td><input id={`${ids}-${x.id}`} type="radio" name={`${ids}-produit`} checked={produit===x.id} onChange={()=>setProduit(x.id)} aria-label={x.nom} data-testid={`pkz-produit-${x.id}`}/></td>
+              <td className="pkz-col-image"><label htmlFor={`${ids}-${x.id}`}><img src={x.type==='saucisson'?'/brand/saucisson-planche.png':'/brand/biere-douzi.png'} alt="" width={40} height={44}/></label></td>
+              <td><label htmlFor={`${ids}-${x.id}`}><b>{x.nom}</b><em>{x.description}</em></label></td>
+              <td className="pkz-col-prix"><label htmlFor={`${ids}-${x.id}`}><strong>{formaterPork(x.prix)}</strong></label></td>
+            </tr>)}</tbody>
+          </table>
         </section>
-        <section className="pkz-livraison">
+        <section className="pkz-livraison" id={`${ids}-bon`}>
+          <h2>{str("porkomazon.bon")}</h2>
+          <p className="pkz-article-choisi">{article.nom}</p>
           <h3>{str("porkomazon.livraison")}</h3>
           {p.livraisons.map((x) => (
             <label key={x.id} className={`pkz-mode${mode === x.id ? " choisi" : ""}`}>
-              <input type="radio" name="livraison" checked={mode === x.id} onChange={() => setMode(x.id)} data-testid={`pkz-livraison-${x.id}`} />
+              <input type="radio" name={`${ids}-livraison`} checked={mode === x.id} onChange={() => setMode(x.id)} data-testid={`pkz-livraison-${x.id}`} />
               <span>
                 <b>{x.nom}</b> — {x.delaiS} s{x.supplement ? ` (+${formaterPork(x.supplement)})` : ""}
                 <em>{x.description}</em>
@@ -95,7 +105,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
           )}
         </section>
       </div>
-      <section className="pkz-suivi">
+      <section className="pkz-suivi" id={`${ids}-suivi`}>
         <h3>{str("porkomazon.enRoute")}</h3>
         {colis.length ? (
           <ul data-testid="pkz-colis">
@@ -111,7 +121,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
         <p data-testid="pkz-garde-manger">{str("porkomazon.gardeManger", { n: gardeManger.stock })}</p>
         <p data-testid="pkz-cave">{str("porkomazon.cave", { n: cave.stock })}</p>
       </section>
-      <section className="pkz-avis">
+      <section className="pkz-avis" id={`${ids}-avis`}>
         <h3>{str("porkomazon.avis")}</h3>
         {p.avis.map((a) => (
           <blockquote key={a.nom}>
@@ -120,7 +130,7 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
           </blockquote>
         ))}
       </section>
-      <footer className="pkz-pied">{str("porkomazon.mentions")}</footer>
+      <footer className="pkz-pied"><b>{str("porkomazon.optimise")}</b><p>{str("porkomazon.mentions")}</p></footer>
     </div>
   );
 }
