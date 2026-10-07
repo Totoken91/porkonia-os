@@ -255,6 +255,11 @@ export interface Channel {
 /** Portail officiel PigNet (page d'accueil du navigateur). */
 /** Bloc d'une page perso de PigNet (pages de citoyens façon années 2000). */
 export type BlocSite =
+  | { t: "entete"; titre: string; sousTitre: string; badge: string; navigation: { texte: string; url: string }[] }
+  | { t: "action"; texte: string; action: ActionRef }
+  | { t: "programme"; id: string }
+  | { t: "chevaliers" }
+  | { t: "leveeFonds"; titre: string; texte: string; montants: number[]; libelle: string }
   | { t: "titre"; texte: string }
   | { t: "texte"; texte: string }
   | { t: "defile"; texte: string }
@@ -281,7 +286,7 @@ export interface SitePerso {
   /** Ligne de l'annuaire. */
   description: string;
   categorie: string;
-  theme: "bois" | "ciel" | "nuit" | "papier" | "rouge" | "portail" | "banque" | "porkomazon";
+  theme: "bois" | "ciel" | "nuit" | "papier" | "rouge" | "portail" | "banque" | "porkomazon" | "donjon" | "brasserie" | "signal" | "zouk";
   /** Membre de l'Anneau des pages perso (liens précédent / suivant). */
   anneau?: boolean;
   /** Pages : "" est l'accueil. */
@@ -460,6 +465,8 @@ export interface JeuJambonjon {
 }
 
 export interface Portal {
+  raccourcis: { label: string; url: string }[];
+  bannieres: { id: string; image: string; titre: string; cta: string; url: string; cote: "gauche" | "droite" }[];
   /** Compteur de visites : valeur au 1er janvier 2000, puis tant de visites par jour. */
   compteur: { base: number; parJour: number };
   /** Saint du jour, tiré selon la date. */

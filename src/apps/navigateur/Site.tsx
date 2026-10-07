@@ -10,6 +10,9 @@ import { useOs } from "@/os/context";
 import { compteur } from "./portail";
 import { anneau, siteUrl } from "./url";
 import { Banque } from "./Banque";
+import { estInstalle } from "@/apps/installeur/logic";
+import { useCompte, operer } from "@/os/banqueStore";
+import { debiter, formaterPork } from "@/os/banque";
 import { Porkomazon } from "./Porkomazon";
 
 type Message = { nom: string; date: string; message: string };
@@ -61,6 +64,35 @@ function LivreDor({ site }: { site: SitePerso }) {
   );
 }
 
+function LeveeFonds({ bloc, go }: { bloc: Extract<BlocSite,{t:"leveeFonds"}>; go(u:string):void }) {
+  const { user, str, playSound, signal } = useOs();
+  const compte = useCompte(user.id);
+  const [message, setMessage] = useState("");
+  const investir = (montant:number) => {
+    const r = operer(user.id,c=>debiter(c,montant,bloc.libelle,new Date()));
+    if(!r || !r.ok)return setMessage(str(r?'saucissignal.soldeInsuffisant':'saucissignal.compteAbsent'));
+    playSound('ding');signal('saucissignal:don');
+    setMessage(str('saucissignal.recu',{montant:formaterPork(montant)}));
+  };
+  return <section className="site-fonds" data-testid="saucissignal-fonds">
+    <h2>{bloc.titre}</h2><p>{bloc.texte}</p>
+    {compte?<p>{str('saucissignal.solde',{montant:formaterPork(compte.solde)})}</p>:<p>{str('saucissignal.compteAbsent')}</p>}
+    <div>{bloc.montants.map(m=><button key={m} className="site-action" disabled={!compte} onClick={()=>investir(m)} data-testid={`saucissignal-don-${m}`}>{str('saucissignal.investir',{montant:formaterPork(m)})}</button>)}</div>
+    <p role="status" data-testid="saucissignal-recu">{message}</p>
+    <button className="site-lien" onClick={()=>go('porko://banque-porc')}>{str('saucissignal.banque')}</button>
+  </section>;
+}
+
+/** Le même accès devient Jouer après l’installation, y compris si le jeu était déjà installé sur ce poste. */
+function Programme({ id }: { id: string }) {
+  const { pack, fs, str, openApp } = useOs();
+  const inst = pack.installeurs.find(i=>i.programme===id);
+  const installe = !inst || estInstalle(fs.disque, id);
+  return <button className="site-action" data-testid={`site-jouer-${id}`} onClick={()=>openApp(installe?id:'installeur',installe?undefined:{id:inst!.id})}>
+    {str(installe?'site.jouer':'site.installerJouer')} ▸
+  </button>;
+}
+
 /** Lien de téléchargement : ouvre la boîte « Téléchargement de fichier » du système. */
 function Telecharger({ id }: { id: string }) {
   const { pack, str, openApp } = useOs();
@@ -78,9 +110,22 @@ function Telecharger({ id }: { id: string }) {
   );
 }
 
-function Bloc({ b, site, go }: { b: BlocSite; site: SitePerso; go(u: string): void }) {
-  const { pack, str } = useOs();
+function Bloc({ b, site, page, go }: { b: BlocSite; site: SitePerso; page:string; go(u: string): void }) {
+  const { pack, str, runAction } = useOs();
   switch (b.t) {
+    case "entete":
+      return <header className="pignet-site-entete">
+        <span>{b.badge}</span><h1>{b.titre}</h1><p>{b.sousTitre}</p>
+        <nav aria-label={b.titre}>{b.navigation.map(n=><button className="site-lien" key={n.url} aria-current={siteUrl(site.hote,page)===n.url?'page':undefined} onClick={()=>go(n.url)}>{n.texte}</button>)}</nav>
+      </header>;
+    case "programme": return <Programme id={b.id}/>;
+    case "leveeFonds": return <LeveeFonds bloc={b} go={go}/>;
+    case "action": return <button className="site-action" onClick={()=>runAction(b.action)}>{b.texte} ▸</button>;
+    case "chevaliers": return <div className="site-chevaliers">{pack.jambonjon.rpg?.chevaliers.map(c=><article key={c.id}>
+      <img src={`/ordre-cochon/blasons/${c.id}.png`} alt="" width={48} height={48}/>
+      <div><h2>{c.nom}</h2><b>{str(`jbj.rpg.${c.classe}`)}</b><p>{c.histoire}</p><p><strong>{str('site.innee')} : {c.innee}</strong><br/>{c.effet}</p></div>
+    </article>)}</div>;
+
     case "titre":
       return <h1 className="site-titre">{b.texte}</h1>;
     case "texte":
@@ -195,7 +240,7 @@ export function Site({ site, page, go, introuvable }: { site: SitePerso; page: s
   return (
     <div className={`site site-${site.theme}`} data-testid={`site-${site.hote}`}>
       {p.blocs.map((b, i) => (
-        <Bloc key={i} b={b} site={site} go={go} />
+        <Bloc key={i} b={b} site={site} page={page} go={go} />
       ))}
       <p className="site-pied">{site.hote === "annuaire" ? null : `porko://${site.hote}`}</p>
     </div>

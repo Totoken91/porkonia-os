@@ -6,6 +6,7 @@
 import type { ActionRef, ContentPack, MenuEntry, MenuSpec, Program } from "../types";
 import { deplierGenerique } from "@/os/generique";
 import { ordreCochon } from "./ordre-cochon";
+import { accesPigNet, pubsPigNet, nouveauxSitesPigNet } from './pignet';
 import { campagneOrdre } from './ordre-cochon-campagne';
 
 // Images de Porkopédia copiées dans public/porkopedia/ (le site est protégé par mot de passe depuis octobre 2026).
@@ -351,7 +352,7 @@ export const porkosPack: ContentPack = {
   apps: [
     { id: "bienvenue", kind: "bienvenue", title: "Bienvenue dans PorkOS", icon: "embleme", size: { w: 560, h: 350 }, single: true, menu: "accessoires", blurb: "Revoir l'écran de bienvenue" },
     { id: "mail", kind: "mail", title: "Courrier d'État", icon: "mail", size: { w: 720, h: 470 }, single: true, menu: "programmes", blurb: "Votre courrier, déjà lu" },
-    { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 700, h: 480 }, menu: "programmes", blurb: "Le monde, tel qu'homologué" },
+    { id: "navigateur", kind: "navigateur", title: "PigNet Navigateur", icon: "navigateur", size: { w: 780, h: 550 }, menu: "programmes", blurb: "Le monde, tel qu'homologué" },
     { id: "channel-pork", kind: "channel-pork", title: "Channel Pork", icon: "tele", size: { w: 560, h: 506 }, habillage: "tuner", single: true, menu: "programmes", blurb: "Cinq chaînes, toutes Canal 1" },
     { id: "nappe-vide", kind: "nappe-vide", title: "Nappe Vide", icon: "nappe", size: { w: 260, h: 330 }, single: true, menu: "programmes", blurb: "Jeu de protocole pour toute la famille" },
     { id: "fichiers", kind: "fichiers", title: "Mes documents", icon: "dossier", size: { w: 480, h: 340 }, menu: "accessoires", blurb: "Vos papiers, en ordre" },
@@ -2441,6 +2442,8 @@ export const porkosPack: ContentPack = {
   ] as Program[]).map(deplierGenerique),
 
   portal: {
+    raccourcis: accesPigNet,
+    bannieres: pubsPigNet,
     compteur: { base: 4_120_000, parJour: 1212 },
     saints: [
       "Saint Jambon",
@@ -2618,6 +2621,7 @@ export const porkosPack: ContentPack = {
 
   // PigNet : pages perso de citoyens et annuaire (porko://…). Personnages et sites inventés pour PorkOS.
   sites: [
+    ...nouveauxSitesPigNet,
     {
       hote: "annuaire",
       titre: "Annuaire PigNet des sites homologués",
@@ -2718,8 +2722,9 @@ export const porkosPack: ContentPack = {
             { t: "titre", texte: "Le Grenier à Partagiciels" },
             { t: "defile", texte: "NOUVEAU : COURSE DE GROSSES 1.0, le premier jeu de paris de la République, et L’ORDRE COCHON 1.0, le premier jeu de cave en vraie 3D. Téléchargez avant que la Commission ne s'en aperçoive." },
             { t: "texte", texte: "Bienvenue au Grenier. Ici, des citoyens partagent leurs programmes. Tout est gratuit, sauf le temps de téléchargement, qui est facturé à votre patience." },
+            { t: "liens", liens: [{ texte: "DONJONBON : le site dédié au jeu", url: "porko://donjonbon" }, { texte: "Salle d’arcade : tous les jeux", url: "porko://salle-arcade" }] },
             { t: "titre", texte: "L’Ordre Cochon : Les Entrailles du Royaume" },
-            { t: "texte", texte: "Descendez dans les caves d'affinage, case par case. Labyrinthes jamais deux fois les mêmes, brouillard de cave, rats, gobelins, moisissures nobles et inspecteurs des fraudes salées. Mangez du jambon, buvez de la bière, rotez sur vos ennemis. Cinq étages, un Grand Affineur." },
+            { t: "texte", texte: "Descendez dans les caves d'affinage, case par case. Labyrinthes jamais deux fois les mêmes, brouillard de cave, rats, gobelins, moisissures nobles et inspecteurs des fraudes salées. Mangez du jambon, buvez de la bière, rotez sur vos ennemis. Douze étages, un Grand Affineur." },
             { t: "liste", items: ["Configuration requise : PorkOS 12.12, 4 Mo de mémoire vive, un clavier avec les touches Z, Q, S, D, A et E.", "Carte graphique : n'importe laquelle, le jeu est déjà flou.", "Testé sur trois postes, dont un a survécu."] },
             { t: "telecharger", fichier: "jambonjon" },
             { t: "texte", texte: "Une fois le fichier téléchargé, ouvrez-le pour lancer l'assistant d'installation. Le Ministère des Loisirs recommande de ne pas jouer plus de onze heures d'affilée." },
@@ -3212,6 +3217,21 @@ export const porkosPack: ContentPack = {
   },
 
   strings: {
+    "portail.acces": "Accès directs PigNet",
+    "portail.partenaires": "Publicités PigNet",
+    "portail.decouvrir": "À découvrir sur PigNet",
+    "portail.decouvrirJeu": "Jouer / Installer",
+    "portail.siteJeu": "Le jeu à la une",
+    "site.jouer": "Jouer",
+    "site.installerJouer": "Installer et jouer",
+    "site.innee": "Compétence innée",
+    "saucissignal.investir": "Investir {montant} Pork$",
+    "saucissignal.solde": "Capital disponible : {montant} Pork$",
+    "saucissignal.compteAbsent": "Un compte à la Caisse est nécessaire pour participer.",
+    "saucissignal.soldeInsuffisant": "Capital insuffisant. La Caisse propose une allocation quotidienne.",
+    "saucissignal.recu": "Participation enregistrée : {montant} Pork$. Bénéficiaire : Éric, compte personnel. Parts attribuées : 0. Éric vous remercie pour le coup de main.",
+    "saucissignal.banque": "Consulter l’opération à la banque",
+
     "jbj.acteEtage": "Acte {acte} · {n}/{max}",
     "jbj.msg.etageConcu": "{texte}",
     "jbj.rpg.choix": "Choisir un chevalier",

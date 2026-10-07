@@ -1585,4 +1585,88 @@
   .piece.poche .saucisson-table { right:auto; left:104px; bottom:calc(env(safe-area-inset-bottom,0px) + 96px); }
   @keyframes saucisson-bouchee { 50% { transform:translateY(-18px) rotate(-5deg); } }
   @media (prefers-reduced-motion:reduce) { .saucisson-table,.saucisson-table.mange { animation:none; } }
+
+  /* PigNet 1999 : colonnes éditoriales, publicités indépendantes et raccourcis de premier niveau. */
+  .portail { font:16px/18px var(--font-sans); }
+  .portail h1 { font:bold 16px/18px var(--font-sans); }
+  .portail-tete { gap:8px; }
+  .portail-titre p,.portail-date,.portail-flash,.portail-portee,.portail .cadre h3,
+  .portail .cadre .lien,.portail .services small,.portail .direct small,.portail .resultats small,
+  .portail .bourse table,.portail-pied,.portail-pied .badges span { font:16px/18px var(--font-sans); }
+  .portail-titre p { margin:4px 0; }
+  .portail-date { max-width:180px; }
+  .portail-recherche { margin:4px 0 8px; }
+  .portail-raccourcis { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:3px; margin:6px 0; }
+  .portail-raccourcis button { min-height:40px; padding:5px 3px; background:#e8dcbd; color:#4a2026; border:2px outset #cabb94; font-weight:bold; }
+  .portail-raccourcis button:first-child { background:#5b2028; color:#ffe19c; }
+  .portail-raccourcis button:hover { border-color:#71464b; }
+  .portail-raccourcis button:focus-visible,.portail-banniere:focus-visible { outline:2px solid #145ab3; outline-offset:1px; }
+  .portail-grille { grid-template-columns:128px minmax(0,1fr) 128px; }
+  .portail-bannieres { display:flex; flex-direction:column; gap:8px; }
+  .portail-banniere { width:100%; display:flex; flex-direction:column; padding:0; border:1px solid #575047; color:#17263b; background:#efebdc; text-align:center; }
+  .portail-banniere img { display:block; width:100%; height:auto; aspect-ratio:1/2; object-fit:cover; }
+  .portail-banniere span { display:block; padding:6px 3px; border:2px outset #c5bfa9; background:#eae4d2; text-decoration:underline; }
+  .portail-banniere:hover span { background:#fff4ca; }
+  .portail-jeu-vedette { display:flex; align-items:center; gap:8px; padding:8px; width:100%; color:#f7e6c5; background:#292b23; border:2px outset #9b936d; text-align:left; }
+  .portail-jeu-vedette img { flex:none; image-rendering:pixelated; }
+  .portail-jeu-vedette span { display:flex; flex-direction:column; gap:5px; }
+  .portail .une-corps { flex-direction:column; }
+  .portail .une-corps img { width:100%; height:130px; object-fit:cover; }
+  .portail .une h2 { font:bold 16px/18px var(--font-sans); }
+  .portail .cadre { overflow-wrap:anywhere; }
+  .portail .bourse tbody { display:block; }
+  .portail .bourse tr { display:grid; grid-template-columns:1fr 1fr; padding:4px 0; }
+  .portail .bourse td:first-child { grid-column:1 / -1; }
+  .portail .bourse .n { white-space:normal; text-align:left; }
+  .portail .vignettes b { font:bold 16px/18px var(--font-sans); }
+  .portail .vignettes span { font:16px/18px var(--font-sans); }
+  .portail-pied { gap:6px; }
+  .site.site-donjon,.site.site-brasserie,.site.site-signal,.site.site-zouk,.site.site-portail { font:16px/20px var(--font-sans); padding:10px; }
+  .pignet-site-entete { padding:12px; border:3px double currentColor; margin-bottom:12px; }
+  .pignet-site-entete h1 { font:bold 16px/18px var(--font-sans); margin:8px 0; letter-spacing:2px; }
+  .pignet-site-entete p { margin:5px 0 10px; }
+  .pignet-site-entete nav { display:flex; flex-wrap:wrap; gap:4px; }
+  .pignet-site-entete .site-lien { flex:1 1 110px; border:2px outset #b6a785; background:#e4dcc8; color:#262217; padding:8px; text-align:center; text-decoration:none; }
+  .pignet-site-entete [aria-current=page] { border-style:inset; background:#c7b788; }
+  .site-action { display:block; min-height:44px; padding:10px 14px; margin:10px 0; border:3px outset #c4af78; background:#5a2029; color:#fff1cb; }
+  .site-action:hover { background:#71313a; }
+  .site-action:disabled { opacity:.55; }
+  .site.site-donjon { background:#22271f; color:#e8dfbf; }
+  .site-donjon .pignet-site-entete { background:#171a15; border-color:#918364; }
+  .site-donjon .site-titre,.site-zouk .site-titre { font:bold 16px/20px var(--font-sans); color:#e9cf89; text-align:left; }
+  .site-donjon .site-lien,.site-zouk .site-lien { color:#ead8a3; }
+  .site-donjon .pignet-site-entete .site-lien { color:#171a15; }
+  .site.site-brasserie { background:#f3ebd6; color:#5f202b; }
+  .site-brasserie .pignet-site-entete { background:#681d2b; color:#f8e6ba; border-color:#ae904c; }
+  .site-brasserie .site-titre,.site-signal .site-titre,.site-portail .site-titre { font:bold 16px/20px var(--font-sans); text-align:left; }
+  .site.site-signal { background:#f4f6f3; color:#263e45; }
+  .site-signal .pignet-site-entete { background:#167785; color:#fff; border-color:#12606d; }
+  .site-signal .site-action { background:#e18425; color:#182e37; border-color:#efb67c; }
+  .site.site-zouk { background:#102740; color:#dce9ee; }
+  .site-zouk .pignet-site-entete { background:#091a2d; border-color:#4c91a5; }
+  .site-zouk .site-action { background:#e28627; color:#122a3a; }
+  .site-chevaliers { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .site-chevaliers article { display:flex; gap:8px; padding:8px; border:2px ridge #918364; background:#171a15; }
+  .site-chevaliers img { flex:none; image-rendering:pixelated; }
+  .site-chevaliers h2 { font:bold 16px/18px var(--font-sans); }
+  .site-chevaliers p { margin:6px 0; }
+  .site-chevaliers article > div { min-width:0; }
+  .site-fonds { padding:12px; border:2px solid #72a3a7; background:#e9f1ed; color:#213b41; margin:12px 0; }
+  .site-fonds h2 { font:bold 16px/18px var(--font-sans); }
+  .site-fonds p { margin:8px 0; }
+  .site-fonds > div { display:flex; flex-wrap:wrap; gap:6px; }
+  @container (max-width:560px) {
+    .portail-raccourcis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .portail-raccourcis button { min-height:44px; }
+    .portail-grille { grid-template-columns:1fr; }
+    .portail-grille main { grid-row:1; }
+    .portail-bannieres { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .portail-banniere img { height:240px; object-fit:contain; background:#151820; }
+    .portail-portee { flex-wrap:wrap; gap:6px; }
+    .portail .une-corps { flex-direction:row; }
+    .portail .une-corps img { width:35%; height:auto; align-self:start; }
+    .site-chevaliers { grid-template-columns:1fr; }
+    .site-donjon .site-image img { max-width:100%; }
+  }
+
 }

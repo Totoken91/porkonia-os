@@ -1,6 +1,6 @@
 "use client";
 /** PigNet Navigateur : l'internet national. Porkopédia y est consultable hors ligne (notices intégrées au build). */
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { DECALAGE, live } from "@/apps/channel-pork/timeline";
@@ -25,6 +25,7 @@ export function Navigateur() {
   const { str, signal, openApp, pack } = useOs();
   const { win, setTitle } = useWin();
   const adresse = useRef<HTMLInputElement>(null);
+  const pageWeb = useRef<HTMLDivElement>(null);
   const [hist, setHist] = useState<{ list: string[]; i: number }>({ list: [win.args.url ?? HOME], i: 0 });
   const url = hist.list[hist.i]!;
   const [bar, setBar] = useState(url);
@@ -38,7 +39,7 @@ export function Navigateur() {
     if (win.args.url && win.args.url !== url) go(win.args.url);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [win.args.url]);
-  useEffect(() => setBar(url), [url]);
+  useEffect(() => {setBar(url);if(pageWeb.current)pageWeb.current.scrollTop=0;}, [url]);
 
   const pageTitle = route.kind === "article" ? (byId.get(route.id)?.title ?? CATALOG.find((c) => c.id === route.id)?.title ?? "412") : route.kind === "accueil" ? "PigNet" : route.kind === "index" ? "Porkopédia" : route.kind === "recherche" ? route.q : site ? (site.pages[route.kind === "site" ? route.page : ""]?.titre ?? site.titre) : "PigNet";
   useEffect(() => setTitle(`${pageTitle} — PigNet Navigateur`), [pageTitle, setTitle]);
@@ -83,7 +84,7 @@ export function Navigateur() {
           <button className="pk-btn small">Aller</button>
         </form>
       </div>
-      <div className="pk-body page-web" onClick={onLink} data-testid="nav-page">
+      <div ref={pageWeb} className="pk-body page-web" onClick={onLink} data-testid="nav-page">
         {route.kind === "accueil" && <Accueil go={go} />}
         {route.kind === "index" && <Index go={go} section={route.section} />}
         {route.kind === "recherche" && <Recherche q={route.q} go={go} />}
@@ -101,7 +102,8 @@ export function Navigateur() {
 }
 
 function Accueil({ go }: { go(u: string): void }) {
-  const { str, pack, runAction, openApp, signal } = useOs();
+  const { str, pack, runAction, openApp } = useOs();
+  const ids=useId();
   const portail = pack.portal;
   const [q, setQ] = useState("");
   const [portee, setPortee] = useState<"tout" | "porkopedia" | "etranger">("tout");
@@ -120,7 +122,7 @@ function Accueil({ go }: { go(u: string): void }) {
     return [...m.entries()].sort((x, y) => y[1] - x[1]).slice(0, 12);
   }, []);
   const direct = pack.channels.map((c, i) => ({ c, d: live(c, pack.programs, maintenant.getTime() / 1000, i * DECALAGE) }));
-  const date = maintenant.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const date = maintenant.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
   const rechercher = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +133,7 @@ function Accueil({ go }: { go(u: string): void }) {
   return (
     <div className="portail">
       <header className="portail-tete">
-        <img src="/brand/embleme-128.png" alt="" width={64} height={64} />
+        <img src="/brand/embleme-128.png" alt="" width={40} height={40} />
         <div className="portail-titre">
           <h1>{str("nav.accueil.titre")}</h1>
           <p>{str("nav.accueil.sousTitre")}</p>
@@ -142,6 +144,9 @@ function Accueil({ go }: { go(u: string): void }) {
         </div>
       </header>
 
+      <nav className="portail-raccourcis" aria-label={str('portail.acces')}>
+        {portail.raccourcis.map(r=><button key={r.url} onClick={()=>go(r.url)} data-testid={`portail-acces-${r.url.split('://')[1]}`}>{r.label}</button>)}
+      </nav>
       <div className="portail-flash" aria-label="Dernière minute">
         <span>{portail.flash.repeat(2)}</span>
       </div>
@@ -152,14 +157,15 @@ function Accueil({ go }: { go(u: string): void }) {
         <span className="portail-portee">
           {(["tout", "porkopedia", "etranger"] as const).map((k) => (
             <label key={k}>
-              <input type="radio" name="portee" checked={portee === k} onChange={() => setPortee(k)} /> {str(`portail.portee.${k}`)}
+              <input type="radio" name={`${ids}-portee`} checked={portee === k} onChange={() => setPortee(k)} /> {str(`portail.portee.${k}`)}
             </label>
           ))}
         </span>
       </form>
 
       <div className="portail-grille">
-        <aside>
+        <aside className="portail-gauche">
+          <Bannieres cote="gauche" go={go}/>
           <section className="cadre">
             <h3>{str("portail.rubriques")}</h3>
             <ul className="rubriques">
@@ -185,6 +191,14 @@ function Accueil({ go }: { go(u: string): void }) {
         </aside>
 
         <main>
+          <section className="cadre portail-jeux">
+            <h3>{str('portail.siteJeu')}</h3>
+            <button className="portail-jeu-vedette" onClick={()=>go('porko://donjonbon')}>
+              <img src="/ordre-cochon/blasons/berthe.png" alt="" width={48} height={48}/>
+              <span><b>{pack.sites.find(x=>x.hote==='donjonbon')?.titre}</b><u>{str('portail.decouvrirJeu')} ▸</u></span>
+            </button>
+            <button className="lien plus" onClick={()=>go('porko://salle-arcade')}>{portail.raccourcis[1]?.label} ▸</button>
+          </section>
           <section className="cadre une" data-testid="portail-une">
             <h3>{str("portail.une")}</h3>
             <div className="une-corps">
@@ -211,7 +225,7 @@ function Accueil({ go }: { go(u: string): void }) {
           <section className="cadre">
             <h3>{str("portail.notices")}</h3>
             <ul className="vignettes">
-              {ARTICLES.map((a) => (
+              {ARTICLES.slice(0, 8).map((a) => (
                 <li key={a.id}>
                   <a data-article={a.id} href="#">
                     {a.image ? <img src={a.image} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span className="sans-image" />}
@@ -224,7 +238,8 @@ function Accueil({ go }: { go(u: string): void }) {
           </section>
         </main>
 
-        <aside>
+        <aside className="portail-droite">
+          <Bannieres cote="droite" go={go}/>
           <section className="cadre direct">
             <h3>{str("portail.direct")}</h3>
             <ul>
@@ -245,7 +260,7 @@ function Accueil({ go }: { go(u: string): void }) {
               <form onSubmit={(e) => { e.preventDefault(); setVote(choix); }}>
                 {portail.sondage.options.map((o, i) => (
                   <label key={o}>
-                    <input type="radio" name="sondage" checked={choix === i} onChange={() => setChoix(i)} /> {o}
+                    <input type="radio" name={`${ids}-sondage`} checked={choix === i} onChange={() => setChoix(i)} /> {o}
                   </label>
                 ))}
                 <button className="pk-btn small" data-testid="portail-voter">{str("portail.voter")}</button>
@@ -287,13 +302,7 @@ function Accueil({ go }: { go(u: string): void }) {
               ))}
             </ul>
           </section>
-          <button className="portail-pub" onClick={() => signal("pub:cta")} aria-label={str("portail.pub")}>
-            <img src={portail.pub.image} alt="" />
-            <span>
-              <b>{portail.pub.texte}</b>
-              <u>{portail.pub.cta}</u>
-            </span>
-          </button>
+
         </aside>
       </div>
 
@@ -334,6 +343,15 @@ function Accueil({ go }: { go(u: string): void }) {
       </footer>
     </div>
   );
+}
+
+function Bannieres({ cote, go }: { cote:"gauche"|"droite"; go(u:string):void }) {
+  const { pack, str }=useOs();
+  return <div className="portail-bannieres" aria-label={str('portail.partenaires')}>
+    {pack.portal.bannieres.filter(b=>b.cote===cote).map(b=><button key={b.id} className={`portail-banniere pub-${b.id}`} aria-label={`${b.titre} — ${b.cta}`} onClick={()=>go(b.url)} data-testid={`pub-${b.id}`}>
+      <img src={b.image} alt="" width={120} height={240}/><span>{b.cta} ▸</span>
+    </button>)}
+  </div>;
 }
 
 function Index({ go, section }: { go(u: string): void; section?: string }) {
