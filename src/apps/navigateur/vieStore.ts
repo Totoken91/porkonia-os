@@ -1,10 +1,11 @@
 "use client";
 import {useSyncExternalStore} from 'react';
 import {relireVie,vide,type VieLocale} from './vie-locale';
+import {cle as cleStockage} from '@/os/stockage';
 const etats=new Map<string,VieLocale>();
 const abonnes=new Set<()=>void>();
 const initial=vide();
-const cle=(u:string)=>`porkos.pignet.vie.${u}`;
+const cle=(u:string)=>cleStockage('vieLocale',{profil:u});
 function lire(u:string):VieLocale {
   if(!etats.has(u)) {
     let v=vide();

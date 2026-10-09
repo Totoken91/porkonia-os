@@ -15,9 +15,10 @@ import { useCompte, operer } from "@/os/banqueStore";
 import { debiter, formaterPork } from "@/os/banque";
 import { Porkomazon } from "./Porkomazon";
 import {VieLocale} from './VieLocale';
+import { cle } from "@/os/stockage";
 
 type Message = { nom: string; date: string; message: string };
-const cleLivre = (hote: string,user:string) => `porkos.livredor.${hote}.${user}`;
+const cleLivre = (hote: string,user:string) => cle('livreDor', { hote, profil: user });
 
 function LivreDor({ site }: { site: SitePerso }) {
   const { str, signal, user } = useOs();

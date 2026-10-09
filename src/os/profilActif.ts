@@ -2,7 +2,6 @@
 let actif:string|null=null;
 const abonnes=new Set<()=>void>();
 export const profilActif=()=>actif;
-export const cleProfil=(base:string,id:string)=>`${base}.${id}`;
 export function activerProfil(id:string|null) {
   if(id===actif)return;
   actif=id;for(const f of abonnes)f();

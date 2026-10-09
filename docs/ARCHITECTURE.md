@@ -6,7 +6,9 @@ Export statique Next 16 (App Router, `output: "export"`), React 19, TypeScript s
 src/
   content/
     types.ts              contrat d'un pack de contenu
-    packs/porkos.ts       le pack « Édition Citoyenne »
+    packs/porkos.ts       le pack « Édition Citoyenne » (assemble les fichiers ci-dessous)
+    packs/pignet.ts       sites et publicités du portail PigNet ; pignet-vivant.ts : annonces, horoscope, courrier des lecteurs
+    packs/ordre-cochon*.ts contenu et plans de campagne de L'Ordre Cochon
     porkopedia/*.json     notices Porkopédia assainies au build (scripts/build-porkopedia.mts)
   os/                     cœur PUR (testé) + contextes React
     windows.ts            réducteur du gestionnaire de fenêtres
@@ -15,7 +17,13 @@ src/
     fs.ts                 chemins du système de fichiers du pack
     vfs.ts                disque du poste : opérations pures (créer, renommer, déplacer, copier, jeter, restaurer), Bureau, assainissement
     glisser.ts            glisser-déposer de fichiers (type de données, zones [data-depot])
-    settings.ts           réglages (localStorage, assainis)
+    settings.ts           réglages (assainis, un jeu par profil)
+    stockage.ts           REGISTRE de tout ce qui est conservé dans le navigateur (voir « Comptes, profils et stockage »)
+    comptes.ts            comptes locaux (empreinte PBKDF2 du mot de passe), reprise des sauvegardes d'avant les comptes
+    profilActif.ts        profil connecté dans cet onglet ; prévient les magasins au changement de profil
+    banque.ts             compte en Pork$ fictifs (logique pure) ; banqueStore.ts le partage entre banque, jeux et boutiques
+    ivresse.ts            ébriété (logique pure) ; ivresseStore.ts la partage entre le moniteur et les applis
+    biere.ts              colis à délai de livraison (logique pure) ; provisionsStore.ts → biereStore.ts, saucissonStore.ts
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
     sons.ts               sons système (WebAudio) : carillons synthétisés, machine en échantillons (public/audio/pc/, scripts/sons-pc.py)
     distinctions.ts       distinctions civiques (succès) : signaux et ouvertures d'applis → médailles, rang, état conservé
@@ -36,13 +44,34 @@ src/
 4. Une règle peut livrer un courrier tardif (action `mail`) : il arrive dans la boîte de réception, avec bulle et enveloppe dans la zone de notification. La boîte est retenue dans le navigateur.
 5. Une action (`ActionRef`) peut ouvrir une appli, afficher un dialogue ou une bulle, lancer une pub, une mise à jour, la veille ou le verrouillage.
 
+## Comptes, profils et stockage
+
+Tout ce que PorkOS conserve vit dans le `localStorage` de ce navigateur : rien n'est envoyé à un serveur, rien ne se
+synchronise entre appareils (voir [COMPTES-LOCAUX.md](COMPTES-LOCAUX.md) pour l'usage).
+
+- **Un seul registre.** `src/os/stockage.ts` déclare chaque donnée conservée : sa base (`porkos.…`), sa portée
+  (« poste », commune à tous les profils, ou « profil », une copie par compte), si la clé porte le pack ou l'hôte d'un site,
+  et sa situation avant les comptes. La clé se calcule avec `cle(nom, { profil, pack, hote })`. `tests/stockage.test.ts` refuse toute chaîne `porkos.…` écrite ailleurs dans `src/`
+  et fige la forme des clés historiques (les changer rendrait les sauvegardes illisibles).
+- **Reprise d'avant les comptes.** Les clés autrefois partagées (`heritage: "partagee"`) sont copiées vers le profil
+  historique `citoyen` quand le premier compte accepte la reprise ; celles qui portaient déjà `citoyen` sont reprises telles
+  quelles. Les deux listes se déduisent du registre (`clesHeritage`, `clesHistoriques`).
+- **Changement de profil.** Les composants de session sont remontés à la connexion (`key` = identifiant du profil) et
+  relisent leurs clés. Les magasins hors React (`ivresseStore`, `provisionsStore`) sont des modules : ils s'abonnent à
+  `surProfil` (`profilActif.ts`) pour se vider et relire. Un nouveau magasin de module doit faire de même, ou indexer son
+  cache par profil comme `banqueStore` et `vieStore`.
+
+Ajouter une donnée conservée : une ligne dans `STOCKAGE`, puis `cle(...)` à l'endroit qui lit et écrit. Si un magasin de
+module la garde en mémoire, l'abonner à `surProfil`.
+
 ## Ajouter…
 
 - **un fichier, un mail, une pub, un programme, un message** : uniquement dans le pack.
 - **une réaction du système** : une règle dans `rules` (+ un pool de flash infos ou un dialogue).
 - **une appli** : un `kind` dans `types.ts`, un composant dans `src/apps/<kind>/`, une entrée dans `registry.tsx`, un manifeste dans le pack.
-- **un programme à télécharger** : un manifeste `installable: true` (absent des menus tant qu'aucun raccourci vers lui n'existe sur le disque), une entrée de `telechargements` et d'`installeurs`, un bloc `{ t: "telecharger" }` sur une page PigNet. La boîte « Téléchargement de fichier » dépose le programme d'installation sur le disque ; l'assistant (`src/apps/installeur/`) crée le dossier, les raccourcis et le désinstalleur. Exemple : Jambonjon (`src/apps/jambonjon/` : logique au tour par tour, rendu par lancer de rayons en 224×168).
+- **un programme à télécharger** : un manifeste `installable: true` (absent des menus tant qu'aucun raccourci vers lui n'existe sur le disque), une entrée de `telechargements` et d'`installeurs`, un bloc `{ t: "telecharger" }` sur une page PigNet. La boîte « Téléchargement de fichier » dépose le programme d'installation sur le disque ; l'assistant (`src/apps/installeur/`) crée le dossier, les raccourcis et le désinstalleur. Exemple : L'Ordre Cochon (`src/apps/jambonjon/` : logique au tour par tour, rendu par lancer de rayons en 320×180 ; règles du RPG dans [ORDRE-COCHON-RPG.md](ORDRE-COCHON-RPG.md)).
 - **argent, bourse et ivresse** : le compte en banque (Pork$, fictif, `localStorage`) est de la logique pure dans `src/os/banque.ts`, partagé par `src/os/banqueStore.ts` entre le site de la Caisse (`{ t: "banque" }`, `src/apps/navigateur/Banque.tsx`, courtage sur `coursSeance`) et la Course de Grosses (`src/apps/grosses/` : course calculée à l'avance puis rejouée). La bière se commande sur Porkomazon (`Porkomazon.tsx`, colis à délai de livraison dans `src/os/biere.ts` / `biereStore.ts`), puis se boit à la bouteille posée par le moniteur devant l'écran ; boire alimente `src/os/ivresse.ts` / `ivresseStore.ts` ; le moniteur lit ce niveau et tord l'écran (filtre SVG `#ivresse` + classes `.tube.ivre`, CSS seul sur le Poche).
+- **une donnée conservée dans le navigateur** : une entrée du registre `src/os/stockage.ts` (voir ci-dessus).
 - **une réplique de Gruik** (l'assistant du bureau) : `assistant` dans le pack (question à la première ouverture d'un programme, remarque sur un signal, conseils) ; logique dans `src/os/assistant.ts`, dessin pixel dans `src/components/gruik.ts`.
 - **un nouvel ordinateur** (spin-off) : un nouveau pack ; `page.tsx` choisit le pack.
 
@@ -70,3 +99,8 @@ Seul point serveur de PorkOS. Le Courrier d'État reconnaît l'adresse d'un corr
 personnage. Le relais valide la demande, fixe lui-même l'invite (consignes communes + fiche), appelle Groq avec la clé du
 serveur, nettoie la réponse et la renvoie ; la session la livre quelques secondes plus tard comme un courrier ordinaire.
 Toute erreur (relais absent en export statique, quota, réseau) donne la lettre de secours du personnage.
+
+## Documentation
+
+[`docs/README.md`](README.md) sépare les guides de référence, à tenir à jour, du journal des livraisons (`docs/journal/`), qui
+garde la trace des choix et des validations sans être corrigé ensuite.

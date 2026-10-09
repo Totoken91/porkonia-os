@@ -13,6 +13,7 @@ import { Boot } from "./Boot";
 import { Login } from "./Login";
 import { Monitor } from "./Monitor";
 import { Session } from "./Session";
+import { cle } from "@/os/stockage";
 
 type Phase =
   | { kind: "boot" }
@@ -22,7 +23,7 @@ type Phase =
   | { kind: "securite" };
 
 /** Marqueur « le système tourne » : s'il survit à une coupure, le prochain démarrage passe par ScanDisque. */
-const EN_MARCHE = "porkos.en-marche";
+const EN_MARCHE = cle("enMarche");
 const lireMarque = () => {
   try {
     return window.localStorage.getItem(EN_MARCHE) === "1";

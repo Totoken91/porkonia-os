@@ -11,7 +11,7 @@ beforeEach(()=>{
 afterEach(()=>{activerProfil(null);vi.clearAllTimers();vi.useRealTimers();vi.unstubAllGlobals();});
 describe('Stocks de provisions indépendants',()=>{
   it('livre à la bonne échéance et consomme uniquement le produit choisi',()=>{
-    const b=creerStock('porkos.biere'),s=creerStock('porkos.saucisson');
+    const b=creerStock('biere'),s=creerStock('saucisson');
     const avisB=vi.fn(),avisS=vi.fn();b.surLivraison(avisB);s.surLivraison(avisS);
     b.useStock();s.useStock();b.commander(6,'drone',10000);s.commander(3,'colis',90000);
     vi.advanceTimersByTime(10000);expect(b.useStock().stock).toBe(6);expect(s.useStock().stock).toBe(0);
@@ -21,14 +21,14 @@ describe('Stocks de provisions indépendants',()=>{
   });
   it('retrouve les stocks et livre une commande arrivée pendant une absence',()=>{
     window.localStorage.setItem('porkos.biere.citoyen',JSON.stringify({stock:4,enRoute:[],prochainId:9}));
-    const s=creerStock('porkos.saucisson');s.commander(3,'drone',10000);
+    const s=creerStock('saucisson');s.commander(3,'drone',10000);
     vi.advanceTimersByTime(15000);
-    const relu=creerStock('porkos.saucisson');expect(relu.useStock().stock).toBe(3);expect(relu.useStock().enRoute).toHaveLength(0);
-    relu.prendre();expect(creerStock('porkos.saucisson').useStock().stock).toBe(2);
-    expect(creerStock('porkos.biere').useStock()).toEqual({stock:4,enRoute:[],prochainId:9});
+    const relu=creerStock('saucisson');expect(relu.useStock().stock).toBe(3);expect(relu.useStock().enRoute).toHaveLength(0);
+    relu.prendre();expect(creerStock('saucisson').useStock().stock).toBe(2);
+    expect(creerStock('biere').useStock()).toEqual({stock:4,enRoute:[],prochainId:9});
   });
   it('refuse une commande invalide et un stock vide sans les modifier',()=>{
-    const s=creerStock('porkos.saucisson');expect(s.commander(-1,'drone',10000)).toBe(false);expect(s.prendre()).toBe(false);
+    const s=creerStock('saucisson');expect(s.commander(-1,'drone',10000)).toBe(false);expect(s.prendre()).toBe(false);
     expect(s.useStock().stock).toBe(0);expect(s.useStock().enRoute).toHaveLength(0);
   });
 });

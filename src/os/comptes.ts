@@ -1,7 +1,9 @@
 import type {ContentPack,UserProfile} from '@/content/types';
+import {cle,clesHeritage,clesHistoriques,PROFIL_HISTORIQUE} from './stockage';
+export {clesHeritage};
 export interface CompteLocal {id:string;nom:string;creation:string;sel:string;empreinte:string;iterations:number}
-export const CLE_COMPTES='porkos.comptes.v1';
-export const CLE_SELECTION='porkos.compte.selection';
+export const CLE_COMPTES=cle('comptes');
+export const CLE_SELECTION=cle('selection');
 const ITERATIONS=210000;
 const hex=(v:ArrayBuffer)=>Array.from(new Uint8Array(v),n=>n.toString(16).padStart(2,'0')).join('');
 export const nomNormalise=(n:string)=>n.trim().normalize('NFKC').toLocaleLowerCase('fr-FR');
@@ -37,14 +39,9 @@ export function validerCreation(comptes:CompteLocal[],nom:string,mdp:string,conf
   if(comptes.length>=24)return 'limite';
   return null;
 }
-/** Les données de l'ancienne démo sont copiées une seule fois au profil qui les revendique. */
-export function clesHeritage(packId:string,stockage:Storage):[string,string][] {
-  const partagees=['porkos.reglages','porkos.jambonjon.partie','porkos.jambonjon.conseils','porkos.biere','porkos.saucisson','porkos.ivresse','porkos.executer.historique',`porkos.courrier.${packId}`,`porkos.fenetres.${packId}`,`porkos.bureau.${packId}`];
-  for(let i=0;i<stockage.length;i++){const k=stockage.key(i);if(k?.startsWith('porkos.livredor.')&&!k.endsWith('.citoyen')&&!k.includes('.p-'))partagees.push(k);}
-  return partagees.map(k=>[k,`${k}.citoyen`]);
-}
+/** Les données de l'ancienne démo sont copiées une seule fois au profil qui les revendique (voir `stockage.ts`). */
 export function aHeritage(packId:string):boolean {
-  try {return clesHeritage(packId,localStorage).some(([k])=>localStorage.getItem(k)!==null)||['porkos.banque.citoyen',`porkos.disque.${packId}.citoyen`,`porkos.distinctions.${packId}.citoyen`,'porkos.pignet.vie.citoyen'].some(k=>localStorage.getItem(k)!==null);}catch{return false;}
+  try {return clesHeritage(packId,localStorage).some(([k])=>localStorage.getItem(k)!==null)||clesHistoriques(packId).some(k=>localStorage.getItem(k)!==null);}catch{return false;}
 }
 export async function creerCompte(nom:string,mdp:string,confirmation:string,packId:string,recuperer:boolean):Promise<CompteLocal|ErreurCompte> {
   let comptes=chargerComptes();let erreur=validerCreation(comptes,nom,mdp,confirmation);if(erreur)return erreur;
@@ -52,7 +49,7 @@ export async function creerCompte(nom:string,mdp:string,confirmation:string,pack
   const h=await empreinte(mdp,sel,ITERATIONS);
   // Relire après le calcul pour tenir compte d'une création faite dans un autre onglet.
   comptes=chargerComptes();erreur=validerCreation(comptes,nom,mdp,confirmation);if(erreur)return erreur;
-  const id=!comptes.length&&(recuperer||!aHeritage(packId))?'citoyen':`p-${crypto.randomUUID()}`;
+  const id=!comptes.length&&(recuperer||!aHeritage(packId))?PROFIL_HISTORIQUE:`p-${crypto.randomUUID()}`;
   const c:CompteLocal={id,nom:nom.trim(),creation:new Date().toISOString(),sel,empreinte:h,iterations:ITERATIONS};
   const changements:[string,string][]=[];
   if(!comptes.length&&recuperer)for(const [avant,apres] of clesHeritage(packId,localStorage)){

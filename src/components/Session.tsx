@@ -31,6 +31,7 @@ import { Wallpaper } from "./Wallpaper";
 import { WindowFrame } from "./WindowFrame";
 import { Assistant } from "./Assistant";
 import type { EvenementOs } from "@/os/assistant";
+import { cle } from "@/os/stockage";
 
 type Input = SchedulerInput extends infer T ? (T extends unknown ? Omit<T, "elapsed"> : never) : never;
 
@@ -80,7 +81,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const [ctxMenu, setCtxMenu] = useState<MenuState | null>(null);
   const [gele, setGele] = useState<Record<string, boolean>>({});
   const [fatal, setFatal] = useState(false);
-  const cleCourrier = `porkos.courrier.${pack.id}.${user.id}`;
+  const cleCourrier = cle("courrier", { pack: pack.id, profil: user.id });
   const [boite, setBoiteState] = useState<Boite>(() => initBoite(pack.mails));
   const boiteRef = useRef(boite);
   const setBoite = useCallback(
@@ -107,7 +108,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   }, [cleCourrier, pack.mails]);
 
   // Distinctions civiques, retenues dans le navigateur pour chaque citoyen du poste.
-  const cleDecor = `porkos.distinctions.${pack.id}.${user.id}`;
+  const cleDecor = cle("distinctions", { pack: pack.id, profil: user.id });
   const [decor, setDecor] = useState<EtatDistinctions>(() => {
     try {
       return sanitizeDistinctions(JSON.parse(window.localStorage.getItem(cleDecor) ?? "null"), pack.distinctions);
@@ -120,7 +121,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const decerneRef = useRef<(d: import("@/content/types").Distinction) => void>(() => {});
 
   // Disque du poste, retenu dans le navigateur pour chaque citoyen.
-  const cleDisque = `porkos.disque.${pack.id}.${user.id}`;
+  const cleDisque = cle("disque", { pack: pack.id, profil: user.id });
   const [disque, setDisqueState] = useState<Disque>(() => {
     let brut: unknown = null;
     try {
@@ -134,7 +135,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   const [pressePapiers, setPressePapiers] = useState<{ chemins: string[]; couper: boolean } | null>(null);
 
   // Numéro de cette session pour ce citoyen : certains courriers attendent qu'on revienne.
-  const cleSessions = `porkos.sessions.${pack.id}.${user.id}`;
+  const cleSessions = cle("sessions", { pack: pack.id, profil: user.id });
   const [numeroSession] = useState(() => {
     try {
       const n = Number(window.localStorage.getItem(cleSessions));
@@ -574,7 +575,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   );
 
   // Session : on retrouve ses fenêtres, sauf après un arrêt brutal.
-  const cleFenetres = `porkos.fenetres.${pack.id}.${user.id}`;
+  const cleFenetres = cle("fenetres", { pack: pack.id, profil: user.id });
   const restaurationFaite = useRef(false);
   useEffect(() => {
     let saved: SavedWin[] = [];

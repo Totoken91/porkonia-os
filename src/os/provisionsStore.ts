@@ -3,9 +3,10 @@
  * de colis sert à la bière et au saucisson, avec une clé et des abonnements distincts. */
 import { useSyncExternalStore } from "react";
 import { cave, expedier, livrer, sanitize, servir, type Cave } from "./biere";
-import {profilActif,surProfil,cleProfil} from './profilActif';
+import {profilActif,surProfil} from './profilActif';
+import { cle, type NomStockage } from './stockage';
 
-export function creerStock(CLE: string) {
+export function creerStock(NOM: Extract<NomStockage, 'biere' | 'saucisson'>) {
   let etat: Cave = cave();
   let lu = false;
   const abonnes = new Set<() => void>();
@@ -14,7 +15,7 @@ export function creerStock(CLE: string) {
 
   function ecrire() {
     try {
-      const id=profilActif();if(id)window.localStorage.setItem(cleProfil(CLE,id), JSON.stringify(etat));
+      const id=profilActif();if(id)window.localStorage.setItem(cle(NOM,{profil:id}), JSON.stringify(etat));
     } catch {
       /* stock non retenu */
     }
@@ -39,7 +40,7 @@ export function creerStock(CLE: string) {
     lu = true;
     const id=profilActif();if(!id){etat=cave();return;}
     try {
-      etat = sanitize(JSON.parse(window.localStorage.getItem(cleProfil(CLE,id)) ?? "null"));
+      etat = sanitize(JSON.parse(window.localStorage.getItem(cle(NOM,{profil:id})) ?? "null"));
     } catch {
       etat = cave();
     }

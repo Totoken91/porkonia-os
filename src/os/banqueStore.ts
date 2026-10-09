@@ -6,8 +6,9 @@
  */
 import { useSyncExternalStore } from "react";
 import { sanitize, type Compte, type Resultat } from "./banque";
+import { cle as cleStockage } from "./stockage";
 
-const cle = (u: string) => `porkos.banque.${u}`;
+const cle = (u: string) => cleStockage("banque", { profil: u });
 const comptes = new Map<string, Compte | null>();
 const abonnes = new Set<() => void>();
 

@@ -1,5 +1,6 @@
 /** Réglages du citoyen (conservés dans le navigateur, jamais ailleurs). */
 import type { ChoixEcran } from "./ecran";
+import { cle, cleSansProfil } from "./stockage";
 
 export type FondUni = "bouteille" | "lie" | "fondateur" | "emblemes";
 /** Fond uni du système, ou image d'un pack (« image:<id> », voir `wallpaper.images`). */
@@ -34,11 +35,13 @@ export const DELAIS_ECONOMISEUR = [0, 60, 120, 300];
 
 export const DEFAULT_SETTINGS: Settings = { crt: 35, hymne: 70, fond: "bouteille", rappels: true, sons: true, economiseur: 120, contenuFenetres: true, pixelsNets: false, fichiersCaches: false, affichage: "auto", assistant: true };
 
-const KEY = "porkos.reglages";
+
+/** Réglages d'un profil ; sans profil (avant la connexion), la clé commune du poste. */
+const cleReglages = (profil?: string) => (profil ? cle("reglages", { profil }) : cleSansProfil("reglages"));
 
 export function loadSettings(user?:string): Settings {
   try {
-    const raw = window.localStorage.getItem(user?`${KEY}.${user}`:KEY);
+    const raw = window.localStorage.getItem(cleReglages(user));
     if (!raw) return DEFAULT_SETTINGS;
     return sanitizeSettings(JSON.parse(raw));
   } catch {
@@ -48,7 +51,7 @@ export function loadSettings(user?:string): Settings {
 
 export function saveSettings(s: Settings,user?:string): void {
   try {
-    window.localStorage.setItem(user?`${KEY}.${user}`:KEY, JSON.stringify(s));
+    window.localStorage.setItem(cleReglages(user), JSON.stringify(s));
   } catch {
     /* navigation privée : les réglages restent en mémoire */
   }

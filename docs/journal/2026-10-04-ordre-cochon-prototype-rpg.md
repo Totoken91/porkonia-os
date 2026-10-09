@@ -2,7 +2,7 @@
 
 Le modèle RPG est branché sur le moteur de jeu. La campagne est maintenant étendue à douze plans conçus en quatre actes, avec le boss final existant au douzième étage.
 
-Les plans comportent des entrées sûres, sorties intentionnelles, salles à thème, boucles et réserves latérales. Les nouvelles parties RPG les utilisent ; une sauvegarde garde sa carte en cours et adopte le prochain plan lors de la descente. Un ancien boss sauvegardé à l'étage 5 ne termine plus la partie avant le 12. La suite est suivie dans [ORDRE-COCHON-FEUILLE-DE-ROUTE.md](ORDRE-COCHON-FEUILLE-DE-ROUTE.md).
+Les plans comportent des entrées sûres, sorties intentionnelles, salles à thème, boucles et réserves latérales. Les nouvelles parties RPG les utilisent ; une sauvegarde garde sa carte en cours et adopte le prochain plan lors de la descente. Un ancien boss sauvegardé à l'étage 5 ne termine plus la partie avant le 12. La suite est suivie dans [ORDRE-COCHON-FEUILLE-DE-ROUTE.md](../ORDRE-COCHON-FEUILLE-DE-ROUTE.md).
 
 ## Disponible
 

@@ -16,6 +16,7 @@ import { BUREAU, POUBELLE, creer, renommer } from "@/os/vfs";
 import { Icon } from "./Icon";
 import { Renommage, iconOf } from "./Fichier";
 import { ContextMenu, type MenuItem, type MenuState } from "./Menu";
+import { cle as cleStockage } from "@/os/stockage";
 
 export interface Rect {
   x: number;
@@ -71,7 +72,7 @@ export function Desktop({ area, onLaunch }: Props) {
   const cleIds = ids.join("|");
   const parId = useMemo(() => new Map(elements.map((d) => [d.id, d])), [elements]);
   const dims = useMemo(() => dimsFor(area.w, area.h), [area.w, area.h]);
-  const cle = `porkos.bureau.${pack.id}.${user.id}`;
+  const cle = cleStockage("bureau", { pack: pack.id, profil: user.id });
   const zone = useRef<HTMLDivElement>(null);
 
   const [layout, setLayout] = useState<Layout>(() => defaultLayout(ids, dims));

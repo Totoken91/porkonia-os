@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ActionRef } from "@/content/types";
 import { Icon } from "@/components/Icon";
 import { useOs, useWin } from "@/os/context";
+import { cle } from "@/os/stockage";
 
 type Cible = { app: string; args?: Record<string, string> } | { action: ActionRef };
 
@@ -20,7 +21,7 @@ export function resolveCommand(cmd: string, aliases: Record<string, Cible>, apps
 
 export function Executer() {
   const { pack, str, openApp, runAction, signal, user } = useOs();
-  const CLE_HISTORIQUE=`porkos.executer.historique.${user.id}`;
+  const CLE_HISTORIQUE=cle('executer',{profil:user.id});
   const { close } = useWin();
   const [cmd, setCmd] = useState("");
   // Historique des commandes tapées (comme la liste d'Exécuter d'époque) : c'est là que réapparaissent les secrets trouvés.

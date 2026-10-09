@@ -6,9 +6,9 @@
  */
 import { useSyncExternalStore } from "react";
 import { boire, niveau, sanitize, SEUIL_WARP, sobre, type Ebriete } from "./ivresse";
-import {profilActif,surProfil,cleProfil} from './profilActif';
+import {profilActif,surProfil} from './profilActif';
+import { cle } from './stockage';
 
-const CLE = "porkos.ivresse";
 let etat: Ebriete = sobre();
 let lu = false;
 let v = 0;
@@ -21,7 +21,7 @@ function lire() {
   lu = true;
   const id=profilActif();if(!id){etat=sobre();v=0;return;}
   try {
-    etat = sanitize(JSON.parse(window.localStorage.getItem(cleProfil(CLE,id)) ?? "null"), Date.now());
+    etat = sanitize(JSON.parse(window.localStorage.getItem(cle('ivresse',{profil:id})) ?? "null"), Date.now());
   } catch {
     etat = sobre();
   }
@@ -30,7 +30,7 @@ function lire() {
 
 function ecrire() {
   try {
-    const id=profilActif();if(id)window.localStorage.setItem(cleProfil(CLE,id), JSON.stringify(etat));
+    const id=profilActif();if(id)window.localStorage.setItem(cle('ivresse',{profil:id}), JSON.stringify(etat));
   } catch {
     /* ivresse non retenue */
   }

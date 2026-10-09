@@ -1,6 +1,6 @@
 # L’Ordre Cochon — règles de progression validées
 
-Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; douze plans, trois classes, leurs compétences, douze chevaliers, quatre boss et trois refuges sont implémentés. La calibration de progression associe XP de combat et accomplissement d’étage. L'état de l'intégration est décrit dans [ORDRE-COCHON-PROTOTYPE-RPG.md](ORDRE-COCHON-PROTOTYPE-RPG.md).
+Cadre validé par le joueur le 4 octobre 2026. Ce document est la référence commune pour les travaux sur le RPG. Les règles ci-dessous décrivent la cible ; douze plans, trois classes, leurs compétences, douze chevaliers, quatre boss et trois refuges sont implémentés. La calibration de progression associe XP de combat et accomplissement d’étage. L'état de l'intégration est décrit dans [journal/2026-10-04-ordre-cochon-prototype-rpg.md](journal/2026-10-04-ordre-cochon-prototype-rpg.md).
 
 ## Campagne et niveaux
 

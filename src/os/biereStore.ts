@@ -1,6 +1,6 @@
 "use client";
 import { creerStock } from './provisionsStore';
-const bieres=creerStock('porkos.biere');
+const bieres=creerStock('biere');
 export const commanderBieres=bieres.commander;
 export const prendreBiere=bieres.prendre;
 export const surLivraison=bieres.surLivraison;
