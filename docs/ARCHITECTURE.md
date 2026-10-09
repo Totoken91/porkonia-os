@@ -24,6 +24,7 @@ src/
     banque.ts             compte en Pork$ fictifs (logique pure) ; banqueStore.ts le partage entre banque, jeux et boutiques
     ivresse.ts            ébriété (logique pure) ; ivresseStore.ts la partage entre le moniteur et les applis
     biere.ts              colis à délai de livraison (logique pure) ; provisionsStore.ts → biereStore.ts, saucissonStore.ts
+    economie.ts           primes civiques, dividendes en nature, abonnements, prix indexés (logique pure) ; economieSession.ts
     desktop.ts            grille magnétique des icônes du bureau (placement, glisser, lasso, clavier)
     sons.ts               sons système (WebAudio) : carillons synthétisés, machine en échantillons (public/audio/pc/, scripts/sons-pc.py)
     distinctions.ts       distinctions civiques (succès) : signaux et ouvertures d'applis → médailles, rang, état conservé
@@ -72,6 +73,13 @@ module la garde en mémoire, l'abonner à `surProfil`.
 - **un programme à télécharger** : un manifeste `installable: true` (absent des menus tant qu'aucun raccourci vers lui n'existe sur le disque), une entrée de `telechargements` et d'`installeurs`, un bloc `{ t: "telecharger" }` sur une page PigNet. La boîte « Téléchargement de fichier » dépose le programme d'installation sur le disque ; l'assistant (`src/apps/installeur/`) crée le dossier, les raccourcis et le désinstalleur. Exemple : L'Ordre Cochon (`src/apps/jambonjon/` : logique au tour par tour, rendu par lancer de rayons en 320×180 ; règles du RPG dans [ORDRE-COCHON-RPG.md](ORDRE-COCHON-RPG.md)).
 - **argent, bourse et ivresse** : le compte en banque (Pork$, fictif, `localStorage`) est de la logique pure dans `src/os/banque.ts`, partagé par `src/os/banqueStore.ts` entre le site de la Caisse (`{ t: "banque" }`, `src/apps/navigateur/Banque.tsx`, courtage sur `coursSeance`) et la Course de Grosses (`src/apps/grosses/` : course calculée à l'avance puis rejouée). La bière se commande sur Porkomazon (`Porkomazon.tsx`, colis à délai de livraison dans `src/os/biere.ts` / `biereStore.ts`), puis se boit à la bouteille posée par le moniteur devant l'écran ; boire alimente `src/os/ivresse.ts` / `ivresseStore.ts` ; le moniteur lit ce niveau et tord l'écran (filtre SVG `#ivresse` + classes `.tube.ivre`, CSS seul sur le Poche).
 - **une donnée conservée dans le navigateur** : une entrée du registre `src/os/stockage.ts` (voir ci-dessus).
+- **une prime, un dividende ou un abonnement** : la section `economie` du pack. Une prime est versée sur un signal du
+  système (`*` final pour une famille), plafonnée par jour ou unique ; un dividende en nature se réclame à la banque
+  quand on détient assez de parts d'un titre ; un abonnement se souscrit sur un signal, se prélève périodiquement (sans
+  rattrapage en rafale) et se résilie par un mot dans un courrier au correspondant. Logique pure dans
+  `src/os/economie.ts` (compteurs et abonnements conservés dans le compte du profil), branchement de session dans
+  `src/os/economieSession.ts`. Un article de Porkomazon peut suivre le cours du jour d'un titre (`indexe`). Le saucisson
+  éponge l'ivresse (`economie.eponge`).
 - **une réplique de Gruik** (l'assistant du bureau) : `assistant` dans le pack (question à la première ouverture d'un programme, remarque sur un signal, conseils) ; logique dans `src/os/assistant.ts`, dessin pixel dans `src/components/gruik.ts`.
 - **un nouvel ordinateur** (spin-off) : un nouveau pack ; `page.tsx` choisit le pack.
 

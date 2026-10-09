@@ -193,6 +193,24 @@ try {
     await page.waitForTimeout(500);
     await shot(page, `${tag}-ivre`);
     step(`${tag} : Porkomazon, livraison, choppe, l'écran tangue`);
+
+    // Économie : prix indexés, saucisson qui éponge, abonnement Saucissignal à la levée de fonds.
+    if (!(await page.locator(".pkz-indexe").first().innerText()).includes("indexé")) throw new Error(`${tag}: prix non indexés`);
+    await page.getByTestId("pkz-produit-saucisson").check({ force: true });
+    await page.getByTestId("pkz-commander").click({ force: true });
+    await page.getByTestId("saucisson-table").waitFor({ timeout: 20000 });
+    const avant = await page.evaluate(() => JSON.parse(localStorage.getItem("porkos.ivresse.citoyen")).v);
+    await page.getByTestId("saucisson-table").click({ force: true });
+    await page.waitForFunction((v) => (JSON.parse(localStorage.getItem("porkos.ivresse.citoyen"))?.v ?? 0) < v - 0.5, avant);
+    await page.locator(".tube.ivre").waitFor({ state: "detached", timeout: 5000 });
+    step(`${tag} : le saucisson éponge la bière, l'écran se redresse`);
+    const url = page.locator("[data-testid=window-navigateur] [data-testid=nav-url]").last();
+    await url.fill("porko://saucissignal/investir");
+    await url.press("Enter");
+    await page.getByTestId("saucissignal-don-5").click({ force: true });
+    await page.waitForFunction(() => Boolean(JSON.parse(localStorage.getItem("porkos.banque.citoyen")).abonnements?.saucissignal));
+    await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith("porkos.courrier.") && localStorage.getItem(k).includes("sauc-bienvenue")));
+    step(`${tag} : Saucissignal abonne l'investisseur et Éric lui écrit`);
     await ctx.close();
   }
   if (errors.length) throw new Error(errors.join("\n"));

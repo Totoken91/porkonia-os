@@ -4,7 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import porkopedia from "@/content/porkopedia/porkopedia.json";
 import { useMenuCommands, useOs, useWin } from "@/os/context";
 import { DECALAGE, live } from "@/apps/channel-pork/timeline";
-import { compteur, cours, duJour, jour, meteo } from "./portail";
+import { compteur, coursSeance, duJour, jour, meteo } from "./portail";
 import { HOME, articleUrl, parseUrl, rubriqueUrl, search, searchUrl } from "./url";
 import { Site } from "./Site";
 import {CoinCitoyens,NouvellesLocales} from './VieLocale';
@@ -285,7 +285,8 @@ function Accueil({ go }: { go(u: string): void }) {
             <h3>{str("portail.bourse")}</h3>
             <table>
               <tbody>
-                {cours(portail.bourse, maintenant).map((x) => (
+                {/* Cours de séance : les mêmes que ceux du guichet de la Caisse, où l'on achète et vend. */}
+                {coursSeance(portail.bourse, maintenant.getTime()).map((x) => (
                   <tr key={x.nom}>
                     <td>{x.nom}</td>
                     <td className="n">{x.valeur.toLocaleString("fr-FR")} {x.unite}</td>

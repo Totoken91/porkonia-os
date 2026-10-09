@@ -364,9 +364,60 @@ export interface JeuBanque {
 export interface JeuPorkomazon {
   nom: string;
   slogan: string;
-  produits: { id: string; nom: string; description: string; qte: number; prix: number; type?: "biere" | "saucisson" }[];
+  /** `indexe` : nom d'un titre de la Bourse du jambon ; le prix suit alors son cours du jour. */
+  produits: { id: string; nom: string; description: string; qte: number; prix: number; type?: "biere" | "saucisson"; indexe?: string }[];
   livraisons: { id: string; nom: string; description: string; delaiS: number; supplement: number }[];
   avis: { nom: string; note: number; texte: string }[];
+}
+
+/* --------------------------------- Économie -------------------------------- */
+
+/** Prime civique versée sur un signal du système (voir `os/economie.ts`). */
+export interface Prime {
+  id: string;
+  /** Signal déclencheur ; `*` final couvre une famille (« tv:integral:* »). */
+  signal: string;
+  montant: number;
+  libelle: string;
+  /** Nombre de versements par jour, ou une seule fois pour toujours. */
+  limite: { parJour: number } | "unique";
+  /** Bulle à l'arrivée de la prime ({montant}). */
+  bulle: string;
+}
+
+/** Dividende en nature : détenir `seuil` parts d'un titre donne droit chaque jour à une livraison. */
+export interface Dividende {
+  id: string;
+  titre: string;
+  seuil: number;
+  produit: "biere" | "saucisson";
+  qte: number;
+  libelle: string;
+}
+
+/** Abonnement prélevé périodiquement après un signal de souscription, résiliable par courrier à un correspondant. */
+export interface Abonnement {
+  id: string;
+  declencheur: string;
+  montant: number;
+  joursEntre: number;
+  libelle: string;
+  correspondant: string;
+  /** Expression régulière (sans casse) qui, dans un courrier au correspondant, vaut demande de résiliation. */
+  resiliation: string;
+  /** Courrier à la souscription, puis un courrier par prélèvement (dans l'ordre, sans répétition). */
+  bienvenue: string;
+  rapports: string[];
+  /** Bulles rares tant que l'abonnement court ({distance}). */
+  alertes: string[];
+}
+
+export interface Economie {
+  primes: Prime[];
+  dividendes: Dividende[];
+  abonnements: Abonnement[];
+  /** Verres d'ivresse épongés par un saucisson. */
+  eponge: number;
 }
 
 /* ------------------------------- Assistant -------------------------------- */
@@ -634,6 +685,7 @@ export interface ContentPack {
   grosses: JeuGrosses;
   banque: JeuBanque;
   porkomazon: JeuPorkomazon;
+  economie: Economie;
   assistant: AssistantSpec;
   /** Messages de l'appli Configuration et du système (réglages absurdes). */
   strings: Record<string, string>;

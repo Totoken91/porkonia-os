@@ -98,7 +98,7 @@ export function PorkOS({ pack }: { pack: ContentPack }) {
   };
 
   return (
-    <Monitor crt={settings.crt} power={power} onPower={togglePower} sons={settings.sons} nette={settings.pixelsNets} affichage={settings.affichage} str={str}>
+    <Monitor crt={settings.crt} power={power} onPower={togglePower} sons={settings.sons} nette={settings.pixelsNets} affichage={settings.affichage} eponge={pack.economie.eponge} str={str}>
       {phase.kind === "boot" && brutal !== null && <Boot key={bootId} pack={pack} brutal={brutal} sons={settings.sons} onDone={bootDone} />}
       {phase.kind === "login" && (
         <Login pack={pack} fond={settings.fond} onLogin={(user) => {activerProfil(user.id);setSettingsState(loadSettings(user.id));setPhase({ kind: "session", user, impatient: phase.impatient, sleeping: false });}} />

@@ -8,6 +8,8 @@ import { debiter, formaterPork } from "@/os/banque";
 import { secondesRestantes } from "@/os/biere";
 import { commanderBieres, useCave } from "@/os/biereStore";
 import { commanderSaucissons, useGardeManger } from "@/os/saucissonStore";
+import { prixIndexe } from "@/os/economie";
+import { cours } from "./portail";
 import { siteUrl } from "./url";
 
 export function Porkomazon({ go }: { go?(u: string): void }) {
@@ -30,7 +32,15 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
   const livraison = p.livraisons.find((x) => x.id === mode)!;
   const stock=article.type==="saucisson"?gardeManger:cave;
   const colis=[...cave.enRoute.map(k=>({...k,type:"biere" as const})),...gardeManger.enRoute.map(k=>({...k,type:"saucisson" as const}))];
-  const total = article.prix + livraison.supplement;
+  // Prix du jour : un article indexé suit le cours de son titre à la Bourse du jambon (cours du jour, pas de séance).
+  const coursDuJour = cours(pack.portal.bourse, new Date(maintenant));
+  const prix = (x: (typeof p.produits)[number]) => {
+    const t = x.indexe ? coursDuJour.find((c) => c.nom === x.indexe) : undefined;
+    const ref = x.indexe ? pack.portal.bourse.find((b) => b.nom === x.indexe) : undefined;
+    return t && ref ? prixIndexe(x.prix, t.valeur, ref.base) : x.prix;
+  };
+  const indexes = [...new Set(p.produits.flatMap((x) => (x.indexe ? [x.indexe] : [])))];
+  const total = prix(article) + livraison.supplement;
 
   const commander = () => {
     if (!compte) return setMessage(str("porkomazon.err.compte"));
@@ -77,9 +87,10 @@ export function Porkomazon({ go }: { go?(u: string): void }) {
               <td><input id={`${ids}-${x.id}`} type="radio" name={`${ids}-produit`} checked={produit===x.id} onChange={()=>setProduit(x.id)} aria-label={x.nom} data-testid={`pkz-produit-${x.id}`}/></td>
               <td className="pkz-col-image"><label htmlFor={`${ids}-${x.id}`}><img src={x.type==='saucisson'?'/brand/saucisson-planche.webp':'/brand/biere-douzi.png'} alt="" width={40} height={44}/></label></td>
               <td><label htmlFor={`${ids}-${x.id}`}><b>{x.nom}</b><em>{x.description}</em></label></td>
-              <td className="pkz-col-prix"><label htmlFor={`${ids}-${x.id}`}><strong>{formaterPork(x.prix)}</strong></label></td>
+              <td className="pkz-col-prix"><label htmlFor={`${ids}-${x.id}`}><strong>{formaterPork(prix(x))}</strong></label></td>
             </tr>)}</tbody>
           </table>
+          {indexes.map((t) => <p key={t} className="pkz-indexe">{str("porkomazon.prixIndexe", { titre: t })}</p>)}
         </section>
         <section className="pkz-livraison" id={`${ids}-bon`}>
           <h2>{str("porkomazon.bon")}</h2>

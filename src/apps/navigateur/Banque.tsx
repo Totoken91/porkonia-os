@@ -9,6 +9,9 @@ import { useOs } from "@/os/context";
 import { useCompte, enregistrer, operer } from "@/os/banqueStore";
 import { acheter, allocationDisponible, ALLOCATION_JOUR, coutAchat, formaterPork, ouvrir, produitVente, toucherAllocation, valoriser, vendre, verifier, PRIME_BIENVENUE } from "@/os/banque";
 import { coursSeance, PAS_SEANCE } from "./portail";
+import { etatDividende, toucherDividende } from "@/os/economie";
+import { commanderBieres } from "@/os/biereStore";
+import { commanderSaucissons } from "@/os/saucissonStore";
 import { siteUrl } from "./url";
 
 function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet(o: "compte" | "bourse"): void }) {
@@ -99,6 +102,23 @@ function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet
     setMessage(r?.ok ? str("banque.allocationOk", { somme: formaterPork(ALLOCATION_JOUR) }) : str("banque.err.allocation"));
     if (r?.ok) playSound("ding");
   };
+  // Dividende en nature : livré comme une commande Porkomazon (délai court), une fois par jour.
+  const reclamerDividende = (d: (typeof pack.economie.dividendes)[number]) => {
+    const etat = etatDividende(compte, d, new Date());
+    if (etat !== "disponible") {
+      const qte = compte.portefeuille[d.titre]?.qte ?? 0;
+      return setMessage(str(etat === "parts" ? "banque.dividendeParts" : "banque.dividendeDeja", { seuil: d.seuil, titre: d.titre, qte }));
+    }
+    const r = operer(user.id, (c) => {
+      const apres = toucherDividende(c, d, new Date());
+      return apres ? { ok: true, compte: apres } : { ok: false, erreur: "plafond" };
+    });
+    if (!r?.ok) return;
+    (d.produit === "saucisson" ? commanderSaucissons : commanderBieres)(d.qte, "dividende", 10_000);
+    setMessage(str("banque.dividendeOk"));
+    playSound("ding");
+  };
+  const abonnements = pack.economie.abonnements.filter((a) => compte.abonnements?.[a.id]);
   const ordre = (nom: string, sens: "achat" | "vente") => {
     const qte = Math.floor(Number(qtes[nom] || "1"));
     const p = prix[nom]!;
@@ -130,6 +150,14 @@ function Guichet({ onglet, setOnglet }: { onglet: "compte" | "bourse"; setOnglet
               {str("banque.allocation", { somme: formaterPork(ALLOCATION_JOUR) })}
             </button>
           </p>
+          {pack.economie.dividendes.map((d) => (
+            <p key={d.id}>
+              <button onClick={() => reclamerDividende(d)} disabled={etatDividende(compte, d, new Date()) === "deja"} data-testid={`banque-dividende-${d.id}`}>
+                {str("banque.dividende", { libelle: d.libelle })}
+              </button>
+            </p>
+          ))}
+          {abonnements.length > 0 && <p data-testid="banque-abonnements">{str("banque.abonnements", { liste: abonnements.map((a) => str("banque.abonnementLigne", { libelle: a.libelle, montant: formaterPork(a.montant), jours: a.joursEntre })).join(" ; ") })}</p>}
           <table className="banque-table banque-historique" data-testid="banque-historique">
             <caption>{str('banque.releve')}</caption>
             <thead><tr><th scope="col">{str('banque.dateOperation')}</th><th scope="col">{str('banque.libelleOperation')}</th><th scope="col">{str('banque.montantOperation')}</th></tr></thead>

@@ -24,6 +24,9 @@ function charger(u: string): Compte | null {
   return c;
 }
 
+/** Le compte du profil, hors React (null : pas encore ouvert). */
+export const lireCompte = (u: string): Compte | null => charger(u);
+
 export function enregistrer(u: string, c: Compte | null) {
   comptes.set(u, c);
   try {

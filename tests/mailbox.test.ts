@@ -51,7 +51,13 @@ describe("boîte aux lettres", () => {
     for (const d of ["reception", "envoyes", "brouillons", "corbeille"] as const) expect(inFolder(b, d).length).toBeGreaterThan(0);
     const tardifs = porkosPack.mails.filter((x) => x.later).map((x) => x.id);
     expect(tardifs.length).toBeGreaterThan(0);
-    const livres = porkosPack.rules.flatMap((r) => (r.action.type === "mail" ? [r.action.id] : []));
+    // Livrés par une règle, ou par l'économie (primes, abonnements : voir src/os/economieSession.ts).
+    const eco = porkosPack.economie;
+    const livres = [
+      ...porkosPack.rules.flatMap((r) => (r.action.type === "mail" ? [r.action.id] : [])),
+      "eco-primes",
+      ...eco.abonnements.flatMap((a) => [a.bienvenue, ...a.rapports]),
+    ];
     for (const id of tardifs) expect(livres).toContain(id);
     expect(new Set(porkosPack.mails.map((x) => x.id)).size).toBe(porkosPack.mails.length);
   });

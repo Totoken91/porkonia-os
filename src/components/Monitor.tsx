@@ -12,7 +12,7 @@ import { ambiance, glouglou, jouer } from "@/os/sons";
 import { usePleinEcran } from "@/os/pleinEcran";
 import { cursorCss } from "./pixel";
 import { InfoBulles } from "./InfoBulles";
-import { boireVerres, useIvresse } from "@/os/ivresseStore";
+import { boireVerres, epongerVerres, useIvresse } from "@/os/ivresseStore";
 import { prendreSaucisson, useGardeManger } from "@/os/saucissonStore";
 import { prendreBiere, useCave } from "@/os/biereStore";
 import { intensite, stade } from "@/os/ivresse";
@@ -34,6 +34,8 @@ interface Props {
   nette: boolean;
   /** Format choisi dans les réglages (l'adresse ?ecran=… l'emporte). */
   affichage: ChoixEcran;
+  /** Verres épongés par un saucisson (pack, `economie.eponge`). */
+  eponge: number;
   str(key: string): string;
 }
 
@@ -43,7 +45,7 @@ export function demanderPleinEcran(el: Element = document.documentElement) {
   el.requestFullscreen({ navigationUI: "hide" }).catch(() => {});
 }
 
-export function Monitor({ children, crt, power, onPower, sons, nette, affichage, str }: Props) {
+export function Monitor({ children, crt, power, onPower, sons, nette, affichage, eponge, str }: Props) {
   const plein = usePleinEcran();
   const [box, setBox] = useState<{ vw: number; vh: number; dpr: number } | null>(null);
   const [choixAdresse, setChoixAdresse] = useState<ChoixEcran>("auto");
@@ -322,7 +324,7 @@ export function Monitor({ children, crt, power, onPower, sons, nette, affichage,
       {gardeManger.stock > 0 && tube !== "eteint" && <button
         className={`saucisson-table${bouchee?" mange":""}`}
         data-testid="saucisson-table" title={str("porkomazon.mangerSaucisson")} aria-label={str("porkomazon.mangerSaucisson")}
-        onClick={e=>{e.currentTarget.blur();if(bouchee||!prendreSaucisson())return;setBouchee(true);setTimeout(()=>setBouchee(false),700);}}
+        onClick={e=>{e.currentTarget.blur();if(bouchee||!prendreSaucisson())return;epongerVerres(eponge);setBouchee(true);setTimeout(()=>setBouchee(false),700);}}
       >
         <img src="/brand/saucisson-planche.webp" alt="" width={148} height={96} draggable={false}/>
         <span className="choppe-n">{gardeManger.stock}</span>

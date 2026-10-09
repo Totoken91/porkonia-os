@@ -27,6 +27,27 @@ export interface Compte {
   derniereAllocation: string;
   /** Titres détenus, par nom : quantité, et total payé (pour le prix de revient). */
   portefeuille: Record<string, Position>;
+  /** Primes et dividendes déjà touchés (voir `economie.ts`) : par identifiant, le jour et le nombre de fois. */
+  compteurs?: Record<string, Compteur>;
+  /** Abonnements en cours (prélèvements périodiques), par identifiant. */
+  abonnements?: Record<string, AbonnementEnCours>;
+}
+
+export interface Compteur {
+  /** Jour local (aaaa-mm-jj) du dernier passage. */
+  jour: string;
+  /** Passages ce jour-là. */
+  jour_n: number;
+  /** Passages depuis toujours. */
+  total: number;
+}
+
+export interface AbonnementEnCours {
+  /** ISO : souscription et dernier prélèvement (ou souscription s'il n'y en a pas encore). */
+  depuis: string;
+  dernier: string;
+  /** Prélèvements effectués. */
+  n: number;
 }
 
 export interface Position {
@@ -162,6 +183,8 @@ export function sanitize(v: unknown): Compte | null {
     prochainId: typeof o.prochainId === "number" && Number.isFinite(o.prochainId) ? Math.max(o.prochainId, historique.reduce((a, x) => Math.max(a, x.id + 1), 1)) : historique.reduce((a, x) => Math.max(a, x.id + 1), 1),
     derniereAllocation: typeof o.derniereAllocation === "string" ? o.derniereAllocation.slice(0, 10) : "",
     portefeuille: sanitizePortefeuille(o.portefeuille),
+    ...optionnel("compteurs", sanitizeCompteurs(o.compteurs)),
+    ...optionnel("abonnements", sanitizeAbonnements(o.abonnements)),
   };
 }
 
@@ -171,6 +194,32 @@ function sanitizePortefeuille(v: unknown): Record<string, Position> {
   for (const [nom, p] of Object.entries(v as Record<string, unknown>).slice(0, MAX_TITRES)) {
     const q = p as Position;
     if (nom.length > 0 && nom.length <= 60 && q && Number.isInteger(q.qte) && q.qte > 0 && q.qte <= MAX_PAR_TITRE && Number.isInteger(q.cout) && q.cout >= 0) out[nom] = { qte: q.qte, cout: q.cout };
+  }
+  return out;
+}
+
+/** Champ facultatif : absent plutôt que vide, pour que les comptes anciens se relisent à l'identique. */
+const optionnel = <K extends string, V extends object>(k: K, v: V) => (Object.keys(v).length ? ({ [k]: v } as Record<K, V>) : {});
+
+const entier = (v: unknown) => typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 1_000_000;
+const date = (v: unknown) => typeof v === "string" && v.length <= 40 && Number.isFinite(Date.parse(v));
+
+function sanitizeCompteurs(v: unknown): Record<string, Compteur> {
+  const out: Record<string, Compteur> = {};
+  if (!v || typeof v !== "object") return out;
+  for (const [id, x] of Object.entries(v as Record<string, unknown>).slice(0, 200)) {
+    const q = x as Compteur;
+    if (id.length <= 60 && q && typeof q.jour === "string" && /^\d{4}-\d{2}-\d{2}$/.test(q.jour) && entier(q.jour_n) && entier(q.total)) out[id] = { jour: q.jour, jour_n: q.jour_n, total: q.total };
+  }
+  return out;
+}
+
+function sanitizeAbonnements(v: unknown): Record<string, AbonnementEnCours> {
+  const out: Record<string, AbonnementEnCours> = {};
+  if (!v || typeof v !== "object") return out;
+  for (const [id, x] of Object.entries(v as Record<string, unknown>).slice(0, 20)) {
+    const a = x as AbonnementEnCours;
+    if (id.length <= 60 && a && date(a.depuis) && date(a.dernier) && entier(a.n)) out[id] = { depuis: a.depuis, dernier: a.dernier, n: a.n };
   }
   return out;
 }

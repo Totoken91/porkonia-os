@@ -5,7 +5,7 @@
  * le niveau tant qu'un composant l'écoute.
  */
 import { useSyncExternalStore } from "react";
-import { boire, niveau, sanitize, SEUIL_WARP, sobre, type Ebriete } from "./ivresse";
+import { boire, eponger, niveau, sanitize, SEUIL_WARP, sobre, type Ebriete } from "./ivresse";
 import {profilActif,surProfil} from './profilActif';
 import { cle } from './stockage';
 
@@ -14,6 +14,7 @@ let lu = false;
 let v = 0;
 const abonnes = new Set<() => void>();
 const warps = new Set<() => void>();
+const eponges = new Set<() => void>();
 let battement: ReturnType<typeof setInterval> | null = null;
 
 function lire() {
@@ -73,6 +74,23 @@ export function boireVerres(verres = 1): number {
   prevenir();
   if (avant < SEUIL_WARP && v >= SEUIL_WARP) for (const f of warps) f();
   return v;
+}
+
+/** Un saucisson éponge `verres` verres ; prévient les abonnés (la session en fait un signal). */
+export function epongerVerres(verres: number): number {
+  if (!profilActif()) return 0;
+  lire();
+  etat = eponger(etat, Date.now(), verres);
+  ecrire();
+  v = Math.round(niveau(etat, Date.now()) * 100) / 100;
+  prevenir();
+  for (const f of eponges) f();
+  return v;
+}
+
+export function surEponge(f: () => void) {
+  eponges.add(f);
+  return () => void eponges.delete(f);
 }
 
 /** Abonnement au franchissement du seuil où l'écran se met à déformer franchement. */

@@ -25,6 +25,12 @@ export const niveau = (e: Ebriete, now: number) => (e.v <= 0 ? 0 : Math.max(0, e
 
 export const boire = (e: Ebriete, now: number, verres = 1): Ebriete => ({ v: Math.min(MAX_VERRES, niveau(e, now) + verres), t: now });
 
+/** Le saucisson éponge : retire des verres (jamais sous zéro). */
+export const eponger = (e: Ebriete, now: number, verres: number): Ebriete => {
+  const v = Math.max(0, niveau(e, now) - verres);
+  return v > 0 ? { v, t: now } : sobre();
+};
+
 /** Intensité des effets visuels, de 0 (sobre) à 1 (sous la table). */
 export const intensite = (v: number) => Math.min(1, Math.max(0, (v - SEUIL_VISIBLE) / 9));
 

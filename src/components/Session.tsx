@@ -16,7 +16,8 @@ import { DEFAULT_SETTINGS, type Settings } from "@/os/settings";
 import { jouer, type Son } from "@/os/sons";
 import { surLivraisonSaucisson } from "@/os/saucissonStore";
 import { surLivraison } from "@/os/biereStore";
-import { surWarp } from "@/os/ivresseStore";
+import { surEponge, surWarp } from "@/os/ivresseStore";
+import { brancherEconomie } from "@/os/economieSession";
 import { deliver, initBoite, markRead, move, sanitizeBoite, saveDraft, send, type Boite, type Brouillon, type Dossier } from "@/os/mailbox";
 import { emptyWinState, saveWindows, winReducer, type SavedWin, type Viewport, type WinAction } from "@/os/windows";
 import { filAvec, texteDuCitoyen, trouverCorrespondant } from "@/os/correspondance";
@@ -199,6 +200,8 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
   );
 
   const [evOs, setEvOs] = useState<{ n: number; ev: EvenementOs } | null>(null);
+  // Primes, abonnements et résiliations : branchés une fois la session prête (voir plus bas).
+  const economie = useRef<ReturnType<typeof brancherEconomie> | null>(null);
   const feed = useCallback(
     (input: Input) => {
       const elapsed = Date.now() - loginAt.current;
@@ -206,6 +209,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       rules.current = r.state;
       for (const { action } of r.actions) runRef.current(action);
       if (input.kind === "tick") return;
+      if (input.kind === "signal") economie.current?.surSignal(input.name);
       if (input.kind === "app-open" || input.kind === "signal") setEvOs((e) => ({ n: (e?.n ?? 0) + 1, ev: input.kind === "app-open" ? { kind: "app-open", app: input.app } : { kind: "signal", name: input.name } }));
       const d = observer(pack.distinctions, decorRef.current, input, applisDuPoste, new Date().toISOString());
       if (JSON.stringify(d.etat) === JSON.stringify(decorRef.current)) return;
@@ -285,10 +289,12 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
       playSound("ding");
     });
     const b = surWarp(() => feed({ kind: "signal", name: "ivresse:warp" }));
+    const c = surEponge(() => feed({ kind: "signal", name: "ivresse:eponge" }));
     return () => {
       a();
       saucisson();
       b();
+      c();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pushToast]);
@@ -363,6 +369,29 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
     [pack, rng, pushToast, openApp, onSleep, onLock, onShutdown, onRestart, feed],
   );
   runRef.current = runAction;
+
+  // Économie : un signal émis par elle-même (prime versée) repasse par la file, hors de l'appel en cours.
+  useEffect(() => {
+    economie.current = brancherEconomie({
+      pack,
+      profil: user.id,
+      rng,
+      str,
+      pushToast,
+      runAction: (a) => runRef.current(a),
+      signal: (name) => setTimeout(() => feed({ kind: "signal", name }), 0),
+    });
+    const premier = setTimeout(() => economie.current?.tic(), 5000);
+    const id = setInterval(() => {
+      if (!live.current.veille && !live.current.saver) economie.current?.tic();
+    }, 60_000);
+    return () => {
+      clearTimeout(premier);
+      clearInterval(id);
+      economie.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack, user.id]);
   // Une bulle par distinction au plus toutes les deux minutes ; celles d'entre-temps sont regroupées en une seule.
   decerneRef.current = (d) => {
     if (auDemarrage.current) {
@@ -462,6 +491,7 @@ export function Session({ pack, user, settings, setSettings, impatient, onLock, 
         feed({ kind: "signal", name: "courrier:envoye" });
         const objetReponse = /^re\s*:/i.test(d.subject) ? d.subject : `RE: ${d.subject || "(sans objet)"}`;
         if (correspondant) {
+          economie.current?.surCourrier(correspondant.id, `${d.subject}\n${d.body}`);
           // Une personnalité répond en personnage (relais serveur vers le modèle) ; hors ligne, sa lettre de secours.
           feed({ kind: "signal", name: `courrier:personnage:${correspondant.id}` });
           const debut = Date.now();
