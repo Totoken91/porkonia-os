@@ -8,8 +8,11 @@ type Couleur=readonly[number,number,number];
 const OS:Couleur=[240,216,168],OR:Couleur=[224,168,64],SANG:Couleur=[176,48,32],SEL:Couleur=[184,208,136],BRAISE:Couleur=[240,112,40];
 export function dessinerImpacts(out:ImageData,cam:Camera,temps:number,impacts:ImpactVisuel[],profondeur:Float32Array) {
   const W=out.width,H=out.height,f=focale(W),dx=Math.cos(cam.angle),dy=Math.sin(cam.angle);
+  // Coups successifs sur un même monstre : chaque nouveau chiffre s'écarte du précédent.
+  const rangs=new Map<number,number>();
   for(const effet of impacts) {
     const age=temps-effet.debut;if(age<0||age>950)continue;
+    const rang=rangs.get(effet.uid)??0;rangs.set(effet.uid,rang+1);
     const rx=effet.x-cam.x,ry=effet.y-cam.y,z=rx*dx+ry*dy;
     if(z<.15||z>8)continue;
     const cx=W/2+f*(ry*dx-rx*dy)/z,cy=H/2+cam.bob+cam.secousse;
@@ -84,7 +87,8 @@ export function dessinerImpacts(out:ImageData,cam:Camera,temps:number,impacts:Im
     }
     // Chiffres natifs 3×5 à contour sombre, lisibles au-dessus du point d'impact.
     const texte=String(effet.degats),echelle=2;
-    const ox=Math.round(cx-texte.length*4*echelle/2),oy=Math.round(cy-rayon-8-Math.min(24,age*.025));
+    const decale=rang===0?0:(rang%2?26:-26);
+    const ox=Math.round(cx-texte.length*4*echelle/2+decale),oy=Math.round(cy-rayon-8-Math.min(24,age*.025));
     const alpha=Math.min(1,(950-age)/220);
     const chiffres:[number,number][]=[];
     if(cx>=0&&cx<W&&profondeur[Math.max(0,Math.min(H-1,Math.round(cy)))*W+Math.min(W-1,Math.round(cx))]!>=z-.12)

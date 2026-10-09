@@ -44,9 +44,10 @@
   .jbj:not(.jbj-poche) .jbj-etage { grid-column:1; grid-row:1; }
   .jbj:not(.jbj-poche) .jbj-niveau { grid-column:1; grid-row:2; }
   .jbj:not(.jbj-poche) .jbj-vitaux { grid-column:2; grid-row:1 / 3; gap:2px; padding:0; }
-  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) { width:48px; height:48px; border-width:3px; }
-  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) span { top:0; }
-  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) b { top:16px; }
+  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) { width:58px; height:58px; border-width:3px; }
+  /* Libellé et valeur près de l'équateur de l'orbe, là où la corde est assez large pour « Mousse ». */
+  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) span { top:9px; }
+  .jbj:not(.jbj-poche) .jbj-vitaux .jbj-jauge:is(.pv,.mousse) b { top:25px; }
   .jbj:not(.jbj-poche) .jbj-provisions { grid-column:3; grid-row:1; display:grid; gap:2px; }
   .jbj:not(.jbj-poche) .jbj-provisions button { padding:0 2px; min-height:28px; }
   .jbj:not(.jbj-poche) .jbj-provisions img { width:24px; height:24px; }

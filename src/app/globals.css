@@ -1471,7 +1471,7 @@
   .bq-lien { background:none; border:0; padding:0; color:#000080; text-decoration:underline; font:inherit; cursor:pointer; text-align:left; }
   .bq-taux { width:calc(100% - 12px); border-collapse:collapse; margin-bottom:6px; }
   .bq-taux td { padding:3px 1px; border:1px solid #a19471; overflow-wrap:anywhere; }
-  .bq-taux td:last-child { text-align:right; color:#28452c; }
+  .bq-taux td:last-child { text-align:right; color:#28452c; white-space:nowrap; overflow-wrap:normal; width:1%; }
   .bq-actus { list-style:none; margin:0; padding:0; }
   .bq-actus li { display:flex; gap:6px; padding:5px 0; border-bottom:1px dashed #a19471; }
   .bq-actus li > span { flex:none; align-self:start; padding:2px 4px; border:1px solid #a19471; background:#e9dfc3; color:#304a39; }
@@ -1637,6 +1637,8 @@
   .site-donjon .site-lien,.site-zouk .site-lien { color:#ead8a3; }
   .site-donjon .pignet-site-entete .site-lien { color:#171a15; }
   .site.site-brasserie { background:#f3ebd6; color:#5f202b; }
+  .site-brasserie .site-image { text-align:center; }
+  .site-brasserie .site-image img { max-width:180px; }
   .site-brasserie .pignet-site-entete { background:#681d2b; color:#f8e6ba; border-color:#ae904c; }
   .site-brasserie .site-titre,.site-signal .site-titre,.site-portail .site-titre { font:bold 16px/20px var(--font-sans); text-align:left; }
   .site.site-signal { background:#f4f6f3; color:#263e45; }

@@ -85,9 +85,11 @@ export function Grosses() {
     [course, cochons],
   );
 
+  // La piste n'existe qu'une fois le compte ouvert : on la redessine aussi à ce moment-là.
+  const avecCompte = compte !== null;
   useEffect(() => {
     if (phase === "paris") dessiner(0);
-  }, [phase, dessiner]);
+  }, [phase, dessiner, avecCompte]);
 
   // Rejeu de la course, image par image, au rythme de la simulation.
   useEffect(() => {

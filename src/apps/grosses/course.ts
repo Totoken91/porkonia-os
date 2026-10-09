@@ -58,16 +58,18 @@ export function simuler(cochons: readonly Cochon[], graine: number, avecHumeur =
       if (arrivee[k]! >= 0) continue;
       const c = cochons[k]!;
       const prog = pos[k]! / LONGUEUR;
-      let cible = 6.4 + c.vitesse * 2.2 + (avecHumeur ? c.humeur * 0.45 : 0);
-      if (prog > 0.55) cible *= 1 - (1 - c.endurance) * 0.32 * Math.min(1, (prog - 0.55) / 0.35);
-      if (prog > 0.8) cible *= 1 + c.sprint * 0.22;
+      // Écarts de forme modestes et beaucoup d'imprévus : la favorite gagne souvent, pas toujours (cote ~2,5),
+      // et l'humeur cachée ne suffit pas à rendre un pari rentable (vérifié dans les tests).
+      let cible = 6.6 + c.vitesse * 0.7 + (avecHumeur ? c.humeur * 0.15 : 0);
+      if (prog > 0.55) cible *= 1 - (1 - c.endurance) * 0.14 * Math.min(1, (prog - 0.55) / 0.35);
+      if (prog > 0.8) cible *= 1 + c.sprint * 0.1;
       // Accidents de parcours : un faux pas ralentit, un coup de groin relance.
       if (gene[k]! > 0) {
         gene[k] = gene[k]! - 1;
         cible *= gene[k]! > 0 ? 0.45 : 1;
-      } else if (rng() < 0.0032) gene[k] = 14 + Math.floor(rng() * 14);
-      else if (rng() < 0.0025) vit[k] = vit[k]! + 2.2;
-      vit[k] = vit[k]! + (cible - vit[k]!) * 0.12 + (rng() - 0.5) * 0.55;
+      } else if (rng() < 0.009) gene[k] = 14 + Math.floor(rng() * 14);
+      else if (rng() < 0.006) vit[k] = vit[k]! + 2.2;
+      vit[k] = vit[k]! + (cible - vit[k]!) * 0.12 + (rng() - 0.5) * 1.0;
       pos[k] = pos[k]! + Math.max(0.5, vit[k]!) / IMAGES_PAR_SECONDE;
       if (pos[k]! >= LONGUEUR) {
         // Instant d'arrivée fractionnaire : départage deux cochons arrivés dans la même image.
@@ -109,11 +111,15 @@ export function cotes(cochons: readonly Cochon[], essais = 360): Cotes {
     vic[r.classement[0]!] = vic[r.classement[0]!]! + 1;
     for (const k of r.classement.slice(0, 3)) pod[k] = pod[k]! + 1;
   }
-  const arrondi = (x: number) => Math.round(x * 10) / 10;
-  const lisse = (c: number) => (c + 0.6) / (essais + 0.6 * n);
+  // Arrondi vers le bas : la maison garde toujours sa marge, même sur les centièmes.
+  const auDixieme = (x: number) => Math.floor(x * 10) / 10;
+  const auVingtieme = (x: number) => Math.floor(x * 20) / 20;
+  // Probabilités lissées (une cochonne jamais vue gagnante garde une petite chance).
+  const pVictoire = (c: number) => (c + 0.6) / (essais + 0.6 * n);
+  const pPodium = (c: number) => (c + 0.3) / (essais + 0.6);
   return {
-    gagnant: vic.map((c) => Math.min(60, Math.max(1.2, arrondi((1 - TAXE) / lisse(c))))),
-    place: pod.map((c) => Math.min(20, Math.max(1.1, arrondi(((1 - TAXE) * 3) / (lisse(c) * 3) / 1.9)))),
+    gagnant: vic.map((c) => Math.min(60, Math.max(1.1, auDixieme((1 - TAXE) / pVictoire(c))))),
+    place: pod.map((c) => Math.min(20, Math.max(1.05, auVingtieme((1 - TAXE) / pPodium(c))))),
   };
 }
 

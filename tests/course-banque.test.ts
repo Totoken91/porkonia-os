@@ -126,6 +126,29 @@ describe("Course de Grosses", () => {
     c.place.forEach((x, k) => expect(x).toBeLessThan(c.gagnant[k]!));
     expect(cotes(cochons)).toEqual(c);
   });
+  it("propose des cotes placées qui rapportent, sans avantage au parieur", () => {
+    const c = cotes(cochons);
+    // Trois places payées sur six : la cote placée moyenne dépasse nettement la mise.
+    expect(c.place.reduce((a, x) => a + x, 0) / c.place.length).toBeGreaterThan(1.4);
+    // Espérance par cochonne, mesurée sur d'autres courses que celles du bookmaker : la maison garde l'avantage.
+    const essais = 400;
+    const pod = new Array<number>(cochons.length).fill(0);
+    for (let e = 0; e < essais; e++) for (const k of simuler(cochons, 100_003 + e * 17, false).classement.slice(0, 3)) pod[k] = pod[k]! + 1;
+    const esperance = pod.reduce((a, x, k) => a + (x / essais) * c.place[k]!, 0) / cochons.length;
+    expect(esperance).toBeLessThan(1);
+    expect(esperance).toBeGreaterThan(0.75);
+  });
+  it("laisse une vraie chance aux outsiders : ni favorite imbattable, ni cochonne sans espoir", () => {
+    let favorite = 0, outsider = 0;
+    for (let g = 1; g <= 12; g++) {
+      const c = cotes(composer(porkosPack.grosses.cochons, g * 7919), 240);
+      favorite += Math.min(...c.gagnant) / 12;
+      outsider += Math.max(...c.gagnant) / 12;
+    }
+    expect(favorite).toBeGreaterThan(1.8);
+    expect(favorite).toBeLessThan(3.5);
+    expect(outsider).toBeLessThan(45);
+  });
   it("paie les paris gagnants et place", () => {
     const c = { gagnant: [3, 4, 5, 6, 7, 8], place: [1.5, 1.6, 1.7, 1.8, 1.9, 2] };
     const classement = [2, 0, 4, 1, 3, 5];
